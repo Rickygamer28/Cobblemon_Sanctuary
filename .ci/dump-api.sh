@@ -1,26 +1,39 @@
 #!/usr/bin/env bash
-# Decompiles selected parts of the Cobblemon jar so the API can be read without the source.
-# Usage: dump-api.sh <out-dir>   (patterns come from .ci/dump-patterns.txt)
+# Dumps parts of the Cobblemon jar so its API can be read without the source:
+#  - javap signatures for classes matching .ci/javap-regex.txt (fast)
+#  - Vineflower-decompiled source for classes listed in .ci/decompile-classes.txt
+# Usage: dump-api.sh <out-dir>
 set -u
 OUT="$1"
-mkdir -p "$OUT"
+mkdir -p "$OUT/javap" "$OUT/src"
 JAR="$RUNNER_TEMP/cobblemon.jar"
-curl -fsSL -o "$JAR" "$COBBLE_URL" || JAR=""
+curl -fsSL -o "$JAR" "$COBBLE_URL" || { echo "download failed" > "$OUT/error.txt"; exit 0; }
+unzip -Z1 "$JAR" > "$OUT/jar-classes.txt"
 
-echo "Cobblemon jar: $JAR" | tee "$OUT/jar.txt"
-[ -z "$JAR" ] && exit 0
-unzip -l "$JAR" > "$OUT/jar-listing.txt" 2>&1
-unzip -p "$JAR" META-INF/neoforge.mods.toml > "$OUT/cobblemon-mods.toml" 2>/dev/null || true
+# javap signatures
+grep '\.class$' "$OUT/jar-classes.txt" | grep -v '\$\$' | grep -E -f .ci/javap-regex.txt | sed 's/\.class$//; s|/|.|g' > "$OUT/javap-list.txt"
+wc -l < "$OUT/javap-list.txt" > "$OUT/javap-count.txt"
+timeout 600 xargs -a "$OUT/javap-list.txt" -n 200 javap -p -cp "$JAR" > "$OUT/javap-all.txt" 2> "$OUT/javap-errors.txt" || true
+# split per top-level class file
+awk -v out="$OUT/javap" '
+  /^Compiled from/ { next }
+  /^(public |protected |private |)(abstract |final |static |sealed |non-sealed )*(class|interface|enum|@interface|record) / {
+    name=$0; sub(/ (extends|implements|permits) .*/, "", name); sub(/ *\{$/, "", name); n=split(name, parts, " "); cls=parts[n]; sub(/<.*/, "", cls);
+    top=cls; sub(/\$.*/, "", top); file=out "/" top ".txt"
+  }
+  { if (file != "") print >> file }
+' "$OUT/javap-all.txt"
+rm -f "$OUT/javap-all.txt"
 
+# decompiled source for key classes
 WORK=$(mktemp -d)
 mkdir -p "$WORK/classes"
 while IFS= read -r pat; do
   [ -z "$pat" ] && continue
   case "$pat" in \#*) continue;; esac
   unzip -o -q "$JAR" "$pat" -d "$WORK/classes" 2>/dev/null || true
-done < .ci/dump-patterns.txt
-
-curl -sSL -o "$WORK/vineflower.jar" https://repo1.maven.org/maven2/org/vineflower/vineflower/1.10.1/vineflower-1.10.1.jar
-mkdir -p "$OUT/src"
-timeout 600 java -jar "$WORK/vineflower.jar" -dgs=1 -rsy=1 -log=WARN "$WORK/classes" "$OUT/src" > "$OUT/decompile.log" 2>&1 || true
+done < .ci/decompile-classes.txt
+find "$WORK/classes" -name '*.class' | wc -l > "$OUT/decompile-input-count.txt"
+curl -fsSL -o "$WORK/vineflower.jar" https://repo1.maven.org/maven2/org/vineflower/vineflower/1.10.1/vineflower-1.10.1.jar
+timeout 480 java -jar "$WORK/vineflower.jar" -dgs=1 -mpm=20 -log=ERROR "$WORK/classes" "$OUT/src" > "$OUT/decompile.log" 2>&1 || echo "vineflower exit $?" >> "$OUT/decompile.log"
 find "$OUT/src" -type f | wc -l > "$OUT/src-count.txt"

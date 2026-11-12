@@ -54,13 +54,6 @@ repositories {
 dependencies {
     // Cobblemon (NeoForge build) — compile against it; players install it themselves.
     compileOnly "maven.modrinth:cobblemon:${cobblemon_version}"
-    // Kotlin stdlib is provided at runtime by Kotlin for Forge (required by Cobblemon anyway).
-    compileOnly "org.jetbrains.kotlin:kotlin-stdlib:${kotlin_version}"
-}
-
-// The Kotlin plugin adds the stdlib as an implementation dependency; Kotlin for Forge provides it at runtime.
-configurations.implementation {
-    exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib'
 }
 
 var generateModMetadata = tasks.register('generateModMetadata', ProcessResources) {

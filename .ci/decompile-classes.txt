@@ -1,0 +1,16 @@
+# Classes to decompile fully (unzip patterns; keep this list short)
+com/cobblemon/mod/common/entity/pokemon/PokemonEntity.class
+com/cobblemon/mod/common/entity/pokemon/PokemonEntity$*.class
+com/cobblemon/mod/common/entity/pokemon/PokemonServerDelegate*.class
+com/cobblemon/mod/common/entity/pokemon/PokemonBehaviourFlag.class
+com/cobblemon/mod/common/block/entity/PokemonPastureBlockEntity*.class
+com/cobblemon/mod/common/block/PastureBlock.class
+com/cobblemon/mod/common/net/messages/client/animation/PlayPosableAnimationPacket.class
+com/cobblemon/mod/common/CobblemonActivities.class
+com/cobblemon/mod/common/CobblemonMemories.class
+com/cobblemon/mod/common/api/pasture/PastureLinkManager.class
+com/cobblemon/mod/common/api/storage/pc/PCStore.class
+com/cobblemon/mod/common/api/storage/PokemonStoreManager.class
+com/cobblemon/mod/common/api/pokemon/egg/*.class
+com/cobblemon/mod/common/entity/ai/ChooseLandWanderTargetTask*.class
+com/cobblemon/mod/common/entity/ai/CobblemonWalkTarget.class
