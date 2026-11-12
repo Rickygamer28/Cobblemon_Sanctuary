@@ -37,3 +37,12 @@ find "$WORK/classes" -name '*.class' | wc -l > "$OUT/decompile-input-count.txt"
 curl -fsSL -o "$WORK/vineflower.jar" https://repo1.maven.org/maven2/org/vineflower/vineflower/1.10.1/vineflower-1.10.1.jar
 timeout 480 java -jar "$WORK/vineflower.jar" -dgs=1 -mpm=20 -log=ERROR "$WORK/classes" "$OUT/src" > "$OUT/decompile.log" 2>&1 || echo "vineflower exit $?" >> "$OUT/decompile.log"
 find "$OUT/src" -type f | wc -l > "$OUT/src-count.txt"
+
+# raw data files (behaviours, a few posers and species) to learn animation names and AI setup
+mkdir -p "$OUT/raw"
+unzip -o -q "$JAR" 'data/cobblemon/behaviours/*' 'assets/cobblemon/bedrock/pokemon/posers/0025_pikachu/*' 'assets/cobblemon/bedrock/pokemon/posers/0006_charizard/*' 'assets/cobblemon/bedrock/pokemon/posers/0133_eevee/*' 'assets/cobblemon/bedrock/pokemon/posers/0094_gengar/*' 'assets/cobblemon/bedrock/pokemon/posers/0130_gyarados/*' 'assets/cobblemon/bedrock/pokemon/posers/0001_bulbasaur/*' 'data/cobblemon/species/generation1/pikachu.json' 'data/cobblemon/species/generation1/charmander.json' 'data/cobblemon/species/generation1/eevee.json' -d "$OUT/raw" 2>/dev/null || true
+grep -o 'animations/[^"]*' "$OUT/jar-classes.txt" | head -0 >/dev/null
+# all animation names used by posers (unique, with counts)
+mkdir -p "$WORK/posers"
+unzip -o -q "$JAR" 'assets/cobblemon/bedrock/pokemon/posers/*' -d "$WORK/posers" 2>/dev/null || true
+grep -rhoE '"(animations|quirks|poseAnimations)"|q\.bedrock(_quirk|_primary|_stateful)?\([^)]*\)' "$WORK/posers" | sed -E "s/'[a-z0-9_]+',//" | sort | uniq -c | sort -rn | head -300 > "$OUT/poser-animation-usage.txt"

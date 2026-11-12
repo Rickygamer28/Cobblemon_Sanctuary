@@ -14,3 +14,8 @@ com/cobblemon/mod/common/api/storage/PokemonStoreManager.class
 com/cobblemon/mod/common/api/pokemon/egg/*.class
 com/cobblemon/mod/common/entity/ai/ChooseLandWanderTargetTask*.class
 com/cobblemon/mod/common/entity/ai/CobblemonWalkTarget.class
+com/cobblemon/mod/common/api/ai/CobblemonWanderControl*.class
+com/cobblemon/mod/common/api/ai/config/task/PokemonWanderControlTaskConfig*.class
+com/cobblemon/mod/common/api/ai/config/task/WanderTaskConfig*.class
+com/cobblemon/mod/common/api/ai/config/task/LookAtEntitiesTaskConfig*.class
+com/cobblemon/mod/common/entity/pokemon/ai/tasks/ChooseFlightWanderTargetTask*.class
