@@ -26,12 +26,19 @@ object ZoneLayout {
     )
 
     /** The ring, plus any custom types added by other mods (appended at the end). */
+    @Volatile private var cachedRing: List<String> = BASE_RING
+    @Volatile private var cachedTypeCount = -1
+
     fun ring(): List<String> {
+        val count = runCatching { ElementalTypes.count() }.getOrDefault(-1)
+        if (count == cachedTypeCount) return cachedRing
         val extra = runCatching {
             ElementalTypes.all().map { it.name.lowercase() }
                 .filter { it !in BASE_RING && it != HUB && it != TypeLogic.FLYING }
         }.getOrDefault(emptyList())
-        return BASE_RING + extra
+        cachedRing = BASE_RING + extra
+        cachedTypeCount = count
+        return cachedRing
     }
 
     data class Hit(
