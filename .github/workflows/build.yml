@@ -1,0 +1,87 @@
+name: Build
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Resolve versions
+        run: |
+          set -u
+          latest() { grep -oP "<version>$1</version>" | sed 's/<[^>]*>//g' | sort -V | tail -1; }
+          NEO=$(curl -fsSL https://maven.neoforged.net/releases/net/neoforged/neoforge/maven-metadata.xml | latest '21\.1\.\d+')
+          MDG=$(curl -fsSL https://plugins.gradle.org/m2/net/neoforged/moddev/net.neoforged.moddev.gradle.plugin/maven-metadata.xml | latest '2\.0\.\d+')
+          curl -fsSL 'https://api.modrinth.com/v2/project/cobblemon/version?loaders=%5B%22neoforge%22%5D&game_versions=%5B%221.21.1%22%5D' > cobblemon-versions.json
+          COBBLE=$(jq -r '[.[] | select(.version_number | test("1\\.8\\.4"))][0].id' cobblemon-versions.json)
+          COBBLE_NAME=$(jq -r '[.[] | select(.version_number | test("1\\.8\\.4"))][0].version_number' cobblemon-versions.json)
+          echo "NEO=$NEO" >> "$GITHUB_ENV"
+          echo "MDG=$MDG" >> "$GITHUB_ENV"
+          echo "COBBLE=$COBBLE" >> "$GITHUB_ENV"
+          mkdir -p ci-out
+          {
+            echo "neoforge=$NEO"
+            echo "moddev=$MDG"
+            echo "cobblemon_modrinth_id=$COBBLE"
+            echo "cobblemon_version=$COBBLE_NAME"
+            echo "recent cobblemon neoforge versions:"
+            jq -r '.[0:8][] | "  \(.version_number)  \(.id)"' cobblemon-versions.json
+          } | tee ci-out/versions.txt
+
+      - name: Build
+        id: build
+        run: |
+          set +e
+          ./gradlew build --stacktrace -Pneo_version="$NEO" -Pmoddev_version="$MDG" -Pcobblemon_version="$COBBLE" > ci-out/build.log 2>&1
+          STATUS=$?
+          echo "$STATUS" > ci-out/status.txt
+          tail -80 ci-out/build.log
+          grep -E "^e: |error:|warning:.*deprecated" ci-out/build.log | head -200 > ci-out/errors.txt || true
+          mkdir -p ci-out/jar
+          cp build/libs/*.jar ci-out/jar/ 2>/dev/null || true
+          echo "status=$STATUS" >> "$GITHUB_OUTPUT"
+
+      - name: Dump Cobblemon API
+        if: hashFiles('.ci/dump-api') != ''
+        run: bash .ci/dump-api.sh ci-out/api
+
+      - name: Publish results to ci-output branch
+        if: always()
+        run: |
+          cd ci-out
+          echo "${GITHUB_SHA}" > commit.txt
+          git init -q
+          git config user.name "sanctuary-ci"
+          git config user.email "ci@users.noreply.github.com"
+          git add -A
+          git commit -q -m "CI output for ${GITHUB_SHA}"
+          git push -f -q "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" HEAD:ci-output
+
+      - uses: actions/upload-artifact@v4
+        if: steps.build.outputs.status == '0'
+        with:
+          name: cobblemon-sanctuary-jar
+          path: build/libs/*.jar
+
+      - name: Fail if build failed
+        if: steps.build.outputs.status != '0'
+        run: exit 1
