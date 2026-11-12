@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "GPG",
+    "PCP",
+    "GPG"
+  ],
+  "key": {
+    "G": {
+      "tag": "cobblemon:type_gems"
+    },
+    "P": {
+      "item": "cobblemon:pasture"
+    },
+    "C": {
+      "item": "cobblemon:pc"
+    }
+  },
+  "result": {
+    "id": "cobblemon_sanctuary:sanctuary_core",
+    "count": 1
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "cobblemon_sanctuary:block/sanctuary_core_top",
+    "side": "cobblemon_sanctuary:block/sanctuary_core_side",
+    "bottom": "cobblemon_sanctuary:block/sanctuary_core_bottom"
+  }
+}

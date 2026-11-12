@@ -19,3 +19,4 @@ com/cobblemon/mod/common/api/ai/config/task/PokemonWanderControlTaskConfig*.clas
 com/cobblemon/mod/common/api/ai/config/task/WanderTaskConfig*.class
 com/cobblemon/mod/common/api/ai/config/task/LookAtEntitiesTaskConfig*.class
 com/cobblemon/mod/common/entity/pokemon/ai/tasks/ChooseFlightWanderTargetTask*.class
+com/cobblemon/mod/common/client/net/animation/PlayPosableAnimationHandler*.class

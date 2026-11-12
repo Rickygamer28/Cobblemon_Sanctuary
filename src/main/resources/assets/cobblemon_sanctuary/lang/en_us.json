@@ -1,0 +1,9 @@
+{
+  "itemGroup.cobblemon_sanctuary": "Cobblemon: Sanctuary",
+  "block.cobblemon_sanctuary.sanctuary_core": "Sanctuary Core",
+  "block.cobblemon_sanctuary.hub_bell": "Hub Bell",
+  "item.cobblemon_sanctuary.sanctuary_journal": "Sanctuary Journal",
+  "item.cobblemon_sanctuary.sanctuary_journal.tooltip": "Use to read about your sanctuary. Right-click a resident with it to interact.",
+  "item.cobblemon_sanctuary.whistle": "Whistle",
+  "item.cobblemon_sanctuary.whistle.tooltip": "Lets you call residents from the Journal."
+}
