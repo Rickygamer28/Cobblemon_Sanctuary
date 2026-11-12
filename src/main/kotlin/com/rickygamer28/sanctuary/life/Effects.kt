@@ -22,9 +22,8 @@ object Effects {
         val level = entity.level() as? ServerLevel ?: return
         val choice = if (entity.isFlying()) names.map { "air_$it" } + names else names
         val packet = PlayPosableAnimationPacket(entity.id, LinkedHashSet(choice), emptyList())
-        level.players().forEach { p ->
-            if (p.distanceToSqr(entity) < 64.0 * 64.0) CobblemonNetwork.sendPacket(p, packet)
-        }
+        val near = level.players().filter { it.distanceToSqr(entity) < 64.0 * 64.0 }
+        if (near.isNotEmpty()) CobblemonNetwork.sendPacketToPlayers(near, packet)
     }
 
     fun particles(entity: PokemonEntity, type: ParticleOptions, count: Int, spread: Double = 0.35) {
