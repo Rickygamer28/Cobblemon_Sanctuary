@@ -4,7 +4,9 @@
 set -u
 OUT="$1"
 mkdir -p "$OUT"
-JAR=$(find "$HOME/.gradle" -type f -name 'cobblemon*.jar' ! -name '*sources*' 2>/dev/null | head -1)
+JAR="$RUNNER_TEMP/cobblemon.jar"
+curl -fsSL -o "$JAR" "$COBBLE_URL" || JAR=""
+
 echo "Cobblemon jar: $JAR" | tee "$OUT/jar.txt"
 [ -z "$JAR" ] && exit 0
 unzip -l "$JAR" > "$OUT/jar-listing.txt" 2>&1
@@ -20,5 +22,5 @@ done < .ci/dump-patterns.txt
 
 curl -sSL -o "$WORK/vineflower.jar" https://repo1.maven.org/maven2/org/vineflower/vineflower/1.10.1/vineflower-1.10.1.jar
 mkdir -p "$OUT/src"
-java -jar "$WORK/vineflower.jar" -dgs=1 -rsy=1 -log=WARN "$WORK/classes" "$OUT/src" > "$OUT/decompile.log" 2>&1 || true
+timeout 600 java -jar "$WORK/vineflower.jar" -dgs=1 -rsy=1 -log=WARN "$WORK/classes" "$OUT/src" > "$OUT/decompile.log" 2>&1 || true
 find "$OUT/src" -type f | wc -l > "$OUT/src-count.txt"
