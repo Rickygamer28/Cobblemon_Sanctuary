@@ -46,3 +46,29 @@ grep -o 'animations/[^"]*' "$OUT/jar-classes.txt" | head -0 >/dev/null
 mkdir -p "$WORK/posers"
 unzip -o -q "$JAR" 'assets/cobblemon/bedrock/pokemon/posers/*' -d "$WORK/posers" 2>/dev/null || true
 grep -rhoE '"(animations|quirks|poseAnimations)"|q\.bedrock(_quirk|_primary|_stateful)?\([^)]*\)' "$WORK/posers" | sed -E "s/'[a-z0-9_]+',//" | sort | uniq -c | sort -rn | head -300 > "$OUT/poser-animation-usage.txt"
+
+# Water types and how they move (to check which ones count as "lives only in water")
+mkdir -p "$WORK/species"
+unzip -o -q "$JAR" 'data/cobblemon/species/*' -d "$WORK/species" 2>/dev/null || true
+python3 - "$WORK/species" > "$OUT/water-movers.txt" <<'PY' || true
+import json, os, sys
+rows = []
+for root, _, files in os.walk(sys.argv[1]):
+    for f in files:
+        if not f.endswith('.json'): continue
+        try: d = json.load(open(os.path.join(root, f)))
+        except Exception: continue
+        types = [d.get('primaryType'), d.get('secondaryType')]
+        if 'water' not in types: continue
+        m = (d.get('behaviour') or {}).get('moving') or {}
+        w = m.get('walk') or {}; s = m.get('swim') or {}; fl = m.get('fly') or {}
+        canWalk = w.get('canWalk', True); avoidsLand = w.get('avoidsLand', False)
+        canSwim = s.get('canSwimInWater', True); avoidsWater = s.get('avoidsWater', False); canFly = fl.get('canFly', False)
+        landless = (not canWalk) or avoidsLand
+        rows.append((d.get('name', f), '/'.join(t for t in types if t), landless, canFly, canSwim and not avoidsWater))
+rows.sort()
+print('name | types | landless | canFly | swims | old-rule | new-rule')
+for n, t, l, fly, sw in rows:
+    if l or fly:
+        print(f"{n} | {t} | {l} | {fly} | {sw} | {l} | {l and sw and not fly}")
+PY
