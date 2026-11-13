@@ -20,6 +20,7 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent
 import net.neoforged.neoforge.event.level.BlockEvent
+import net.neoforged.neoforge.event.level.ChunkEvent
 import net.neoforged.neoforge.event.server.ServerStoppingEvent
 import net.neoforged.neoforge.event.tick.ServerTickEvent
 import org.slf4j.Logger
@@ -42,19 +43,19 @@ class CobblemonSanctuary(modBus: IEventBus, container: ModContainer) {
         bus.addListener(EntityJoinLevelEvent::class.java) { onEntityJoin(it) }
         bus.addListener(BlockEvent.BreakEvent::class.java) { onBlockBreak(it) }
         bus.addListener(ServerStoppingEvent::class.java) { onServerStopping(it) }
+        bus.addListener(ChunkEvent.Load::class.java) { onChunkLoad(it) }
         LOGGER.info("Cobblemon: Sanctuary loaded")
     }
 
     private fun onServerTick(event: ServerTickEvent.Post) {
-        for (level in event.server.allLevels) {
-            val data = SanctuaryData.get(level)
-            if (data.sanctuaries.isEmpty()) continue
-            for (s in data.sanctuaries.values.toList()) {
-                try {
-                    Residents.tick(level, data, s)
-                } catch (e: Exception) {
-                    LOGGER.error("Sanctuary tick failed for ${s.id}", e)
-                }
+        val level = SanctuaryDimension.level(event.server) ?: return
+        val data = SanctuaryData.get(event.server)
+        if (data.sanctuaries.isEmpty()) return
+        for (s in data.sanctuaries.values.toList()) {
+            try {
+                Residents.tick(level, data, s)
+            } catch (e: Exception) {
+                LOGGER.error("Sanctuary tick failed for ${s.id}", e)
             }
         }
     }
@@ -77,34 +78,57 @@ class CobblemonSanctuary(modBus: IEventBus, container: ModContainer) {
         Interactions.act(player, target.pokemon.uuid, "menu", null)
     }
 
-    /** Residents saved with the world come back with a plain tethering; drop them and let the sanctuary respawn them. */
+    /**
+     * Residents saved with the world come back with a plain tethering; drop them and let the sanctuary respawn them.
+     * Also keeps wild Pokémon out of the sanctuaries.
+     */
     private fun onEntityJoin(event: EntityJoinLevelEvent) {
         val entity = event.entity as? PokemonEntity ?: return
         val level = event.level as? ServerLevel ?: return
-        // no wild Pokémon inside a sanctuary: only residents live there
-        if (entity.tethering == null && SanctuaryConfig.blockWildSpawns.get() && runCatching { entity.pokemon.isWild() && !entity.isBattleClone() }.getOrDefault(false)) {
-            val s = SanctuaryData.get(level).containing(entity.blockPosition())
-            if (s != null && s.state == com.rickygamer28.sanctuary.data.SanctuaryState.ACTIVE) {
-                event.isCanceled = true
-                return
-            }
+        val tethering = entity.tethering
+        if (tethering == null) {
+            if (SanctuaryDimension.isSanctuary(level) && SanctuaryConfig.blockWildSpawns.get() &&
+                runCatching { entity.pokemon.isWild() && !entity.isBattleClone() }.getOrDefault(false)
+            ) event.isCanceled = true
+            return
         }
-        val tethering = entity.tethering ?: return
         if (tethering is SanctuaryTethering) return
-        if (SanctuaryData.get(level).at(tethering.pasturePos) == null) return
+        // a real pasture has its Pasture Block at pasturePos; ours (old or new) never does
+        val pos = tethering.pasturePos
+        val isRealPasture = level.isLoaded(pos) && level.getBlockState(pos).`is`(com.cobblemon.mod.common.CobblemonBlocks.PASTURE)
+        val wide = tethering.maxRoamPos.x - tethering.minRoamPos.x > 120
+        if (isRealPasture || (!wide && !level.isLoaded(pos))) return
         event.isCanceled = true
         if (entity.pokemon.tetheringId == tethering.tetheringId) entity.pokemon.tetheringId = null
     }
 
-    /** Only the owner (or an operator) can break a Sanctuary Core. */
+    /** The return Core in a sanctuary's hub can't be broken; portal Cores only by their owner. */
     private fun onBlockBreak(event: BlockEvent.BreakEvent) {
         val level = event.level as? ServerLevel ?: return
         if (!event.state.`is`(ModContent.SANCTUARY_CORE.get())) return
-        val s = SanctuaryData.get(level).at(event.pos) ?: return
         val player = event.player
+        if (SanctuaryDimension.isSanctuary(level)) {
+            if (SanctuaryData.get(level.server).at(event.pos) != null && !player.isCreative) {
+                event.isCanceled = true
+                (player as? ServerPlayer)?.let { com.rickygamer28.sanctuary.ui.say(it, "This Core leads back home and can't be broken.", net.minecraft.ChatFormatting.RED) }
+            }
+            return
+        }
+        val s = SanctuaryData.get(level.server).atPortal(level.dimension().location().toString(), event.pos) ?: return
         if (player.uuid != s.owner && !player.hasPermissions(2)) {
             event.isCanceled = true
-            (player as? ServerPlayer)?.sendSystemMessage(Text.error("Only ${s.ownerName} can remove this sanctuary."))
+            (player as? ServerPlayer)?.let { com.rickygamer28.sanctuary.ui.say(it, "Only ${s.ownerName} can remove this Core.", net.minecraft.ChatFormatting.RED) }
+        }
+    }
+
+    /** When part of a valley that was skipped (unloaded) loads, the builder comes back to it soon. */
+    private fun onChunkLoad(event: ChunkEvent.Load) {
+        val level = event.level as? ServerLevel ?: return
+        if (!SanctuaryDimension.isSanctuary(level)) return
+        val pos = event.chunk.pos.getMiddleBlockPosition(SanctuaryDimension.GROUND_Y)
+        level.server.execute {
+            val s = SanctuaryData.get(level.server).near(pos, Sanctuaries.RIM + 16) ?: return@execute
+            com.rickygamer28.sanctuary.world.SanctuaryGenerator.nudge(s, level.gameTime)
         }
     }
 

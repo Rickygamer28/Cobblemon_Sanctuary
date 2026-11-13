@@ -6,9 +6,15 @@ import net.neoforged.neoforge.common.ModConfigSpec
 object SanctuaryConfig {
     private val builder = ModConfigSpec.Builder()
 
-    val spawnCap: ModConfigSpec.IntValue = builder
-        .comment("How many resident Pokémon can be spawned at once in one sanctuary (the rest live there virtually).")
-        .defineInRange("spawnCap", 60, 4, 400)
+    val spawnCapSmall: ModConfigSpec.IntValue = builder
+        .comment("How many residents can be out at once in a Small sanctuary (the rest live there virtually).")
+        .defineInRange("spawnCapSmall", 80, 4, 1000)
+    val spawnCapMedium: ModConfigSpec.IntValue = builder
+        .comment("How many residents can be out at once in a Medium sanctuary.")
+        .defineInRange("spawnCapMedium", 150, 4, 1000)
+    val spawnCapLarge: ModConfigSpec.IntValue = builder
+        .comment("How many residents can be out at once in a Large sanctuary.")
+        .defineInRange("spawnCapLarge", 240, 4, 1000)
 
     val spawnRange: ModConfigSpec.IntValue = builder
         .comment("Residents are spawned only in biomes within this many blocks of a player.")
@@ -47,8 +53,16 @@ object SanctuaryConfig {
         .define("fillRivers", true)
 
     val fillWaterDepth: ModConfigSpec.IntValue = builder
-        .comment("Deepest water that gets filled. Deeper water (oceans) is left alone.")
-        .defineInRange("fillWaterDepth", 12, 1, 40)
+        .comment("Deepest water (rivers, lakes, ocean) that gets filled in so the biomes continue as land. The Water biome keeps its water.")
+        .defineInRange("maxFillDepth", 64, 1, 128)
+
+    val buildWall: ModConfigSpec.BooleanValue = builder
+        .comment("Build a wall with gates around the sanctuary's edge.")
+        .define("buildWall", true)
+
+    val reshapeTerrain: ModConfigSpec.BooleanValue = builder
+        .comment("Reshape the terrain to fit each biome (volcano, lakes, dunes, mesas, peaks, flat hub).")
+        .define("reshapeTerrain", true)
 
     val clearTrees: ModConfigSpec.BooleanValue = builder
         .comment("Clear natural trees inside the sanctuary so the biomes can grow their own plants. Player builds are never touched.")

@@ -86,19 +86,20 @@ object SanctuaryCommand {
         when (StringArgumentType.getString(ctx, "action")) {
             "size" -> {
                 val size = SanctuarySize.entries.firstOrNull { it.name.equals(arg, ignoreCase = true) } ?: return 0
-                Sanctuaries.setSize(level, s, player, size)
+                Sanctuaries.setSize(s, player, size)
             }
-            "confirm" -> Sanctuaries.confirm(level, s, player)
+            "confirm" -> Sanctuaries.confirm(s, player)
             "cancel" -> Sanctuaries.cancel(level, s, player)
-            "expand" -> Sanctuaries.expand(level, s, player)
-            "leave" -> Sanctuaries.leave(player, s, level)
+            "expand" -> Sanctuaries.expand(s, player)
+            "leave" -> Sanctuaries.leave(player, s)
             "rebuild" -> if (s.owner == player.uuid) {
                 s.rebuild()
                 Sanctuaries.data(level).setDirty()
                 player.sendSystemMessage(Text.good("Rebuilding the biomes. Stay nearby so the area stays loaded."))
             }
             "journal" -> if (s.isMember(player.uuid)) Sanctuaries.giveJournal(player)
-            "outline" -> if (s.isMember(player.uuid)) Residents.runtime(s).outlineUntil = level.gameTime + 20L * 15
+            "travel" -> Sanctuaries.travel(player, s)
+            "home" -> com.rickygamer28.sanctuary.SanctuaryDimension.returnHome(player)
             "menu" -> com.rickygamer28.sanctuary.ui.SanctuaryGuis.openCore(player, level, s)
             else -> return 0
         }

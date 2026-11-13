@@ -1,0 +1,38 @@
+{
+  "has_precipitation": true,
+  "temperature": 0.8,
+  "downfall": 0.4,
+  "effects": {
+    "fog_color": 13824255,
+    "sky_color": 9097471,
+    "water_color": 3840712,
+    "water_fog_color": 798528,
+    "grass_color": 8964165,
+    "foliage_color": 6467626,
+    "particle": {
+      "options": {
+        "type": "minecraft:spore_blossom_air"
+      },
+      "probability": 0.008
+    },
+    "music": {
+      "sound": "minecraft:music.overworld.flower_forest",
+      "min_delay": 12000,
+      "max_delay": 24000,
+      "replace_current_music": false
+    }
+  },
+  "spawners": {
+    "monster": [],
+    "creature": [],
+    "ambient": [],
+    "axolotls": [],
+    "underground_water_creature": [],
+    "water_creature": [],
+    "water_ambient": [],
+    "misc": []
+  },
+  "spawn_costs": {},
+  "carvers": {},
+  "features": []
+}

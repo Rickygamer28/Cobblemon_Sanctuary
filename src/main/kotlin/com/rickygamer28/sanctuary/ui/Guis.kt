@@ -6,7 +6,7 @@ import com.rickygamer28.sanctuary.Sanctuaries
 import com.rickygamer28.sanctuary.data.Sanctuary
 import com.rickygamer28.sanctuary.data.SanctuarySize
 import com.rickygamer28.sanctuary.data.SanctuaryState
-import com.rickygamer28.sanctuary.life.Preview
+import com.rickygamer28.sanctuary.SanctuaryDimension
 import com.rickygamer28.sanctuary.life.Residents
 import com.rickygamer28.sanctuary.life.Sizes
 import com.rickygamer28.sanctuary.registry.ModContent
@@ -33,34 +33,33 @@ fun zoneIcon(zone: String?): Item = when (zone) {
 
 fun typeName(zone: String) = zone.replaceFirstChar { it.uppercase() }
 
-// ---------------------------------------------------------------------- preview
+// ---------------------------------------------------------------------- creating a sanctuary
 
 class PreviewGui(player: ServerPlayer, val level: ServerLevel, val s: Sanctuary) :
-    Gui(player, 3, Component.literal("Sanctuary preview")) {
+    Gui(player, 3, Component.literal("Create your Sanctuary")) {
     override fun build() {
-        Residents.refreshRoster(level, s, Residents.runtime(s), level.gameTime)
-        set(4, icon(Items.SPYGLASS, "Look around!",
-            "The white outline shows the sanctuary's area.",
-            "The blue outline is the most it can grow to.",
-            "Nothing changes until you confirm.",
-            "Natural ground and trees inside will be reshaped.",
-            "Pokémon in your PC: ${s.residentCount}", color = ChatFormatting.GOLD))
+        SanctuaryDimension.level(level.server)?.let { Residents.refreshRoster(it, s, Residents.runtime(s), it.gameTime) }
+        set(4, icon(ItemStack(ModContent.SANCTUARY_CORE_ITEM.get()), colored("A valley for your Pokémon", ChatFormatting.GOLD),
+            gray("This Core opens a path to your own valley"),
+            gray("in the Sanctuary dimension. Your world isn't changed."),
+            gray("Every Pokémon in your PC will live there."),
+            gray("Pokémon in your PC: ${s.residentCount}")))
         val sizeItems = mapOf(SanctuarySize.SMALL to Items.OAK_SAPLING, SanctuarySize.MEDIUM to Items.AZALEA, SanctuarySize.LARGE to Items.FLOWERING_AZALEA)
         listOf(11, 13, 15).zip(SanctuarySize.entries).forEach { (slot, size) ->
             when {
                 !Sizes.allowed(size) -> set(slot, icon(Items.BARRIER, size.label, "Disabled on this server", color = ChatFormatting.DARK_GRAY))
                 !Sizes.unlocked(size, s.residentCount) -> set(slot, icon(Items.GRAY_DYE, size.label, "Radius ${size.radius} blocks", "Needs ${Sizes.residentsNeeded(size)} Pokémon", color = ChatFormatting.DARK_GRAY))
                 else -> set(slot, icon(sizeItems.getValue(size), size.label + if (s.size == size) " (chosen)" else "", "Radius ${size.radius} blocks", "Click to choose", color = ChatFormatting.GREEN, glow = s.size == size)) { _, _ ->
-                    Sanctuaries.setSize(level, s, player, size)
+                    Sanctuaries.setSize(s, player, size)
                     refresh()
                 }
             }
         }
-        set(21, icon(Items.LIME_CONCRETE, "Confirm", "Start building the sanctuary", color = ChatFormatting.GREEN)) { _, _ ->
-            Sanctuaries.confirm(level, s, player)
-            close()
+        set(21, icon(Items.LIME_CONCRETE, "Create", "Make the valley and travel there", color = ChatFormatting.GREEN)) { _, _ ->
+            Sanctuaries.confirm(s, player)
+            goTo { HomeGui(player, level, s) }
         }
-        set(23, icon(Items.RED_CONCRETE, "Cancel", "Remove the Core; nothing changes", color = ChatFormatting.RED)) { _, _ ->
+        set(23, icon(Items.RED_CONCRETE, "Cancel", "Take the Core back", color = ChatFormatting.RED)) { _, _ ->
             Sanctuaries.cancel(level, s, player)
             close()
         }
@@ -74,15 +73,26 @@ class HomeGui(player: ServerPlayer, val level: ServerLevel, val s: Sanctuary) :
     Gui(player, 4, Component.literal("${s.ownerName}'s Sanctuary")) {
     override fun build() {
         val rt = Residents.runtime(s)
-        Residents.refreshRoster(level, s, rt, level.gameTime)
+        SanctuaryDimension.level(level.server)?.let { Residents.refreshRoster(it, s, rt, it.gameTime) }
         val owner = s.owner == player.uuid
         val progress = SanctuaryGenerator.progress(s)
         set(4, icon(ItemStack(ModContent.SANCTUARY_CORE_ITEM.get()), colored("${s.size.label} Sanctuary", ChatFormatting.GOLD),
             gray("Residents: ${s.residentCount}"),
             gray("Out right now: ${rt.live.size}"),
             gray("Biomes awake: ${s.unlocked.size}/${ZoneLayout.ring().size + 1}"),
-            gray(if (progress != null) "Building biomes: $progress%" else "Biomes are built"),
+            gray(if (progress != null) "Shaping the valley: $progress%" else "The valley is ready"),
             gray("Members: " + (listOf(s.ownerName) + s.members.map { s.memberNames[it] ?: "?" }).joinToString(", "))))
+
+        val inside = SanctuaryDimension.isSanctuary(player.level())
+        if (inside) {
+            set(0, icon(Items.ENDER_EYE, "Return home", "Go back to where you came from", color = ChatFormatting.LIGHT_PURPLE)) { _, _ ->
+                close(); player.server.execute { SanctuaryDimension.returnHome(player) }
+            }
+        } else {
+            set(0, icon(Items.ENDER_PEARL, "Travel to the sanctuary", "Visit your Pokémon's valley", color = ChatFormatting.LIGHT_PURPLE, glow = true)) { _, _ ->
+                close(); player.server.execute { Sanctuaries.travel(player, s) }
+            }
+        }
 
         set(10, icon(Gui.item("cobblemon:poke_ball", Items.ENDER_PEARL), "Residents", "Everyone living here", "Click to browse", color = ChatFormatting.AQUA)) { _, _ ->
             goTo { ResidentsGui(player, level, s, 0, null) }
@@ -100,27 +110,21 @@ class HomeGui(player: ServerPlayer, val level: ServerLevel, val s: Sanctuary) :
         if (owner) {
             val next = Sizes.nextSize(s.size)
             when {
-                next == null -> set(19, icon(Items.EMERALD_BLOCK, "Largest size", "Your sanctuary can't grow any bigger", color = ChatFormatting.GREEN))
-                Sizes.unlocked(next, s.residentCount) -> set(19, icon(Items.EMERALD, "Expand to ${next.label}", "Free! You have ${s.residentCount} Pokémon", "Radius ${next.radius} blocks", color = ChatFormatting.GREEN, glow = true)) { _, _ ->
-                    Sanctuaries.expand(level, s, player); refresh()
+                next == null -> set(20, icon(Items.EMERALD_BLOCK, "Largest size", "Your valley can't grow any bigger", color = ChatFormatting.GREEN))
+                Sizes.unlocked(next, s.residentCount) -> set(20, icon(Items.EMERALD, "Expand to ${next.label}", "Free! You have ${s.residentCount} Pokémon", "Radius ${next.radius} blocks", color = ChatFormatting.GREEN, glow = true)) { _, _ ->
+                    Sanctuaries.expand(s, player); refresh()
                 }
-                else -> set(19, icon(Items.GRAY_DYE, "Expand to ${next.label}", "Needs ${Sizes.residentsNeeded(next)} Pokémon", "You have ${s.residentCount}", color = ChatFormatting.DARK_GRAY))
+                else -> set(20, icon(Items.GRAY_DYE, "Expand to ${next.label}", "Needs ${Sizes.residentsNeeded(next)} Pokémon", "You have ${s.residentCount}", color = ChatFormatting.DARK_GRAY))
             }
-            set(21, icon(Items.BRUSH, "Rebuild biomes", "Go over the whole area again", "(natural ground and trees only)", color = ChatFormatting.GOLD)) { _, _ ->
+            set(22, icon(Items.BRUSH, "Reshape the valley", "Rebuild every biome from scratch", "(only natural ground; your builds stay)", color = ChatFormatting.GOLD)) { _, _ ->
                 s.rebuild(); Sanctuaries.data(level).setDirty()
-                say(player, "Rebuilding the biomes. Stay nearby so the area stays loaded.")
+                say(player, "Reshaping the valley. Stay inside so it stays loaded.")
                 refresh()
             }
-            if (Preview.maxAllowed().radius > s.size.radius) {
-                set(23, icon(Items.SPYGLASS, "Show outline", "Shows the current and maximum area for 15 s", color = ChatFormatting.AQUA)) { _, _ ->
-                    Residents.runtime(s).outlineUntil = level.gameTime + 20L * 15
-                    close()
-                }
-            }
-            set(25, icon(Items.PLAYER_HEAD, "Invite a friend", "Type /sanctuary invite <name>", "Their PC Pokémon will live here too", color = ChatFormatting.AQUA))
+            set(24, icon(Items.PLAYER_HEAD, "Invite a friend", "Type /sanctuary invite <name>", "Their PC Pokémon will live here too", color = ChatFormatting.AQUA))
         } else {
-            set(25, icon(Items.BARRIER, "Leave sanctuary", "Your Pokémon go back to your PC", color = ChatFormatting.RED)) { _, _ ->
-                Sanctuaries.leave(player, s, level); close()
+            set(24, icon(Items.BARRIER, "Leave sanctuary", "Your Pokémon go back to your PC", color = ChatFormatting.RED)) { _, _ ->
+                Sanctuaries.leave(player, s); close()
             }
         }
         fill(FILLER)

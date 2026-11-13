@@ -1,42 +1,43 @@
 package com.rickygamer28.sanctuary.world
 
+import com.rickygamer28.sanctuary.CobblemonSanctuary
+import com.rickygamer28.sanctuary.Sanctuaries
 import com.rickygamer28.sanctuary.SanctuaryConfig
 import com.rickygamer28.sanctuary.data.Sanctuary
 import com.rickygamer28.sanctuary.data.SanctuaryData
 import com.rickygamer28.sanctuary.data.SanctuarySize
 import com.rickygamer28.sanctuary.data.SanctuaryState
-import net.minecraft.core.BlockPos
 import net.minecraft.server.level.ServerLevel
 import java.util.UUID
+import kotlin.math.sqrt
 
-/** Every column offset within the largest sanctuary, sorted from the centre outwards. */
+/** Every column offset within the largest sanctuary and its mountain rim, sorted from the centre outwards. */
 object ColumnOrder {
+    val R = SanctuarySize.MAX_RADIUS + Sanctuaries.RIM
     val dx: IntArray
     val dz: IntArray
     private val distSq: IntArray
     private val reverse: IntArray
-    private val side = SanctuarySize.MAX_RADIUS * 2 + 1
+    private val side = R * 2 + 1
 
-    /** Index of the column at offset (dx, dz) from the centre, or -1 if outside the largest sanctuary. */
+    /** Index of the column at offset (dx, dz) from the centre, or -1 if outside. */
     fun indexOf(dx: Int, dz: Int): Int {
-        val r = SanctuarySize.MAX_RADIUS
-        if (dx < -r || dx > r || dz < -r || dz > r) return -1
-        return reverse[(dx + r) * side + (dz + r)]
+        if (dx < -R || dx > R || dz < -R || dz > R) return -1
+        return reverse[(dx + R) * side + (dz + R)]
     }
 
     init {
-        val r = SanctuarySize.MAX_RADIUS
         val list = ArrayList<IntArray>()
-        for (x in -r..r) for (z in -r..r) {
+        for (x in -R..R) for (z in -R..R) {
             val d = x * x + z * z
-            if (d <= r * r) list.add(intArrayOf(x, z, d))
+            if (d <= R * R) list.add(intArrayOf(x, z, d))
         }
         list.sortWith(compareBy<IntArray> { it[2] }.thenBy { it[0] }.thenBy { it[1] })
         dx = IntArray(list.size) { list[it][0] }
         dz = IntArray(list.size) { list[it][1] }
         distSq = IntArray(list.size) { list[it][2] }
         reverse = IntArray(side * side) { -1 }
-        for (i in dx.indices) reverse[(dx[i] + r) * side + (dz[i] + r)] = i
+        for (i in dx.indices) reverse[(dx[i] + R) * side + (dz[i] + R)] = i
     }
 
     /** Number of columns within [radius]. */
@@ -53,8 +54,9 @@ object ColumnOrder {
 }
 
 /**
- * Grows the biomes outwards from the centre, a few columns per tick, only in loaded chunks.
- * When a new type arrives or a biome grows, the sanctuary is swept again; already-dressed columns are skipped.
+ * Builds the valley from the centre outwards, a time-limited number of columns per tick and only in loaded chunks:
+ * the biomes, then the wall, then the mountain rim. When a new type arrives or the sanctuary grows it's swept again;
+ * finished columns are skipped.
  */
 object SanctuaryGenerator {
     private val cursors = HashMap<UUID, Int>()
@@ -65,11 +67,20 @@ object SanctuaryGenerator {
 
     fun isGrowing(s: Sanctuary) = s.generationDirty || cursors.containsKey(s.id)
 
+    /** A chunk of this sanctuary just loaded: if parts were skipped earlier, try again soon. */
+    fun nudge(s: Sanctuary, now: Long) {
+        if (missedUnloaded[s.id] != true || cursors.containsKey(s.id)) return
+        val soon = now + 40
+        val cur = retryAt[s.id]
+        if (cur == null || cur > soon) retryAt[s.id] = soon
+    }
+
+    private fun total(s: Sanctuary) = ColumnOrder.countWithin(s.size.radius + Sanctuaries.RIM)
+
     /** Progress of the current building sweep, 0..100, or null when not building. */
     fun progress(s: Sanctuary): Int? {
         val c = cursors[s.id] ?: return if (s.generationDirty) 0 else null
-        val total = ColumnOrder.countWithin(s.size.radius).coerceAtLeast(1)
-        return (c * 100L / total).toInt()
+        return (c * 100L / total(s).coerceAtLeast(1)).toInt()
     }
 
     fun tick(level: ServerLevel, data: SanctuaryData, s: Sanctuary) {
@@ -88,42 +99,43 @@ object SanctuaryGenerator {
             missedUnloaded[s.id] = false
         }
         val ring = ZoneLayout.ring()
-        val total = ColumnOrder.countWithin(s.size.radius)
+        val total = total(s)
+        val radius = s.size.radius
         var i = cursors[s.id] ?: 0
         var budget = SanctuaryConfig.generationSpeed.get()
         val deadline = System.nanoTime() + SanctuaryConfig.generationMillis.get() * 1_000_000L
         var scanned = 0
-        val extents = HashMap<String, Double>()
         while (budget > 0 && i < total) {
             scanned++
-            if ((scanned and 63) == 0 && System.nanoTime() > deadline) break
+            if ((scanned and 31) == 0 && System.nanoTime() > deadline) break
             val idx = i++
             if (s.dressed.get(idx)) continue
-            val x = s.center.x + ColumnOrder.dx[idx]
-            val z = s.center.z + ColumnOrder.dz[idx]
-            val hit = ZoneLayout.locate(s, x, z, ring) ?: continue
-            if (hit.zone !in s.unlocked) continue
-            val ext = extents.getOrPut(hit.zone) { ZoneLayout.extent(s, hit.zone) }
-            if (hit.zone != ZoneLayout.HUB && hit.dist > ext) continue
+            val ox = ColumnOrder.dx[idx]
+            val oz = ColumnOrder.dz[idx]
+            val x = s.center.x + ox
+            val z = s.center.z + oz
+            val dist = sqrt((ox * ox + oz * oz).toDouble())
+            val inside = dist <= radius
+            val hit = if (inside) ZoneLayout.locate(s, x, z, ring) else null
+            // locked biomes stay a plain meadow until a Pokémon of their type moves in (the wall is always built)
+            if (inside && (hit == null || (hit.zone !in s.unlocked && dist <= radius - 1.6))) continue
             if (!level.hasChunk(x shr 4, z shr 4)) { missedUnloaded[s.id] = true; continue }
             val ok = try {
-                BiomeDresser.dress(level, s, x, z, hit, ring)
+                if (inside) BiomeDresser.dress(level, s, x, z, hit!!, ring) else BiomeDresser.dressRim(level, s, x, z, dist, ring)
             } catch (e: Exception) {
-                com.rickygamer28.sanctuary.CobblemonSanctuary.LOGGER.warn("Couldn't dress column $x,$z", e)
+                CobblemonSanctuary.LOGGER.warn("Couldn't build column $x,$z", e)
                 true
             }
-            if (ok) { s.dressed.set(idx); BiomePainter.mark(s, x, z) }
+            if (ok) { s.dressed.set(idx); BiomePainter.mark(s, x, z) } else missedUnloaded[s.id] = true
             budget--
         }
         if (i >= total) {
             cursors.remove(s.id)
             if (missedUnloaded[s.id] == true) retryAt[s.id] = now + 600
+            else if (s.oldWallRadius > 0) s.oldWallRadius = 0
         } else {
             cursors[s.id] = i
         }
         data.setDirty()
     }
-
-    @Suppress("unused")
-    fun columnPos(s: Sanctuary, idx: Int) = BlockPos(s.center.x + ColumnOrder.dx[idx], s.center.y, s.center.z + ColumnOrder.dz[idx])
 }

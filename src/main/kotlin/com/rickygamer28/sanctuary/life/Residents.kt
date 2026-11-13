@@ -74,13 +74,14 @@ object Residents {
         val players = playersNear(level, s)
 
         if (s.state == SanctuaryState.PREVIEW) {
-            if (now % 20L == 0L) Preview.draw(level, s, players)
             if (now % 100L == 0L) refreshRoster(level, s, rt, now)
             return
         }
 
-        if (players.isNotEmpty()) SanctuaryGenerator.tick(level, data, s)
-        if (now < rt.outlineUntil && now % 20L == 0L) Preview.draw(level, s, players)
+        if (players.isNotEmpty()) {
+            SanctuaryGenerator.tick(level, data, s)
+            if (now % 100L == 0L) com.rickygamer28.sanctuary.Sanctuaries.ensureCenterCore(level, s)
+        }
 
         // scenes run every tick so animations line up
         Scenes.tick(level, s, rt, now)
@@ -98,7 +99,7 @@ object Residents {
     }
 
     private fun playersNear(level: ServerLevel, s: Sanctuary): List<ServerPlayer> {
-        val r = (s.size.radius + 48).toDouble()
+        val r = (s.size.radius + com.rickygamer28.sanctuary.Sanctuaries.RIM + 32).toDouble()
         return level.players().filter {
             val dx = it.x - s.center.x
             val dz = it.z - s.center.z
@@ -165,7 +166,11 @@ object Residents {
     }
 
     private fun updateSpawns(level: ServerLevel, s: Sanctuary, rt: SanctuaryRuntime, players: List<ServerPlayer>, now: Long) {
-        val cap = SanctuaryConfig.spawnCap.get()
+        val cap = when (s.size) {
+            com.rickygamer28.sanctuary.data.SanctuarySize.SMALL -> SanctuaryConfig.spawnCapSmall.get()
+            com.rickygamer28.sanctuary.data.SanctuarySize.MEDIUM -> SanctuaryConfig.spawnCapMedium.get()
+            com.rickygamer28.sanctuary.data.SanctuarySize.LARGE -> SanctuaryConfig.spawnCapLarge.get()
+        }
         val range = SanctuaryConfig.spawnRange.get().toDouble()
         if (now - rt.shuffleAt > 20L * 60 * 10) { rt.shuffleSeed = level.random.nextLong(); rt.shuffleAt = now }
         val ring = ZoneLayout.ring()
@@ -211,7 +216,7 @@ object Residents {
         // spawn a few new ones each second to avoid lag spikes
         var spawned = 0
         for (e in wanted) {
-            if (spawned >= 4 || rt.live.size >= cap) break
+            if (spawned >= 8 || rt.live.size >= cap) break
             if (rt.live.containsKey(e.pokemon.uuid)) continue
             if (spawn(level, s, rt, e, null, players) != null) spawned++
         }

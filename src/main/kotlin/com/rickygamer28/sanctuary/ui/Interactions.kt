@@ -48,7 +48,7 @@ object Interactions {
         val live = f.live
         when (action) {
             "menu" -> ResidentGui(player, f.level, f.s, pokemonId).open()
-            "summary" -> Menus.summary(player, f.s, pokemon)
+            "summary" -> ResidentGui(player, f.level, f.s, pokemonId).open()
             "pet" -> {
                 if (live == null) return say(player, "$name isn't out right now. Go find it in the ${Residents.zoneName(TypeLogic.homeZone(pokemon, data, ZoneLayout.ring()))}!", net.minecraft.ChatFormatting.GRAY)
                 if (!near(player, live)) return say(player, "Get closer to $name first.", net.minecraft.ChatFormatting.GRAY)
@@ -127,7 +127,7 @@ object Interactions {
             }
             "call" -> {
                 if (!player.inventory.contains(ItemStack(ModContent.WHISTLE.get()))) return say(player, "You need a Whistle.", net.minecraft.ChatFormatting.RED)
-                val here = Sanctuaries.data(player.serverLevel()).containing(player.blockPosition())
+                val here = Sanctuaries.at(player.serverLevel(), player.blockPosition())
                 if (here == null || here.id != f.s.id) return say(player, "You need to be inside the sanctuary.", net.minecraft.ChatFormatting.RED)
                 val rt = Residents.runtime(f.s)
                 val target = live ?: f.entry?.let { Residents.spawn(f.level, f.s, rt, it, Residents.surface(f.level, player.blockX + 2, player.blockZ + 2)) }

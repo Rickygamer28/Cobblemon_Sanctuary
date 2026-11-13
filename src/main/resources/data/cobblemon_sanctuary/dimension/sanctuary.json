@@ -1,0 +1,30 @@
+{
+  "type": "cobblemon_sanctuary:sanctuary",
+  "generator": {
+    "type": "minecraft:flat",
+    "settings": {
+      "biome": "cobblemon_sanctuary:meadow",
+      "lakes": false,
+      "features": false,
+      "structure_overrides": [],
+      "layers": [
+        {
+          "block": "minecraft:bedrock",
+          "height": 1
+        },
+        {
+          "block": "minecraft:stone",
+          "height": 59
+        },
+        {
+          "block": "minecraft:dirt",
+          "height": 3
+        },
+        {
+          "block": "minecraft:grass_block",
+          "height": 1
+        }
+      ]
+    }
+  }
+}

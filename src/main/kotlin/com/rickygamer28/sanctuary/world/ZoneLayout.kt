@@ -53,11 +53,13 @@ object ZoneLayout {
     private fun phase(s: Sanctuary, salt: Int): Double =
         ((s.seed xor (salt * 0x9E3779B97F4A7C15uL.toLong())) and 0xFFFF).toDouble() / 0xFFFF * 2 * PI
 
-    private fun wobble(s: Sanctuary, dist: Double): Double =
-        7.0 * sin(dist / 23.0 + phase(s, 1)) + 3.0 * sin(dist / 9.0 + phase(s, 2))
+    /** Organic, curvy borders: the angle is bent by smooth 2D noise. */
+    private fun wobble(s: Sanctuary, x: Int, z: Int): Double =
+        (Noise.value(s.seed + 101, x / 46.0, z / 46.0) - 0.5) * 26.0 +
+            (Noise.value(s.seed + 202, x / 15.0, z / 15.0) - 0.5) * 8.0
 
-    fun hubRadiusAt(s: Sanctuary, angleDeg: Double): Double =
-        s.size.hubRadius + 3.0 * sin(angleDeg * PI / 30.0 + phase(s, 3))
+    fun hubRadiusAt(s: Sanctuary, x: Int, z: Int): Double =
+        s.size.hubRadius + (Noise.value(s.seed + 303, x / 18.0, z / 18.0) - 0.5) * 9.0
 
     /** Where does the column at (x, z) belong? Null if outside the sanctuary's current size. */
     fun locate(s: Sanctuary, x: Int, z: Int, ring: List<String> = ring()): Hit? {
@@ -67,10 +69,10 @@ object ZoneLayout {
         if (dist > s.size.radius) return null
         var angle = Math.toDegrees(atan2(dx, -dz))
         if (angle < 0) angle += 360.0
-        if (dist <= hubRadiusAt(s, angle)) return Hit(HUB, dist, 0.0, null)
+        if (dist <= hubRadiusAt(s, x, z)) return Hit(HUB, dist, 0.0, null)
         val n = ring.size
         val w = 360.0 / n
-        var a = (angle + wobble(s, dist)) % 360.0
+        var a = (angle + wobble(s, x, z)) % 360.0
         if (a < 0) a += 360.0
         val pos = a / w
         val i = floor(pos).toInt().coerceIn(0, n - 1)
@@ -101,6 +103,15 @@ object ZoneLayout {
         return hub + growth * (s.size.radius - hub)
     }
 
+    /** The middle of a ring biome (used for volcanoes, peaks and spawning order). */
+    fun anchor(s: Sanctuary, zone: String, ring: List<String> = ring()): Pair<Int, Int> {
+        if (zone == HUB) return s.center.x to s.center.z
+        val i = ring.indexOf(zone).coerceAtLeast(0)
+        val a = (i + 0.5) * 2 * PI / ring.size
+        val d = (s.size.hubRadius + s.size.radius) / 2.0
+        return (s.center.x + sin(a) * d).toInt() to (s.center.z - cos(a) * d).toInt()
+    }
+
     /** A random spot inside a biome (x, z), or null if the biome has no room yet. */
     fun randomPoint(s: Sanctuary, zone: String, random: RandomSource, ring: List<String> = ring()): Pair<Int, Int>? {
         if (zone == HUB) {
@@ -114,10 +125,9 @@ object ZoneLayout {
         val inner = s.size.hubRadius + 5.0
         if (ext <= inner + 2) return null
         val w = 360.0 / ring.size
-        repeat(12) {
+        repeat(24) {
             val d = inner + random.nextDouble() * (ext - 3 - inner)
-            val wobbled = i * w + w * (0.12 + random.nextDouble() * 0.76)
-            val raw = Math.toRadians(wobbled - wobble(s, d))
+            val raw = Math.toRadians(i * w + w * (-0.3 + random.nextDouble() * 1.6))
             val x = (s.center.x + sin(raw) * d).toInt()
             val z = (s.center.z - cos(raw) * d).toInt()
             if (locate(s, x, z, ring)?.zone == zone) return x to z

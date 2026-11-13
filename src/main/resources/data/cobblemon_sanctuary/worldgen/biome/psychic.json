@@ -1,0 +1,38 @@
+{
+  "has_precipitation": true,
+  "temperature": 0.8,
+  "downfall": 0.4,
+  "effects": {
+    "fog_color": 14469375,
+    "sky_color": 12164338,
+    "water_color": 9330396,
+    "water_fog_color": 2099776,
+    "grass_color": 11897562,
+    "foliage_color": 10119368,
+    "particle": {
+      "options": {
+        "type": "minecraft:portal"
+      },
+      "probability": 0.01
+    },
+    "music": {
+      "sound": "minecraft:music.overworld.lush_caves",
+      "min_delay": 12000,
+      "max_delay": 24000,
+      "replace_current_music": false
+    }
+  },
+  "spawners": {
+    "monster": [],
+    "creature": [],
+    "ambient": [],
+    "axolotls": [],
+    "underground_water_creature": [],
+    "water_creature": [],
+    "water_ambient": [],
+    "misc": []
+  },
+  "spawn_costs": {},
+  "carvers": {},
+  "features": []
+}

@@ -24,8 +24,9 @@ class SanctuaryCoreBlock(properties: Properties) : Block(properties) {
 
     override fun useWithoutItem(state: BlockState, level: Level, pos: BlockPos, player: Player, hitResult: BlockHitResult): InteractionResult {
         if (level is ServerLevel && player is ServerPlayer) {
-            val s = Sanctuaries.data(level).at(pos)
+            val s = Sanctuaries.forCore(level, pos)
             if (s != null) SanctuaryGuis.openCore(player, level, s)
+            else com.rickygamer28.sanctuary.ui.say(player, "This Core isn't linked. Break it and place it again to link it to your sanctuary.")
         }
         return InteractionResult.sidedSuccess(level.isClientSide)
     }

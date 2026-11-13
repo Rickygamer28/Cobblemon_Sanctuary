@@ -56,11 +56,17 @@ class Sanctuary(
     val id: UUID,
     var owner: UUID,
     var ownerName: String,
+    /** Centre of the valley inside the Sanctuary dimension (where the return Core stands). */
     val center: BlockPos,
     var size: SanctuarySize,
     var state: SanctuaryState,
     val seed: Long,
+    val slot: Int = 0,
 ) {
+    /** The portal Core in the player's own world (dimension id + position), if one is placed. */
+    var portalDim: String? = null
+    var portalPos: BlockPos? = null
+
     val members: MutableSet<UUID> = linkedSetOf()
     val memberNames: MutableMap<UUID, String> = mutableMapOf()
     val residents: MutableMap<UUID, ResidentData> = mutableMapOf()
@@ -70,6 +76,27 @@ class Sanctuary(
 
     /** Columns already dressed by the generator (indexes into [com.rickygamer28.sanctuary.world.ColumnOrder]). */
     var dressed: BitSet = BitSet()
+
+    /** Original ground height of each column before the sanctuary reshaped it (Short.MIN_VALUE = not recorded). */
+    var originY: ShortArray = ShortArray(0)
+
+    /** Radius of a wall that must be taken down after expanding (0 = none). */
+    var oldWallRadius: Int = 0
+
+    fun origin(idx: Int): Int? {
+        if (idx >= originY.size) return null
+        val v = originY[idx]
+        return if (v == Short.MIN_VALUE) null else v.toInt()
+    }
+
+    fun setOrigin(idx: Int, y: Int, total: Int) {
+        if (originY.size < total) {
+            val grown = ShortArray(total) { Short.MIN_VALUE }
+            originY.copyInto(grown)
+            originY = grown
+        }
+        originY[idx] = y.toShort()
+    }
 
     /** Recent events shown in the Journal, newest last. */
     val events: ArrayDeque<String> = ArrayDeque()
@@ -132,6 +159,9 @@ class Sanctuary(
         t.putInt("Size", size.ordinal)
         t.putString("State", state.name)
         t.putLong("Seed", seed)
+        t.putInt("Slot", slot)
+        portalDim?.let { t.putString("PortalDim", it) }
+        portalPos?.let { t.putLong("PortalPos", it.asLong()) }
         val mem = ListTag()
         members.forEach { m ->
             mem.add(CompoundTag().also { it.putUUID("Id", m); it.putString("Name", memberNames[m] ?: "") })
@@ -151,12 +181,19 @@ class Sanctuary(
         variants.forEach { (k, v) -> vars.putInt(k, v) }
         t.put("Variants", vars)
         t.putInt("Version", DATA_VERSION)
+        t.putInt("OldWall", oldWallRadius)
+        val packed = IntArray((originY.size + 1) / 2) { i ->
+            val a = originY[i * 2].toInt() and 0xFFFF
+            val b = (if (i * 2 + 1 < originY.size) originY[i * 2 + 1].toInt() else Short.MIN_VALUE.toInt()) and 0xFFFF
+            (a shl 16) or b
+        }
+        t.putIntArray("Origin", packed)
         return t
     }
 
     companion object {
         /** Bump to make existing sanctuaries rebuild their biomes after a generator change. */
-        const val DATA_VERSION = 4
+        const val DATA_VERSION = 5
 
         fun key(a: UUID, b: UUID): String = if (a < b) "$a|$b" else "$b|$a"
 
@@ -169,7 +206,10 @@ class Sanctuary(
                 size = SanctuarySize.byOrdinal(t.getInt("Size")),
                 state = runCatching { SanctuaryState.valueOf(t.getString("State")) }.getOrDefault(SanctuaryState.ACTIVE),
                 seed = t.getLong("Seed"),
+                slot = t.getInt("Slot"),
             )
+            if (t.contains("PortalDim")) s.portalDim = t.getString("PortalDim")
+            if (t.contains("PortalPos")) s.portalPos = BlockPos.of(t.getLong("PortalPos"))
             t.getList("Members", Tag.TAG_COMPOUND.toInt()).forEach { e ->
                 val c = e as CompoundTag
                 val m = c.getUUID("Id")
@@ -181,6 +221,11 @@ class Sanctuary(
             val rel = t.getCompound("Relationships")
             rel.allKeys.forEach { k -> s.relationships[k] = rel.getInt(k) }
             s.dressed = if (t.getInt("Version") >= DATA_VERSION) BitSet.valueOf(t.getLongArray("Dressed")) else BitSet()
+            s.oldWallRadius = t.getInt("OldWall")
+            val packed = t.getIntArray("Origin")
+            if (packed.isNotEmpty()) {
+                s.originY = ShortArray(packed.size * 2) { i -> ((packed[i / 2] shr (if (i % 2 == 0) 16 else 0)) and 0xFFFF).toShort() }
+            }
             t.getList("Events", Tag.TAG_STRING.toInt()).forEach { s.events.addLast(it.asString) }
             val vars = t.getCompound("Variants")
             vars.allKeys.forEach { k -> s.variants[k] = vars.getInt(k) }
