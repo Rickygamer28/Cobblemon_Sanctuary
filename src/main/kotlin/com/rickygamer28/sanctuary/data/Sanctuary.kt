@@ -249,7 +249,7 @@ class Sanctuary(
 
     companion object {
         /** Bump to make existing sanctuaries rebuild their biomes after a generator change. */
-        const val DATA_VERSION = 8
+        const val DATA_VERSION = 9
 
         fun key(a: UUID, b: UUID): String = if (a < b) "$a|$b" else "$b|$a"
 
