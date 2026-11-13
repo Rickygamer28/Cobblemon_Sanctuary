@@ -83,6 +83,19 @@ object ZoneLayout {
         return Hit(ring[i], dist, edge, neighbour)
     }
 
+    /** The ring biome in the direction of (x, z), ignoring the hub (used to blend the hub's edge). */
+    fun ringZoneAt(s: Sanctuary, x: Int, z: Int, ring: List<String> = ring()): String? {
+        if (ring.isEmpty()) return null
+        val dx = (x - s.center.x).toDouble()
+        val dz = (z - s.center.z).toDouble()
+        var angle = Math.toDegrees(atan2(dx, -dz))
+        if (angle < 0) angle += 360.0
+        val n = ring.size
+        var a = (angle + wobble(s, x, z)) % 360.0
+        if (a < 0) a += 360.0
+        return ring[floor(a / (360.0 / n)).toInt().coerceIn(0, n - 1)]
+    }
+
     fun areNeighbours(a: String, b: String, ring: List<String> = ring()): Boolean {
         if (a == HUB || b == HUB) return true
         val i = ring.indexOf(a)

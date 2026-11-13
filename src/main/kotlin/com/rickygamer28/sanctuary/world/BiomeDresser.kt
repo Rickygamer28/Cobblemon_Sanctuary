@@ -74,9 +74,19 @@ object BiomeDresser {
         fun top(state: BlockState) { level.setBlock(surface, state, FLAGS) }
         /** Fills below the top, deep enough to cover any exposed cliff side. */
         fun filler(state: BlockState, minDepth: Int = 3) {
+            val shift = (noise(30.0, 77) * 3).toInt()
             for (i in 1..max(minDepth, exposure)) {
                 val p = surface.below(i)
-                if (isNatural(level.getBlockState(p))) level.setBlock(p, state, FLAGS)
+                if (!isNatural(level.getBlockState(p))) continue
+                var st = state
+                // soil only a few blocks deep; below it, rock
+                if (i > 3 && (st.`is`(Blocks.DIRT) || st.`is`(Blocks.GRASS_BLOCK) || st.`is`(Blocks.MUD) || st.`is`(Blocks.PODZOL) || st.`is`(Blocks.ROOTED_DIRT))) st = b(Blocks.STONE)
+                // tall cliffs show layers
+                if (exposure > 4 && i > 1) {
+                    val accent = STRATA[st.block]
+                    if (accent != null && Math.floorMod(p.y + shift, 4) == 0) st = accent
+                }
+                level.setBlock(p, st, FLAGS)
             }
         }
         fun ground(top: BlockState, filler: BlockState = top) { top(top); filler(filler) }
@@ -225,6 +235,14 @@ object BiomeDresser {
         Blocks.CHIPPED_ANVIL, Blocks.DAMAGED_ANVIL, Blocks.BRICKS, Blocks.PURPUR_PILLAR, Blocks.SHROOMLIGHT, Blocks.WITHER_ROSE,
     )
 
+    /** The layer that shows in tall cliffs of each rock. */
+    private val STRATA: Map<Block, BlockState> = mapOf(
+        Blocks.STONE to b(Blocks.ANDESITE), Blocks.SANDSTONE to b(Blocks.SMOOTH_SANDSTONE), Blocks.RED_SANDSTONE to b(Blocks.TERRACOTTA),
+        Blocks.BLACKSTONE to b(Blocks.BASALT), Blocks.TUFF to b(Blocks.CALCITE), Blocks.DEEPSLATE to b(Blocks.COBBLED_DEEPSLATE),
+        Blocks.PACKED_ICE to b(Blocks.BLUE_ICE), Blocks.PACKED_MUD to b(Blocks.MUD), Blocks.CALCITE to b(Blocks.SMOOTH_BASALT),
+        Blocks.SOUL_SOIL to b(Blocks.SOUL_SAND), Blocks.SMOOTH_BASALT to b(Blocks.TUFF),
+    )
+
     fun isNatural(state: BlockState): Boolean =
         state.`is`(BlockTags.DIRT) || state.`is`(BlockTags.SAND) || state.`is`(BlockTags.BASE_STONE_OVERWORLD) ||
             state.`is`(BlockTags.TERRACOTTA) || state.block in GROUND || state.`is`(Blocks.WATER)
@@ -247,78 +265,137 @@ object BiomeDresser {
     // ================================================================== terrain shapes
 
     private fun smooth(t: Double): Double { val c = t.coerceIn(0.0, 1.0); return c * c * (3 - 2 * c) }
-    private fun n(s: Sanctuary, x: Int, z: Int, scale: Double, salt: Int) = Noise.value(s.seed + salt * 7919L, x / scale, z / scale)
-    private fun ridge(s: Sanctuary, x: Int, z: Int, scale: Double, salt: Int): Double { val v = 1 - abs(2 * n(s, x, z, scale, salt) - 1); return v * v }
     private fun terrace(v: Double, step: Int) = floor(v / step) * step
+
+    /** Fractal noise in [-1, 1] at a scale in blocks. */
+    private fun f(s: Sanctuary, x: Double, z: Double, scale: Double, salt: Int, oct: Int = 4) = Noise.fbm(s.seed + salt * 7919L, x / scale, z / scale, oct)
+    private fun f01(s: Sanctuary, x: Double, z: Double, scale: Double, salt: Int, oct: Int = 4) = f(s, x, z, scale, salt, oct) * 0.5 + 0.5
+    private fun ridge(s: Sanctuary, x: Double, z: Double, scale: Double, salt: Int, oct: Int = 4) = Noise.ridged(s.seed + salt * 7919L, x / scale, z / scale, oct)
 
     private fun anchorDist(s: Sanctuary, zone: String, x: Int, z: Int, ring: List<String>): Double {
         val (ax, az) = ZoneLayout.anchor(s, zone, ring)
         return sqrt(((x - ax) * (x - ax) + (z - az) * (z - az)).toDouble())
     }
 
-    /** The raw height of a biome above the flat ground (before blending into its neighbours). */
-    private fun rawOffset(s: Sanctuary, zone: String, variant: Int, x: Int, z: Int, ring: List<String>): Double = when (zone) {
-        ZoneLayout.HUB -> 0.0
-        "water" -> when (variant) {
-            2 -> { // mangrove channels
-                val c = abs(sin(x / 9.0 + n(s, x, z, 30.0, 1) * 6) - cos(z / 11.0 + n(s, x, z, 30.0, 2) * 4))
-                if (c < 0.4) -3.0 else n(s, x, z, 12.0, 3) * 1.5
-            }
-            else -> { val l = n(s, x, z, 26.0, 4) * 0.75 + n(s, x, z, 8.0, 5) * 0.25; -1.0 - smooth((l - 0.32) / 0.3) * (if (variant == 1) 7.0 else 6.0) }
-        }
-        "grass" -> n(s, x, z, 40.0, 6) * 7 + n(s, x, z, 13.0, 7) * 2
-        "bug" -> n(s, x, z, 30.0, 8) * 5 + n(s, x, z, 9.0, 9) * 1.5
-        "fairy" -> n(s, x, z, 34.0, 10) * 6 + n(s, x, z, 11.0, 11) * 1.5
-        "dark" -> if (variant == 1) -smooth((n(s, x, z, 20.0, 12) - 0.5) / 0.2) * 7 + n(s, x, z, 30.0, 13) * 4 else n(s, x, z, 28.0, 13) * 5
-        "ghost" -> max(0.0, 12 - anchorDist(s, zone, x, z, ring) * 0.16) + n(s, x, z, 15.0, 14) * 2
-        "poison" -> n(s, x, z, 20.0, 15) * 1.5 - 0.5
-        "psychic" -> n(s, x, z, 26.0, 16) * 3 + if (variant == 2) terrace(n(s, x, z, 30.0, 17) * 10, 3) else 0.0
-        "steel" -> ridge(s, x, z, 26.0, 18) * (if (variant == 1) 4.0 else 11.0) + n(s, x, z, 8.0, 19) * 2
-        "electric" -> smooth((n(s, x, z, 30.0, 20) - 0.4) / 0.3) * 7 + n(s, x, z, 10.0, 21)
-        "rock" -> ridge(s, x, z, 28.0, 22) * (if (variant == 2) 9.0 else 15.0) + n(s, x, z, 9.0, 23) * 3
-        "fighting" -> if (variant == 2) terrace(smooth((n(s, x, z, 30.0, 24) - 0.35) / 0.3) * 12, 4) else n(s, x, z, 30.0, 25) * 2
-        "ground" -> when (variant) {
-            0 -> (sin(x / 8.0 + n(s, x, z, 25.0, 26) * 6) + 1) * 2.2 + n(s, x, z, 11.0, 27) * 1.5
-            1 -> terrace(smooth((n(s, x, z, 30.0, 28) - 0.45) / 0.25) * 18, 3)
-            else -> n(s, x, z, 20.0, 29)
-        }
-        "fire" -> when (variant) {
-            0 -> { // volcano with a crater
-                val d = anchorDist(s, zone, x, z, ring)
-                val h = max(0.0, 34 - d * 0.85)
-                if (d < 6) h - (6 - d) * 1.7 else h + n(s, x, z, 7.0, 30) * 2
-            }
-            1 -> terrace(smooth((n(s, x, z, 28.0, 31) - 0.4) / 0.3) * 16, 4)
-            else -> terrace(n(s, x, z, 22.0, 32) * 6, 2)
-        }
-        "dragon" -> when (variant) {
-            0 -> terrace(smooth((n(s, x, z, 26.0, 33) - 0.4) / 0.3) * 22, 4)
-            1 -> max(0.0, 46 - anchorDist(s, zone, x, z, ring) * 0.55) + ridge(s, x, z, 18.0, 34) * 8
-            else -> n(s, x, z, 30.0, 35) * 6
-        }
-        "ice" -> when (variant) {
-            2 -> -smooth((n(s, x, z, 24.0, 36) - 0.38) / 0.25) * 4
-            else -> n(s, x, z, 30.0, 37) * (if (variant == 0) 9.0 else 5.0) + ridge(s, x, z, 14.0, 38) * 2
-        }
-        else -> n(s, x, z, 25.0, 39) * 3
+    /** A lake mask in [0, 1]: one big lake around the biome's middle, plus a few ponds. */
+    private fun lake(s: Sanctuary, zone: String, x: Int, z: Int, wx: Double, wz: Double, ring: List<String>, size: Double): Double {
+        val d = anchorDist(s, zone, x, z, ring)
+        val main = 1 - d / (s.size.radius * size)
+        val ponds = f01(s, wx, wz, 26.0, 4, 3)
+        return smooth((main * 0.9 + ponds * 0.55 - 0.42) / 0.22)
     }
 
-    /** How strongly a biome's shape applies: it fades out towards borders, the hub and the wall. */
-    private fun blend(s: Sanctuary, hit: ZoneLayout.Hit): Double {
-        if (hit.zone == ZoneLayout.HUB) return 0.0
-        val toBorder = hit.edgeDistance / 14.0
-        val toHub = (hit.dist - s.size.hubRadius) / 12.0
-        val toEdge = (s.size.radius - 6 - hit.dist) / 14.0
-        return smooth(min(toBorder, min(toHub, toEdge)))
+    /**
+     * Height of a biome above the flat ground at (x, z), before blending. Coordinates are warped by noise
+     * so nothing lines up with the block grid.
+     */
+    private fun rawOffset(s: Sanctuary, zone: String, variant: Int, x: Int, z: Int, ring: List<String>): Double {
+        val wx = x + f(s, x.toDouble(), z.toDouble(), 48.0, 901, 2) * 14
+        val wz = z + f(s, x.toDouble(), z.toDouble(), 48.0, 902, 2) * 14
+        val xd = x.toDouble()
+        val zd = z.toDouble()
+        return when (zone) {
+            ZoneLayout.HUB -> f(s, xd, zd, 60.0, 1, 2) * 1.6
+            "water" -> when (variant) {
+                2 -> { // mangrove delta: winding channels between low banks
+                    val ch = ridge(s, wx, wz, 30.0, 7, 3)
+                    -3.4 * smooth((ch - 0.72) / 0.12) + f01(s, xd, zd, 14.0, 8, 2) * 1.2
+                }
+                else -> {
+                    val m = lake(s, zone, x, z, wx, wz, ring, if (variant == 1) 0.42 else 0.36)
+                    val island = smooth((f01(s, wx, wz, 11.0, 6, 2) - (if (variant == 1) 0.68 else 0.75)) / 0.07) * smooth((m - 0.5) / 0.3)
+                    val depth = if (variant == 1) 5.0 else 8.0
+                    -1.0 - depth * m + island * (depth * m + 2) + f(s, xd, zd, 18.0, 9, 2) * 0.8
+                }
+            }
+            "grass" -> when (variant) {
+                0 -> f(s, wx, wz, 38.0, 10) * 7 + 3 + ridge(s, wx, wz, 60.0, 11, 2) * 4
+                1 -> f(s, wx, wz, 46.0, 12) * 7 + 2
+                else -> f(s, wx, wz, 70.0, 13, 3) * 4 + 1
+            }
+            "bug" -> f(s, wx, wz, 40.0, 14) * 5 + f(s, xd, zd, 12.0, 15, 2) * 1.2 + 1
+            "fairy" -> if (variant == 2) f(s, wx, wz, 50.0, 16) * 3 - smooth((f01(s, wx, wz, 16.0, 17, 2) - 0.66) / 0.08) * 2
+                else f(s, wx, wz, 52.0, 16) * 6 + 2
+            "dark" -> when (variant) {
+                1 -> f(s, wx, wz, 44.0, 18) * 5 + 3 - smooth((ridge(s, wx, wz, 70.0, 19, 3) - 0.78) / 0.12) * 16
+                else -> f(s, wx, wz, 40.0, 20) * 5 + 2
+            }
+            "ghost" -> {
+                val d = anchorDist(s, zone, x, z, ring) * (1 + f(s, xd, zd, 24.0, 21, 2) * 0.25)
+                max(0.0, 15 - d * 0.13) + f(s, wx, wz, 20.0, 22, 3) * 2.2
+            }
+            "poison" -> if (variant == 2) f(s, wx, wz, 36.0, 23) * 2.5 + 0.5 else f(s, wx, wz, 26.0, 24, 3) * 1.8 - 0.6
+            "psychic" -> when (variant) {
+                2 -> terrace(smooth(f01(s, wx, wz, 40.0, 25, 3)) * 14, 3) + 1
+                1 -> f(s, wx, wz, 44.0, 26) * 5 + 2
+                else -> f(s, wx, wz, 34.0, 27) * 3.5 + 1
+            }
+            "steel" -> if (variant == 1) ridge(s, wx, wz, 50.0, 28, 2) * 4 else ridge(s, wx, wz, 36.0, 29) * 15 + f(s, xd, zd, 9.0, 30, 2) * 1.5 - 2
+            "electric" -> when (variant) {
+                2 -> ridge(s, wx, wz, 34.0, 31) * 13 - 2
+                else -> smooth((f01(s, wx, wz, 40.0, 32, 3) - 0.45) / 0.14) * 9 + f(s, xd, zd, 12.0, 33, 2) * 1.2
+            }
+            "rock" -> when (variant) {
+                2 -> ridge(s, wx, wz, 30.0, 34) * 11 + f(s, xd, zd, 8.0, 35, 2) * 2
+                else -> Math.pow(ridge(s, wx, wz, 34.0, 36), 1.4) * 22 + f(s, xd, zd, 9.0, 37, 2) * 2.5 - 2
+            }
+            "fighting" -> if (variant == 2) terrace(smooth((f01(s, wx, wz, 38.0, 38, 3) - 0.35) / 0.35) * 15, 4) + f(s, xd, zd, 20.0, 39, 2)
+                else f(s, wx, wz, 50.0, 40, 3) * 2.2 + 0.5
+            "ground" -> when (variant) {
+                0 -> { // dunes: long crests whose direction slowly turns
+                    val dir = f(s, xd, zd, 160.0, 41, 2) * 1.4
+                    val u = wx * kotlin.math.cos(dir) + wz * kotlin.math.sin(dir)
+                    val crest = 1 - abs(sin(u / 10.0 + f(s, xd, zd, 34.0, 42, 2) * 2.5))
+                    Math.pow(crest, 1.6) * 6 + f(s, wx, wz, 44.0, 43, 3) * 2
+                }
+                1 -> terrace(smooth((f01(s, wx, wz, 38.0, 44, 3) - 0.48) / 0.12) * 22, 3) + f(s, xd, zd, 14.0, 45, 2)
+                else -> f(s, wx, wz, 36.0, 46, 3) * 1.2
+            }
+            "fire" -> when (variant) {
+                0 -> { // volcano with a crater
+                    val d = anchorDist(s, zone, x, z, ring) * (1 + f(s, xd, zd, 18.0, 47, 2) * 0.12)
+                    val h = max(0.0, 40 - d * 0.82)
+                    if (d < 7) h - (7 - d) * 1.7 else h + f(s, xd, zd, 7.0, 48, 2) * 1.6 * smooth(h / 8)
+                }
+                1 -> terrace(smooth((f01(s, wx, wz, 36.0, 49, 3) - 0.38) / 0.24) * 18, 4) - smooth((ridge(s, wx, wz, 60.0, 50, 2) - 0.82) / 0.1) * 10
+                else -> terrace(f01(s, wx, wz, 28.0, 51, 3) * 7, 2)
+            }
+            "dragon" -> when (variant) {
+                0 -> terrace(smooth((f01(s, wx, wz, 34.0, 52, 3) - 0.46) / 0.14) * 26, 4) + f(s, xd, zd, 12.0, 53, 2)
+                1 -> {
+                    val d = anchorDist(s, zone, x, z, ring) * (1 + f(s, xd, zd, 26.0, 54, 2) * 0.2)
+                    max(0.0, 54 - d * 0.52) * (0.72 + 0.28 * ridge(s, wx, wz, 22.0, 55, 3)) + ridge(s, wx, wz, 40.0, 56, 2) * 6
+                }
+                else -> f(s, wx, wz, 40.0, 57) * 6 + 2
+            }
+            "ice" -> when (variant) {
+                2 -> -4.5 * lake(s, zone, x, z, wx, wz, ring, 0.38) + f(s, xd, zd, 20.0, 58, 2)
+                0 -> f(s, wx, wz, 40.0, 59) * 8 + ridge(s, wx, wz, 22.0, 60, 3) * 5 + 2
+                else -> f(s, wx, wz, 44.0, 61) * 6 + 2
+            }
+            else -> f(s, wx, wz, 34.0, 62) * 4 + 1
+        }
     }
+
+    /** A biome's own shape, or flat for a biome that's still asleep. */
+    private fun shape(s: Sanctuary, zone: String, x: Int, z: Int, ring: List<String>): Double =
+        if (zone != ZoneLayout.HUB && zone !in s.unlocked) 0.0 else rawOffset(s, zone, variantOf(s, zone), x, z, ring)
+
+    /** Width of the band where two neighbouring biomes melt into each other. */
+    private const val BLEND = 24.0
 
     /** The mountains closing in the valley. */
     private fun rimHeight(s: Sanctuary, x: Int, z: Int, dist: Double): Double {
         val t = smooth((dist - s.size.radius - 1) / 34.0)
-        return t * (26 + n(s, x, z, 40.0, 40) * 16 + ridge(s, x, z, 16.0, 41) * 8)
+        val xd = x.toDouble()
+        val zd = z.toDouble()
+        return t * (24 + f01(s, xd, zd, 60.0, 63) * 18 + ridge(s, xd, zd, 26.0, 64) * 14)
     }
 
-    /** Target top height of a column. */
+    /**
+     * Target top height of a column. Near a border both biomes' shapes are mixed (50/50 right on the border),
+     * so hills and lakes flow from one biome into the next instead of stopping at a flat strip.
+     */
     fun targetHeight(s: Sanctuary, x: Int, z: Int, ring: List<String>): Int {
         val dx = (x - s.center.x).toDouble()
         val dz = (z - s.center.z).toDouble()
@@ -326,8 +403,23 @@ object BiomeDresser {
         if (dist > s.size.radius) return G + rimHeight(s, x, z, dist).roundToInt()
         if (!SanctuaryConfig.reshapeTerrain.get()) return G
         val hit = ZoneLayout.locate(s, x, z, ring) ?: return G
-        if (hit.zone !in s.unlocked) return G
-        val off = rawOffset(s, hit.zone, variantOf(s, hit.zone), x, z, ring) * blend(s, hit)
+        val hubOff = shape(s, ZoneLayout.HUB, x, z, ring) * smooth((dist - 12) / 24.0)
+        var off: Double
+        if (hit.zone == ZoneLayout.HUB) {
+            off = hubOff
+        } else {
+            off = shape(s, hit.zone, x, z, ring)
+            val nb = hit.neighbour
+            if (nb != null && hit.edgeDistance < BLEND) {
+                val w = 0.5 + 0.5 * smooth(hit.edgeDistance / BLEND)
+                off = off * w + shape(s, nb, x, z, ring) * (1 - w)
+            }
+            // into the hub
+            val hubT = smooth((dist - ZoneLayout.hubRadiusAt(s, x, z)) / 20.0)
+            off = off * hubT + hubOff * (1 - hubT)
+        }
+        // down to the wall
+        off *= smooth((s.size.radius - 6 - dist) / 18.0)
         return G + off.roundToInt()
     }
 
@@ -377,13 +469,7 @@ object BiomeDresser {
         val found = findGround(level, s, x, z) ?: return false
         if (!isNatural(level.getBlockState(found))) return true
 
-        var zone = hit.zone
-        val nb = hit.neighbour
-        // a soft, dithered edge between two neighbouring biomes
-        if (nb != null && nb in s.unlocked && hit.edgeDistance < 5.0) {
-            val dither = Noise.value(s.seed + 55, x / 3.0, z / 3.0)
-            if (dither < 0.5 - hit.edgeDistance / 10.0) zone = nb
-        }
+        val zone = surfaceZone(s, hit, x, z, ring)
         val target = targetHeight(s, x, z, ring)
         val surface = reshape(level, found, target)
         val ctx = Ctx(level, s, surface, randomFor(s, x, z), variantOf(s, zone), hit, exposure(s, x, z, target, ring))
@@ -399,6 +485,11 @@ object BiomeDresser {
                     level.setBlock(side.above(), b(if (hit.zone == "ghost" || hit.zone == "dark") Blocks.SOUL_LANTERN else Blocks.LANTERN), FLAGS)
                 }
             }
+            return true
+        }
+        // a lake that reaches over the border keeps its water, whichever biome it spills into
+        if (zone != "water" && target < WATER_Y && (zone == "water" || hit.neighbour == "water" || hit.zone == "water") && "water" in s.unlocked) {
+            water(Ctx(level, s, surface, ctx.random, variantOf(s, "water").let { if (it == 2) 0 else it }, hit, ctx.exposure))
             return true
         }
         when (zone) {
@@ -422,6 +513,31 @@ object BiomeDresser {
             else -> custom(ctx, zone)
         }
         return true
+    }
+
+    /**
+     * Which biome's ground and plants a column gets. Near a border the two biomes interlock in organic patches
+     * (bigger the closer to the border), and the hub's meadow reaches into the biomes the same way.
+     */
+    private fun surfaceZone(s: Sanctuary, hit: ZoneLayout.Hit, x: Int, z: Int, ring: List<String>): String {
+        val xd = x.toDouble()
+        val zd = z.toDouble()
+        // the hub edge
+        val hubEdge = hit.dist - ZoneLayout.hubRadiusAt(s, x, z) // > 0 outside the hub
+        if (abs(hubEdge) < 9) {
+            val n = f01(s, xd, zd, 11.0, 70, 3)
+            val ringZone = if (hit.zone == ZoneLayout.HUB) ZoneLayout.ringZoneAt(s, x, z, ring) else hit.zone
+            val pickRing = n + hubEdge / 18.0 > 0.5
+            if (hit.zone == ZoneLayout.HUB) return if (pickRing && ringZone != null && ringZone in s.unlocked) ringZone else ZoneLayout.HUB
+            if (!pickRing) return ZoneLayout.HUB
+        }
+        val nb = hit.neighbour ?: return hit.zone
+        if (nb !in s.unlocked || hit.edgeDistance >= 14) return hit.zone
+        // a field shared by both sides of the border, so the patches line up
+        val first = if (hit.zone < nb) hit.zone else nb
+        val signed = if (hit.zone == first) hit.edgeDistance else -hit.edgeDistance
+        val n = f01(s, xd, zd, 9.0, 71, 3)
+        return if (n + signed / 28.0 > 0.5) first else if (first == hit.zone) nb else hit.zone
     }
 
     /** Is (x, z) on the route that winds from the hub out to [hit]'s landmark? */
@@ -1246,6 +1362,7 @@ object Noise {
         return ((h ushr 11).toDouble() / (1L shl 53).toDouble())
     }
 
+    /** Smooth value noise in [0, 1) (used for the biome layout). */
     fun value(seed: Long, x: Double, z: Double): Double {
         val x0 = floor(x).toInt()
         val z0 = floor(z).toInt()
@@ -1260,5 +1377,65 @@ object Noise {
         return top + (bottom - top) * fz
     }
 
+    private val GX = DoubleArray(16) { kotlin.math.cos(it * Math.PI / 8) }
+    private val GZ = DoubleArray(16) { kotlin.math.sin(it * Math.PI / 8) }
+
+    /** Gradient (Perlin-style) noise in about [-1, 1]: rounder, more natural shapes than value noise. */
+    fun gradient(seed: Long, x: Double, z: Double): Double {
+        val x0 = floor(x).toInt()
+        val z0 = floor(z).toInt()
+        val fx = x - x0
+        val fz = z - z0
+        fun g(ix: Int, iz: Int, dx: Double, dz: Double): Double {
+            val i = (hash(seed, ix, iz) * 16).toInt() and 15
+            return GX[i] * dx + GZ[i] * dz
+        }
+        val u = fade(fx)
+        val v = fade(fz)
+        val a = g(x0, z0, fx, fz)
+        val b = g(x0 + 1, z0, fx - 1, fz)
+        val c = g(x0, z0 + 1, fx, fz - 1)
+        val d = g(x0 + 1, z0 + 1, fx - 1, fz - 1)
+        val top = a + (b - a) * u
+        val bottom = c + (d - c) * u
+        return ((top + (bottom - top) * v) * 1.41).coerceIn(-1.0, 1.0)
+    }
+
+    /** Fractal noise: several layers of detail, in about [-1, 1]. */
+    fun fbm(seed: Long, x: Double, z: Double, octaves: Int = 4): Double {
+        var sum = 0.0
+        var amp = 1.0
+        var norm = 0.0
+        var fx = x
+        var fz = z
+        for (o in 0 until octaves) {
+            sum += gradient(seed + o * 131L, fx, fz) * amp
+            norm += amp
+            amp *= 0.5
+            fx *= 2.03
+            fz *= 2.03
+        }
+        return sum / norm
+    }
+
+    /** Ridged fractal noise in [0, 1]: sharp crests, for mountain ridges and canyons. */
+    fun ridged(seed: Long, x: Double, z: Double, octaves: Int = 4): Double {
+        var sum = 0.0
+        var amp = 1.0
+        var norm = 0.0
+        var fx = x
+        var fz = z
+        for (o in 0 until octaves) {
+            val r = 1 - kotlin.math.abs(gradient(seed + o * 173L, fx, fz))
+            sum += r * r * amp
+            norm += amp
+            amp *= 0.5
+            fx *= 2.07
+            fz *= 2.07
+        }
+        return sum / norm
+    }
+
     private fun smooth(t: Double) = t * t * (3 - 2 * t)
+    private fun fade(t: Double) = t * t * t * (t * (t * 6 - 15) + 10)
 }

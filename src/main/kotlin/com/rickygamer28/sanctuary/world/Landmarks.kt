@@ -45,7 +45,7 @@ object Landmarks {
     const val NONE = Long.MIN_VALUE
 
     /** Is (x, z) on a landmark? The terrain builder leaves those columns alone. */
-    fun near(s: Sanctuary, x: Int, z: Int): Boolean = s.landmarks.values.any {
+    fun near(s: Sanctuary, x: Int, z: Int): Boolean = (s.landmarks.values + s.staleLandmarks.values).any {
         if (it == NONE) return@any false
         val p = BlockPos.of(it)
         val dx = p.x - x
@@ -59,7 +59,7 @@ object Landmarks {
         val ring = ZoneLayout.ring()
         if (relocate(level, s, ring)) return
         for (zone in ring) {
-            if (zone !in s.unlocked || s.landmarks.containsKey(zone)) continue
+            if (zone !in s.unlocked || s.landmarks.containsKey(zone) || s.staleLandmarks.containsKey(zone)) continue
             val (ax, az) = ZoneLayout.anchor(s, zone, ring)
             if (!loadedAround(level, ax, az, RADIUS + 2)) continue
             val variant = BiomeDresser.variantOf(s, zone)
@@ -98,13 +98,14 @@ object Landmarks {
      * let the builder reshape the spot, and build it again in the new middle of its biome.
      */
     private fun relocate(level: ServerLevel, s: Sanctuary, ring: List<String>): Boolean {
-        for ((zone, packed) in s.landmarks.toList()) {
-            if (packed == NONE) continue
+        val candidates = s.staleLandmarks.entries.map { Triple(it.key, it.value, true) } + s.landmarks.entries.map { Triple(it.key, it.value, false) }
+        for ((zone, packed, stale) in candidates) {
+            if (packed == NONE) { if (stale) s.staleLandmarks.remove(zone); continue }
             val p = BlockPos.of(packed)
             val (ax, az) = ZoneLayout.anchor(s, zone, ring)
             val dx = (p.x - ax).toDouble()
             val dz = (p.z - az).toDouble()
-            if (zone in ring && dx * dx + dz * dz <= 12.0 * 12.0) continue
+            if (!stale && zone in ring && dx * dx + dz * dz <= 12.0 * 12.0) continue
             val r = RADIUS + 2
             if (!loadedAround(level, p.x, p.z, r)) continue
             // take down everything built above the landmark's floor, and turn the floor back into plain ground
@@ -119,7 +120,7 @@ object Landmarks {
                 val floor = BlockPos(p.x + ox, p.y, p.z + oz)
                 if (!BiomeDresser.isNatural(level.getBlockState(floor))) level.setBlock(floor, b(Blocks.STONE), FLAGS)
             }
-            s.landmarks.remove(zone)
+            if (stale) s.staleLandmarks.remove(zone) else s.landmarks.remove(zone)
             for (ox in -r - 2..r + 2) for (oz in -r - 2..r + 2) {
                 val idx = ColumnOrder.indexOf(p.x + ox - s.center.x, p.z + oz - s.center.z)
                 if (idx >= 0) { s.dressed.clear(idx); s.meadow.clear(idx) }

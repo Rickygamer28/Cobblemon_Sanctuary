@@ -123,6 +123,9 @@ class Sanctuary(
     /** Where each biome's landmark stands (packed BlockPos), once built. */
     val landmarks: MutableMap<String, Long> = mutableMapOf()
 
+    /** Landmarks built on terrain that has been rebuilt since: they get taken down and built again. */
+    val staleLandmarks: MutableMap<String, Long> = mutableMapOf()
+
     /** Biome variant chosen per type for this sanctuary. */
     val variants: MutableMap<String, Int> = mutableMapOf()
 
@@ -219,6 +222,9 @@ class Sanctuary(
         val lm = CompoundTag()
         landmarks.forEach { (k, v) -> lm.putLong(k, v) }
         t.put("Landmarks", lm)
+        val st = CompoundTag()
+        staleLandmarks.forEach { (k, v) -> st.putLong(k, v) }
+        t.put("StaleLandmarks", st)
         t.putInt("Version", DATA_VERSION)
         t.putInt("OldWall", oldWallRadius)
         val packed = IntArray((originY.size + 1) / 2) { i ->
@@ -232,7 +238,7 @@ class Sanctuary(
 
     companion object {
         /** Bump to make existing sanctuaries rebuild their biomes after a generator change. */
-        const val DATA_VERSION = 5
+        const val DATA_VERSION = 6
 
         fun key(a: UUID, b: UUID): String = if (a < b) "$a|$b" else "$b|$a"
 
@@ -284,6 +290,13 @@ class Sanctuary(
             mt.allKeys.forEach { k -> s.mates[k] = mt.getLong(k) }
             val lm = t.getCompound("Landmarks")
             lm.allKeys.forEach { k -> s.landmarks[k] = lm.getLong(k) }
+            val st = t.getCompound("StaleLandmarks")
+            st.allKeys.forEach { k -> s.staleLandmarks[k] = st.getLong(k) }
+            if (t.getInt("Version") < DATA_VERSION && t.getInt("Version") > 0) {
+                // the terrain is being rebuilt: landmarks get rebuilt on the new ground too
+                s.landmarks.forEach { (k, v) -> if (v != Long.MIN_VALUE) s.staleLandmarks[k] = v }
+                s.landmarks.clear()
+            }
             val vars = t.getCompound("Variants")
             vars.allKeys.forEach { k -> s.variants[k] = vars.getInt(k) }
             return s
