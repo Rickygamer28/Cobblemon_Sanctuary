@@ -163,6 +163,9 @@ object SanctuaryConfig {
     val playFightXpMaxLevel: ModConfigSpec.IntValue = builder
         .comment("Residents stop gaining experience from play-fights at this level.")
         .defineInRange("playFightXpMaxLevel", 100, 1, 100)
+    val despawnHiddenDistance: ModConfigSpec.IntValue = builder
+        .comment("Residents are only sent back to rest (to make room for others) when no player is within this many blocks.")
+        .defineInRange("despawnHiddenDistance", 48, 0, 256)
     val personalities: ModConfigSpec.BooleanValue = builder
         .comment("Residents behave according to their nature (playful, bold, gentle, laid-back, shy or curious).")
         .define("personalities", true)

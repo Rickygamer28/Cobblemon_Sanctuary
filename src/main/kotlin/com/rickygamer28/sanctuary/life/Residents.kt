@@ -265,14 +265,16 @@ object Residents {
         }
         val wantedIds = wanted.map { it.pokemon.uuid }.toHashSet()
 
-        // despawn the ones no longer wanted (not while in a scene)
+        // despawn the ones no longer wanted (not while in a scene), farthest from the players first, and never
+        // right in front of someone: those wait until nobody is close enough to see them go
+        val hidden = SanctuaryConfig.despawnHiddenDistance.get().toDouble()
+        fun nearestPlayer(r: LiveResident) = players.minOfOrNull { it.distanceToSqr(r.entity) } ?: Double.MAX_VALUE
         var removed = 0
-        for (r in rt.live.values.toList()) {
+        for (r in rt.live.values.filter { it.pokemonId !in wantedIds && it.busyUntil < now }.sortedByDescending { nearestPlayer(it) }) {
             if (removed >= 6) break
-            if (r.pokemonId !in wantedIds && r.busyUntil < now) {
-                despawn(rt, r)
-                removed++
-            }
+            if (nearestPlayer(r) < hidden * hidden) break
+            despawn(rt, r)
+            removed++
         }
         // spawn a few new ones each second to avoid lag spikes
         var spawned = 0

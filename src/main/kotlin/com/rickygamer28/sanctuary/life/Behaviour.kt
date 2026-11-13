@@ -131,7 +131,9 @@ object Behaviour {
         }
         if (r.strandedSince == 0L) r.strandedSince = now
         // on land: head for the water; if it can't get there soon, it goes back to resting (and comes out in the water)
-        if (now - r.strandedSince > 20L * 8) Residents.despawn(rt, r) else if ((now - r.strandedSince) % 60L < 20L) swimSomewhere(level, s, r, near = true)
+        val watched = level.players().any { it.distanceToSqr(e) < 32.0 * 32.0 }
+        val tooLong = now - r.strandedSince > 20L * (if (watched) 60 else 8)
+        if (tooLong) Residents.despawn(rt, r) else if ((now - r.strandedSince) % 60L < 20L) swimSomewhere(level, s, r, near = true)
     }
 
     private fun swimSomewhere(level: ServerLevel, s: Sanctuary, r: LiveResident, near: Boolean = false) {
