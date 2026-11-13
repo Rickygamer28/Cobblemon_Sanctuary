@@ -49,9 +49,20 @@ object Families {
 
     // ------------------------------------------------------------------ who can have eggs
 
+    private val LEGEND_LABELS = setOf("legendary", "mythical", "ultra_beast")
+
+    fun isLegendary(p: Pokemon): Boolean =
+        runCatching { (p.species.labels + p.form.labels).any { it.lowercase() in LEGEND_LABELS } }.getOrDefault(false)
+
     fun canBreed(a: Pokemon, b: Pokemon): Boolean {
         val ga = a.form.eggGroups
         val gb = b.form.eggGroups
+        // legendaries only start a family with another of the same species (Zapdos with Zapdos)
+        if (isLegendary(a) || isLegendary(b)) {
+            if (!(isLegendary(a) && isLegendary(b)) || a.species != b.species) return false
+            return (a.gender == Gender.GENDERLESS && b.gender == Gender.GENDERLESS) ||
+                (a.gender == Gender.MALE && b.gender == Gender.FEMALE) || (a.gender == Gender.FEMALE && b.gender == Gender.MALE)
+        }
         if (EggGroup.UNDISCOVERED in ga || EggGroup.UNDISCOVERED in gb) return false
         val dittoA = EggGroup.DITTO in ga
         val dittoB = EggGroup.DITTO in gb
