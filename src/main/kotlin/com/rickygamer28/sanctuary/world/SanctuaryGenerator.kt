@@ -54,6 +54,13 @@ object SanctuaryGenerator {
 
     fun isGrowing(s: Sanctuary) = s.generationDirty || cursors.containsKey(s.id)
 
+    /** Progress of the current building sweep, 0..100, or null when not building. */
+    fun progress(s: Sanctuary): Int? {
+        val c = cursors[s.id] ?: return if (s.generationDirty) 0 else null
+        val total = ColumnOrder.countWithin(s.size.radius).coerceAtLeast(1)
+        return (c * 100L / total).toInt()
+    }
+
     fun tick(level: ServerLevel, data: SanctuaryData, s: Sanctuary) {
         if (s.state != SanctuaryState.ACTIVE) return
         val now = level.gameTime
@@ -72,10 +79,12 @@ object SanctuaryGenerator {
         val total = ColumnOrder.countWithin(s.size.radius)
         var i = cursors[s.id] ?: 0
         var budget = SanctuaryConfig.generationSpeed.get()
+        val deadline = System.nanoTime() + SanctuaryConfig.generationMillis.get() * 1_000_000L
         var scanned = 0
         val extents = HashMap<String, Double>()
-        while (budget > 0 && i < total && scanned < budget * 8) {
+        while (budget > 0 && i < total) {
             scanned++
+            if ((scanned and 63) == 0 && System.nanoTime() > deadline) break
             val idx = i++
             if (s.dressed.get(idx)) continue
             val x = s.center.x + ColumnOrder.dx[idx]
@@ -85,7 +94,13 @@ object SanctuaryGenerator {
             val ext = extents.getOrPut(hit.zone) { ZoneLayout.extent(s, hit.zone) }
             if (hit.zone != ZoneLayout.HUB && hit.dist > ext) continue
             if (!level.hasChunk(x shr 4, z shr 4)) { missedUnloaded[s.id] = true; continue }
-            if (BiomeDresser.dress(level, s, x, z, hit, ring)) s.dressed.set(idx)
+            val ok = try {
+                BiomeDresser.dress(level, s, x, z, hit, ring)
+            } catch (e: Exception) {
+                com.rickygamer28.sanctuary.CobblemonSanctuary.LOGGER.warn("Couldn't dress column $x,$z", e)
+                true
+            }
+            if (ok) s.dressed.set(idx)
             budget--
         }
         if (i >= total) {

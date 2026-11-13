@@ -27,8 +27,12 @@ object SanctuaryConfig {
         .defineInRange("largeResidents", 300, 0, 10000)
 
     val generationSpeed: ModConfigSpec.IntValue = builder
-        .comment("Terrain columns dressed per tick while a sanctuary is growing.")
-        .defineInRange("generationSpeed", 160, 8, 4096)
+        .comment("Most terrain columns dressed per tick while a sanctuary is growing.")
+        .defineInRange("generationSpeed", 4096, 8, 65536)
+
+    val generationMillis: ModConfigSpec.IntValue = builder
+        .comment("Milliseconds per tick the sanctuary may spend building biomes (higher = faster building, more server load).")
+        .defineInRange("generationMillis", 12, 1, 40)
 
     val growthFullAt: ModConfigSpec.IntValue = builder
         .comment("Pokémon of one type needed for its biome to reach full size.")

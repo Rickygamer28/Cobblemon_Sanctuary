@@ -87,7 +87,7 @@ object Residents {
 
         if ((now + (s.id.hashCode() and 15)) % 20L != 0L) return
 
-        if (rt.rosterDirty || now - rt.rosterAt > 1200) refreshRoster(level, s, rt, now)
+        if (rt.rosterDirty || now - rt.rosterAt > 200) refreshRoster(level, s, rt, now)
         cleanUp(rt)
         if (players.isEmpty()) {
             despawnAll(rt)

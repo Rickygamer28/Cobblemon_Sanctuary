@@ -48,8 +48,9 @@ object Menus {
         }
         if (!s.isMember(player.uuid)) return player.sendSystemMessage(Text.info("This sanctuary belongs to ${s.ownerName}."))
         val rt = Residents.runtime(s)
+        Residents.refreshRoster(level, s, rt, level.gameTime)
         player.sendSystemMessage(Text.title("Sanctuary of ${s.ownerName} (${s.size.label})"))
-        val growing = if (SanctuaryGenerator.isGrowing(s)) " — growing…" else ""
+        val growing = SanctuaryGenerator.progress(s)?.let { " — building biomes: $it%" } ?: ""
         player.sendSystemMessage(Text.info("Residents: ${s.residentCount} (${rt.live.size} out now) · Biomes awake: ${s.unlocked.size}/${ZoneLayout.ring().size + 1}$growing"))
         if (s.members.isNotEmpty()) player.sendSystemMessage(Text.info("Members: ${s.ownerName}, " + s.members.joinToString(", ") { s.memberNames[it] ?: "?" }))
         val buttons = ArrayList<Component>()
