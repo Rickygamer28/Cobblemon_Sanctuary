@@ -86,6 +86,12 @@ class Sanctuary(
     /** Set when the biome layout should be swept again (new type, growth, expansion). */
     var generationDirty: Boolean = true
 
+    /** Go over the whole area again (e.g. after trees were left in the way). */
+    fun rebuild() {
+        dressed = BitSet()
+        generationDirty = true
+    }
+
     fun allMembers(): Set<UUID> = linkedSetOf(owner) + members
 
     fun isMember(uuid: UUID) = uuid == owner || uuid in members
@@ -143,10 +149,14 @@ class Sanctuary(
         val vars = CompoundTag()
         variants.forEach { (k, v) -> vars.putInt(k, v) }
         t.put("Variants", vars)
+        t.putInt("Version", DATA_VERSION)
         return t
     }
 
     companion object {
+        /** Bump to make existing sanctuaries rebuild their biomes after a generator change. */
+        const val DATA_VERSION = 2
+
         fun key(a: UUID, b: UUID): String = if (a < b) "$a|$b" else "$b|$a"
 
         fun load(t: CompoundTag): Sanctuary {
@@ -169,7 +179,7 @@ class Sanctuary(
             res.allKeys.forEach { k -> runCatching { s.residents[UUID.fromString(k)] = ResidentData.load(res.getCompound(k)) } }
             val rel = t.getCompound("Relationships")
             rel.allKeys.forEach { k -> s.relationships[k] = rel.getInt(k) }
-            s.dressed = BitSet.valueOf(t.getLongArray("Dressed"))
+            s.dressed = if (t.getInt("Version") >= DATA_VERSION) BitSet.valueOf(t.getLongArray("Dressed")) else BitSet()
             t.getList("Events", Tag.TAG_STRING.toInt()).forEach { s.events.addLast(it.asString) }
             val vars = t.getCompound("Variants")
             vars.allKeys.forEach { k -> s.variants[k] = vars.getInt(k) }

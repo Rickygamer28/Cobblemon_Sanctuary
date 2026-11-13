@@ -34,6 +34,18 @@ object SanctuaryConfig {
         .comment("Milliseconds per tick the sanctuary may spend building biomes (higher = faster building, more server load).")
         .defineInRange("generationMillis", 12, 1, 40)
 
+    val fillRivers: ModConfigSpec.BooleanValue = builder
+        .comment("Fill rivers and ponds so biomes continue across them.")
+        .define("fillRivers", true)
+
+    val fillWaterDepth: ModConfigSpec.IntValue = builder
+        .comment("Deepest water that gets filled. Deeper water (oceans) is left alone.")
+        .defineInRange("fillWaterDepth", 12, 1, 40)
+
+    val clearTrees: ModConfigSpec.BooleanValue = builder
+        .comment("Clear natural trees inside the sanctuary so the biomes can grow their own plants. Player builds are never touched.")
+        .define("clearTrees", true)
+
     val growthFullAt: ModConfigSpec.IntValue = builder
         .comment("Pokémon of one type needed for its biome to reach full size.")
         .defineInRange("growthFullAt", 20, 1, 1000)

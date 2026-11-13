@@ -1,5 +1,6 @@
 package com.rickygamer28.sanctuary.world
 
+import com.rickygamer28.sanctuary.SanctuaryConfig
 import com.rickygamer28.sanctuary.data.Sanctuary
 import net.minecraft.core.BlockPos
 import net.minecraft.core.registries.Registries
@@ -71,10 +72,8 @@ object BiomeDresser {
 
     /** Dresses one column. Returns false if the column can't be dressed right now. */
     fun dress(level: ServerLevel, s: Sanctuary, x: Int, z: Int, hit: ZoneLayout.Hit, ring: List<String>): Boolean {
-        val y = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1
-        if (y <= level.minBuildHeight) return true
-        val surface = BlockPos(x, y, z)
-        val state = level.getBlockState(surface)
+        val surface = findGround(level, x, z) ?: return true
+        var state = level.getBlockState(surface)
         val random = RandomSource.create(s.seed xor (x * 341873128712L) xor (z * 132897987541L))
 
         // blend borders: near an edge, sometimes use the neighbour's look
@@ -82,7 +81,11 @@ object BiomeDresser {
         val nb = hit.neighbour
         if (nb != null && nb in s.unlocked && hit.edgeDistance < 4.0 && random.nextDouble() < 0.5 - hit.edgeDistance / 8.0) zone = nb
 
-        if (state.fluidState.`is`(FluidTags.WATER) && zone != "water") return true
+        if (state.fluidState.`is`(FluidTags.WATER) && zone != "water") {
+            // rivers and ponds: fill shallow water so the biome continues across; leave deep water (oceans) alone
+            if (!SanctuaryConfig.fillRivers.get() || !fillShallowWater(level, surface)) return true
+            state = level.getBlockState(surface)
+        }
         if (!isNatural(state) && !state.fluidState.`is`(FluidTags.WATER)) return true
 
         // clear small plants so nothing floats
@@ -118,6 +121,77 @@ object BiomeDresser {
     }
 
     private fun b(block: Block): BlockState = block.defaultBlockState()
+
+    /**
+     * The ground of a column, below trees and plants. Natural trees (logs with natural leaves attached)
+     * are cleared on the way down; anything else on top (player builds) makes the column be skipped.
+     */
+    private fun findGround(level: ServerLevel, x: Int, z: Int): BlockPos? {
+        val top = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, x, z) - 1
+        var p = BlockPos(x, top, z)
+        var guard = 0
+        while (guard++ < 48 && p.y > level.minBuildHeight) {
+            val st = level.getBlockState(p)
+            when {
+                st.isAir -> p = p.below()
+                st.`is`(BlockTags.LEAVES) -> {
+                    if (!SanctuaryConfig.clearTrees.get() || st.getOptionalValue(net.minecraft.world.level.block.LeavesBlock.PERSISTENT).orElse(false)) return null
+                    p = p.below()
+                }
+                st.`is`(BlockTags.LOGS) -> {
+                    if (!SanctuaryConfig.clearTrees.get() || !removeTree(level, p)) return null
+                }
+                st.fluidState.isEmpty && st.canBeReplaced() -> p = p.below()
+                st.`is`(Blocks.SNOW) || st.`is`(Blocks.VINE) || st.`is`(Blocks.BAMBOO) || st.`is`(Blocks.SUGAR_CANE) || st.`is`(Blocks.CACTUS) || st.`is`(BlockTags.FLOWERS) || st.`is`(BlockTags.SAPLINGS) -> p = p.below()
+                st.`is`(Blocks.BROWN_MUSHROOM_BLOCK) || st.`is`(Blocks.RED_MUSHROOM_BLOCK) || st.`is`(Blocks.MUSHROOM_STEM) -> {
+                    if (!SanctuaryConfig.clearTrees.get()) return null
+                    level.setBlock(p, Blocks.AIR.defaultBlockState(), FLAGS); p = p.below()
+                }
+                else -> return p
+            }
+        }
+        return null
+    }
+
+    /** Removes a natural tree (connected logs + non-persistent leaves). Returns false if it isn't a natural tree. */
+    private fun removeTree(level: ServerLevel, start: BlockPos): Boolean {
+        val seen = HashSet<BlockPos>()
+        val queue = ArrayDeque<BlockPos>()
+        queue += start
+        seen += start
+        var naturalLeaves = false
+        while (queue.isNotEmpty() && seen.size < 900) {
+            val p = queue.removeFirst()
+            for (dx in -1..1) for (dy in -1..1) for (dz in -1..1) {
+                if (dx == 0 && dy == 0 && dz == 0) continue
+                val n = p.offset(dx, dy, dz)
+                if (n in seen) continue
+                val st = level.getBlockState(n)
+                val isLog = st.`is`(BlockTags.LOGS)
+                val isLeaf = st.`is`(BlockTags.LEAVES) && !st.getOptionalValue(net.minecraft.world.level.block.LeavesBlock.PERSISTENT).orElse(true)
+                if (isLeaf) naturalLeaves = true
+                if (isLog || isLeaf) { seen += n; queue += n }
+            }
+        }
+        if (!naturalLeaves) return false
+        val air = Blocks.AIR.defaultBlockState()
+        for (p in seen) level.setBlock(p, air, FLAGS)
+        return true
+    }
+
+    /** Fills a shallow water column with dirt. Returns false if the water is too deep (oceans). */
+    private fun fillShallowWater(level: ServerLevel, surface: BlockPos): Boolean {
+        val column = ArrayList<BlockPos>()
+        var p = surface
+        while (level.getBlockState(p).fluidState.`is`(FluidTags.WATER)) {
+            column += p
+            if (column.size > SanctuaryConfig.fillWaterDepth.get()) return false
+            p = p.below()
+        }
+        if (column.isEmpty() || level.getBlockState(p).isAir) return false
+        for (pos in column) level.setBlock(pos, Blocks.DIRT.defaultBlockState(), FLAGS)
+        return true
+    }
 
     // ---------------------------------------------------------------- biomes
 

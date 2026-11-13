@@ -62,6 +62,7 @@ object Menus {
                 buttons += if (Sizes.unlocked(next, s.residentCount)) Text.button("Expand to ${next.label}", "/sanctuary core $id expand", "Free: you have ${s.residentCount} Pokémon", ChatFormatting.GREEN)
                 else Text.disabled("Expand to ${next.label}", "Needs ${Sizes.residentsNeeded(next)} Pokémon (you have ${s.residentCount})")
             }
+            buttons += Text.button("Rebuild biomes", "/sanctuary core $id rebuild", "Go over the whole area again (natural ground only)", ChatFormatting.GOLD)
             buttons += Text.suggest("Invite", "/sanctuary invite ", "Invite a player to share this sanctuary")
             if (Preview.maxAllowed().radius > s.size.radius) buttons += Text.button("Show outline", "/sanctuary core $id outline", "Show the current and maximum area")
         } else {

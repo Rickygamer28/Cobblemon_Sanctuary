@@ -92,6 +92,11 @@ object SanctuaryCommand {
             "cancel" -> Sanctuaries.cancel(level, s, player)
             "expand" -> Sanctuaries.expand(level, s, player)
             "leave" -> Sanctuaries.leave(player, s, level)
+            "rebuild" -> if (s.owner == player.uuid) {
+                s.rebuild()
+                Sanctuaries.data(level).setDirty()
+                player.sendSystemMessage(Text.good("Rebuilding the biomes. Stay nearby so the area stays loaded."))
+            }
             "journal" -> if (s.isMember(player.uuid)) Sanctuaries.giveJournal(player)
             "outline" -> if (s.isMember(player.uuid)) Residents.runtime(s).outlineUntil = level.gameTime + 20L * 15
             "menu" -> Menus.core(player, level, s)
