@@ -4,7 +4,9 @@ import com.cobblemon.mod.common.Cobblemon
 import com.cobblemon.mod.common.CobblemonMemories
 import com.cobblemon.mod.common.entity.pokemon.PokemonEntity
 import com.cobblemon.mod.common.pokemon.Pokemon
+import com.rickygamer28.sanctuary.CobblemonSanctuary
 import com.rickygamer28.sanctuary.SanctuaryConfig
+import com.rickygamer28.sanctuary.Sanctuaries
 import com.rickygamer28.sanctuary.data.Sanctuary
 import com.rickygamer28.sanctuary.data.SanctuaryData
 import com.rickygamer28.sanctuary.data.SanctuaryState
@@ -125,19 +127,33 @@ object Residents {
     fun refreshRoster(level: ServerLevel, s: Sanctuary, rt: SanctuaryRuntime, now: Long) {
         val server = level.server
         val list = ArrayList<RosterEntry>()
+        var freed = 0
+        var pcsOk = true
         for (member in s.allMembers()) {
-            val pc = runCatching { Cobblemon.storage.getPC(member, server.registryAccess()) }.getOrNull() ?: continue
+            val pc = runCatching { Cobblemon.storage.getPC(member, server.registryAccess()) }.getOrNull() ?: run { pcsOk = false; null } ?: continue
             val name = if (member == s.owner) s.ownerName else s.memberNames[member] ?: "?"
             for (pokemon in pc) {
                 val ours = rt.live[pokemon.uuid]
                 val tether = pokemon.tetheringId
-                if (tether != null && (ours == null || ours.tethering.tetheringId != tether)) continue // in a real pasture
+                if (tether != null && (ours == null || ours.tethering.tetheringId != tether)) {
+                    // still linked to the sanctuary from before the game closed (or crashed): bring it back.
+                    // Older versions didn't remember their links, so once, every link without a Pokémon out is freed.
+                    val left = pokemon.entity == null && (tether == s.residents[pokemon.uuid]?.tether || !s.legacyTethersFixed)
+                    if (!left) continue // out in a real Cobblemon Pasture
+                    pokemon.tetheringId = null
+                    freed++
+                }
                 list += RosterEntry(pokemon, member, name, pc.uuid)
             }
         }
         rt.roster = list
         rt.rosterAt = now
         rt.rosterDirty = false
+        if (pcsOk && !s.legacyTethersFixed) s.legacyTethersFixed = true
+        if (freed > 0) {
+            CobblemonSanctuary.LOGGER.info("Sanctuary: {} Pokémon were still linked from last time and came back", freed)
+            Sanctuaries.data(level).setDirty()
+        }
 
         val ring = ZoneLayout.ring()
         val counts = HashMap<String, Int>()
@@ -203,7 +219,7 @@ object Residents {
         val byZone = HashMap<String, MutableList<Cand>>()
         val zoneDist = HashMap<String, Double>()
         for (e in rt.roster) {
-            if (e.pokemon.currentHealth <= 0) continue
+            // fainted ones come out too: the sanctuary heals them when they appear
             val home = TypeLogic.homeZone(e.pokemon, s.residents[e.pokemon.uuid], ring)
             if (home != null && home !in s.unlocked) continue
             val key = home ?: "~travelers"
@@ -268,6 +284,7 @@ object Residents {
             e.owner, e.ownerName, UUID.randomUUID(), pokemon.uuid, e.pcId, entity.id, s.center, s.id,
         )
         pokemon.tetheringId = tethering.tetheringId
+        s.resident(pokemon.uuid).tether = tethering.tetheringId
         entity.tethering = tethering
         if (!level.addFreshEntity(entity)) {
             pokemon.tetheringId = null

@@ -44,7 +44,8 @@ class CobblemonSanctuary(modBus: IEventBus, container: ModContainer) {
         bus.addListener(EntityJoinLevelEvent::class.java) { onEntityJoin(it) }
         bus.addListener(net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent::class.java) { onDamage(it) }
         bus.addListener(BlockEvent.BreakEvent::class.java) { onBlockBreak(it) }
-        bus.addListener(ServerStoppingEvent::class.java) { onServerStopping(it) }
+        // before Cobblemon saves the PCs, so no Pokémon is saved still linked to the sanctuary
+        bus.addListener(net.neoforged.bus.api.EventPriority.HIGHEST, ServerStoppingEvent::class.java) { onServerStopping(it) }
         bus.addListener(ChunkEvent.Load::class.java) { onChunkLoad(it) }
         bus.addListener(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post::class.java) { com.rickygamer28.sanctuary.life.Families.onPlayerTick(it.entity) }
         bus.addListener(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent::class.java) { com.rickygamer28.sanctuary.life.Families.forgetPlayer(it.entity.uuid) }

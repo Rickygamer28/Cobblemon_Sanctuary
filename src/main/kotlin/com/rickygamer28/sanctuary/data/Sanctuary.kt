@@ -36,8 +36,11 @@ class ResidentData(
     var lastPet: Long = 0L,
     var lastPlay: Long = 0L,
     var lastFeed: Long = 0L,
+    /** The tethering the sanctuary last gave this Pokémon, to recognise it if it's left behind after a crash. */
+    var tether: UUID? = null,
 ) {
     fun save(): CompoundTag = CompoundTag().also { t ->
+        tether?.let { t.putUUID("Tether", it) }
         homeChoice?.let { t.putString("Home", it) }
         if (noPartners) t.putBoolean("NoPartners", true)
         t.putLong("Pet", lastPet)
@@ -52,6 +55,7 @@ class ResidentData(
             lastPet = t.getLong("Pet"),
             lastPlay = t.getLong("Play"),
             lastFeed = t.getLong("Feed"),
+            tether = if (t.hasUUID("Tether")) t.getUUID("Tether") else null,
         )
     }
 }
@@ -83,6 +87,9 @@ class Sanctuary(
 
     /** Dressed columns that are only a meadow, because their biome was still asleep. */
     var meadow: BitSet = BitSet()
+
+    /** Pokémon left linked to the sanctuary by older versions were brought back once. */
+    var legacyTethersFixed: Boolean = false
 
     /** Biomes to build again on the next pass even where they're already built. Not saved. */
     val rebuildZones: MutableSet<String> = mutableSetOf()
@@ -239,6 +246,7 @@ class Sanctuary(
         staleLandmarks.forEach { (k, v) -> st.putLong(k, v) }
         t.put("StaleLandmarks", st)
         t.putIntArray("Away", intArrayOf(awayMeetings, awayFriends, awayRivals, awayEggs))
+        t.putBoolean("LegacyTethers", legacyTethersFixed)
         t.putInt("Version", DATA_VERSION)
         t.putInt("OldWall", oldWallRadius)
         val packed = IntArray((originY.size + 1) / 2) { i ->
@@ -308,6 +316,7 @@ class Sanctuary(
             mt.allKeys.forEach { k -> s.mates[k] = mt.getLong(k) }
             val lm = t.getCompound("Landmarks")
             lm.allKeys.forEach { k -> s.landmarks[k] = lm.getLong(k) }
+            s.legacyTethersFixed = t.getBoolean("LegacyTethers")
             t.getIntArray("Away").let { a -> if (a.size == 4) { s.awayMeetings = a[0]; s.awayFriends = a[1]; s.awayRivals = a[2]; s.awayEggs = a[3] } }
             val st = t.getCompound("StaleLandmarks")
             st.allKeys.forEach { k -> s.staleLandmarks[k] = st.getLong(k) }
