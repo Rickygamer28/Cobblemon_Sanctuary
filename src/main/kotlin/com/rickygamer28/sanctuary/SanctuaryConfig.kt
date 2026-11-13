@@ -97,7 +97,7 @@ object SanctuaryConfig {
         .defineInRange("meetingChance", 0.15, 0.0, 1.0)
 
     val megaChance: ModConfigSpec.DoubleValue = builder
-        .comment("Chance that a resident holding its Mega Stone Mega Evolves during a play-fight (needs Mega Showdown).")
+        .comment("Chance that a resident with a Mega Evolution Mega Evolves during a play-fight (needs Mega Showdown).")
         .defineInRange("megaChance", 0.35, 0.0, 1.0)
 
     val megaMinSeconds: ModConfigSpec.IntValue = builder.defineInRange("megaMinSeconds", 30, 1, 3600)
@@ -118,8 +118,11 @@ object SanctuaryConfig {
         .defineInRange("awayLifeRate", 1.0, 0.0, 10.0)
 
     val megaEnabled: ModConfigSpec.BooleanValue = builder
-        .comment("Let residents Mega Evolve during play-fights (needs Mega Showdown and the Pokémon holding its Mega Stone).")
+        .comment("Let residents that have a Mega Evolution Mega Evolve during play-fights (needs Mega Showdown).")
         .define("megaEnabled", true)
+    val megaNeedsStone: ModConfigSpec.BooleanValue = builder
+        .comment("Only residents holding their Mega Stone can Mega Evolve in the sanctuary.")
+        .define("megaNeedsStone", false)
 
     // ---- families and eggs
     val eggsEnabled: ModConfigSpec.BooleanValue = builder

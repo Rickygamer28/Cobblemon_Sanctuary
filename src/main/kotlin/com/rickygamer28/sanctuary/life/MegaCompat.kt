@@ -90,18 +90,27 @@ object MegaCompat {
     fun isMega(pokemon: Pokemon): Boolean =
         pokemon.aspects.any { it.lowercase() in MEGA_ASPECTS } || pokemon.form.name.lowercase().startsWith("mega")
 
-    private fun stoneFor(server: MinecraftServer, pokemon: Pokemon): Stone? {
-        val held = pokemon.heldItem()
-        if (held.isEmpty) return null
-        val itemId = BuiltInRegistries.ITEM.getKey(held.item).toString()
-        val path = itemId.substringAfter(':')
+    /**
+     * The Mega Evolution this Pokémon can do. In the sanctuary it doesn't need to hold its Mega Stone (unless the
+     * config says so); if it holds one, that one is used (Charizard X or Y), otherwise one of its megas at random.
+     */
+    private fun stoneFor(server: MinecraftServer, pokemon: Pokemon, random: net.minecraft.util.RandomSource): Stone? {
         val name = pokemon.species.name.lowercase().replace(" ", "").replace("-", "")
         val aspects = pokemon.aspects.map { it.lowercase() }.toSet()
-        return load(server).firstOrNull { st ->
-            (itemId in st.items || st.items.any { it.substringAfter(':') == path }) && name in st.species &&
+        val options = load(server).filter { st ->
+            name in st.species &&
                 (st.required.isEmpty() || st.required.any { group -> group.all { it.lowercase() in aspects } }) &&
                 st.blacklist.none { group -> group.isNotEmpty() && group.all { it.lowercase() in aspects } }
         }
+        if (options.isEmpty()) return null
+        val held = pokemon.heldItem()
+        if (!held.isEmpty) {
+            val itemId = BuiltInRegistries.ITEM.getKey(held.item).toString()
+            val path = itemId.substringAfter(':')
+            options.firstOrNull { st -> itemId in st.items || st.items.any { it.substringAfter(':') == path } }?.let { return it }
+        }
+        if (SanctuaryConfig.megaNeedsStone.get()) return null
+        return options[random.nextInt(options.size)]
     }
 
     private fun applyAll(entity: PokemonEntity, props: List<String>) {
@@ -121,7 +130,7 @@ object MegaCompat {
         if (last != null && now - last < 20L * 60) return
         lastRoll[pokemon.uuid] = now
         if (level.random.nextDouble() >= SanctuaryConfig.megaChance.get()) return
-        val stone = stoneFor(level.server, pokemon) ?: return
+        val stone = stoneFor(level.server, pokemon, level.random) ?: return
         val min = SanctuaryConfig.megaMinSeconds.get()
         val max = SanctuaryConfig.megaMaxSeconds.get().coerceAtLeast(min)
         val seconds = min + level.random.nextInt(max - min + 1)
