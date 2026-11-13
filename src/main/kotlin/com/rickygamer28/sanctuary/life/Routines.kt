@@ -47,6 +47,22 @@ object Routines {
             return false
         }
         r.napSpot = null
+        // ---- a short doze in the daytime (laid-back ones and night owls especially)
+        if (r.dozeUntil > 0) {
+            if (now < r.dozeUntil && !night) { keepAsleep(r); return true }
+            r.dozeUntil = 0
+            wake(r)
+            return false
+        }
+        if (!night && !r.swimmer && r.entity.onGround()) {
+            val rate = (5000 / (r.personality.doze * if (owl) 3.0 else 1.0)).toInt().coerceAtLeast(200)
+            if (level.random.nextInt(rate) == 0) {
+                r.dozeUntil = now + 20L * (25 + level.random.nextInt(40))
+                Residents.stop(r.entity)
+                keepAsleep(r)
+                return true
+            }
+        }
         // ---- a meal at a berry tree (daytime)
         val snack = r.snackSpot
         if (snack != null) {
@@ -57,7 +73,12 @@ object Routines {
             }
             return true
         }
-        if (!night && !r.swimmer && level.random.nextInt(1500) == 0) planMeal(level, s, rt, r, now)
+        if (!night && !r.swimmer && level.random.nextInt((1500 / r.personality.appetite).toInt().coerceAtLeast(100)) == 0) planMeal(level, s, rt, r, now)
+        // ---- a visit to one of the biome's spots: a log, a rock, a pool, a campfire… (owls go at night)
+        if (PropVisits.going(level, s, rt, r, now)) return true
+        if ((!night || owl) && !r.swimmer && r.snackSpot == null &&
+            level.random.nextInt((420 / r.personality.props).toInt().coerceAtLeast(60)) == 0 &&
+            PropVisits.plan(level, s, rt, r, now)) return true
         return false
     }
 
@@ -80,8 +101,10 @@ object Routines {
             Effects.hearts(r.entity); Effects.hearts(friend.entity)
             if (level.random.nextInt(8) == 0) s.logEvent("${r.name} and ${friend.name} curled up together for the night.")
         } else if (level.random.nextInt(3) == 0) {
-            r.napSpot = r.entity.blockPosition()
-            r.napGoalUntil = now
+            // alone: a soft spot nearby if there is one (a mossy mound, a snow pile, a picnic blanket…)
+            val bed = PropVisits.bedNear(level, s, rt, r, r.entity.blockPosition())
+            r.napSpot = bed ?: r.entity.blockPosition()
+            r.napGoalUntil = if (bed != null) now + 20L * 30 else now
         }
     }
 
@@ -96,7 +119,7 @@ object Routines {
      * Cobblemon puts a drowsy Pokémon with nowhere to walk to sleep by itself (with its real sleeping pose), if its
      * species sleeps and likes the spot; otherwise it just rests there quietly.
      */
-    private fun keepAsleep(r: LiveResident) {
+    fun keepAsleep(r: LiveResident) {
         val brain = r.entity.brain
         brain.eraseMemory(MemoryModuleType.WALK_TARGET)
         runCatching { brain.setMemory(CobblemonMemories.POKEMON_DROWSY, true) }
@@ -135,7 +158,7 @@ object Routines {
         if (!level.isLoaded(spot)) return
         if (!isBerryTree(level, spot)) { s.berrySpots.remove(spot.asLong()); return }
         val group = listOf(r) + rt.live.values.filter {
-            it !== r && it.snackSpot == null && !it.napping && !it.swimmer && now >= it.busyUntil &&
+            it !== r && it.snackSpot == null && it.propSpot == null && it.dozeUntil == 0L && !it.napping && !it.swimmer && now >= it.busyUntil &&
                 it.entity.distanceToSqr(r.entity) < 14.0 * 14.0 && s.relation(r.pokemonId, it.pokemonId) >= 0
         }.shuffled().take(2)
         group.forEachIndexed { i, m ->
@@ -152,6 +175,9 @@ object Routines {
         Residents.stop(r.entity)
         r.entity.lookControl.setLookAt(spot.x + 0.5, spot.y + 0.5, spot.z + 0.5)
         Effects.play(r.entity, listOf("eat", "status", "cry"))
+        // the tree itself can become its favourite spot
+        val tree = s.berrySpots.asSequence().map { BlockPos.of(it) }.firstOrNull { it.closerThan(spot, 3.5) }
+        if (tree != null) com.rickygamer28.sanctuary.world.Props.KINDS["berry_tree"]?.let { PropVisits.considerFavourite(level, s, r, tree, it) }
         val st = level.getBlockState(spot)
         val item = st.block.asItem().takeIf { it != Items.AIR } ?: Items.SWEET_BERRIES
         level.sendParticles(ItemParticleOption(ParticleTypes.ITEM, ItemStack(item)), r.entity.x, r.entity.y + r.entity.bbHeight * 0.8, r.entity.z, 8, 0.2, 0.1, 0.2, 0.05)

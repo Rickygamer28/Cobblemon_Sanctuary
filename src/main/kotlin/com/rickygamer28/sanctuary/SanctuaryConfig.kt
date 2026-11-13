@@ -144,6 +144,26 @@ object SanctuaryConfig {
         .comment("Seconds per egg cycle in an Incubator.")
         .defineInRange("incubatorSecondsPerCycle", 12, 1, 3600)
 
+    // ---- growing up in the sanctuary
+    val friendshipGrowthMinutes: ModConfigSpec.IntValue = builder
+        .comment("Every this many minutes, every Pokémon living in the sanctuary grows a little fonder of its trainer (0 = off).")
+        .defineInRange("friendshipGrowthMinutes", 5, 0, 1440)
+    val friendshipGrowthPoints: ModConfigSpec.IntValue = builder
+        .comment("Friendship points gained each time (Pokémon friendship goes up to 255; friendship evolutions need 160).")
+        .defineInRange("friendshipGrowthPoints", 2, 0, 255)
+    val playFightXp: ModConfigSpec.BooleanValue = builder
+        .comment("Residents gain a little experience from play-fights.")
+        .define("playFightXp", true)
+    val playFightXpRate: ModConfigSpec.DoubleValue = builder
+        .comment("Experience per play-fight is about (5 + level) × this.")
+        .defineInRange("playFightXpRate", 1.0, 0.0, 100.0)
+    val playFightXpMaxLevel: ModConfigSpec.IntValue = builder
+        .comment("Residents stop gaining experience from play-fights at this level.")
+        .defineInRange("playFightXpMaxLevel", 100, 1, 100)
+    val personalities: ModConfigSpec.BooleanValue = builder
+        .comment("Residents behave according to their nature (playful, bold, gentle, laid-back, shy or curious).")
+        .define("personalities", true)
+
     val maxSanctuariesPerPlayer: ModConfigSpec.IntValue = builder
         .comment("How many sanctuaries one player can own or belong to.")
         .defineInRange("maxSanctuariesPerPlayer", 1, 1, 16)

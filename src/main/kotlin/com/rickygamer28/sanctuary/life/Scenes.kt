@@ -41,7 +41,7 @@ object Scenes {
         val baseChance = SanctuaryConfig.meetingChance.get()
         val night = Routines.isNight(level)
         val free = rt.live.values.filter {
-            !it.napping && it.napSpot == null && it.snackSpot == null &&
+            !it.napping && it.napSpot == null && it.snackSpot == null && it.propSpot == null && it.dozeUntil == 0L &&
             now >= it.busyUntil && now >= it.nextMeetAt && !it.migrating && it.waypoints.isEmpty() &&
                 !it.entity.isRemoved && !Residents.isSleeping(it.entity) && it.entity.onGround()
         }
@@ -55,20 +55,28 @@ object Scenes {
                 if (a.entity.distanceToSqr(b.entity) > 4.5 * 4.5) continue
                 // night owls (Ghost, Dark) are livelier at night, everyone else by day
                 val owls = Routines.nocturnal(a) && Routines.nocturnal(b)
-                val chance = baseChance * if (night) (if (owls) 2.0 else 0.25) else (if (owls) 0.5 else 1.0)
+                val social = Math.sqrt(a.personality.meet * b.personality.meet)
+                val chance = baseChance * social * if (night) (if (owls) 2.0 else 0.25) else (if (owls) 0.5 else 1.0)
                 if (level.random.nextDouble() > chance) continue
                 val rel = firstImpression(s, a, b, level)
-                val roll = level.random.nextDouble()
-                val kind = when {
-                    rel <= -30 -> Kind.STANDOFF
-                    rel >= 40 -> if (roll < 0.35) Kind.PLAY_FIGHT else if (roll < 0.6) Kind.NUZZLE else if (roll < 0.8) Kind.TAG else Kind.GREET
-                    else -> if (roll < 0.45) Kind.GREET else if (roll < 0.8) Kind.PLAY_FIGHT else Kind.TAG
-                }
+                // what they do depends on how well they know each other, and on both their personalities
+                val fight = (a.personality.fight + b.personality.fight) / 2
+                val tag = (a.personality.tag + b.personality.tag) / 2
+                val love = (a.personality.affection + b.personality.affection) / 2
+                val kind = if (rel <= -30) Kind.STANDOFF else pickKind(level,
+                    if (rel >= 40) listOf(Kind.PLAY_FIGHT to 0.35 * fight, Kind.NUZZLE to 0.25 * love, Kind.TAG to 0.2 * tag, Kind.GREET to 0.2)
+                    else listOf(Kind.GREET to 0.45 * love, Kind.PLAY_FIGHT to 0.35 * fight, Kind.TAG to 0.2 * tag))
                 start(level, s, rt, a, b, kind, now)
                 used += a; used += b
                 break
             }
         }
+    }
+
+    private fun pickKind(level: ServerLevel, weights: List<Pair<Kind, Double>>): Kind {
+        var roll = level.random.nextDouble() * weights.sumOf { it.second }
+        for ((k, w) in weights) { roll -= w; if (roll <= 0) return k }
+        return weights.last().first
     }
 
     private fun firstImpression(s: Sanctuary, a: LiveResident, b: LiveResident, level: ServerLevel): Int {
@@ -92,7 +100,8 @@ object Scenes {
     fun start(level: ServerLevel, s: Sanctuary, rt: SanctuaryRuntime, a: LiveResident, b: LiveResident, kind: Kind, now: Long) {
         val steps = ArrayList<Pair<Int, (Scene) -> Unit>>()
         val r = level.random
-        val friendRate = SanctuaryConfig.friendshipRate.get()
+        // gentle ones make friends faster
+        val friendRate = SanctuaryConfig.friendshipRate.get() * (a.personality.affection + b.personality.affection) / 2
         val rivalRate = SanctuaryConfig.rivalryRate.get()
         fun change(delta: Double) = { _: Scene -> relate(s, a, b, delta.roundToInt()) }
 
@@ -138,6 +147,8 @@ object Scenes {
                     } else {
                         Effects.happy(a.entity); Effects.happy(b.entity)
                         relate(s, scene.a, scene.b, (5 * friendRate).roundToInt())
+                        Growth.playFightXp(s, scene.a)
+                        Growth.playFightXp(s, scene.b)
                         if (r.nextInt(6) == 0) s.logEvent("${a.name} and ${b.name} play-fought in the ${Residents.zoneName(zoneOf(s, a))}.")
                     }
                 }

@@ -733,7 +733,7 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
         when (detailTab) {
             "stats" -> statsTab(g, d, rx + 8, by + 7, rw - 16)
             "moves" -> movesTab(g, d, rx + 8, by + 7, rw - 16)
-            else -> infoTab(g, d, rx + 8, by + 7, rw - 16, bottom - by - 10)
+            else -> infoTab(g, d, rx + 8, by + 7, rw - 16, bottom - by - 10, mx, my)
         }
 
         // actions
@@ -776,7 +776,7 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
         }
     }
 
-    private fun infoTab(g: GuiGraphics, d: CompoundTag, x: Int, y: Int, w: Int, h: Int) {
+    private fun infoTab(g: GuiGraphics, d: CompoundTag, x: Int, y: Int, w: Int, h: Int, mx: Int, my: Int) {
         var ly = y
         fun row(label: String, value: String, c: Int = TEXT) {
             text(g, label, x, ly, SUB)
@@ -787,8 +787,11 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
         row("Home", zoneName(home), opaque(color(home)))
         row("Trainer", d.getString("tr"))
         row("Status", if (d.getBoolean("o")) "Out in the valley" else "Resting somewhere", if (d.getBoolean("o")) GOOD else DIM)
-        row("Nature", Component.translatable(d.getString("nature")).string)
+        val pers = d.getString("pers")
+        row("Nature", Component.translatable(d.getString("nature")).string + if (pers.isNotEmpty()) " · $pers" else "")
+        if (pers.isNotEmpty() && over(mx, my, x, ly - 12, w, 12)) tooltip = listOf(Component.literal(pers), Component.literal(d.getString("persB")).withStyle(net.minecraft.ChatFormatting.GRAY))
         row("Ability", Component.translatable("cobblemon.ability.${d.getString("ability")}").string)
+        row("Favourite", if (d.contains("fav")) d.getString("fav") else "hasn't picked a spot yet", if (d.contains("fav")) 0xFFE8C46A.toInt() else DIM)
         val f = d.getInt("friendship")
         text(g, "Friendship", x, ly, SUB)
         bar(g, x + 70, ly + 1, w - 110, 6, f / 255.0, 0xFFF07CB4.toInt())

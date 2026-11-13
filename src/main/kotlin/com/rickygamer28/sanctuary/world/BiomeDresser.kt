@@ -265,7 +265,7 @@ object BiomeDresser {
         Blocks.MUD_BRICKS, Blocks.POLISHED_BLACKSTONE_BRICKS, Blocks.POLISHED_BLACKSTONE, Blocks.POLISHED_DEEPSLATE,
         Blocks.DEEPSLATE_BRICKS, Blocks.CUT_SANDSTONE, Blocks.CHISELED_SANDSTONE, Blocks.POLISHED_DIORITE,
         Blocks.BRAIN_CORAL_BLOCK, Blocks.TUBE_CORAL_BLOCK, Blocks.FIRE_CORAL_BLOCK, Blocks.HORN_CORAL_BLOCK, Blocks.BUBBLE_CORAL_BLOCK,
-    )
+    ) + Props.GROUND_BLOCKS
 
     /**
      * Small decorations the sanctuary places (lamp posts, gravestones, dummies, rods, chimneys…). When the valley is
@@ -277,7 +277,7 @@ object BiomeDresser {
         Blocks.COBBLED_DEEPSLATE_WALL, Blocks.STONE_BUTTON, Blocks.END_ROD, Blocks.LIGHTNING_ROD, Blocks.IRON_BARS,
         Blocks.HAY_BLOCK, Blocks.CARVED_PUMPKIN, Blocks.JACK_O_LANTERN, Blocks.TARGET, Blocks.REDSTONE_LAMP,
         Blocks.CHIPPED_ANVIL, Blocks.DAMAGED_ANVIL, Blocks.BRICKS, Blocks.PURPUR_PILLAR, Blocks.WITHER_ROSE,
-    )
+    ) + Props.DECOR_BLOCKS
 
     // ================================================================== Cobblemon's own plants and crystals
 
@@ -462,9 +462,13 @@ object BiomeDresser {
                 2 -> Math.pow(ridge(s, wx, wz, 60.0, 31, 2), 1.5) * 14 - 1
                 else -> smooth((f01(s, wx, wz, 56.0, 32, 2) - 0.45) / 0.16) * 8 + f(s, xd, zd, 24.0, 33, 2) * 1.0
             }
-            "rock" -> when (variant) {
-                2 -> Math.pow(ridge(s, wx, wz, 56.0, 34, 2), 1.4) * 12 + f(s, xd, zd, 22.0, 35, 2) * 1.5
-                else -> Math.pow(ridge(s, wx, wz, 64.0, 36, 3), 1.5) * 24 + f(s, xd, zd, 26.0, 37, 2) * 3 - 2
+            "rock" -> {
+                // rolling stony hills; real crags only rise in a few parts, with rocky knolls (tors) dotted around
+                val hills = f(s, wx, wz, 64.0, 34, 3) * 3.2 + 2.0
+                val cragField = smooth((f01(s, xd, zd, 120.0, 35, 2) - (if (variant == 1) 0.64 else 0.56)) / 0.2)
+                val crag = Math.pow(ridge(s, wx, wz, 48.0, 36, 2), 1.6) * (if (variant == 2) 10.0 else 15.0) * cragField
+                val tors = smooth((f01(s, wx, wz, 14.0, 37, 2) - 0.8) / 0.1) * 3.0 * (1 - cragField)
+                hills + crag + tors
             }
             "fighting" -> if (variant == 2) softTerrace(smooth((f01(s, wx, wz, 70.0, 38, 2) - 0.35) / 0.35) * 12, 6)
                 else f(s, wx, wz, 50.0, 40, 3) * 2.2 + 0.5
@@ -647,7 +651,21 @@ object BiomeDresser {
             "ice" -> ice(ctx)
             else -> custom(ctx, zone)
         }
+        // a spot residents like to visit: a log, a rock, a pool, a campfire…
+        Props.place(ctx, zone, ring) { px, pz -> pathAt(s, px, pz, ring) }
         return true
+    }
+
+    /** A route, or one of the hub's paths, runs through (x, z). */
+    private fun pathAt(s: Sanctuary, x: Int, z: Int, ring: List<String>): Boolean {
+        val hit = ZoneLayout.locate(s, x, z, ring) ?: return true
+        if (hit.zone == ZoneLayout.HUB) {
+            val dx = x - s.center.x
+            val dz = z - s.center.z
+            val hubR = s.size.hubRadius
+            return hit.dist in (hubR - 9.0)..(hubR - 2.0) || ((abs(dx) <= 2 || abs(dz) <= 2) && hit.dist > 5)
+        }
+        return onRoute(s, hit, x, z, ring)
     }
 
     /**
@@ -1052,12 +1070,23 @@ object BiomeDresser {
             return
         }
         val soft = if (c.variant == 1) b(Blocks.MOSS_BLOCK) else b(Blocks.COBBLESTONE)
-        c.ground(if (steep) c.patch(5.0, 3, b(Blocks.STONE), b(Blocks.ANDESITE)) else c.patch(11.0, 4, b(Blocks.STONE), b(Blocks.ANDESITE), b(Blocks.GRAVEL), b(Blocks.STONE), soft), b(Blocks.STONE))
+        // stony ground with patches of tough grass in the low parts; bare rock on the crags
+        val grassy = !steep && c.y <= G + 4
+        val top = when {
+            steep -> c.patch(5.0, 3, b(Blocks.STONE), b(Blocks.ANDESITE))
+            grassy -> c.patch(13.0, 4, b(Blocks.GRASS_BLOCK), b(Blocks.STONE), b(Blocks.GRASS_BLOCK), b(Blocks.GRAVEL), b(Blocks.GRASS_BLOCK), soft, b(Blocks.ANDESITE))
+            else -> c.patch(11.0, 4, b(Blocks.STONE), b(Blocks.ANDESITE), b(Blocks.GRAVEL), b(Blocks.STONE), soft)
+        }
+        c.ground(top, if (top.`is`(Blocks.GRASS_BLOCK)) b(Blocks.DIRT) else b(Blocks.STONE))
+        val onGrass = top.`is`(Blocks.GRASS_BLOCK)
         when {
-            c.grid(9, 5) && c.roomy() -> c.feature(MiscOverworldFeatures.FOREST_ROCK, 3, 5)
-            c.variant == 0 && c.grid(19, 6) && c.roomy(8) -> c.crystalCluster(b(Blocks.STONE), null, 4 + c.random.nextInt(5))
-            c.variant == 1 && c.grid(7, 7) && c.roomy() -> c.boulder(b(Blocks.COBBLESTONE), b(Blocks.MOSSY_COBBLESTONE), 1 + c.random.nextInt(2))
-            !steep && c.chance(0.05) -> c.place(b(Blocks.SHORT_GRASS))
+            c.grid(13, 5) && c.roomy() -> c.feature(MiscOverworldFeatures.FOREST_ROCK, 3, 5)
+            c.variant == 0 && c.grid(29, 6) && c.roomy(8) && !grassy -> c.crystalCluster(b(Blocks.STONE), null, 3 + c.random.nextInt(4))
+            c.variant == 1 && c.grid(9, 7) && c.roomy() -> c.boulder(b(Blocks.COBBLESTONE), b(Blocks.MOSSY_COBBLESTONE), 1 + c.random.nextInt(2))
+            onGrass && c.grid(31, 8) && c.roomy(6) -> c.feature(TreeFeatures.SPRUCE)
+            onGrass && c.chance(0.18) -> c.place(b(Blocks.SHORT_GRASS))
+            onGrass && c.chance(0.015) -> c.place(c.pick(b(Blocks.DANDELION), b(Blocks.AZURE_BLUET)))
+            !steep && c.chance(0.04) -> c.place(b(Blocks.SHORT_GRASS))
         }
     }
 

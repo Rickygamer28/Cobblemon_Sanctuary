@@ -47,6 +47,7 @@ object Behaviour {
             val e = r.entity
             if (e.isRemoved) continue
             if (r.swimmer) { swim(level, s, rt, r, now); continue }
+            if (PropVisits.tickActivity(level, s, rt, r, now)) continue
             if (now < r.busyUntil) continue
             if (Routines.tick(level, s, rt, r, now)) continue
 
@@ -92,9 +93,10 @@ object Behaviour {
             }
 
             if (Residents.isSleeping(e)) continue
+            if (PropVisits.shyness(level, s, rt, r, now)) continue
 
             // explore the whole biome now and then, not just the area around the spawn point
-            if (random.nextInt(45) == 0 && !e.brain.hasMemoryValue(MemoryModuleType.WALK_TARGET)) {
+            if (random.nextInt((45 / r.personality.explore).toInt().coerceAtLeast(12)) == 0 && !e.brain.hasMemoryValue(MemoryModuleType.WALK_TARGET)) {
                 val zone = r.visitZone ?: r.home ?: ZoneLayout.HUB
                 walkToZone(level, s, r, zone)
                 continue
@@ -168,7 +170,8 @@ object Behaviour {
         val random = level.random
         if (Routines.isNight(level)) return // flocks rest at night
         val byZone = rt.live.values.filter {
-            it.flyer && !it.migrating && !it.swimmer && !it.napping && it.napSpot == null && it.snackSpot == null && now >= it.busyUntil && it.home != null
+            it.flyer && !it.migrating && !it.swimmer && !it.napping && it.napSpot == null && it.snackSpot == null && it.propSpot == null &&
+                it.dozeUntil == 0L && now >= it.busyUntil && it.home != null
         }.groupBy { it.home!! }
         for ((zone, flock) in byZone) {
             if (random.nextInt(if (flock.size >= 2) 400 else 1200) != 0) continue

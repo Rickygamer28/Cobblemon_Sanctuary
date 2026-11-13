@@ -2,3 +2,5 @@
 com/cobblemon/mod/common/entity/pokemon/ai/tasks/GoToSleepTask*.class
 com/cobblemon/mod/common/entity/pokemon/ai/tasks/WakeUpTask*.class
 com/cobblemon/mod/common/entity/pokemon/PokemonEntity.class
+com/cobblemon/mod/common/pokemon/Pokemon.class
+com/cobblemon/mod/common/pokemon/evolution/variants/LevelUpEvolution*.class

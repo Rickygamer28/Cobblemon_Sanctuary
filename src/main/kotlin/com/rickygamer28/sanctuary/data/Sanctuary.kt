@@ -38,6 +38,9 @@ class ResidentData(
     var lastFeed: Long = 0L,
     /** The tethering the sanctuary last gave this Pokémon, to recognise it if it's left behind after a crash. */
     var tether: UUID? = null,
+    /** Its favourite spot in the valley (a log, rock, pool… or a berry tree) and what it is. */
+    var favourite: Long? = null,
+    var favouriteKind: String? = null,
 ) {
     fun save(): CompoundTag = CompoundTag().also { t ->
         tether?.let { t.putUUID("Tether", it) }
@@ -46,6 +49,8 @@ class ResidentData(
         t.putLong("Pet", lastPet)
         t.putLong("Play", lastPlay)
         t.putLong("Feed", lastFeed)
+        favourite?.let { t.putLong("Fav", it) }
+        favouriteKind?.let { t.putString("FavKind", it) }
     }
 
     companion object {
@@ -56,6 +61,8 @@ class ResidentData(
             lastPlay = t.getLong("Play"),
             lastFeed = t.getLong("Feed"),
             tether = if (t.hasUUID("Tether")) t.getUUID("Tether") else null,
+            favourite = if (t.contains("Fav")) t.getLong("Fav") else null,
+            favouriteKind = if (t.contains("FavKind")) t.getString("FavKind") else null,
         )
     }
 }
@@ -154,6 +161,9 @@ class Sanctuary(
     /** Berry trees in the valley, where residents meet for a meal. */
     val berrySpots: MutableSet<Long> = linkedSetOf()
 
+    /** Logs, rocks, pools, campfires… placed around the biomes for residents to visit (position → kind). */
+    val props: MutableMap<Long, String> = linkedMapOf()
+
     /** Biome variant chosen per type for this sanctuary. */
     val variants: MutableMap<String, Int> = mutableMapOf()
 
@@ -172,6 +182,7 @@ class Sanctuary(
         dressed = BitSet()
         meadow = BitSet()
         berrySpots.clear()
+        props.clear()
         needsCheck = true
         generationDirty = true
     }
@@ -218,6 +229,8 @@ class Sanctuary(
         }
         basketPos?.let { t.putLong("BasketPos", it.asLong()) }
         t.putLongArray("BerrySpots", berrySpots.toLongArray())
+        t.putLongArray("PropPos", props.keys.toLongArray())
+        t.put("PropKind", ListTag().also { l -> props.values.forEach { l.add(net.minecraft.nbt.StringTag.valueOf(it)) } })
         t.putUUID("Id", id)
         t.putUUID("Owner", owner)
         t.putString("OwnerName", ownerName)
@@ -280,7 +293,7 @@ class Sanctuary(
 
     companion object {
         /** Bump to make existing sanctuaries rebuild their biomes after a generator change. */
-        const val DATA_VERSION = 11
+        const val DATA_VERSION = 12
 
         fun key(a: UUID, b: UUID): String = if (a < b) "$a|$b" else "$b|$a"
 
@@ -303,6 +316,11 @@ class Sanctuary(
             }
             if (t.contains("BasketPos")) s.basketPos = BlockPos.of(t.getLong("BasketPos"))
             t.getLongArray("BerrySpots").forEach { s.berrySpots += it }
+            run {
+                val pos = t.getLongArray("PropPos")
+                val kinds = t.getList("PropKind", Tag.TAG_STRING.toInt())
+                for (i in pos.indices) if (i < kinds.size) s.props[pos[i]] = kinds.getString(i)
+            }
             if (t.contains("PortalPos")) s.portalPos = BlockPos.of(t.getLong("PortalPos"))
             t.getList("Members", Tag.TAG_COMPOUND.toInt()).forEach { e ->
                 val c = e as CompoundTag
@@ -349,6 +367,7 @@ class Sanctuary(
             st.allKeys.forEach { k -> s.staleLandmarks[k] = st.getLong(k) }
             if (version < DATA_VERSION && version > 0 && !onlyWater) {
                 s.berrySpots.clear()
+                s.props.clear()
                 // the terrain is being rebuilt: landmarks get rebuilt on the new ground too
                 s.landmarks.forEach { (k, v) -> if (v != Long.MIN_VALUE) s.staleLandmarks[k] = v }
                 s.landmarks.clear()

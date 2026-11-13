@@ -58,6 +58,20 @@ class LiveResident(
     var swimmer = false
     /** When a swimmer was first seen out of the water (0 = in the water). */
     var strandedSince = 0L
+    /** How it behaves, from its nature. */
+    var personality = Personality.NEUTRAL
+    /** Heading to a spot (a log, a pool…), and what it's doing there once it arrives. */
+    var propSpot: BlockPos? = null
+    var propStand: BlockPos? = null
+    var propKind: String? = null
+    var propUntil = 0L
+    var activityKind: String? = null
+    var activityAt: BlockPos? = null
+    var activityUntil = 0L
+    /** A short daytime doze (laid-back Pokémon especially). */
+    var dozeUntil = 0L
+    /** Last time a visit made it fonder of its trainer. */
+    var lastFondAt = -100000L
     val pokemon: Pokemon get() = entity.pokemon
     val name get() = entity.pokemon.getDisplayName(false).string
 }
@@ -109,6 +123,7 @@ object Residents {
         if (rt.rosterDirty || now - rt.rosterAt > 200) refreshRoster(level, s, rt, now)
         cleanUp(rt)
         Gathering.tick(level, s, rt, now)
+        Growth.tick(level, s, rt, now)
         if (players.isEmpty()) {
             despawnAll(rt)
             rt.hadPlayers = false
@@ -310,6 +325,7 @@ object Residents {
         live.second = TypeLogic.secondZone(pokemon, home)
         live.flyer = TypeLogic.canFlyInFlocks(pokemon)
         live.swimmer = swimmer
+        live.personality = Personality.of(pokemon)
         live.nextMeetAt = level.gameTime + 200 + level.random.nextInt(400)
         tethering.roamCheck = { p -> Behaviour.canRoam(s, rt, live, p) }
         rt.live[pokemon.uuid] = live

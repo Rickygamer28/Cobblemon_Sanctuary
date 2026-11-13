@@ -227,6 +227,8 @@ object SanctuaryGuis {
         t.putInt("friendship", pk.friendship)
         t.putString("nature", runCatching { pk.nature.displayName }.getOrDefault(""))
         t.putString("ability", runCatching { pk.ability.name }.getOrDefault(""))
+        com.rickygamer28.sanctuary.life.Personality.of(pk).let { p -> t.putString("pers", p.label); t.putString("persB", p.blurb) }
+        com.rickygamer28.sanctuary.life.PropVisits.describe(s, s.residents[id])?.let { t.putString("fav", it) }
         t.putInt("hpNow", pk.currentHealth)
         val stats = listOf(Stats.HP, Stats.ATTACK, Stats.DEFENCE, Stats.SPECIAL_ATTACK, Stats.SPECIAL_DEFENCE, Stats.SPEED)
         t.putIntArray("stats", intArrayOf(pk.maxHealth, pk.attack, pk.defence, pk.specialAttack, pk.specialDefence, pk.speed))
