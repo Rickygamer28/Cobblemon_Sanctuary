@@ -14,6 +14,15 @@ object ColumnOrder {
     val dx: IntArray
     val dz: IntArray
     private val distSq: IntArray
+    private val reverse: IntArray
+    private val side = SanctuarySize.MAX_RADIUS * 2 + 1
+
+    /** Index of the column at offset (dx, dz) from the centre, or -1 if outside the largest sanctuary. */
+    fun indexOf(dx: Int, dz: Int): Int {
+        val r = SanctuarySize.MAX_RADIUS
+        if (dx < -r || dx > r || dz < -r || dz > r) return -1
+        return reverse[(dx + r) * side + (dz + r)]
+    }
 
     init {
         val r = SanctuarySize.MAX_RADIUS
@@ -26,6 +35,8 @@ object ColumnOrder {
         dx = IntArray(list.size) { list[it][0] }
         dz = IntArray(list.size) { list[it][1] }
         distSq = IntArray(list.size) { list[it][2] }
+        reverse = IntArray(side * side) { -1 }
+        for (i in dx.indices) reverse[(dx[i] + r) * side + (dz[i] + r)] = i
     }
 
     /** Number of columns within [radius]. */

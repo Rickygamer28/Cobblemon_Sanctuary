@@ -72,7 +72,7 @@ object BiomeDresser {
 
     /** Dresses one column. Returns false if the column can't be dressed right now. */
     fun dress(level: ServerLevel, s: Sanctuary, x: Int, z: Int, hit: ZoneLayout.Hit, ring: List<String>): Boolean {
-        val surface = findGround(level, x, z) ?: return true
+        val surface = findGround(level, s, x, z) ?: return true
         var state = level.getBlockState(surface)
         val random = RandomSource.create(s.seed xor (x * 341873128712L) xor (z * 132897987541L))
 
@@ -126,7 +126,7 @@ object BiomeDresser {
      * The ground of a column, below trees and plants. Natural trees (logs with natural leaves attached)
      * are cleared on the way down; anything else on top (player builds) makes the column be skipped.
      */
-    private fun findGround(level: ServerLevel, x: Int, z: Int): BlockPos? {
+    private fun findGround(level: ServerLevel, s: Sanctuary, x: Int, z: Int): BlockPos? {
         val top = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, x, z) - 1
         var p = BlockPos(x, top, z)
         var guard = 0
@@ -139,7 +139,7 @@ object BiomeDresser {
                     p = p.below()
                 }
                 st.`is`(BlockTags.LOGS) -> {
-                    if (!SanctuaryConfig.clearTrees.get() || !removeTree(level, p)) return null
+                    if (!SanctuaryConfig.clearTrees.get() || !removeTree(level, s, p)) return null
                 }
                 st.fluidState.isEmpty && st.canBeReplaced() -> p = p.below()
                 st.`is`(Blocks.SNOW) || st.`is`(Blocks.VINE) || st.`is`(Blocks.BAMBOO) || st.`is`(Blocks.SUGAR_CANE) || st.`is`(Blocks.CACTUS) || st.`is`(BlockTags.FLOWERS) || st.`is`(BlockTags.SAPLINGS) -> p = p.below()
@@ -154,7 +154,7 @@ object BiomeDresser {
     }
 
     /** Removes a natural tree (connected logs + non-persistent leaves). Returns false if it isn't a natural tree. */
-    private fun removeTree(level: ServerLevel, start: BlockPos): Boolean {
+    private fun removeTree(level: ServerLevel, s: Sanctuary, start: BlockPos): Boolean {
         val seen = HashSet<BlockPos>()
         val queue = ArrayDeque<BlockPos>()
         queue += start
@@ -174,6 +174,10 @@ object BiomeDresser {
             }
         }
         if (!naturalLeaves) return false
+        // keep trees the sanctuary planted itself (their base column is already dressed) and trees rooted outside
+        val base = seen.filter { level.getBlockState(it).`is`(BlockTags.LOGS) }.minByOrNull { it.y } ?: start
+        val idx = ColumnOrder.indexOf(base.x - s.center.x, base.z - s.center.z)
+        if (idx < 0 || idx >= ColumnOrder.countWithin(s.size.radius) || s.dressed.get(idx)) return false
         val air = Blocks.AIR.defaultBlockState()
         for (p in seen) level.setBlock(p, air, FLAGS)
         return true
