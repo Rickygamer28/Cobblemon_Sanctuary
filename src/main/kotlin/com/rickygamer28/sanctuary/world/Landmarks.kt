@@ -57,11 +57,11 @@ object Landmarks {
     fun tick(level: ServerLevel, s: Sanctuary) {
         fixVolcano(s)
         val ring = ZoneLayout.ring()
+        if (relocate(level, s, ring)) return
         for (zone in ring) {
             if (zone !in s.unlocked || s.landmarks.containsKey(zone)) continue
             val (ax, az) = ZoneLayout.anchor(s, zone, ring)
-            val loaded = listOf(-RADIUS, RADIUS).all { dx -> listOf(-RADIUS, RADIUS).all { dz -> level.hasChunk((ax + dx) shr 4, (az + dz) shr 4) } }
-            if (!loaded) continue
+            if (!loadedAround(level, ax, az, RADIUS + 2)) continue
             val variant = BiomeDresser.variantOf(s, zone)
             val base = BlockPos(ax, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, ax, az) - 1, az)
             val random = RandomSource.create(s.seed xor zone.hashCode().toLong())
@@ -87,6 +87,47 @@ object Landmarks {
             if (idx >= 0) s.dressed.clear(idx)
         }
         s.generationDirty = true
+    }
+
+    private fun loadedAround(level: ServerLevel, x: Int, z: Int, r: Int) =
+        listOf(-r, r).all { dx -> listOf(-r, r).all { dz -> level.hasChunk((x + dx) shr 4, (z + dz) shr 4) } }
+
+    /**
+     * When the valley grows, the middle of every biome moves outwards. A landmark left at the old spot would keep
+     * its old ground (it's protected from reshaping), so it ends up on a pillar or in a pit: take it down,
+     * let the builder reshape the spot, and build it again in the new middle of its biome.
+     */
+    private fun relocate(level: ServerLevel, s: Sanctuary, ring: List<String>): Boolean {
+        for ((zone, packed) in s.landmarks.toList()) {
+            if (packed == NONE) continue
+            val p = BlockPos.of(packed)
+            val (ax, az) = ZoneLayout.anchor(s, zone, ring)
+            val dx = (p.x - ax).toDouble()
+            val dz = (p.z - az).toDouble()
+            if (zone in ring && dx * dx + dz * dz <= 12.0 * 12.0) continue
+            val r = RADIUS + 2
+            if (!loadedAround(level, p.x, p.z, r)) continue
+            // take down everything built above the landmark's floor, and turn the floor back into plain ground
+            for (ox in -r..r) for (oz in -r..r) {
+                if (ox * ox + oz * oz > r * r) continue
+                for (y in p.y + 1..p.y + 28) {
+                    val pos = BlockPos(p.x + ox, y, p.z + oz)
+                    val st = level.getBlockState(pos)
+                    if (!st.isAir && !st.`is`(com.rickygamer28.sanctuary.registry.ModContent.EGG_NEST.get()) &&
+                        !st.`is`(com.rickygamer28.sanctuary.registry.ModContent.SANCTUARY_CORE.get())) level.setBlock(pos, b(Blocks.AIR), FLAGS)
+                }
+                val floor = BlockPos(p.x + ox, p.y, p.z + oz)
+                if (!BiomeDresser.isNatural(level.getBlockState(floor))) level.setBlock(floor, b(Blocks.STONE), FLAGS)
+            }
+            s.landmarks.remove(zone)
+            for (ox in -r - 2..r + 2) for (oz in -r - 2..r + 2) {
+                val idx = ColumnOrder.indexOf(p.x + ox - s.center.x, p.z + oz - s.center.z)
+                if (idx >= 0) { s.dressed.clear(idx); s.meadow.clear(idx) }
+            }
+            s.generationDirty = true
+            return true
+        }
+        return false
     }
 
     // ------------------------------------------------------------------ helpers

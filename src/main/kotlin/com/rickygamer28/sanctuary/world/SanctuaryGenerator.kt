@@ -62,8 +62,9 @@ object SanctuaryGenerator {
     private val cursors = HashMap<UUID, Int>()
     private val retryAt = HashMap<UUID, Long>()
     private val missedUnloaded = HashMap<UUID, Boolean>()
+    private val recheckMeadow = HashSet<UUID>()
 
-    fun forget(id: UUID) { cursors.remove(id); retryAt.remove(id); missedUnloaded.remove(id); BiomePainter.forget(id) }
+    fun forget(id: UUID) { recheckMeadow.remove(id); cursors.remove(id); retryAt.remove(id); missedUnloaded.remove(id); BiomePainter.forget(id) }
 
     fun isGrowing(s: Sanctuary) = s.generationDirty || cursors.containsKey(s.id)
 
@@ -99,7 +100,9 @@ object SanctuaryGenerator {
             s.generationDirty = false
             cursors[s.id] = 0
             missedUnloaded[s.id] = false
+            if (s.unlockedChanged) { s.unlockedChanged = false; recheckMeadow += s.id }
         }
+        val recheck = s.id in recheckMeadow
         val ring = ZoneLayout.ring()
         val total = total(s)
         val radius = s.size.radius
@@ -111,7 +114,8 @@ object SanctuaryGenerator {
             scanned++
             if ((scanned and 31) == 0 && System.nanoTime() > deadline) break
             val idx = i++
-            if (s.dressed.get(idx)) continue
+            val meadowDone = s.meadow.get(idx)
+            if (s.dressed.get(idx) && !(meadowDone && recheck)) continue
             val ox = ColumnOrder.dx[idx]
             val oz = ColumnOrder.dz[idx]
             val x = s.center.x + ox
@@ -119,20 +123,34 @@ object SanctuaryGenerator {
             val dist = sqrt((ox * ox + oz * oz).toDouble())
             val inside = dist <= radius
             val hit = if (inside) ZoneLayout.locate(s, x, z, ring) else null
-            // locked biomes stay a plain meadow until a Pokémon of their type moves in (the wall is always built)
-            if (inside && (hit == null || (hit.zone !in s.unlocked && dist <= radius - 1.6))) continue
+            if (inside && hit == null) continue
+            // a biome that hasn't woken up is a plain meadow until a Pokémon of its type moves in (the wall is always built)
+            val asleep = inside && hit!!.zone !in s.unlocked && dist <= radius - 1.6
+            if (meadowDone && s.dressed.get(idx)) {
+                if (asleep) continue // still asleep: stays a meadow
+                s.dressed.clear(idx); s.meadow.clear(idx) // it woke up: build the real biome here
+            }
             if (!level.hasChunk(x shr 4, z shr 4)) { missedUnloaded[s.id] = true; continue }
             val ok = try {
-                if (inside) BiomeDresser.dress(level, s, x, z, hit!!, ring) else BiomeDresser.dressRim(level, s, x, z, dist, ring)
+                when {
+                    !inside -> BiomeDresser.dressRim(level, s, x, z, dist, ring)
+                    asleep -> BiomeDresser.dressMeadow(level, s, x, z, hit!!, ring)
+                    else -> BiomeDresser.dress(level, s, x, z, hit!!, ring)
+                }
             } catch (e: Exception) {
                 CobblemonSanctuary.LOGGER.warn("Couldn't build column $x,$z", e)
                 true
             }
-            if (ok) { s.dressed.set(idx); BiomePainter.mark(s, x, z) } else missedUnloaded[s.id] = true
+            if (ok) {
+                s.dressed.set(idx)
+                if (asleep) s.meadow.set(idx) else s.meadow.clear(idx)
+                BiomePainter.mark(s, x, z)
+            } else missedUnloaded[s.id] = true
             budget--
         }
         if (i >= total) {
             cursors.remove(s.id)
+            recheckMeadow -= s.id
             if (missedUnloaded[s.id] == true) retryAt[s.id] = now + 600
             else if (s.oldWallRadius > 0) s.oldWallRadius = 0
         } else {

@@ -207,6 +207,22 @@ object BiomeDresser {
         Blocks.MOSS_BLOCK, Blocks.PURPUR_BLOCK, Blocks.QUARTZ_BLOCK, Blocks.BONE_BLOCK, Blocks.MAGMA_BLOCK, Blocks.PODZOL, Blocks.MYCELIUM,
         Blocks.ROOTED_DIRT, Blocks.COARSE_DIRT, Blocks.OBSIDIAN, Blocks.CRYING_OBSIDIAN, Blocks.WARPED_NYLIUM, Blocks.DRIPSTONE_BLOCK,
         Blocks.WEATHERED_COPPER, Blocks.OXIDIZED_COPPER, Blocks.EXPOSED_COPPER,
+        // route and landmark floors: they must count as ground too, or a rebuild leaves them (and a step) behind
+        Blocks.MUD_BRICKS, Blocks.POLISHED_BLACKSTONE_BRICKS, Blocks.POLISHED_BLACKSTONE, Blocks.POLISHED_DEEPSLATE,
+        Blocks.DEEPSLATE_BRICKS, Blocks.CUT_SANDSTONE, Blocks.CHISELED_SANDSTONE, Blocks.POLISHED_DIORITE,
+        Blocks.BRAIN_CORAL_BLOCK, Blocks.TUBE_CORAL_BLOCK, Blocks.FIRE_CORAL_BLOCK, Blocks.HORN_CORAL_BLOCK, Blocks.BUBBLE_CORAL_BLOCK,
+    )
+
+    /**
+     * Small decorations the sanctuary places (lamp posts, gravestones, dummies, rods, chimneys…). When the valley is
+     * rebuilt or grows, the layout shifts, so old ones are cleared instead of being left standing next to new ones.
+     */
+    private val DECOR: Set<Block> = setOf(
+        Blocks.OAK_FENCE, Blocks.SPRUCE_FENCE, Blocks.DARK_OAK_FENCE, Blocks.LANTERN, Blocks.SOUL_LANTERN,
+        Blocks.COBBLESTONE_WALL, Blocks.MOSSY_COBBLESTONE_WALL, Blocks.STONE_BRICK_WALL, Blocks.MOSSY_STONE_BRICK_WALL,
+        Blocks.COBBLED_DEEPSLATE_WALL, Blocks.STONE_BUTTON, Blocks.END_ROD, Blocks.LIGHTNING_ROD, Blocks.IRON_BARS,
+        Blocks.HAY_BLOCK, Blocks.CARVED_PUMPKIN, Blocks.JACK_O_LANTERN, Blocks.TARGET, Blocks.REDSTONE_LAMP,
+        Blocks.CHIPPED_ANVIL, Blocks.DAMAGED_ANVIL, Blocks.BRICKS, Blocks.PURPUR_PILLAR, Blocks.SHROOMLIGHT, Blocks.WITHER_ROSE,
     )
 
     fun isNatural(state: BlockState): Boolean =
@@ -223,7 +239,7 @@ object BiomeDresser {
     )
 
     private fun isClutter(st: BlockState): Boolean =
-        st.block in CLUTTER || st.`is`(BlockTags.FLOWERS) || st.`is`(BlockTags.SAPLINGS) || st.`is`(BlockTags.CORALS) ||
+        st.block in CLUTTER || st.block in DECOR || st.`is`(BlockTags.FLOWERS) || st.`is`(BlockTags.SAPLINGS) || st.`is`(BlockTags.CORALS) ||
             (st.fluidState.isEmpty && st.canBeReplaced() && !st.isAir)
 
     private fun naturalLeaf(st: BlockState) = st.`is`(BlockTags.LEAVES) && !st.getOptionalValue(LeavesBlock.PERSISTENT).orElse(true)
@@ -445,6 +461,25 @@ object BiomeDresser {
         "poison" -> b(Blocks.MUD_BRICKS) to b(Blocks.PACKED_MUD)
         "dark" -> b(Blocks.COARSE_DIRT) to b(Blocks.PODZOL)
         else -> b(Blocks.DIRT_PATH) to b(Blocks.COARSE_DIRT)
+    }
+
+    /**
+     * A biome that hasn't woken up yet (no resident of its type) is a plain meadow at ground level.
+     * Flattening it matters after the valley grows: otherwise the old mountains would stay inside it.
+     */
+    fun dressMeadow(level: ServerLevel, s: Sanctuary, x: Int, z: Int, hit: ZoneLayout.Hit, ring: List<String>): Boolean {
+        if (s.oldWallRadius in 1 until s.size.radius && abs(hit.dist - (s.oldWallRadius - 0.8)) < 1.6) clearWall(level, x, z)
+        if (Landmarks.near(s, x, z)) return true
+        val found = findGround(level, s, x, z) ?: return false
+        if (!isNatural(level.getBlockState(found))) return true
+        val surface = reshape(level, found, G)
+        val c = Ctx(level, s, surface, randomFor(s, x, z), 0, hit, exposure(s, x, z, G, ring))
+        c.ground(b(Blocks.GRASS_BLOCK), b(Blocks.DIRT))
+        when {
+            c.chance(0.2) -> c.place(b(Blocks.SHORT_GRASS))
+            c.chance(0.01) -> c.place(c.pick(b(Blocks.DANDELION), b(Blocks.POPPY), b(Blocks.OXEYE_DAISY)))
+        }
+        return true
     }
 
     /** The mountains around the valley. */

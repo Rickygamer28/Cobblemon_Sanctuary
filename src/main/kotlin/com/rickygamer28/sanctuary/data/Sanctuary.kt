@@ -81,6 +81,12 @@ class Sanctuary(
     /** Columns already dressed by the generator (indexes into [com.rickygamer28.sanctuary.world.ColumnOrder]). */
     var dressed: BitSet = BitSet()
 
+    /** Dressed columns that are only a meadow, because their biome was still asleep. */
+    var meadow: BitSet = BitSet()
+
+    /** Set when a new biome woke up, so the meadow columns get checked again. Not saved. */
+    var unlockedChanged: Boolean = true
+
     /** Original ground height of each column before the sanctuary reshaped it (Short.MIN_VALUE = not recorded). */
     var originY: ShortArray = ShortArray(0)
 
@@ -133,6 +139,7 @@ class Sanctuary(
     /** Go over the whole area again (e.g. after trees were left in the way). */
     fun rebuild() {
         dressed = BitSet()
+        meadow = BitSet()
         generationDirty = true
     }
 
@@ -191,6 +198,7 @@ class Sanctuary(
         relationships.forEach { (k, v) -> rel.putInt(k, v) }
         t.put("Relationships", rel)
         t.put("Dressed", LongArrayTag(dressed.toLongArray()))
+        t.put("Meadow", LongArrayTag(meadow.toLongArray()))
         val ev = ListTag()
         events.forEach { ev.add(StringTag.valueOf(it)) }
         t.put("Events", ev)
@@ -252,12 +260,14 @@ class Sanctuary(
             val rel = t.getCompound("Relationships")
             rel.allKeys.forEach { k -> s.relationships[k] = rel.getInt(k) }
             s.dressed = if (t.getInt("Version") >= DATA_VERSION) BitSet.valueOf(t.getLongArray("Dressed")) else BitSet()
+            s.meadow = if (t.getInt("Version") >= DATA_VERSION) BitSet.valueOf(t.getLongArray("Meadow")) else BitSet()
             s.oldWallRadius = t.getInt("OldWall")
             // the sizes got bigger: grow the valley like an expansion (old wall down, new wall and mountains further out)
             val savedRadius = if (t.contains("Radius")) t.getInt("Radius") else SanctuarySize.OLD_RADIUS.getOrElse(s.size.ordinal) { s.size.radius }
             if (savedRadius != s.size.radius && s.state == SanctuaryState.ACTIVE) {
                 if (savedRadius < s.size.radius) s.oldWallRadius = savedRadius
                 s.dressed = BitSet()
+                s.meadow = BitSet()
                 s.generationDirty = true
             }
             val packed = t.getIntArray("Origin")

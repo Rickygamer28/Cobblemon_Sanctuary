@@ -146,6 +146,7 @@ object Residents {
         s.typeCounts = counts
         s.residentCount = list.size
         s.unlocked = unlocked
+        if (newTypes.isNotEmpty()) s.unlockedChanged = true
         if (newTypes.isNotEmpty() || grew) s.generationDirty = true
         rt.anchors = unlocked.associateWith { zoneAnchor(s, it, ring) }
     }
