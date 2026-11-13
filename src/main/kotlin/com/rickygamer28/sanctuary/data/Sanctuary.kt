@@ -12,15 +12,19 @@ import java.util.UUID
 enum class SanctuaryState { PREVIEW, ACTIVE }
 
 enum class SanctuarySize(val radius: Int, val label: String) {
-    SMALL(96, "Small"),
-    MEDIUM(160, "Medium"),
-    LARGE(224, "Large");
+    SMALL(128, "Small"),
+    MEDIUM(224, "Medium"),
+    LARGE(320, "Large"),
+    HUGE(448, "Huge");
 
     /** The Normal hub in the middle (a third of the radius by default; see hubPercent in the config). */
     val hubRadius: Int get() = radius * runCatching { com.rickygamer28.sanctuary.SanctuaryConfig.hubPercent.get() }.getOrDefault(33) / 100
 
     companion object {
-        val MAX_RADIUS = LARGE.radius
+        val MAX_RADIUS = HUGE.radius
+
+        /** Radius of each size before 0.7.0 (saves without a stored radius). */
+        val OLD_RADIUS = intArrayOf(96, 160, 224)
         fun byOrdinal(i: Int) = entries.getOrElse(i) { SMALL }
     }
 }
@@ -169,6 +173,7 @@ class Sanctuary(
         t.putString("OwnerName", ownerName)
         t.putLong("Center", center.asLong())
         t.putInt("Size", size.ordinal)
+        t.putInt("Radius", size.radius)
         t.putString("State", state.name)
         t.putLong("Seed", seed)
         t.putInt("Slot", slot)
@@ -248,6 +253,13 @@ class Sanctuary(
             rel.allKeys.forEach { k -> s.relationships[k] = rel.getInt(k) }
             s.dressed = if (t.getInt("Version") >= DATA_VERSION) BitSet.valueOf(t.getLongArray("Dressed")) else BitSet()
             s.oldWallRadius = t.getInt("OldWall")
+            // the sizes got bigger: grow the valley like an expansion (old wall down, new wall and mountains further out)
+            val savedRadius = if (t.contains("Radius")) t.getInt("Radius") else SanctuarySize.OLD_RADIUS.getOrElse(s.size.ordinal) { s.size.radius }
+            if (savedRadius != s.size.radius && s.state == SanctuaryState.ACTIVE) {
+                if (savedRadius < s.size.radius) s.oldWallRadius = savedRadius
+                s.dressed = BitSet()
+                s.generationDirty = true
+            }
             val packed = t.getIntArray("Origin")
             if (packed.isNotEmpty()) {
                 s.originY = ShortArray(packed.size * 2) { i -> ((packed[i / 2] shr (if (i % 2 == 0) 16 else 0)) and 0xFFFF).toShort() }

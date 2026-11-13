@@ -175,6 +175,7 @@ object Residents {
         com.rickygamer28.sanctuary.data.SanctuarySize.SMALL -> SanctuaryConfig.spawnCapSmall.get()
         com.rickygamer28.sanctuary.data.SanctuarySize.MEDIUM -> SanctuaryConfig.spawnCapMedium.get()
         com.rickygamer28.sanctuary.data.SanctuarySize.LARGE -> SanctuaryConfig.spawnCapLarge.get()
+        com.rickygamer28.sanctuary.data.SanctuarySize.HUGE -> SanctuaryConfig.spawnCapHuge.get()
     }
 
     private fun updateSpawns(level: ServerLevel, s: Sanctuary, rt: SanctuaryRuntime, players: List<ServerPlayer>, now: Long) {

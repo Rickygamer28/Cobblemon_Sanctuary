@@ -473,7 +473,8 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
 
         val sizes = data.getList("sizes", Tag.TAG_COMPOUND.toInt())
         val gap = 8
-        val cw = (w - gap * 2) / 3
+        val count = max(1, sizes.size)
+        val cw = (w - gap * (count - 1)) / count
         val cy = y + 74
         val chh = 84
         for (i in 0 until sizes.size) {
@@ -485,7 +486,7 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
             val hover = over(mx, my, cx, cy, cw, chh) && unlocked
             box(g, cx, cy, cw, chh, if (hover) CARD_HOVER else CARD)
             if (chosen) outline(g, cx, cy, cw, chh, ACCENT)
-            val icon = listOf(Items.OAK_SAPLING, Items.AZALEA, Items.FLOWERING_AZALEA)[i.coerceIn(0, 2)]
+            val icon = listOf(Items.OAK_SAPLING, Items.AZALEA, Items.FLOWERING_AZALEA, Items.CHERRY_SAPLING)[i.coerceIn(0, 3)]
             item(g, ItemStack(icon), cx + cw / 2 - 12, cy + 6, 1.5f)
             g.drawCenteredString(font, sz.getString("label"), cx + cw / 2, cy + 32, if (unlocked) TEXT else DIM)
             g.drawCenteredString(font, "Radius ${sz.getInt("radius")} blocks", cx + cw / 2, cy + 44, SUB)

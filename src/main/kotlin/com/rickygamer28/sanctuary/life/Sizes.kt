@@ -9,12 +9,14 @@ object Sizes {
         SanctuarySize.SMALL -> SanctuaryConfig.allowSmall.get()
         SanctuarySize.MEDIUM -> SanctuaryConfig.allowMedium.get()
         SanctuarySize.LARGE -> SanctuaryConfig.allowLarge.get()
+        SanctuarySize.HUGE -> SanctuaryConfig.allowHuge.get()
     }
 
     fun residentsNeeded(size: SanctuarySize): Int = when (size) {
         SanctuarySize.SMALL -> 0
         SanctuarySize.MEDIUM -> SanctuaryConfig.mediumResidents.get()
         SanctuarySize.LARGE -> SanctuaryConfig.largeResidents.get()
+        SanctuarySize.HUGE -> SanctuaryConfig.hugeResidents.get()
     }
 
     fun unlocked(size: SanctuarySize, residents: Int) = allowed(size) && residents >= residentsNeeded(size)

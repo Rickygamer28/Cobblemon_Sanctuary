@@ -7,22 +7,26 @@ object SanctuaryConfig {
     private val builder = ModConfigSpec.Builder()
 
     val spawnCapSmall: ModConfigSpec.IntValue = builder
-        .comment("How many residents can be out at once in a Small sanctuary (the rest live there virtually).")
-        .defineInRange("spawnCapSmall", 80, 4, 1000)
+        .comment("How many residents can be out at once in a Small sanctuary (the rest rest in their homes and swap in as you walk around).")
+        .defineInRange("residentsOutSmall", 100, 4, 2000)
     val spawnCapMedium: ModConfigSpec.IntValue = builder
         .comment("How many residents can be out at once in a Medium sanctuary.")
-        .defineInRange("spawnCapMedium", 150, 4, 1000)
+        .defineInRange("residentsOutMedium", 180, 4, 2000)
     val spawnCapLarge: ModConfigSpec.IntValue = builder
         .comment("How many residents can be out at once in a Large sanctuary.")
-        .defineInRange("spawnCapLarge", 240, 4, 1000)
+        .defineInRange("residentsOutLarge", 260, 4, 2000)
+    val spawnCapHuge: ModConfigSpec.IntValue = builder
+        .comment("How many residents can be out at once in a Huge sanctuary.")
+        .defineInRange("residentsOutHuge", 320, 4, 2000)
 
     val spawnRange: ModConfigSpec.IntValue = builder
-        .comment("Residents are spawned only in biomes within this many blocks of a player.")
-        .defineInRange("spawnRange", 96, 32, 256)
+        .comment("Residents come out in the parts of the valley within this many blocks of a player.")
+        .defineInRange("residentRange", 128, 32, 512)
 
-    val allowSmall: ModConfigSpec.BooleanValue = builder.comment("Allow the Small size (radius 96).").define("allowSmall", true)
-    val allowMedium: ModConfigSpec.BooleanValue = builder.comment("Allow the Medium size (radius 160).").define("allowMedium", true)
-    val allowLarge: ModConfigSpec.BooleanValue = builder.comment("Allow the Large size (radius 224).").define("allowLarge", true)
+    val allowSmall: ModConfigSpec.BooleanValue = builder.comment("Allow the Small size (radius 128).").define("allowSmall", true)
+    val allowMedium: ModConfigSpec.BooleanValue = builder.comment("Allow the Medium size (radius 224).").define("allowMedium", true)
+    val allowLarge: ModConfigSpec.BooleanValue = builder.comment("Allow the Large size (radius 320).").define("allowLarge", true)
+    val allowHuge: ModConfigSpec.BooleanValue = builder.comment("Allow the Huge size (radius 448).").define("allowHuge", true)
 
     val mediumResidents: ModConfigSpec.IntValue = builder
         .comment("Residents needed to unlock the Medium size.")
@@ -31,6 +35,10 @@ object SanctuaryConfig {
     val largeResidents: ModConfigSpec.IntValue = builder
         .comment("Residents needed to unlock the Large size.")
         .defineInRange("largeResidents", 300, 0, 10000)
+
+    val hugeResidents: ModConfigSpec.IntValue = builder
+        .comment("Residents needed to unlock the Huge size.")
+        .defineInRange("hugeResidents", 600, 0, 100000)
 
     val generationSpeed: ModConfigSpec.IntValue = builder
         .comment("Most terrain columns dressed per tick while a sanctuary is growing.")
