@@ -1,2 +1,3 @@
-com/cobblemon/mod/common/client/gui/PokemonGuiUtilsKt
-com/cobblemon/mod/common/client/gui/summary/widgets/ModelWidget
+# Classes to decompile fully (unzip patterns; keep this list short)
+com/cobblemon/mod/common/client/gui/PokemonGuiUtilsKt*.class
+com/cobblemon/mod/common/client/gui/summary/widgets/ModelWidget*.class
