@@ -28,7 +28,7 @@ object SanctuaryConfig {
 
     val generationSpeed: ModConfigSpec.IntValue = builder
         .comment("Most terrain columns dressed per tick while a sanctuary is growing.")
-        .defineInRange("generationSpeed", 4096, 8, 65536)
+        .defineInRange("maxColumnsPerTick", 4096, 8, 65536)
 
     val generationMillis: ModConfigSpec.IntValue = builder
         .comment("Milliseconds per tick the sanctuary may spend building biomes (higher = faster building, more server load).")
