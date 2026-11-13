@@ -9,6 +9,7 @@ import com.rickygamer28.sanctuary.data.SanctuarySize
 import com.rickygamer28.sanctuary.data.SanctuaryState
 import net.minecraft.core.BlockPos
 import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.tags.BlockTags
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.level.levelgen.Heightmap
 import java.util.UUID
@@ -110,19 +111,14 @@ object SanctuaryGenerator {
         while (i < total) {
             if ((++scanned and 31) == 0 && System.nanoTime() > deadline) break
             val idx = i++
-            if (!s.dressed.get(idx) || s.meadow.get(idx)) continue
+            if (!s.dressed.get(idx)) continue
             val x = s.center.x + ColumnOrder.dx[idx]
             val z = s.center.z + ColumnOrder.dz[idx]
             if (!level.hasChunk(x shr 4, z shr 4)) { repairMissed += s.id; continue }
             if (Landmarks.near(s, x, z)) continue
+            looseBlocks(level, x, z)
+            if (s.meadow.get(idx)) continue
             val top = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1
-            // Cobblemon crystal clusters placed by 1.0.0 were upside down: stand them up
-            val topPos = BlockPos(x, top, z)
-            val topState = level.getBlockState(topPos)
-            if (BuiltInRegistries.BLOCK.getKey(topState.block).let { it.namespace == "cobblemon" && it.path.endsWith("_cluster") }) {
-                val upright = BiomeDresser.pointUp(topState)
-                if (upright != topState) level.setBlock(topPos, upright, net.minecraft.world.level.block.Block.UPDATE_CLIENTS)
-            }
             val target = BiomeDresser.targetHeight(s, x, z, ring)
             if (!tooTall(level, s, x, z, ring, top, target)) continue
             // a real leftover is wide (decorations like ice spikes and rock spires are thin)
@@ -152,6 +148,35 @@ object SanctuaryGenerator {
         }
         repairCursor[s.id] = i
         return true
+    }
+
+    /**
+     * Plants and crystals left hanging in the air after the ground under them was lowered (they have no collision,
+     * so older versions didn't see them) are removed, and Cobblemon crystal clusters on the ground stand upright.
+     */
+    private fun looseBlocks(level: ServerLevel, x: Int, z: Int) {
+        val ground = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1
+        val top = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z) - 1
+        val air = net.minecraft.world.level.block.Blocks.AIR.defaultBlockState()
+        var y = top
+        while (y > ground && y > top - 64) {
+            val p = BlockPos(x, y, z)
+            val st = level.getBlockState(p)
+            y--
+            if (st.isAir || st.`is`(BlockTags.LEAVES) || st.`is`(BlockTags.LOGS)) continue
+            if (!level.getBlockState(p.below()).isAir) continue
+            val cob = BiomeDresser.isCobblemonDecor(st)
+            val floating = if (cob) level.getBlockState(p.above()).isAir else (BiomeDresser.isClutter(st) && !st.canSurvive(level, p))
+            if (floating) level.setBlock(p, air, net.minecraft.world.level.block.Block.UPDATE_CLIENTS)
+        }
+        // Cobblemon crystal clusters placed by 1.0.0 were upside down: stand the ones on the ground up
+        for (yy in ground..ground + 2) {
+            val p = BlockPos(x, yy, z)
+            val st = level.getBlockState(p)
+            if (!BuiltInRegistries.BLOCK.getKey(st.block).let { it.namespace == "cobblemon" && it.path.endsWith("_cluster") }) continue
+            val upright = BiomeDresser.pointUp(st)
+            if (upright != st) level.setBlock(p, upright, net.minecraft.world.level.block.Block.UPDATE_CLIENTS)
+        }
     }
 
     /** Solid natural ground standing more than 10 blocks above where the terrain should be (not a floating island). */

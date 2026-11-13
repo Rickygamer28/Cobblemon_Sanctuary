@@ -155,16 +155,40 @@
       ],
       "faces": {
         "north": {
-          "texture": "#copper_top"
+          "texture": "#copper_top",
+          "uv": [
+            7,
+            0,
+            9,
+            1
+          ]
         },
         "south": {
-          "texture": "#copper_top"
+          "texture": "#copper_top",
+          "uv": [
+            7,
+            0,
+            9,
+            1
+          ]
         },
         "east": {
-          "texture": "#copper_top"
+          "texture": "#copper_top",
+          "uv": [
+            7,
+            0,
+            9,
+            1
+          ]
         },
         "west": {
-          "texture": "#copper_top"
+          "texture": "#copper_top",
+          "uv": [
+            7,
+            0,
+            9,
+            1
+          ]
         },
         "up": {
           "texture": "#copper_top"

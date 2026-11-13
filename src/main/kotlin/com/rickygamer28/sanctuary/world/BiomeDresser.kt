@@ -372,8 +372,21 @@ object BiomeDresser {
         Blocks.AMETHYST_CLUSTER, Blocks.LARGE_AMETHYST_BUD, Blocks.WARPED_ROOTS, Blocks.COBWEB,
     )
 
-    private fun isClutter(st: BlockState): Boolean =
-        st.block in CLUTTER || st.block in DECOR || st.`is`(BlockTags.FLOWERS) || st.`is`(BlockTags.SAPLINGS) || st.`is`(BlockTags.CORALS) ||
+    /** Cobblemon's own plants, flowers and crystal clusters (not player blocks like PCs or healers). */
+    private val COB_PLANTS = setOf(
+        "pep_up_flower", "lucibell", "verdroot", "bugwort", "pomohana", "pauvillea", "lobaila", "voltaconia", "wistensu", "mistleaf",
+        "revival_herb", "medicinal_leek", "hearty_grains", "galarica_nut_bush", "vivichoke", "big_root", "energy_root", "gimmighoul_chest",
+    )
+
+    fun isCobblemonDecor(st: BlockState): Boolean {
+        val id = BuiltInRegistries.BLOCK.getKey(st.block)
+        if (id.namespace != "cobblemon") return false
+        val p = id.path
+        return p.endsWith("_cluster") || p.endsWith("_bud") || p.endsWith("_mint") || p.endsWith("_berry") || p in COB_PLANTS
+    }
+
+    fun isClutter(st: BlockState): Boolean =
+        isCobblemonDecor(st) || st.block in CLUTTER || st.block in DECOR || st.`is`(BlockTags.FLOWERS) || st.`is`(BlockTags.SAPLINGS) || st.`is`(BlockTags.CORALS) ||
             (st.fluidState.isEmpty && st.canBeReplaced() && !st.isAir)
 
     private fun naturalLeaf(st: BlockState) = st.`is`(BlockTags.LEAVES) && !st.getOptionalValue(LeavesBlock.PERSISTENT).orElse(true)
@@ -841,7 +854,8 @@ object BiomeDresser {
     private fun findGround(level: ServerLevel, s: Sanctuary, x: Int, z: Int): BlockPos? {
         val clear = SanctuaryConfig.clearTrees.get()
         val air = b(Blocks.AIR)
-        var p = BlockPos(x, level.getHeight(Heightmap.Types.MOTION_BLOCKING, x, z) - 1, z)
+        // from the very top: plants and crystals without collision would otherwise be left floating when the ground is lowered
+        var p = BlockPos(x, level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z) - 1, z)
         val mine = placed[s.id]
         var guard = 0
         while (guard++ < 120 && p.y > level.minBuildHeight) {
