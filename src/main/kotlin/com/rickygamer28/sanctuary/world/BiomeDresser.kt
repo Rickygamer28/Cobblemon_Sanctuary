@@ -309,10 +309,14 @@ object BiomeDresser {
                     -3.4 * smooth((ch - 0.72) / 0.12) + f01(s, xd, zd, 14.0, 8, 2) * 1.2
                 }
                 else -> {
-                    val m = lake(s, zone, x, z, wx, wz, ring, if (variant == 1) 0.42 else 0.36)
-                    val island = smooth((f01(s, wx, wz, 26.0, 6, 2) - (if (variant == 1) 0.66 else 0.72)) / 0.06) * smooth((m - 0.5) / 0.3)
+                    // a smaller lake in the middle, with real land around it: grassy banks and beaches
+                    val m = lake(s, zone, x, z, wx, wz, ring, if (variant == 1) 0.32 else 0.27)
                     val depth = if (variant == 1) 5.0 else 8.0
-                    -1.0 - depth * m + island * (depth * m + 2) + f(s, xd, zd, 30.0, 9, 2) * 0.6
+                    val land = 1.6 + f(s, wx, wz, 54.0, 9, 2) * 2.2
+                    val base = land * (1 - m) + (-1.0 - depth * m) * m
+                    // a few proper islands in the deep part
+                    val island = smooth((f01(s, wx, wz, 32.0, 6, 2) - (if (variant == 1) 0.62 else 0.68)) / 0.05) * smooth((m - 0.55) / 0.25)
+                    base + island * (2.5 - base)
                 }
             }
             "grass" -> when (variant) {
@@ -352,8 +356,9 @@ object BiomeDresser {
                 0 -> { // dunes: long crests whose direction slowly turns
                     val dir = f(s, xd, zd, 160.0, 41, 2) * 1.4
                     val u = wx * kotlin.math.cos(dir) + wz * kotlin.math.sin(dir)
-                    val crest = 1 - abs(sin(u / 18.0 + f(s, xd, zd, 60.0, 42, 2) * 2.0))
-                    Math.pow(crest, 2.0) * 4 + f(s, wx, wz, 70.0, 43, 2) * 2.5
+                    val crest = 1 - abs(sin(u / 30.0 + f(s, xd, zd, 90.0, 42, 2) * 2.0))
+                    val field = smooth((f01(s, xd, zd, 110.0, 44, 2) - 0.4) / 0.25) // dunes only in some parts
+                    Math.pow(crest, 4.0) * 5 * field + f(s, wx, wz, 120.0, 43, 2) * 1.5
                 }
                 1 -> softTerrace(smooth((f01(s, wx, wz, 56.0, 44, 2) - 0.48) / 0.14) * 20, 4, 3.2)
                 else -> f(s, wx, wz, 36.0, 46, 3) * 1.2
@@ -839,6 +844,12 @@ object BiomeDresser {
             return
         }
         val lagoon = c.variant == 1
+        if (depth == 0) {
+            c.level.setBlock(c.surface, b(Blocks.WATER), FLAGS)
+            c.level.setBlock(c.surface.below(), b(Blocks.SAND), FLAGS)
+            if (c.chance(0.04)) c.waterTop(b(Blocks.LILY_PAD))
+            return
+        }
         if (depth >= 1) {
             c.flood()
             val bed = when {
@@ -1132,7 +1143,7 @@ object BiomeDresser {
                 if (puddle && c.chance(0.5)) { c.pool(b(Blocks.MUD)); return }
                 c.ground(b(Blocks.MYCELIUM), b(Blocks.DIRT))
                 when {
-                    c.grid(9, 6) && c.roomy(6) -> c.feature(if (c.random.nextBoolean()) TreeFeatures.HUGE_RED_MUSHROOM else TreeFeatures.HUGE_BROWN_MUSHROOM)
+                    c.grid(18, 6) && c.roomy(6) -> c.feature(if (c.random.nextBoolean()) TreeFeatures.HUGE_RED_MUSHROOM else TreeFeatures.HUGE_BROWN_MUSHROOM)
                     c.chance(0.04) -> c.place(c.pick(b(Blocks.RED_MUSHROOM), b(Blocks.BROWN_MUSHROOM)))
                 }
             }
