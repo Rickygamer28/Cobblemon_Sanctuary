@@ -84,6 +84,9 @@ class Sanctuary(
     /** Dressed columns that are only a meadow, because their biome was still asleep. */
     var meadow: BitSet = BitSet()
 
+    /** Look for leftover pillars once the valley is built (after loading and after each rebuild). Not saved. */
+    var needsCheck: Boolean = true
+
     /** Set when a new biome woke up, so the meadow columns get checked again. Not saved. */
     var unlockedChanged: Boolean = true
 
@@ -149,6 +152,7 @@ class Sanctuary(
     fun rebuild() {
         dressed = BitSet()
         meadow = BitSet()
+        needsCheck = true
         generationDirty = true
     }
 
@@ -245,7 +249,7 @@ class Sanctuary(
 
     companion object {
         /** Bump to make existing sanctuaries rebuild their biomes after a generator change. */
-        const val DATA_VERSION = 6
+        const val DATA_VERSION = 7
 
         fun key(a: UUID, b: UUID): String = if (a < b) "$a|$b" else "$b|$a"
 

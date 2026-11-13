@@ -54,10 +54,15 @@ object Landmarks {
     }
 
     /** Builds at most one missing landmark whose area is loaded. */
-    fun tick(level: ServerLevel, s: Sanctuary) {
+    /** Cleans up old landmark spots. Runs even while the valley is being built, so old spots never block it. */
+    fun maintain(level: ServerLevel, s: Sanctuary) {
         fixVolcano(s)
+        relocate(level, s, ZoneLayout.ring())
+    }
+
+    fun tick(level: ServerLevel, s: Sanctuary) {
         val ring = ZoneLayout.ring()
-        if (relocate(level, s, ring)) return
+        if (s.staleLandmarks.isNotEmpty()) return
         for (zone in ring) {
             if (zone !in s.unlocked || s.landmarks.containsKey(zone) || s.staleLandmarks.containsKey(zone)) continue
             val (ax, az) = ZoneLayout.anchor(s, zone, ring)

@@ -267,10 +267,17 @@ object BiomeDresser {
     private fun smooth(t: Double): Double { val c = t.coerceIn(0.0, 1.0); return c * c * (3 - 2 * c) }
     private fun terrace(v: Double, step: Int) = floor(v / step) * step
 
+    /** Terraces with sloped edges (not sheer walls): flat steps joined by short, steep slopes. */
+    private fun softTerrace(v: Double, step: Int, steep: Double = 2.6): Double {
+        val base = floor(v / step) * step
+        val t = (v - base) / step
+        return base + step * smooth((t - 0.5) * steep + 0.5)
+    }
+
     /** Fractal noise in [-1, 1] at a scale in blocks. */
-    private fun f(s: Sanctuary, x: Double, z: Double, scale: Double, salt: Int, oct: Int = 4) = Noise.fbm(s.seed + salt * 7919L, x / scale, z / scale, oct)
-    private fun f01(s: Sanctuary, x: Double, z: Double, scale: Double, salt: Int, oct: Int = 4) = f(s, x, z, scale, salt, oct) * 0.5 + 0.5
-    private fun ridge(s: Sanctuary, x: Double, z: Double, scale: Double, salt: Int, oct: Int = 4) = Noise.ridged(s.seed + salt * 7919L, x / scale, z / scale, oct)
+    private fun f(s: Sanctuary, x: Double, z: Double, scale: Double, salt: Int, oct: Int = 3) = Noise.fbm(s.seed + salt * 7919L, x / scale, z / scale, oct)
+    private fun f01(s: Sanctuary, x: Double, z: Double, scale: Double, salt: Int, oct: Int = 3) = f(s, x, z, scale, salt, oct) * 0.5 + 0.5
+    private fun ridge(s: Sanctuary, x: Double, z: Double, scale: Double, salt: Int, oct: Int = 3) = Noise.ridged(s.seed + salt * 7919L, x / scale, z / scale, oct)
 
     private fun anchorDist(s: Sanctuary, zone: String, x: Int, z: Int, ring: List<String>): Double {
         val (ax, az) = ZoneLayout.anchor(s, zone, ring)
@@ -303,9 +310,9 @@ object BiomeDresser {
                 }
                 else -> {
                     val m = lake(s, zone, x, z, wx, wz, ring, if (variant == 1) 0.42 else 0.36)
-                    val island = smooth((f01(s, wx, wz, 11.0, 6, 2) - (if (variant == 1) 0.68 else 0.75)) / 0.07) * smooth((m - 0.5) / 0.3)
+                    val island = smooth((f01(s, wx, wz, 26.0, 6, 2) - (if (variant == 1) 0.66 else 0.72)) / 0.06) * smooth((m - 0.5) / 0.3)
                     val depth = if (variant == 1) 5.0 else 8.0
-                    -1.0 - depth * m + island * (depth * m + 2) + f(s, xd, zd, 18.0, 9, 2) * 0.8
+                    -1.0 - depth * m + island * (depth * m + 2) + f(s, xd, zd, 30.0, 9, 2) * 0.6
                 }
             }
             "grass" -> when (variant) {
@@ -326,42 +333,42 @@ object BiomeDresser {
             }
             "poison" -> if (variant == 2) f(s, wx, wz, 36.0, 23) * 2.5 + 0.5 else f(s, wx, wz, 26.0, 24, 3) * 1.8 - 0.6
             "psychic" -> when (variant) {
-                2 -> terrace(smooth(f01(s, wx, wz, 40.0, 25, 3)) * 14, 3) + 1
+                2 -> softTerrace(smooth(f01(s, wx, wz, 60.0, 25, 2)) * 12, 4) + 1
                 1 -> f(s, wx, wz, 44.0, 26) * 5 + 2
                 else -> f(s, wx, wz, 34.0, 27) * 3.5 + 1
             }
-            "steel" -> if (variant == 1) ridge(s, wx, wz, 50.0, 28, 2) * 4 else ridge(s, wx, wz, 36.0, 29) * 15 + f(s, xd, zd, 9.0, 30, 2) * 1.5 - 2
+            "steel" -> if (variant == 1) ridge(s, wx, wz, 70.0, 28, 2) * 4 else Math.pow(ridge(s, wx, wz, 64.0, 29, 2), 1.5) * 16 + f(s, xd, zd, 26.0, 30, 2) * 1.5 - 2
             "electric" -> when (variant) {
-                2 -> ridge(s, wx, wz, 34.0, 31) * 13 - 2
-                else -> smooth((f01(s, wx, wz, 40.0, 32, 3) - 0.45) / 0.14) * 9 + f(s, xd, zd, 12.0, 33, 2) * 1.2
+                2 -> Math.pow(ridge(s, wx, wz, 60.0, 31, 2), 1.5) * 14 - 1
+                else -> smooth((f01(s, wx, wz, 56.0, 32, 2) - 0.45) / 0.16) * 8 + f(s, xd, zd, 24.0, 33, 2) * 1.0
             }
             "rock" -> when (variant) {
-                2 -> ridge(s, wx, wz, 30.0, 34) * 11 + f(s, xd, zd, 8.0, 35, 2) * 2
-                else -> Math.pow(ridge(s, wx, wz, 34.0, 36), 1.4) * 22 + f(s, xd, zd, 9.0, 37, 2) * 2.5 - 2
+                2 -> Math.pow(ridge(s, wx, wz, 56.0, 34, 2), 1.4) * 12 + f(s, xd, zd, 22.0, 35, 2) * 1.5
+                else -> Math.pow(ridge(s, wx, wz, 64.0, 36, 3), 1.5) * 24 + f(s, xd, zd, 26.0, 37, 2) * 3 - 2
             }
-            "fighting" -> if (variant == 2) terrace(smooth((f01(s, wx, wz, 38.0, 38, 3) - 0.35) / 0.35) * 15, 4) + f(s, xd, zd, 20.0, 39, 2)
+            "fighting" -> if (variant == 2) softTerrace(smooth((f01(s, wx, wz, 70.0, 38, 2) - 0.35) / 0.35) * 12, 6)
                 else f(s, wx, wz, 50.0, 40, 3) * 2.2 + 0.5
             "ground" -> when (variant) {
                 0 -> { // dunes: long crests whose direction slowly turns
                     val dir = f(s, xd, zd, 160.0, 41, 2) * 1.4
                     val u = wx * kotlin.math.cos(dir) + wz * kotlin.math.sin(dir)
-                    val crest = 1 - abs(sin(u / 10.0 + f(s, xd, zd, 34.0, 42, 2) * 2.5))
-                    Math.pow(crest, 1.6) * 6 + f(s, wx, wz, 44.0, 43, 3) * 2
+                    val crest = 1 - abs(sin(u / 18.0 + f(s, xd, zd, 60.0, 42, 2) * 2.0))
+                    Math.pow(crest, 2.0) * 4 + f(s, wx, wz, 70.0, 43, 2) * 2.5
                 }
-                1 -> terrace(smooth((f01(s, wx, wz, 38.0, 44, 3) - 0.48) / 0.12) * 22, 3) + f(s, xd, zd, 14.0, 45, 2)
+                1 -> softTerrace(smooth((f01(s, wx, wz, 56.0, 44, 2) - 0.48) / 0.14) * 20, 4, 3.2)
                 else -> f(s, wx, wz, 36.0, 46, 3) * 1.2
             }
             "fire" -> when (variant) {
                 0 -> { // volcano with a crater
                     val d = anchorDist(s, zone, x, z, ring) * (1 + f(s, xd, zd, 18.0, 47, 2) * 0.12)
                     val h = max(0.0, 40 - d * 0.82)
-                    if (d < 7) h - (7 - d) * 1.7 else h + f(s, xd, zd, 7.0, 48, 2) * 1.6 * smooth(h / 8)
+                    if (d < 7) h - (7 - d) * 1.7 else h + f(s, xd, zd, 16.0, 48, 2) * 1.2 * smooth(h / 8)
                 }
-                1 -> terrace(smooth((f01(s, wx, wz, 36.0, 49, 3) - 0.38) / 0.24) * 18, 4) - smooth((ridge(s, wx, wz, 60.0, 50, 2) - 0.82) / 0.1) * 10
-                else -> terrace(f01(s, wx, wz, 28.0, 51, 3) * 7, 2)
+                1 -> softTerrace(smooth((f01(s, wx, wz, 56.0, 49, 2) - 0.38) / 0.24) * 16, 5) - smooth((ridge(s, wx, wz, 80.0, 50, 2) - 0.84) / 0.1) * 9
+                else -> softTerrace(f01(s, wx, wz, 40.0, 51, 2) * 6, 2)
             }
             "dragon" -> when (variant) {
-                0 -> terrace(smooth((f01(s, wx, wz, 34.0, 52, 3) - 0.46) / 0.14) * 26, 4) + f(s, xd, zd, 12.0, 53, 2)
+                0 -> softTerrace(smooth((f01(s, wx, wz, 56.0, 52, 2) - 0.46) / 0.16) * 24, 6, 3.4)
                 1 -> {
                     val d = anchorDist(s, zone, x, z, ring) * (1 + f(s, xd, zd, 26.0, 54, 2) * 0.2)
                     max(0.0, 54 - d * 0.52) * (0.72 + 0.28 * ridge(s, wx, wz, 22.0, 55, 3)) + ridge(s, wx, wz, 40.0, 56, 2) * 6
@@ -834,7 +841,11 @@ object BiomeDresser {
         val lagoon = c.variant == 1
         if (depth >= 1) {
             c.flood()
-            val bed = if (lagoon) b(Blocks.SAND) else c.patch(6.0, 3, b(Blocks.SAND), b(Blocks.GRAVEL), b(Blocks.CLAY), b(Blocks.SAND))
+            val bed = when {
+                lagoon || depth <= 2 -> b(Blocks.SAND)
+                depth <= 4 -> if (c.noise(14.0, 3) > 0.6) b(Blocks.CLAY) else b(Blocks.SAND)
+                else -> if (c.noise(16.0, 4) > 0.55) b(Blocks.CLAY) else b(Blocks.GRAVEL)
+            }
             c.ground(bed, b(Blocks.SAND))
             when {
                 lagoon && depth >= 2 && c.chance(0.2) -> c.underwater(c.pick(b(Blocks.BRAIN_CORAL_BLOCK), b(Blocks.TUBE_CORAL_BLOCK), b(Blocks.FIRE_CORAL_BLOCK), b(Blocks.HORN_CORAL_BLOCK), b(Blocks.BUBBLE_CORAL_BLOCK)))
@@ -1029,7 +1040,7 @@ object BiomeDresser {
                 }
             }
             else -> {
-                c.ground(c.patch(9.0, 6, b(Blocks.GRASS_BLOCK), b(Blocks.MOSSY_STONE_BRICKS), b(Blocks.GRASS_BLOCK), b(Blocks.COARSE_DIRT)), b(Blocks.STONE))
+                c.ground(if (c.noise(6.0, 6) > 0.84) b(Blocks.MOSSY_STONE_BRICKS) else c.patch(12.0, 6, b(Blocks.GRASS_BLOCK), b(Blocks.GRASS_BLOCK), b(Blocks.COARSE_DIRT)), b(Blocks.DIRT))
                 when {
                     c.grid(18, 7) && c.roomy(8) -> c.ruinWall(b(Blocks.MOSSY_STONE_BRICKS), 5 + c.random.nextInt(5), 5)
                     c.grid(14, 8) && c.roomy() -> { c.column(b(Blocks.CHISELED_STONE_BRICKS), 4); c.place(b(Blocks.BONE_BLOCK), 5) }
@@ -1068,7 +1079,7 @@ object BiomeDresser {
                 c.ground(if (path) b(Blocks.SOUL_SOIL) else c.patch(9.0, 1, b(Blocks.PODZOL), b(Blocks.COARSE_DIRT), b(Blocks.GRASS_BLOCK)), b(Blocks.DIRT))
                 when {
                     path -> {}
-                    Math.floorMod(c.x, 4) == 0 && Math.floorMod(c.z, 5) == 0 && c.roomy() && c.exposure <= 3 && c.noise(20.0, 2) > 0.35 -> c.gravestone()
+                    Math.floorMod(c.x, 4) == 0 && Math.floorMod(c.z, 6) == 0 && c.roomy() && c.exposure <= 2 && c.noise(34.0, 2) > 0.68 -> c.gravestone()
                     c.grid(12, 3) && c.roomy() -> c.deadTree(b(Blocks.STRIPPED_DARK_OAK_LOG), b(Blocks.DARK_OAK_FENCE))
                     c.grid(10, 4) && c.roomy() -> c.lampPost(b(Blocks.SPRUCE_FENCE), b(Blocks.SOUL_LANTERN))
                     c.chance(0.004) -> c.place(b(Blocks.COBWEB))
@@ -1135,12 +1146,12 @@ object BiomeDresser {
             0 -> when {
                 c.grid(7, 2) && c.roomy() -> c.feature(TreeFeatures.AZALEA_TREE)
                 c.grid(13, 3) && c.roomy() -> c.fallenLog(b(Blocks.OAK_LOG))
-                c.grid(17, 4) && c.roomy() -> { c.column(b(Blocks.OAK_LOG), 2); c.place(b(Blocks.BEE_NEST), 3) }
+                c.grid(33, 4) && c.roomy() -> { c.column(b(Blocks.OAK_LOG), 2); c.place(b(Blocks.BEE_NEST), 3) }
                 c.chance(0.3) -> c.tallPlant(c.pick(b(Blocks.TALL_GRASS), b(Blocks.LARGE_FERN)))
                 c.chance(0.3) -> c.place(b(Blocks.SHORT_GRASS))
             }
             1 -> when {
-                c.grid(15, 7) && c.roomy() -> { c.column(b(Blocks.OAK_LOG), 2); c.place(b(Blocks.BEE_NEST), 3) }
+                c.grid(31, 7) && c.roomy() -> { c.column(b(Blocks.OAK_LOG), 2); c.place(b(Blocks.BEE_NEST), 3) }
                 c.chance(0.06) -> c.tallPlant(c.patch(12.0, 5, b(Blocks.SUNFLOWER), b(Blocks.LILAC), b(Blocks.ROSE_BUSH), b(Blocks.PEONY)))
                 c.chance(0.3) -> c.place(c.patch(6.0, 6, b(Blocks.POPPY), b(Blocks.ALLIUM), b(Blocks.CORNFLOWER), b(Blocks.OXEYE_DAISY), b(Blocks.ORANGE_TULIP), b(Blocks.PINK_TULIP)))
             }
@@ -1255,7 +1266,7 @@ object BiomeDresser {
         val steep = c.exposure > 4
         when (c.variant) {
             0 -> {
-                c.ground(c.patch(7.0, 1, b(Blocks.GRAVEL), b(Blocks.POLISHED_ANDESITE), b(Blocks.WEATHERED_COPPER), b(Blocks.GRAVEL)), b(Blocks.STONE))
+                c.ground(if (c.noise(5.0, 11) > 0.86) b(Blocks.WEATHERED_COPPER) else c.patch(14.0, 1, b(Blocks.GRAVEL), b(Blocks.POLISHED_ANDESITE), b(Blocks.STONE)), b(Blocks.STONE))
                 when {
                     c.grid(8, 2) && c.roomy() -> c.boulder(c.pick(b(Blocks.POLISHED_ANDESITE), b(Blocks.SMOOTH_STONE)), b(Blocks.IRON_BARS))
                     c.grid(11, 3) && c.roomy() -> c.place(c.pick(b(Blocks.CHIPPED_ANVIL), b(Blocks.DAMAGED_ANVIL)))
@@ -1271,7 +1282,11 @@ object BiomeDresser {
                 }
             }
             else -> {
-                c.ground(if (steep) c.patch(5.0, 6, b(Blocks.STONE), b(Blocks.TUFF)) else c.patch(9.0, 7, b(Blocks.GRAVEL), b(Blocks.POLISHED_ANDESITE), b(Blocks.OXIDIZED_COPPER)), b(Blocks.STONE))
+                c.ground(when {
+                    steep -> c.patch(16.0, 6, b(Blocks.STONE), b(Blocks.ANDESITE))
+                    c.noise(5.0, 12) > 0.87 -> b(Blocks.OXIDIZED_COPPER)
+                    else -> c.patch(16.0, 7, b(Blocks.STONE), b(Blocks.GRAVEL), b(Blocks.POLISHED_ANDESITE))
+                }, b(Blocks.STONE))
                 if (c.grid(11, 8) && c.roomy()) c.crystalCluster(b(Blocks.POLISHED_ANDESITE), b(Blocks.LIGHTNING_ROD), 2 + c.random.nextInt(3))
             }
         }
@@ -1297,7 +1312,12 @@ object BiomeDresser {
                 }
             }
             else -> {
-                c.ground(c.patch(8.0, 6, b(Blocks.STONE), b(Blocks.EXPOSED_COPPER), b(Blocks.YELLOW_TERRACOTTA), b(Blocks.STONE)), b(Blocks.STONE))
+                val vein = abs(c.noise(22.0, 13) - 0.5) < 0.03
+                c.ground(when {
+                    vein -> b(Blocks.EXPOSED_COPPER)
+                    c.exposure > 4 -> c.patch(16.0, 6, b(Blocks.STONE), b(Blocks.TUFF))
+                    else -> c.patch(18.0, 6, b(Blocks.STONE), b(Blocks.TUFF), b(Blocks.STONE), b(Blocks.CALCITE))
+                }, b(Blocks.STONE))
                 if (c.grid(10, 7) && c.roomy()) c.crystalCluster(b(Blocks.EXPOSED_COPPER), b(Blocks.LIGHTNING_ROD), 2 + c.random.nextInt(3))
             }
         }

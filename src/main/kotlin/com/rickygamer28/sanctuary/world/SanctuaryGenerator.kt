@@ -7,7 +7,9 @@ import com.rickygamer28.sanctuary.data.Sanctuary
 import com.rickygamer28.sanctuary.data.SanctuaryData
 import com.rickygamer28.sanctuary.data.SanctuarySize
 import com.rickygamer28.sanctuary.data.SanctuaryState
+import net.minecraft.core.BlockPos
 import net.minecraft.server.level.ServerLevel
+import net.minecraft.world.level.levelgen.Heightmap
 import java.util.UUID
 import kotlin.math.sqrt
 
@@ -84,12 +86,78 @@ object SanctuaryGenerator {
         return (c * 100L / total(s).coerceAtLeast(1)).toInt()
     }
 
+    private val repairCursor = HashMap<UUID, Int>()
+    private val repaired = HashMap<UUID, Int>()
+
+    /** Check the valley once after loading (and after each rebuild). */
+    fun scheduleCheck(id: UUID) { repairCursor[id] = 0; repaired[id] = 0 }
+
+    /**
+     * Safety net: walks over the finished valley and cuts down any column that stands far above where the terrain
+     * should be (a leftover pillar of an old volcano, peak or mountain, whatever left it behind), then lets the
+     * builder dress it again. Returns true while it's still busy.
+     */
+    private fun repair(level: ServerLevel, s: Sanctuary): Boolean {
+        var i = repairCursor[s.id] ?: return false
+        val ring = ZoneLayout.ring()
+        val total = ColumnOrder.countWithin(s.size.radius - 2)
+        val deadline = System.nanoTime() + SanctuaryConfig.generationMillis.get() * 1_000_000L
+        var scanned = 0
+        var found = repaired[s.id] ?: 0
+        while (i < total) {
+            if ((++scanned and 31) == 0 && System.nanoTime() > deadline) break
+            val idx = i++
+            if (!s.dressed.get(idx) || s.meadow.get(idx)) continue
+            val x = s.center.x + ColumnOrder.dx[idx]
+            val z = s.center.z + ColumnOrder.dz[idx]
+            if (!level.hasChunk(x shr 4, z shr 4) || Landmarks.near(s, x, z)) continue
+            val top = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1
+            val target = BiomeDresser.targetHeight(s, x, z, ring)
+            if (!tooTall(level, s, x, z, ring, top, target)) continue
+            // a real leftover is wide (decorations like ice spikes and rock spires are thin)
+            val wide = listOf(4 to 0, -4 to 0, 0 to 4, 0 to -4).count { (ox, oz) ->
+                val nx = x + ox
+                val nz = z + oz
+                level.hasChunk(nx shr 4, nz shr 4) &&
+                    tooTall(level, s, nx, nz, ring, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, nx, nz) - 1, BiomeDresser.targetHeight(s, nx, nz, ring))
+            }
+            if (wide < 3) continue
+            // cut the natural blocks above the target height, then dress the column again
+            for (y in target + 1..top) {
+                val p = BlockPos(x, y, z)
+                if (BiomeDresser.isNatural(level.getBlockState(p))) level.setBlock(p, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), net.minecraft.world.level.block.Block.UPDATE_CLIENTS)
+            }
+            s.dressed.clear(idx)
+            if (found++ < 3) CobblemonSanctuary.LOGGER.info("Sanctuary: cut a leftover pillar at {} {} (was {}, should be {})", x, z, top, target)
+            s.generationDirty = true
+        }
+        repaired[s.id] = found
+        if (i >= total) {
+            repairCursor.remove(s.id)
+            if (found > 0) CobblemonSanctuary.LOGGER.info("Sanctuary: repaired {} columns", found)
+            return false
+        }
+        repairCursor[s.id] = i
+        return true
+    }
+
+    /** Solid natural ground standing more than 10 blocks above where the terrain should be (not a floating island). */
+    private fun tooTall(level: ServerLevel, s: Sanctuary, x: Int, z: Int, ring: List<String>, top: Int, target: Int): Boolean {
+        if (top <= target + 10) return false
+        if (Landmarks.near(s, x, z)) return false
+        for (y in target + 1..top) if (!BiomeDresser.isNatural(level.getBlockState(BlockPos(x, y, z)))) return false
+        @Suppress("UNUSED_VARIABLE") val r = ring
+        return true
+    }
+
     fun tick(level: ServerLevel, data: SanctuaryData, s: Sanctuary) {
         if (s.state != SanctuaryState.ACTIVE) return
         val now = level.gameTime
         if (now % 10L == 0L) BiomePainter.tick(level, s)
+        if (now % 40L == 0L) Landmarks.maintain(level, s)
         if (!s.generationDirty && !cursors.containsKey(s.id)) {
-            // the valley is built: put up the landmarks of awake biomes
+            // the valley is built: check for leftovers, then put up the landmarks of awake biomes
+            if (repair(level, s)) return
             if (now % 40L == 0L) Landmarks.tick(level, s)
             val retry = retryAt[s.id] ?: return
             if (now < retry) return
@@ -98,6 +166,7 @@ object SanctuaryGenerator {
         }
         if (s.generationDirty) {
             s.generationDirty = false
+            if (s.needsCheck) { s.needsCheck = false; scheduleCheck(s.id) }
             cursors[s.id] = 0
             missedUnloaded[s.id] = false
             if (s.unlockedChanged) { s.unlockedChanged = false; recheckMeadow += s.id }
