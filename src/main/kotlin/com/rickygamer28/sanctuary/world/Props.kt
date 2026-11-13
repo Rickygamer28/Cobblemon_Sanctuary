@@ -1,5 +1,6 @@
 package com.rickygamer28.sanctuary.world
 
+import com.rickygamer28.sanctuary.SanctuaryDimension
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.tags.BlockTags
