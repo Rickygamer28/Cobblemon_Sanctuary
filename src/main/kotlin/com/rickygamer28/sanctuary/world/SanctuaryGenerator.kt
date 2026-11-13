@@ -8,6 +8,7 @@ import com.rickygamer28.sanctuary.data.SanctuaryData
 import com.rickygamer28.sanctuary.data.SanctuarySize
 import com.rickygamer28.sanctuary.data.SanctuaryState
 import net.minecraft.core.BlockPos
+import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.level.levelgen.Heightmap
 import java.util.UUID
@@ -112,6 +113,13 @@ object SanctuaryGenerator {
             val z = s.center.z + ColumnOrder.dz[idx]
             if (!level.hasChunk(x shr 4, z shr 4) || Landmarks.near(s, x, z)) continue
             val top = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1
+            // Cobblemon crystal clusters placed by 1.0.0 were upside down: stand them up
+            val topPos = BlockPos(x, top, z)
+            val topState = level.getBlockState(topPos)
+            if (BuiltInRegistries.BLOCK.getKey(topState.block).let { it.namespace == "cobblemon" && it.path.endsWith("_cluster") }) {
+                val upright = BiomeDresser.pointUp(topState)
+                if (upright != topState) level.setBlock(topPos, upright, net.minecraft.world.level.block.Block.UPDATE_CLIENTS)
+            }
             val target = BiomeDresser.targetHeight(s, x, z, ring)
             if (!tooTall(level, s, x, z, ring, top, target)) continue
             // a real leftover is wide (decorations like ice spikes and rock spires are thin)

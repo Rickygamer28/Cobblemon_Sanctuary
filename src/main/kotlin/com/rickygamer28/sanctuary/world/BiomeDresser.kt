@@ -318,7 +318,13 @@ object BiomeDresser {
         var state = block.defaultBlockState()
         val age = block.stateDefinition.getProperty("age") as? net.minecraft.world.level.block.state.properties.IntegerProperty
         if (age != null) state = state.setValue(age, age.possibleValues.max())
-        return state
+        return pointUp(state)
+    }
+
+    /** Crystal clusters and the like stand upright on the ground. */
+    fun pointUp(state: BlockState): BlockState {
+        val facing = state.block.stateDefinition.getProperty("facing") as? net.minecraft.world.level.block.state.properties.DirectionProperty
+        return if (facing != null && Direction.UP in facing.possibleValues) state.setValue(facing, Direction.UP) else state
     }
 
     private fun cobFeature(id: String): ResourceKey<ConfiguredFeature<*, *>> =
