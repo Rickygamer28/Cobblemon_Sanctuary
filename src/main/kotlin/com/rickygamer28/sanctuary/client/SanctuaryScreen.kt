@@ -262,6 +262,7 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
             tab == "resident" -> residentPage(g, cx, cy, cw, ch, mouseX, mouseY, partialTick)
             tab == "biomes" -> biomesPage(g, cx, cy, cw, ch, mouseX, mouseY)
             tab == "events" -> eventsPage(g, cx, cy, cw, ch)
+            tab == "goals" -> goalsPage(g, cx, cy, cw, ch, mouseX, mouseY)
             tab == "nest" -> nestPage(g, cx, cy, cw, ch, mouseX, mouseY)
             tab == "members" -> membersPage(g, cx, cy, cw, ch, mouseX, mouseY)
         }
@@ -468,6 +469,7 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
             Triple("biomes", "Biomes", itemOf("cobblemon:grass_gem", Items.OAK_SAPLING)),
             Triple("nest", "Nest", ItemStack(ModContent.POKEMON_EGG.get())),
             Triple("events", "Journal", ItemStack(ModContent.JOURNAL.get())),
+            Triple("goals", "Goals", itemOf("cobblemon:rare_candy", Items.NETHER_STAR)),
             Triple("members", "Members", ItemStack(Items.PLAYER_HEAD)),
         )
         var ty = y + 8
@@ -478,6 +480,13 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
             if (active) g.fill(x + 5, ty + 3, x + 7, ty + 19, ACCENT)
             item(g, icon, x + 11, ty + 3)
             text(g, label, x + 31, ty + 7, if (active) TEXT else SUB)
+            val ready = data.getList("goals", Tag.TAG_COMPOUND.toInt()).let { l -> (0 until l.size).count { l.getCompound(it).getBoolean("reached") && !l.getCompound(it).getBoolean("claimed") } }
+            if (key == "goals" && ready > 0) {
+                val badge = "$ready"
+                val bw = font.width(badge) + 6
+                box(g, x + SIDE_W - 10 - bw - 2, ty + 6, bw, 11, 0xFFE0A030.toInt())
+                g.drawCenteredString(font, badge, x + SIDE_W - 12 - bw / 2, ty + 8, 0xFFFFFFFF.toInt())
+            }
             if (key == "nest" && eggs.isNotEmpty()) {
                 val badge = "${eggs.size}"
                 val bw = font.width(badge) + 6
@@ -628,8 +637,25 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
         // recent events
         val ey = cy + 26
         text(g, "Recently", x, ey, SUB)
-        val basket = if (data.getBoolean("hasBasket")) "Gathering Basket: ${data.getInt("basketItems")} items" else "No Gathering Basket placed yet"
-        text(g, basket, x + w - font.width(basket), ey, if (data.getBoolean("hasBasket")) GOLD else DIM)
+        val basket = if (data.getBoolean("hasBasket")) "Basket: ${data.getInt("basketItems")} items" else "No Gathering Basket placed yet"
+        var bx2 = x + w
+        if (data.getBoolean("hasBasket")) {
+            // what residents bring: click to switch a kind of find on or off
+            val off = data.getList("basketOff", Tag.TAG_STRING.toInt()).let { l -> (0 until l.size).map { l.getString(it) }.toSet() }
+            for ((key, label) in listOf("jobs" to "Jobs", "apricorns" to "Apricorns", "berries" to "Berries", "drops" to "Drops").reversed()) {
+                val on = key !in off
+                val pw2 = font.width(label) + 8
+                bx2 -= pw2
+                val hover = over(mx, my, bx2, ey - 2, pw2, 12)
+                box(g, bx2, ey - 2, pw2, 12, if (on) mix(GOLD, 0x182029, if (hover) 0.45f else 0.6f) else if (hover) CARD_HOVER else CARD)
+                g.drawString(font, label, bx2 + 4, ey, if (on) TEXT else DIM, false)
+                if (hover) tooltip = listOf(Component.literal(if (on) "Residents bring $label (click to stop)" else "Residents don't bring $label (click to allow)"),
+                    Component.literal("Each item stops at 32 in the basket.").withStyle(net.minecraft.ChatFormatting.GRAY))
+                if (owner) hit(bx2, ey - 2, pw2, 12) { send("basket", key, page = "home") }
+                bx2 -= 3
+            }
+        }
+        text(g, basket, bx2 - font.width(basket) - 4, ey, if (data.getBoolean("hasBasket")) GOLD else DIM)
         val events = data.getList("events", Tag.TAG_STRING.toInt())
         if (events.isEmpty()) text(g, "Nothing has happened yet.", x + 10, ey + 14, DIM)
         var ly = ey + 14
@@ -982,6 +1008,69 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
             box(g, x + 2, ly + 1, 5, 5, if (i == 0) ACCENT else mix(ACCENT, 0x182029, 0.5f))
             for (line in ls) { g.drawString(font, line, x + 14, ly, if (i == 0) TEXT else SUB, false); ly += 10 }
             ly += 8
+        }
+        g.disableScissor()
+        scrollbar(g, x + w + 4, gy, gh)
+    }
+
+    // ------------------------------------------------------------------ goals
+
+    private fun rewardIcon(id: String): ItemStack = when (id) {
+        "#cobblemon:mints" -> itemOf("cobblemon:adamant_mint", Items.GREEN_DYE)
+        "#cobblemon:apricorns" -> itemOf("cobblemon:red_apricorn", Items.APPLE)
+        else -> itemOf(id.removePrefix("#"), Items.PAPER)
+    }
+
+    private fun goalsPage(g: GuiGraphics, x: Int, y: Int, w: Int, h: Int, mx: Int, my: Int) {
+        val goals = data.getList("goals", Tag.TAG_COMPOUND.toInt())
+        val list = (0 until goals.size).map { goals.getCompound(it) }
+            // ready to collect first, then the ones still going, then the finished ones
+            .sortedBy { if (it.getBoolean("reached") && !it.getBoolean("claimed")) 0 else if (!it.getBoolean("reached")) 1 else 2 }
+        val done = list.count { it.getBoolean("reached") }
+        text(g, "Goals for your sanctuary", x, y, SUB)
+        val count = "$done/${list.size} reached"
+        text(g, count, x + w - font.width(count), y, GOLD)
+        val gy = y + 16
+        val gh = h - 18
+        val cardH = 40
+        val gap = 5
+        maxScroll = max(0.0, list.size * (cardH + gap) - gap - gh.toDouble())
+        scroll = scroll.coerceIn(0.0, maxScroll)
+        g.enableScissor(x - 2, gy, x + w + 2, gy + gh)
+        var cy = gy - scroll.toInt()
+        for (goal in list) {
+            if (cy + cardH >= gy && cy <= gy + gh) {
+                val reached = goal.getBoolean("reached")
+                val claimed = goal.getBoolean("claimed")
+                val ready = reached && !claimed
+                box(g, x, cy, w, cardH, if (ready) mix(GOLD, 0x182029, 0.82f) else CARD)
+                g.fill(x, cy, x + 2, cy + cardH, if (claimed) DIM else if (ready) GOLD else ACCENT)
+                text(g, fit(goal.getString("title"), w - 150), x + 8, cy + 5, if (claimed) SUB else TEXT, true)
+                text(g, fit(goal.getString("desc"), w - 150), x + 8, cy + 17, SUB)
+                val have = goal.getInt("have")
+                val need = goal.getInt("need").coerceAtLeast(1)
+                bar(g, x + 8, cy + 30, w - 160, 4, have.toDouble() / need, if (reached) GOOD else ACCENT)
+                text(g, "$have/$need", x + w - 148, cy + 28, if (reached) GOOD else DIM)
+                // rewards
+                val rewards = goal.getList("rewards", Tag.TAG_STRING.toInt())
+                var rx = x + w - 112
+                for (i in 0 until rewards.size) {
+                    val (n, id) = rewards.getString(i).split('|', limit = 2).let { it[0] to it.getOrElse(1) { "" } }
+                    val stack = rewardIcon(id)
+                    item(g, stack, rx, cy + 4)
+                    if (n != "1") text(g, n, rx + 12, cy + 13, TEXT, true)
+                    if (over(mx, my, rx, cy + 4, 16, 16) && my in gy until gy + gh) tooltip = listOf(
+                        Component.literal("$n× ").append(if (id.startsWith("#")) Component.literal("random ${id.substringAfterLast(':').trimEnd('s')}") else stack.hoverName))
+                    rx += 22
+                }
+                val bx = x + w - 112
+                when {
+                    claimed -> text(g, "Collected", bx, cy + 26, DIM)
+                    ready -> if (cy + 23 >= gy && cy + 37 <= gy + gh) button(g, bx, cy + 22, 104, 15, "Collect reward", GOLD, mx, my) { send("claim", goal.getString("id"), page = "goals") }
+                    else -> text(g, "In progress", bx, cy + 26, DIM)
+                }
+            }
+            cy += cardH + gap
         }
         g.disableScissor()
         scrollbar(g, x + w + 4, gy, gh)

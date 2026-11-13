@@ -1,7 +1,10 @@
 package com.rickygamer28.sanctuary.registry
 
 import com.rickygamer28.sanctuary.CobblemonSanctuary
+import com.rickygamer28.sanctuary.block.BouncyBallBlock
 import com.rickygamer28.sanctuary.block.EggNestBlock
+import com.rickygamer28.sanctuary.block.FeedingTroughBlock
+import com.rickygamer28.sanctuary.block.PokemonBedBlock
 import com.rickygamer28.sanctuary.block.GatheringBasketBlock
 import com.rickygamer28.sanctuary.block.HubBellBlock
 import com.rickygamer28.sanctuary.block.IncubatorBlock
@@ -52,6 +55,15 @@ object ModContent {
     val GATHERING_BASKET: DeferredBlock<GatheringBasketBlock> = BLOCKS.register("gathering_basket") { ->
         GatheringBasketBlock(BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(0.8f).sound(SoundType.BAMBOO_WOOD).noOcclusion())
     }
+    val POKEMON_BED: DeferredBlock<PokemonBedBlock> = BLOCKS.register("pokemon_bed") { ->
+        PokemonBedBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED).strength(0.6f).sound(SoundType.WOOL).noOcclusion())
+    }
+    val BOUNCY_BALL: DeferredBlock<BouncyBallBlock> = BLOCKS.register("bouncy_ball") { ->
+        BouncyBallBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_LIGHT_BLUE).strength(0.3f).sound(SoundType.WOOL).noOcclusion())
+    }
+    val FEEDING_TROUGH: DeferredBlock<FeedingTroughBlock> = BLOCKS.register("feeding_trough") { ->
+        FeedingTroughBlock(BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(1.0f).sound(SoundType.WOOD).noOcclusion())
+    }
     val INCUBATOR_ENTITY: DeferredHolder<BlockEntityType<*>, BlockEntityType<IncubatorBlockEntity>> = BLOCK_ENTITIES.register("incubator") { ->
         BlockEntityType.Builder.of({ pos, state -> IncubatorBlockEntity(pos, state) }, INCUBATOR.get()).build(null)
     }
@@ -71,6 +83,9 @@ object ModContent {
     val GATHERING_BASKET_ITEM: DeferredItem<Item> = ITEMS.register("gathering_basket") { ->
         net.minecraft.world.item.BlockItem(GATHERING_BASKET.get(), Item.Properties())
     }
+    val POKEMON_BED_ITEM: DeferredItem<Item> = ITEMS.register("pokemon_bed") { -> net.minecraft.world.item.BlockItem(POKEMON_BED.get(), Item.Properties()) }
+    val BOUNCY_BALL_ITEM: DeferredItem<Item> = ITEMS.register("bouncy_ball") { -> net.minecraft.world.item.BlockItem(BOUNCY_BALL.get(), Item.Properties()) }
+    val FEEDING_TROUGH_ITEM: DeferredItem<Item> = ITEMS.register("feeding_trough") { -> net.minecraft.world.item.BlockItem(FEEDING_TROUGH.get(), Item.Properties()) }
     val POKEMON_EGG: DeferredItem<PokemonEggItem> = ITEMS.register("pokemon_egg") { ->
         PokemonEggItem(Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON))
     }
@@ -90,6 +105,9 @@ object ModContent {
                 output.accept(HUB_BELL_ITEM.get())
                 output.accept(INCUBATOR_ITEM.get())
                 output.accept(GATHERING_BASKET_ITEM.get())
+                output.accept(POKEMON_BED_ITEM.get())
+                output.accept(BOUNCY_BALL_ITEM.get())
+                output.accept(FEEDING_TROUGH_ITEM.get())
             }
             .build()
     }

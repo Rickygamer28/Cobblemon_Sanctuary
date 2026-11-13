@@ -23,7 +23,7 @@ import kotlin.math.abs
  */
 object Props {
     /** What a resident does at a spot. */
-    enum class Action { SIT, NAP, WARM, SPLASH, SNIFF, ROLL, TRAIN, CHARGE, SHIMMER, HAUNT, PICNIC, DIG }
+    enum class Action { SIT, NAP, WARM, SPLASH, SNIFF, ROLL, TRAIN, CHARGE, SHIMMER, HAUNT, PICNIC, DIG, PLAY, EAT }
 
     class Kind(
         val id: String,
@@ -42,6 +42,8 @@ object Props {
         val soil: Boolean = false,
         /** Builds it on the column; returns the spot residents walk to (null if it couldn't be built). */
         val build: ((BiomeDresser.Ctx) -> BlockPos?)? = null,
+        /** Placed by a player: every resident likes it. */
+        val placed: Boolean = false,
     )
 
     private fun b(block: Block): BlockState = block.defaultBlockState()
@@ -244,8 +246,12 @@ object Props {
             c.around(3) { if (c.random.nextInt(3) == 0) b(Blocks.AMETHYST_CLUSTER) else b(Blocks.RAW_GOLD_BLOCK) }
             c.above
         },
-        // not built: residents can pick a berry tree as their favourite spot too
-        Kind("berry_tree", "a berry tree", Action.SNIFF, false, setOf("grass", "bug", "normal", "fairy")),
+        // not built: residents can pick a berry tree as their favourite spot too (and Grass and Water types tend them)
+        Kind("berry_tree", "a berry tree", Action.SNIFF, false, setOf("grass", "bug", "normal", "fairy", "water")),
+        // decorations players place
+        Kind("player_bed", "a Pokémon bed", Action.NAP, true, emptySet(), bed = true, placed = true),
+        Kind("player_toy", "a bouncy ball", Action.PLAY, false, emptySet(), gathering = true, placed = true),
+        Kind("player_trough", "a feeding trough", Action.EAT, false, emptySet(), gathering = true, placed = true),
     ).associateBy { it.id }
 
     /** Which spots each biome gets. */

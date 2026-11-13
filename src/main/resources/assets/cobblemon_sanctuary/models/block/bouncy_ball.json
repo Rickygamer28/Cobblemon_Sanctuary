@@ -1,0 +1,178 @@
+{
+  "parent": "minecraft:block/block",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "particle": "cobblemon_sanctuary:block/bouncy_ball",
+    "ball": "cobblemon_sanctuary:block/bouncy_ball"
+  },
+  "elements": [
+    {
+      "from": [
+        4,
+        1,
+        5
+      ],
+      "to": [
+        12,
+        7,
+        11
+      ],
+      "faces": {
+        "north": {
+          "texture": "#ball",
+          "uv": [
+            0,
+            3,
+            16,
+            13
+          ]
+        },
+        "south": {
+          "texture": "#ball",
+          "uv": [
+            0,
+            3,
+            16,
+            13
+          ]
+        },
+        "east": {
+          "texture": "#ball",
+          "uv": [
+            0,
+            3,
+            16,
+            13
+          ]
+        },
+        "west": {
+          "texture": "#ball",
+          "uv": [
+            0,
+            3,
+            16,
+            13
+          ]
+        },
+        "up": {
+          "texture": "#ball",
+          "uv": [
+            0,
+            3,
+            16,
+            13
+          ]
+        },
+        "down": {
+          "texture": "#ball",
+          "uv": [
+            0,
+            3,
+            16,
+            13
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        5,
+        0,
+        5
+      ],
+      "to": [
+        11,
+        8,
+        11
+      ],
+      "faces": {
+        "north": {
+          "texture": "#ball"
+        },
+        "south": {
+          "texture": "#ball"
+        },
+        "east": {
+          "texture": "#ball"
+        },
+        "west": {
+          "texture": "#ball"
+        },
+        "up": {
+          "texture": "#ball"
+        },
+        "down": {
+          "texture": "#ball"
+        }
+      }
+    },
+    {
+      "from": [
+        5,
+        1,
+        4
+      ],
+      "to": [
+        11,
+        7,
+        12
+      ],
+      "faces": {
+        "north": {
+          "texture": "#ball",
+          "uv": [
+            0,
+            3,
+            16,
+            13
+          ]
+        },
+        "south": {
+          "texture": "#ball",
+          "uv": [
+            0,
+            3,
+            16,
+            13
+          ]
+        },
+        "east": {
+          "texture": "#ball",
+          "uv": [
+            0,
+            3,
+            16,
+            13
+          ]
+        },
+        "west": {
+          "texture": "#ball",
+          "uv": [
+            0,
+            3,
+            16,
+            13
+          ]
+        },
+        "up": {
+          "texture": "#ball",
+          "uv": [
+            0,
+            3,
+            16,
+            13
+          ]
+        },
+        "down": {
+          "texture": "#ball",
+          "uv": [
+            0,
+            3,
+            16,
+            13
+          ]
+        }
+      }
+    }
+  ]
+}

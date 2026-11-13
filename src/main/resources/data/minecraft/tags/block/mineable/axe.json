@@ -1,6 +1,8 @@
 {
   "replace": false,
   "values": [
-    "cobblemon_sanctuary:gathering_basket"
+    "cobblemon_sanctuary:gathering_basket",
+    "cobblemon_sanctuary:pokemon_bed",
+    "cobblemon_sanctuary:feeding_trough"
   ]
 }

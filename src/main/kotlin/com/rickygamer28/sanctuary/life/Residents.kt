@@ -72,6 +72,10 @@ class LiveResident(
     var dozeUntil = 0L
     /** Last time a visit made it fonder of its trainer. */
     var lastFondAt = -100000L
+    /** Came over to greet its trainer, and follows them until then. */
+    var greetPlayer: UUID? = null
+    var greetUntil = 0L
+    var greeted = false
     /** Going back to rest: walking into a den (or out of sight, or diving), then gone. */
     var leaving = false
     var leaveTarget: BlockPos? = null
@@ -132,6 +136,7 @@ object Residents {
         cleanUp(rt)
         Gathering.tick(level, s, rt, now)
         Growth.tick(level, s, rt, now)
+        Milestones.tick(level, s, rt, now)
         if (players.isEmpty()) {
             despawnAll(rt)
             rt.hadPlayers = false
@@ -143,6 +148,7 @@ object Residents {
             AwayLife.welcome(s, players)
         }
         updateSpawns(level, s, rt, players, now)
+        Greeting.tick(level, s, rt, players, now)
         Behaviour.tickSecond(level, s, rt, now)
         MegaCompat.tick(now)
         Families.tickSecond(level, s, rt, now)
@@ -257,6 +263,7 @@ object Residents {
         val night = Routines.isNight(level)
         val rotate = SanctuaryConfig.rotationMinutes.get()
         if (rt.shiftNight != night || (rotate > 0 && now - rt.shuffleAt > 20L * 60 * rotate)) {
+            if (rt.shiftNight == true && !night) Jobs.dawn(level, s)
             if (rt.shiftNight != null && rt.shiftNight != night) {
                 s.logEvent(if (night) "Night fell: the night owls came out and the others went home to their dens." else "Morning came: the day crowd came out of their dens.")
             }

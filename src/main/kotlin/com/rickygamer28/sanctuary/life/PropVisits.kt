@@ -55,25 +55,33 @@ object PropVisits {
                 }
             }
         }
-        // a spot nearby, preferring the kinds its types love
+        // a spot nearby, preferring the kinds its types love (and the ones its trainer placed)
         var total = 0.0
-        val options = ArrayList<Pair<Long, Double>>()
-        for ((p, kindId) in s.props) {
+        val options = ArrayList<Triple<Long, String, Double>>()
+        fun consider(p: Long, kind: Props.Kind) {
             val pos = BlockPos.of(p)
-            if (abs(pos.x - here.x) > RANGE || abs(pos.z - here.z) > RANGE) continue
-            val kind = kindOf(kindId) ?: continue
-            if (!level.isLoaded(pos) || !Behaviour.canRoam(s, rt, r, pos)) continue
-            val w = (if (likes(r, kind)) 4.0 else 1.0) * (if (p == rd?.favourite) 3.0 else 1.0)
+            if (abs(pos.x - here.x) > RANGE || abs(pos.z - here.z) > RANGE) return
+            if (!level.isLoaded(pos) || !Behaviour.canRoam(s, rt, r, pos)) return
+            var w = (if (likes(r, kind)) 4.0 else 1.0) * (if (p == rd?.favourite) 3.0 else 1.0)
+            if (kind.placed) w = 4.0 * when (kind.action) {
+                Props.Action.PLAY -> r.personality.tag
+                Props.Action.NAP -> r.personality.doze.coerceAtMost(2.0)
+                Props.Action.EAT -> r.personality.appetite
+                else -> 1.0
+            }
             total += w
-            options += p to w
+            options += Triple(p, kind.id, w)
         }
+        for ((p, kindId) in s.props) kindOf(kindId)?.let { consider(p, it) }
+        // berry trees: Grass and Water types tend them, Bug types visit their flowers
+        val tree = kindOf("berry_tree")
+        if (tree != null && likes(r, tree)) for (p in s.berrySpots) consider(p, tree)
         if (options.isEmpty()) return false
         var roll = level.random.nextDouble() * total
-        val pick = options.firstOrNull { roll -= it.second; roll <= 0 }?.first ?: options.last().first
-        val pos = BlockPos.of(pick)
-        val kindId = s.props[pick] ?: return false
-        if (!Props.stillThere(level, pos)) { s.props.remove(pick); return false }
-        return go(level, r, pos, kindId, now)
+        val pick = options.firstOrNull { roll -= it.third; roll <= 0 } ?: options.last()
+        val pos = BlockPos.of(pick.first)
+        if (!Props.stillThere(level, pos)) { if (pick.second != "berry_tree") s.props.remove(pick.first); return false }
+        return go(level, r, pos, pick.second, now)
     }
 
     private fun go(level: ServerLevel, r: LiveResident, pos: BlockPos, kindId: String, now: Long, offset: Int = 0): Boolean {
@@ -183,6 +191,15 @@ object PropVisits {
             Props.Action.HAUNT -> { near(ParticleTypes.SOUL, 2, 0.4, 0.02); if (anim) Effects.play(e, listOf("status", "cry")) }
             Props.Action.PICNIC -> { if (second % 2 == 0) Effects.hearts(e); if (anim) Effects.play(e, listOf("eat", "status", "cry")) }
             Props.Action.DIG -> { near(BlockParticleOption(ParticleTypes.BLOCK, level.getBlockState(at)), 8, 0.4, 0.1); if (anim) Effects.play(e, listOf("physical", "status", "cry")) }
+            Props.Action.PLAY -> {
+                // bats the ball around
+                if (second % 2 == 0) { Effects.play(e, listOf("physical", "cry", "status")); level.sendParticles(ParticleTypes.NOTE, cx, cy + 0.6, cz, 1, 0.3, 0.2, 0.3, 0.5) }
+                if (second % 3 == 1) Effects.happy(e)
+            }
+            Props.Action.EAT -> {
+                if (anim) Effects.play(e, listOf("eat", "status", "cry"))
+                if (com.rickygamer28.sanctuary.block.FeedingTroughBlock.food(level, at) > 0) near(net.minecraft.core.particles.ItemParticleOption(ParticleTypes.ITEM, net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.SWEET_BERRIES)), 4, 0.3, 0.05)
+            }
         }
     }
 
@@ -191,6 +208,13 @@ object PropVisits {
         r.activityAt = null
         r.busyUntil = 0
         if (kind.action == Props.Action.NAP) Routines.wake(r)
+        // a meal at the trough its trainer filled
+        if (kind.action == Props.Action.EAT && com.rickygamer28.sanctuary.block.FeedingTroughBlock.food(level, at) > 0) {
+            if (level.random.nextInt(3) == 0) com.rickygamer28.sanctuary.block.FeedingTroughBlock.eat(level, at)
+            Effects.hearts(r.entity)
+            Growth.fonder(s, r.pokemon, 1)
+            s.stat("meals")
+        }
         // a nice time: a little fonder of its trainer (at most every ten minutes)
         if (now - r.lastFondAt > 20L * 600) {
             r.lastFondAt = now
@@ -202,6 +226,8 @@ object PropVisits {
             s.addRelation(r.pokemonId, o.pokemonId, 1)
         }
         considerFavourite(level, s, r, at, kind)
+        s.stat("visits")
+        Jobs.afterVisit(level, s, rt, r, kind, at, now)
         if (level.random.nextInt(25) == 0) {
             val zone = ZoneLayout.locate(s, at.x, at.z)?.zone
             s.logEvent("${r.name} spent some time at ${kind.label} in the ${Residents.zoneName(zone)}.")

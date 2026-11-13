@@ -170,6 +170,20 @@ class Sanctuary(
     /** How many residents are out at once: 0 normal, 1 more, 2 everyone. */
     var crowd: Int = 0
 
+    /** Running counts for the Journal's goals (visits, jobs, greetings, megas, play-fights…). */
+    val stats: MutableMap<String, Int> = mutableMapOf()
+
+    /** Kinds of finds the Gathering Basket doesn't take ("drops", "berries", "apricorns", "jobs"). */
+    val basketOff: MutableSet<String> = linkedSetOf()
+
+    /** Goals whose reward was already collected. */
+    val claimed: MutableSet<String> = linkedSetOf()
+
+    /** Goals reached (and announced). */
+    val reached: MutableSet<String> = linkedSetOf()
+
+    fun stat(key: String, by: Int = 1) { stats[key] = (stats[key] ?: 0) + by }
+
     /** Biome variant chosen per type for this sanctuary. */
     val variants: MutableMap<String, Int> = mutableMapOf()
 
@@ -188,7 +202,8 @@ class Sanctuary(
         dressed = BitSet()
         meadow = BitSet()
         berrySpots.clear()
-        props.clear()
+        // the valley's own spots go; decorations players placed stay
+        props.values.removeIf { !it.startsWith("player_") }
         dens.clear()
         needsCheck = true
         generationDirty = true
@@ -241,6 +256,10 @@ class Sanctuary(
         t.putLongArray("DenPos", dens.keys.toLongArray())
         t.put("DenInfo", ListTag().also { l -> dens.values.forEach { l.add(net.minecraft.nbt.StringTag.valueOf(it)) } })
         t.putInt("Crowd", crowd)
+        t.put("Stats", CompoundTag().also { c -> stats.forEach { (k, v) -> c.putInt(k, v) } })
+        t.put("BasketOff", ListTag().also { l -> basketOff.forEach { l.add(net.minecraft.nbt.StringTag.valueOf(it)) } })
+        t.put("Claimed", ListTag().also { l -> claimed.forEach { l.add(net.minecraft.nbt.StringTag.valueOf(it)) } })
+        t.put("Reached", ListTag().also { l -> reached.forEach { l.add(net.minecraft.nbt.StringTag.valueOf(it)) } })
         t.putUUID("Id", id)
         t.putUUID("Owner", owner)
         t.putString("OwnerName", ownerName)
@@ -335,6 +354,10 @@ class Sanctuary(
                 for (i in dp.indices) if (i < di.size) s.dens[dp[i]] = di.getString(i)
             }
             s.crowd = t.getInt("Crowd")
+            t.getCompound("Stats").let { c -> c.allKeys.forEach { k -> s.stats[k] = c.getInt(k) } }
+            t.getList("Claimed", Tag.TAG_STRING.toInt()).forEach { s.claimed += it.asString }
+            t.getList("BasketOff", Tag.TAG_STRING.toInt()).forEach { s.basketOff += it.asString }
+            t.getList("Reached", Tag.TAG_STRING.toInt()).forEach { s.reached += it.asString }
             if (t.contains("PortalPos")) s.portalPos = BlockPos.of(t.getLong("PortalPos"))
             t.getList("Members", Tag.TAG_COMPOUND.toInt()).forEach { e ->
                 val c = e as CompoundTag
@@ -381,7 +404,7 @@ class Sanctuary(
             st.allKeys.forEach { k -> s.staleLandmarks[k] = st.getLong(k) }
             if (version < DATA_VERSION && version > 0 && !onlyWater) {
                 s.berrySpots.clear()
-                s.props.clear()
+                s.props.values.removeIf { !it.startsWith("player_") }
                 s.dens.clear()
                 // the terrain is being rebuilt: landmarks get rebuilt on the new ground too
                 s.landmarks.forEach { (k, v) -> if (v != Long.MIN_VALUE) s.staleLandmarks[k] = v }

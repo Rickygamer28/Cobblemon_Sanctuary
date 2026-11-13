@@ -141,6 +141,7 @@ object MegaCompat {
         level.sendParticles(ParticleTypes.FLASH, entity.x, entity.y + entity.bbHeight * 0.6, entity.z, 1, 0.0, 0.0, 0.0, 0.0)
         Effects.play(entity, Effects.CRY)
         s?.logEvent("${pokemon.getDisplayName(false).string} Mega Evolved during a play-fight!")
+        s?.stat("megas")
     }
 
     /** Ends Mega Evolutions whose time is up. Called every second. */

@@ -16,6 +16,7 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType
 object Leaving {
     fun start(level: ServerLevel, s: Sanctuary, rt: SanctuaryRuntime, r: LiveResident, now: Long) {
         r.leaving = true
+        r.greetPlayer = null
         r.leaveSince = now
         r.busyUntil = Long.MAX_VALUE
         r.propSpot = null; r.activityKind = null; r.snackSpot = null; r.napSpot = null

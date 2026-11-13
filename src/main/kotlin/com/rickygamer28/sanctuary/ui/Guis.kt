@@ -81,6 +81,19 @@ object SanctuaryGuis {
         t.putInt("residents", s.residentCount)
         t.putInt("live", rt.live.values.count { !it.leaving })
         t.putInt("capNow", Residents.spawnCap(s))
+        t.put("basketOff", ListTag().also { l -> s.basketOff.forEach { l.add(StringTag.valueOf(it)) } })
+        t.put("goals", ListTag().also { list ->
+            for (g in com.rickygamer28.sanctuary.life.Milestones.GOALS) list.add(CompoundTag().also {
+                it.putString("id", g.id)
+                it.putString("title", g.title)
+                it.putString("desc", g.desc)
+                it.putInt("have", com.rickygamer28.sanctuary.life.Milestones.value(g, s, rt).coerceAtMost(g.need))
+                it.putInt("need", g.need)
+                it.putBoolean("reached", g.id in s.reached)
+                it.putBoolean("claimed", g.id in s.claimed)
+                it.put("rewards", ListTag().also { rl -> g.rewards.forEach { rw -> rl.add(StringTag.valueOf("${rw.count}|${rw.id}")) } })
+            })
+        })
         t.putInt("crowd", s.crowd)
         t.putBoolean("crowdAllowed", com.rickygamer28.sanctuary.SanctuaryConfig.allowBigCrowds.get())
         run {
@@ -310,6 +323,18 @@ object ScreenActions {
             "travel" -> { SanctuaryGuis.close(player); player.server.execute { Sanctuaries.travel(player, s) } }
             "return" -> { SanctuaryGuis.close(player); player.server.execute { SanctuaryDimension.returnHome(player) } }
             "expand" -> { if (ownerOnly()) Sanctuaries.expand(s, player); refresh("home") }
+            "claim" -> {
+                val msg = com.rickygamer28.sanctuary.life.Milestones.claim(level, s, player, v)
+                say(player, msg, if (msg.startsWith("Collected")) ChatFormatting.GREEN else ChatFormatting.GRAY)
+                refresh("goals")
+            }
+            "basket" -> {
+                if (ownerOnly() && v in setOf("drops", "berries", "apricorns", "jobs")) {
+                    if (!s.basketOff.remove(v)) s.basketOff += v
+                    Sanctuaries.data(level).setDirty()
+                }
+                refresh("home")
+            }
             "crowd" -> {
                 val c = v.toIntOrNull()?.coerceIn(0, 2) ?: 0
                 if (ownerOnly()) {

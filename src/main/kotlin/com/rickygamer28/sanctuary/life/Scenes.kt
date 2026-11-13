@@ -41,7 +41,7 @@ object Scenes {
         val baseChance = SanctuaryConfig.meetingChance.get()
         val night = Routines.isNight(level)
         val free = rt.live.values.filter {
-            !it.napping && it.napSpot == null && it.snackSpot == null && it.propSpot == null && it.dozeUntil == 0L &&
+            !it.napping && it.napSpot == null && it.snackSpot == null && it.propSpot == null && it.dozeUntil == 0L && it.greetPlayer == null &&
             now >= it.busyUntil && now >= it.nextMeetAt && !it.migrating && it.waypoints.isEmpty() &&
                 !it.entity.isRemoved && !Residents.isSleeping(it.entity) && it.entity.onGround()
         }
@@ -147,6 +147,7 @@ object Scenes {
                     } else {
                         Effects.happy(a.entity); Effects.happy(b.entity)
                         relate(s, scene.a, scene.b, (5 * friendRate).roundToInt())
+                        s.stat("playfights")
                         Growth.playFightXp(s, scene.a)
                         Growth.playFightXp(s, scene.b)
                         if (r.nextInt(6) == 0) s.logEvent("${a.name} and ${b.name} play-fought in the ${Residents.zoneName(zoneOf(s, a))}.")

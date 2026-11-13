@@ -9,5 +9,8 @@
   "block.cobblemon_sanctuary.incubator": "Incubator",
   "block.cobblemon_sanctuary.egg_nest": "Nest",
   "item.cobblemon_sanctuary.pokemon_egg": "Pokémon Egg",
-  "block.cobblemon_sanctuary.gathering_basket": "Gathering Basket"
+  "block.cobblemon_sanctuary.gathering_basket": "Gathering Basket",
+  "block.cobblemon_sanctuary.pokemon_bed": "Pokémon Bed",
+  "block.cobblemon_sanctuary.bouncy_ball": "Bouncy Ball",
+  "block.cobblemon_sanctuary.feeding_trough": "Feeding Trough"
 }

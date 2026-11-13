@@ -108,7 +108,19 @@ object SanctuaryConfig {
         .define("basketEnabled", true)
     val basketMinutes: ModConfigSpec.IntValue = builder
         .comment("Minutes between gathering trips (a few residents bring something each time).")
-        .defineInRange("basketMinutes", 2, 1, 1440)
+        .defineInRange("basketMinutes", 5, 1, 1440)
+    val basketItemCap: ModConfigSpec.IntValue = builder
+        .comment("Residents stop bringing an item once the basket holds this many of it.")
+        .defineInRange("basketItemCap", 32, 1, 3456)
+    val jobRate: ModConfigSpec.DoubleValue = builder
+        .comment("How often residents' jobs turn up something for the basket (1.0 = default, 0 = jobs only change the valley).")
+        .defineInRange("jobRate", 1.0, 0.0, 10.0)
+    val greetings: ModConfigSpec.BooleanValue = builder
+        .comment("Residents that are fond of their trainer come over to say hello.")
+        .define("greetings", true)
+    val greetFriendship: ModConfigSpec.IntValue = builder
+        .comment("Friendship a resident needs to come and greet its trainer.")
+        .defineInRange("greetFriendship", 120, 0, 255)
 
     val awayLife: ModConfigSpec.BooleanValue = builder
         .comment("Residents keep meeting, making friends and rivals and laying eggs while nobody is in the sanctuary.")

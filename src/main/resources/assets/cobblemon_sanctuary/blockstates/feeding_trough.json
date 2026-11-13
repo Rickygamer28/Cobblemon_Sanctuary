@@ -1,0 +1,79 @@
+{
+  "variants": {
+    "facing=north,food=0": {
+      "model": "cobblemon_sanctuary:block/feeding_trough"
+    },
+    "facing=north,food=1": {
+      "model": "cobblemon_sanctuary:block/feeding_trough_full"
+    },
+    "facing=north,food=2": {
+      "model": "cobblemon_sanctuary:block/feeding_trough_full"
+    },
+    "facing=north,food=3": {
+      "model": "cobblemon_sanctuary:block/feeding_trough_full"
+    },
+    "facing=north,food=4": {
+      "model": "cobblemon_sanctuary:block/feeding_trough_full"
+    },
+    "facing=east,food=0": {
+      "model": "cobblemon_sanctuary:block/feeding_trough",
+      "y": 90
+    },
+    "facing=east,food=1": {
+      "model": "cobblemon_sanctuary:block/feeding_trough_full",
+      "y": 90
+    },
+    "facing=east,food=2": {
+      "model": "cobblemon_sanctuary:block/feeding_trough_full",
+      "y": 90
+    },
+    "facing=east,food=3": {
+      "model": "cobblemon_sanctuary:block/feeding_trough_full",
+      "y": 90
+    },
+    "facing=east,food=4": {
+      "model": "cobblemon_sanctuary:block/feeding_trough_full",
+      "y": 90
+    },
+    "facing=south,food=0": {
+      "model": "cobblemon_sanctuary:block/feeding_trough",
+      "y": 180
+    },
+    "facing=south,food=1": {
+      "model": "cobblemon_sanctuary:block/feeding_trough_full",
+      "y": 180
+    },
+    "facing=south,food=2": {
+      "model": "cobblemon_sanctuary:block/feeding_trough_full",
+      "y": 180
+    },
+    "facing=south,food=3": {
+      "model": "cobblemon_sanctuary:block/feeding_trough_full",
+      "y": 180
+    },
+    "facing=south,food=4": {
+      "model": "cobblemon_sanctuary:block/feeding_trough_full",
+      "y": 180
+    },
+    "facing=west,food=0": {
+      "model": "cobblemon_sanctuary:block/feeding_trough",
+      "y": 270
+    },
+    "facing=west,food=1": {
+      "model": "cobblemon_sanctuary:block/feeding_trough_full",
+      "y": 270
+    },
+    "facing=west,food=2": {
+      "model": "cobblemon_sanctuary:block/feeding_trough_full",
+      "y": 270
+    },
+    "facing=west,food=3": {
+      "model": "cobblemon_sanctuary:block/feeding_trough_full",
+      "y": 270
+    },
+    "facing=west,food=4": {
+      "model": "cobblemon_sanctuary:block/feeding_trough_full",
+      "y": 270
+    }
+  }
+}
