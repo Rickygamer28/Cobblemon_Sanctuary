@@ -40,10 +40,10 @@ object Props {
         val bed: Boolean = false,
         /** Only on dirt or grass (flowers and the like). */
         val soil: Boolean = false,
-        /** Builds it on the column; returns the spot residents walk to (null if it couldn't be built). */
-        val build: ((BiomeDresser.Ctx) -> BlockPos?)? = null,
         /** Placed by a player: every resident likes it. */
         val placed: Boolean = false,
+        /** Builds it on the column; returns the spot residents walk to (null if it couldn't be built). */
+        val build: ((BiomeDresser.Ctx) -> BlockPos?)? = null,
     )
 
     private fun b(block: Block): BlockState = block.defaultBlockState()
