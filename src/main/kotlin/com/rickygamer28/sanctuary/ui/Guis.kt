@@ -126,6 +126,8 @@ object SanctuaryGuis {
         })
         t.put("events", ListTag().also { list -> s.events.toList().reversed().forEach { list.add(StringTag.valueOf(it)) } })
         t.putBoolean("hasWhistle", player.inventory.contains(ItemStack(ModContent.WHISTLE.get())))
+        t.putBoolean("hasBasket", s.basketPos != null)
+        t.putInt("basketItems", com.rickygamer28.sanctuary.life.Gathering.itemCount(s))
         t.putBoolean("eggsOn", com.rickygamer28.sanctuary.SanctuaryConfig.eggsEnabled.get())
         t.put("eggs", eggs(player, s, ring))
 

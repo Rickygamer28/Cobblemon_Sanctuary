@@ -103,6 +103,13 @@ object SanctuaryConfig {
     val megaMinSeconds: ModConfigSpec.IntValue = builder.defineInRange("megaMinSeconds", 30, 1, 3600)
     val megaMaxSeconds: ModConfigSpec.IntValue = builder.defineInRange("megaMaxSeconds", 300, 1, 3600)
 
+    val basketEnabled: ModConfigSpec.BooleanValue = builder
+        .comment("Residents bring their Cobblemon drops, berries and apricorns to a Gathering Basket placed in the valley.")
+        .define("basketEnabled", true)
+    val basketMinutes: ModConfigSpec.IntValue = builder
+        .comment("Minutes between gathering trips (a few residents bring something each time).")
+        .defineInRange("basketMinutes", 2, 1, 1440)
+
     val awayLife: ModConfigSpec.BooleanValue = builder
         .comment("Residents keep meeting, making friends and rivals and laying eggs while nobody is in the sanctuary.")
         .define("awayLife", true)

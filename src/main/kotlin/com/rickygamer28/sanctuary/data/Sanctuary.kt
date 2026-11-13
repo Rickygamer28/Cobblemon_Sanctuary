@@ -145,6 +145,15 @@ class Sanctuary(
     var awayRivals = 0
     var awayEggs = 0
 
+    /** The Gathering Basket's contents (shared by every basket placed in the valley). */
+    val basket: net.minecraft.world.SimpleContainer = net.minecraft.world.SimpleContainer(54)
+
+    /** Where a Gathering Basket stands in the valley (residents only gather while one is placed). */
+    var basketPos: BlockPos? = null
+
+    /** Berry trees in the valley, where residents meet for a meal. */
+    val berrySpots: MutableSet<Long> = linkedSetOf()
+
     /** Biome variant chosen per type for this sanctuary. */
     val variants: MutableMap<String, Int> = mutableMapOf()
 
@@ -196,8 +205,18 @@ class Sanctuary(
         while (events.size > 40) events.removeFirst()
     }
 
-    fun save(): CompoundTag {
+    fun save(registries: net.minecraft.core.HolderLookup.Provider? = null): CompoundTag {
         val t = CompoundTag()
+        if (registries != null) {
+            val items = ListTag()
+            for (i in 0 until basket.containerSize) {
+                val st = basket.getItem(i)
+                if (!st.isEmpty) items.add(CompoundTag().also { it.putInt("Slot", i); it.put("Item", st.save(registries)) })
+            }
+            t.put("Basket", items)
+        }
+        basketPos?.let { t.putLong("BasketPos", it.asLong()) }
+        t.putLongArray("BerrySpots", berrySpots.toLongArray())
         t.putUUID("Id", id)
         t.putUUID("Owner", owner)
         t.putString("OwnerName", ownerName)
@@ -264,7 +283,7 @@ class Sanctuary(
 
         fun key(a: UUID, b: UUID): String = if (a < b) "$a|$b" else "$b|$a"
 
-        fun load(t: CompoundTag): Sanctuary {
+        fun load(t: CompoundTag, registries: net.minecraft.core.HolderLookup.Provider? = null): Sanctuary {
             val s = Sanctuary(
                 id = t.getUUID("Id"),
                 owner = t.getUUID("Owner"),
@@ -276,6 +295,13 @@ class Sanctuary(
                 slot = t.getInt("Slot"),
             )
             if (t.contains("PortalDim")) s.portalDim = t.getString("PortalDim")
+            if (registries != null) t.getList("Basket", Tag.TAG_COMPOUND.toInt()).forEach { e ->
+                val c = e as CompoundTag
+                val slot = c.getInt("Slot")
+                if (slot in 0 until s.basket.containerSize) s.basket.setItem(slot, net.minecraft.world.item.ItemStack.parse(registries, c.getCompound("Item")).orElse(net.minecraft.world.item.ItemStack.EMPTY))
+            }
+            if (t.contains("BasketPos")) s.basketPos = BlockPos.of(t.getLong("BasketPos"))
+            t.getLongArray("BerrySpots").forEach { s.berrySpots += it }
             if (t.contains("PortalPos")) s.portalPos = BlockPos.of(t.getLong("PortalPos"))
             t.getList("Members", Tag.TAG_COMPOUND.toInt()).forEach { e ->
                 val c = e as CompoundTag

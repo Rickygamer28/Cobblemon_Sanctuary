@@ -7,6 +7,7 @@ import com.rickygamer28.sanctuary.data.Sanctuary
 import com.rickygamer28.sanctuary.registry.ModContent
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
+import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.core.registries.Registries
 import net.minecraft.data.worldgen.features.MiscOverworldFeatures
 import net.minecraft.data.worldgen.features.TreeFeatures
@@ -217,6 +218,17 @@ object BiomeDresser {
                 for (dy in 0 until depth) at(surface.offset(dx, height - dy, dz), if (dy == 0) top else main)
             }
         }
+        /** A Cobblemon berry tree (or a sweet berry bush without Cobblemon's), where residents meet for meals. */
+        fun berryTree() {
+            if (!level.getBlockState(above).isAir || !level.getBlockState(surface).`is`(BlockTags.DIRT)) return
+            val ids = listOf("oran_berry", "pecha_berry", "cheri_berry", "rawst_berry", "sitrus_berry", "leppa_berry", "aspear_berry", "persim_berry")
+            val block = BuiltInRegistries.BLOCK.get(ResourceLocation.fromNamespaceAndPath("cobblemon", ids[random.nextInt(ids.size)]))
+            var state = if (block == Blocks.AIR) b(Blocks.SWEET_BERRY_BUSH) else block.defaultBlockState()
+            val age = state.block.stateDefinition.getProperty("age") as? net.minecraft.world.level.block.state.properties.IntegerProperty
+            if (age != null) state = state.setValue(age, age.possibleValues.max())
+            level.setBlock(above, state, Block.UPDATE_ALL)
+            if (s.berrySpots.size < 600) s.berrySpots += above.asLong()
+        }
         fun tallPlant(state: BlockState) {
             val lower = above
             val upper = lower.above()
@@ -266,6 +278,72 @@ object BiomeDresser {
         Blocks.HAY_BLOCK, Blocks.CARVED_PUMPKIN, Blocks.JACK_O_LANTERN, Blocks.TARGET, Blocks.REDSTONE_LAMP,
         Blocks.CHIPPED_ANVIL, Blocks.DAMAGED_ANVIL, Blocks.BRICKS, Blocks.PURPUR_PILLAR, Blocks.WITHER_ROSE,
     )
+
+    // ================================================================== Cobblemon's own plants and crystals
+
+    /** What each biome grows from Cobblemon: apricorn trees, mints and herbs, flowers, gem clusters, tumblestone… */
+    private class CobDecor(
+        val apricorn: String? = null,
+        val patches: List<String> = emptyList(),
+        val flowers: List<String> = emptyList(),
+        val gem: String? = null,
+        val rocks: List<String> = emptyList(),
+        val chest: Boolean = false,
+    )
+
+    private val COBBLEMON_DECOR: Map<String, CobDecor> = mapOf(
+        ZoneLayout.HUB to CobDecor("yellow", listOf("pink_mint", "white_mint", "revival_herb"), listOf("pep_up_flower", "lucibell"), "normal"),
+        "grass" to CobDecor("green", listOf("green_mint", "revival_herb", "hearty_grains/grains_patch"), listOf("verdroot", "pep_up_flower"), "grass"),
+        "bug" to CobDecor("green", listOf("hearty_grains/grains_patch", "green_mint"), listOf("bugwort", "verdroot"), "bug"),
+        "fairy" to CobDecor("pink", listOf("pink_mint", "white_mint"), listOf("lucibell", "pomohana", "pauvillea"), "fairy"),
+        "water" to CobDecor("blue", listOf("medicinal_leek", "blue_mint", "cyan_mint"), listOf("lobaila"), "water"),
+        "fire" to CobDecor("red", listOf("red_mint"), emptyList(), "fire"),
+        "ice" to CobDecor("white", listOf("white_mint"), emptyList(), "ice"),
+        "electric" to CobDecor("yellow", emptyList(), listOf("voltaconia"), "electric"),
+        "psychic" to CobDecor(null, listOf("pink_mint"), listOf("wistensu", "mistleaf"), "psychic"),
+        "poison" to CobDecor(null, emptyList(), listOf("mistleaf"), "poison"),
+        "dark" to CobDecor("black", emptyList(), emptyList(), "dark"),
+        "ghost" to CobDecor(null, emptyList(), emptyList(), "ghost", chest = true),
+        "rock" to CobDecor(null, emptyList(), emptyList(), "rock", listOf("tumblestone_cluster")),
+        "ground" to CobDecor(null, emptyList(), emptyList(), "ground", listOf("tumblestone_cluster")),
+        "steel" to CobDecor(null, emptyList(), emptyList(), "steel", listOf("sky_tumblestone_cluster")),
+        "dragon" to CobDecor(null, emptyList(), emptyList(), "dragon", listOf("black_tumblestone_cluster")),
+        "fighting" to CobDecor("red", listOf("galarica_nuts/galarica_bushes"), emptyList(), "fighting"),
+    )
+
+    /** A Cobblemon block by name, fully grown if it grows; null when this Cobblemon version doesn't have it. */
+    private fun cobBlock(id: String): BlockState? {
+        val block = BuiltInRegistries.BLOCK.get(ResourceLocation.fromNamespaceAndPath("cobblemon", id))
+        if (block == Blocks.AIR) return null
+        var state = block.defaultBlockState()
+        val age = block.stateDefinition.getProperty("age") as? net.minecraft.world.level.block.state.properties.IntegerProperty
+        if (age != null) state = state.setValue(age, age.possibleValues.max())
+        return state
+    }
+
+    private fun cobFeature(id: String): ResourceKey<ConfiguredFeature<*, *>> =
+        ResourceKey.create(Registries.CONFIGURED_FEATURE, ResourceLocation.fromNamespaceAndPath("cobblemon", id))
+
+    private fun cobblemonDecor(c: Ctx, zone: String, target: Int) {
+        val d = COBBLEMON_DECOR[zone] ?: return
+        if (target < WATER_Y + 1 || !c.level.getBlockState(c.above).isAir) return
+        val salt = 600 + Math.floorMod(zone.hashCode(), 97)
+        val ground = c.level.getBlockState(c.surface)
+        val soil = ground.`is`(BlockTags.DIRT)
+        val solid = ground.isFaceSturdy(c.level, c.surface, Direction.UP)
+        when {
+            d.apricorn != null && soil && c.grid(36, salt) && c.roomy(6) -> c.feature(cobFeature("${d.apricorn}_apricorn_tree"))
+            d.gem != null && solid && c.grid(25, salt + 1) && c.roomy() -> cobBlock("${d.gem}_gem_cluster")?.let { c.place(it) }
+            d.rocks.isNotEmpty() && solid && c.grid(17, salt + 2) && c.roomy() -> cobBlock(d.rocks[c.random.nextInt(d.rocks.size)])?.let { c.place(it) }
+            d.patches.isNotEmpty() && soil && c.grid(31, salt + 3) && c.roomy() -> c.feature(cobFeature(d.patches[c.random.nextInt(d.patches.size)]), 4, 3)
+            d.flowers.isNotEmpty() && soil && c.chance(0.012) -> cobBlock(d.flowers[c.random.nextInt(d.flowers.size)])?.let {
+                if (it.hasProperty(DoublePlantBlock.HALF)) c.tallPlant(it) else c.place(it)
+            }
+            d.chest && solid && c.grid(73, salt + 4) && c.roomy(8) -> cobBlock("gimmighoul_chest")?.let { c.place(it) }
+        }
+    }
+
+    private val BERRY_ZONES = listOf("grass", "bug", "fairy", ZoneLayout.HUB, "water", "fighting")
 
     /** The layer that shows in tall cliffs of each rock. */
     private val STRATA: Map<Block, BlockState> = mapOf(
@@ -535,6 +613,9 @@ object BiomeDresser {
             }
             return true
         }
+        cobblemonDecor(ctx, zone, target)
+        // berry trees in the lusher biomes, where residents meet for meals
+        if (zone in BERRY_ZONES && ctx.grid(27, 400 + BERRY_ZONES.indexOf(zone)) && ctx.roomy(6) && target >= WATER_Y + 1) ctx.berryTree()
         // a lake that reaches over the border keeps its water, whichever biome it spills into
         if (zone != "water" && target < WATER_Y && (zone == "water" || hit.neighbour == "water" || hit.zone == "water") && "water" in s.unlocked) {
             water(Ctx(level, s, surface, ctx.random, variantOf(s, "water").let { if (it == 2) 0 else it }, hit, ctx.exposure))

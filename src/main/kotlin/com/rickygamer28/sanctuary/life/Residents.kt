@@ -47,6 +47,13 @@ class LiveResident(
     /** A newborn follows its parents around for a while after hatching. */
     var followParents: Pair<UUID, UUID>? = null
     var followUntil = 0L
+    /** Asleep for the night, and where it's heading to sleep next to a friend. */
+    var napping = false
+    var napSpot: BlockPos? = null
+    var napGoalUntil = 0L
+    /** Heading to a berry tree for a meal. */
+    var snackSpot: BlockPos? = null
+    var snackUntil = 0L
     /** Can't go on land: stays in the water. */
     var swimmer = false
     /** When a swimmer was first seen out of the water (0 = in the water). */
@@ -101,6 +108,7 @@ object Residents {
 
         if (rt.rosterDirty || now - rt.rosterAt > 200) refreshRoster(level, s, rt, now)
         cleanUp(rt)
+        Gathering.tick(level, s, rt, now)
         if (players.isEmpty()) {
             despawnAll(rt)
             rt.hadPlayers = false

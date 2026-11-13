@@ -22,7 +22,7 @@ class Scene(
 }
 
 object Scenes {
-    enum class Kind { GREET, PLAY_FIGHT, NUZZLE, STANDOFF }
+    enum class Kind { GREET, PLAY_FIGHT, NUZZLE, STANDOFF, TAG }
 
     /** Species that are natural rivals (by species name). */
     private val NATURAL_RIVALS = listOf(
@@ -38,8 +38,10 @@ object Scenes {
     // ------------------------------------------------------------------ finding meetings
 
     fun findMeetings(level: ServerLevel, s: Sanctuary, rt: SanctuaryRuntime, now: Long) {
-        val chance = SanctuaryConfig.meetingChance.get()
+        val baseChance = SanctuaryConfig.meetingChance.get()
+        val night = Routines.isNight(level)
         val free = rt.live.values.filter {
+            !it.napping && it.napSpot == null && it.snackSpot == null &&
             now >= it.busyUntil && now >= it.nextMeetAt && !it.migrating && it.waypoints.isEmpty() &&
                 !it.entity.isRemoved && !Residents.isSleeping(it.entity) && it.entity.onGround()
         }
@@ -51,13 +53,16 @@ object Scenes {
                 val b = free[j]
                 if (b in used) continue
                 if (a.entity.distanceToSqr(b.entity) > 4.5 * 4.5) continue
+                // night owls (Ghost, Dark) are livelier at night, everyone else by day
+                val owls = Routines.nocturnal(a) && Routines.nocturnal(b)
+                val chance = baseChance * if (night) (if (owls) 2.0 else 0.25) else (if (owls) 0.5 else 1.0)
                 if (level.random.nextDouble() > chance) continue
                 val rel = firstImpression(s, a, b, level)
                 val roll = level.random.nextDouble()
                 val kind = when {
                     rel <= -30 -> Kind.STANDOFF
-                    rel >= 40 -> if (roll < 0.45) Kind.PLAY_FIGHT else if (roll < 0.75) Kind.NUZZLE else Kind.GREET
-                    else -> if (roll < 0.55) Kind.GREET else Kind.PLAY_FIGHT
+                    rel >= 40 -> if (roll < 0.35) Kind.PLAY_FIGHT else if (roll < 0.6) Kind.NUZZLE else if (roll < 0.8) Kind.TAG else Kind.GREET
+                    else -> if (roll < 0.45) Kind.GREET else if (roll < 0.8) Kind.PLAY_FIGHT else Kind.TAG
                 }
                 start(level, s, rt, a, b, kind, now)
                 used += a; used += b
@@ -138,6 +143,31 @@ object Scenes {
                 }
                 length = t + 15
             }
+            Kind.TAG -> {
+                // one chases, the other runs; when it's caught they swap
+                steps += at(0) { _ -> Effects.play(a.entity, Effects.CRY); Effects.happy(a.entity) }
+                var t = 6
+                for (round in 0..1) {
+                    val chaser = if (round == 0) a else b
+                    val runner = if (round == 0) b else a
+                    repeat(4) {
+                        steps += at(t) { _ ->
+                            val away = runner.entity.position().subtract(chaser.entity.position()).normalize()
+                            val side = if (r.nextBoolean()) 1.0 else -1.0
+                            val dest = runner.entity.position().add(away.scale(7.0)).add(away.z * 3 * side, 0.0, -away.x * 3 * side)
+                            Residents.walkTo(runner.entity, BlockPos.containing(dest), 0.8f, 1)
+                            Residents.walkTo(chaser.entity, runner.entity.blockPosition(), 0.8f, 1)
+                        }
+                        t += 14
+                    }
+                    steps += at(t) { _ -> Effects.play(chaser.entity, Effects.CRY); Effects.happy(runner.entity) } // tagged!
+                    t += 10
+                }
+                steps += at(t) { _ -> Effects.happy(a.entity); Effects.happy(b.entity) }
+                steps += at(t + 5, change(4 * friendRate))
+                if (r.nextInt(8) == 0) steps += at(t + 6) { _ -> s.logEvent("${a.name} and ${b.name} played tag in the ${Residents.zoneName(zoneOf(s, a))}.") }
+                length = t + 10
+            }
             Kind.STANDOFF -> {
                 steps += at(8) { _ -> Effects.play(a.entity, Effects.SHOW_OFF); Effects.angry(a.entity) }
                 steps += at(30) { _ -> Effects.play(b.entity, Effects.SHOW_OFF); Effects.angry(b.entity) }
@@ -157,7 +187,7 @@ object Scenes {
         val scene = Scene(a, b, kind, now, steps, length)
         a.busyUntil = now + length
         b.busyUntil = now + length
-        if (kind != Kind.PLAY_FIGHT && kind != Kind.NUZZLE) { Residents.stop(a.entity); Residents.stop(b.entity) }
+        if (kind != Kind.PLAY_FIGHT && kind != Kind.NUZZLE && kind != Kind.TAG) { Residents.stop(a.entity); Residents.stop(b.entity) }
         rt.scenes += scene
     }
 

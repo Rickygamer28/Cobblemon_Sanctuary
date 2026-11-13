@@ -560,6 +560,8 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
         // recent events
         val ey = ay + 32
         text(g, "Recently", x, ey, SUB)
+        val basket = if (data.getBoolean("hasBasket")) "Gathering Basket: ${data.getInt("basketItems")} items" else "No Gathering Basket placed yet"
+        text(g, basket, x + w - font.width(basket), ey, if (data.getBoolean("hasBasket")) GOLD else DIM)
         val events = data.getList("events", Tag.TAG_STRING.toInt())
         if (events.isEmpty()) text(g, "Nothing has happened yet.", x + 10, ey + 14, DIM)
         var ly = ey + 14

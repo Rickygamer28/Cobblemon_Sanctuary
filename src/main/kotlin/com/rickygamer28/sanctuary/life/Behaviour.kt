@@ -48,6 +48,7 @@ object Behaviour {
             if (e.isRemoved) continue
             if (r.swimmer) { swim(level, s, rt, r, now); continue }
             if (now < r.busyUntil) continue
+            if (Routines.tick(level, s, rt, r, now)) continue
 
             // Cobblemon lets some Pokémon hunt each other; in the sanctuary that becomes play-fighting
             val target = e.brain.getMemory(MemoryModuleType.ATTACK_TARGET).orElse(null)

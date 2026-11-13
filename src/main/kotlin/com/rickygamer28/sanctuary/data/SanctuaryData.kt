@@ -39,7 +39,7 @@ class SanctuaryData : SavedData() {
 
     override fun save(tag: CompoundTag, registries: HolderLookup.Provider): CompoundTag {
         val list = ListTag()
-        sanctuaries.values.forEach { list.add(it.save()) }
+        sanctuaries.values.forEach { list.add(it.save(registries)) }
         tag.put("Sanctuaries", list)
         tag.putInt("NextSlot", nextSlot)
         return tag
@@ -48,10 +48,10 @@ class SanctuaryData : SavedData() {
     companion object {
         private const val NAME = "cobblemon_sanctuary_v2"
 
-        private fun load(tag: CompoundTag, @Suppress("UNUSED_PARAMETER") registries: HolderLookup.Provider): SanctuaryData {
+        private fun load(tag: CompoundTag, registries: HolderLookup.Provider): SanctuaryData {
             val data = SanctuaryData()
             tag.getList("Sanctuaries", Tag.TAG_COMPOUND.toInt()).forEach {
-                runCatching { Sanctuary.load(it as CompoundTag) }.onSuccess { s -> data.sanctuaries[s.id] = s }
+                runCatching { Sanctuary.load(it as CompoundTag, registries) }.onSuccess { s -> data.sanctuaries[s.id] = s }
             }
             data.nextSlot = tag.getInt("NextSlot").coerceAtLeast(1)
             return data

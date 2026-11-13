@@ -2,6 +2,7 @@ package com.rickygamer28.sanctuary.registry
 
 import com.rickygamer28.sanctuary.CobblemonSanctuary
 import com.rickygamer28.sanctuary.block.EggNestBlock
+import com.rickygamer28.sanctuary.block.GatheringBasketBlock
 import com.rickygamer28.sanctuary.block.HubBellBlock
 import com.rickygamer28.sanctuary.block.IncubatorBlock
 import com.rickygamer28.sanctuary.block.IncubatorBlockEntity
@@ -48,6 +49,9 @@ object ModContent {
         IncubatorBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE).strength(2.0f).sound(SoundType.COPPER).noOcclusion()
             .lightLevel { if (it.getValue(IncubatorBlock.HAS_EGG)) 9 else 3 })
     }
+    val GATHERING_BASKET: DeferredBlock<GatheringBasketBlock> = BLOCKS.register("gathering_basket") { ->
+        GatheringBasketBlock(BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(0.8f).sound(SoundType.BAMBOO_WOOD).noOcclusion())
+    }
     val INCUBATOR_ENTITY: DeferredHolder<BlockEntityType<*>, BlockEntityType<IncubatorBlockEntity>> = BLOCK_ENTITIES.register("incubator") { ->
         BlockEntityType.Builder.of({ pos, state -> IncubatorBlockEntity(pos, state) }, INCUBATOR.get()).build(null)
     }
@@ -63,6 +67,9 @@ object ModContent {
     }
     val INCUBATOR_ITEM: DeferredItem<Item> = ITEMS.register("incubator") { ->
         net.minecraft.world.item.BlockItem(INCUBATOR.get(), Item.Properties())
+    }
+    val GATHERING_BASKET_ITEM: DeferredItem<Item> = ITEMS.register("gathering_basket") { ->
+        net.minecraft.world.item.BlockItem(GATHERING_BASKET.get(), Item.Properties())
     }
     val POKEMON_EGG: DeferredItem<PokemonEggItem> = ITEMS.register("pokemon_egg") { ->
         PokemonEggItem(Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON))
@@ -82,6 +89,7 @@ object ModContent {
                 output.accept(WHISTLE.get())
                 output.accept(HUB_BELL_ITEM.get())
                 output.accept(INCUBATOR_ITEM.get())
+                output.accept(GATHERING_BASKET_ITEM.get())
             }
             .build()
     }
