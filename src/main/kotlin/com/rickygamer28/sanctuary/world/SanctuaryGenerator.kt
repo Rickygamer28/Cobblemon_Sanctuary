@@ -219,6 +219,7 @@ object SanctuaryGenerator {
         }
         if (i >= total) {
             cursors.remove(s.id)
+            BiomeDresser.endPass(s)
             recheckMeadow -= s.id
             if (missedUnloaded[s.id] == true) retryAt[s.id] = now + 600
             else if (s.oldWallRadius > 0) s.oldWallRadius = 0

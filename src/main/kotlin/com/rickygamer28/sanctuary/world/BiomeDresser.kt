@@ -47,6 +47,22 @@ object BiomeDresser {
 
     private fun b(block: Block): BlockState = block.defaultBlockState()
 
+    /**
+     * Blocks this building pass placed as decorations (a boulder, a mushroom cap, an island…) that reach over into
+     * columns not built yet. Those columns must not mistake them for old ground or clutter and cut them off.
+     */
+    private val placed = HashMap<java.util.UUID, HashSet<Long>>()
+
+    private fun placedFor(s: Sanctuary) = placed.getOrPut(s.id) { HashSet() }
+
+    fun protect(s: Sanctuary, pos: BlockPos) {
+        val set = placedFor(s)
+        if (set.size < 3_000_000) set += pos.asLong()
+    }
+
+    /** The building pass is over: nothing left to protect. */
+    fun endPass(s: Sanctuary) { placed.remove(s.id) }
+
     // ================================================================== context + helpers
 
     class Ctx(
@@ -100,15 +116,31 @@ object BiomeDresser {
         }
         fun at(pos: BlockPos, state: BlockState) {
             val cur = level.getBlockState(pos)
-            if (cur.isAir || (cur.canBeReplaced() && cur.fluidState.isEmpty)) level.setBlock(pos, state, FLAGS)
+            if (cur.isAir || (cur.canBeReplaced() && cur.fluidState.isEmpty)) {
+                level.setBlock(pos, state, FLAGS)
+                if (pos.x != x || pos.z != z) protect(s, pos)
+            }
         }
         fun place(state: BlockState, offset: Int = 1) = at(surface.above(offset), state)
         fun column(state: BlockState, height: Int) { for (i in 1..height) place(state, i) }
         fun pick(vararg states: BlockState): BlockState = states[random.nextInt(states.size)]
-        fun feature(key: ResourceKey<ConfiguredFeature<*, *>>) {
+        /**
+         * Places a vanilla feature. For features that aren't trees (giant mushrooms, ice spikes, mossy rocks),
+         * [protectRadius] marks what it built around the spot so neighbouring columns don't cut it off.
+         */
+        fun feature(key: ResourceKey<ConfiguredFeature<*, *>>, protectRadius: Int = 0, protectHeight: Int = 16) {
             runCatching {
                 level.registryAccess().registryOrThrow(Registries.CONFIGURED_FEATURE).getHolder(key).ifPresent {
                     it.value().place(level, level.chunkSource.generator, random, above)
+                }
+            }
+            if (protectRadius > 0) {
+                for (dx in -protectRadius..protectRadius) for (dz in -protectRadius..protectRadius) {
+                    if (dx == 0 && dz == 0) continue
+                    for (dy in 1..protectHeight) {
+                        val p = surface.offset(dx, dy, dz)
+                        if (!level.getBlockState(p).isAir && level.getBlockState(p).fluidState.isEmpty) protect(s, p)
+                    }
                 }
             }
         }
@@ -232,7 +264,7 @@ object BiomeDresser {
         Blocks.COBBLESTONE_WALL, Blocks.MOSSY_COBBLESTONE_WALL, Blocks.STONE_BRICK_WALL, Blocks.MOSSY_STONE_BRICK_WALL,
         Blocks.COBBLED_DEEPSLATE_WALL, Blocks.STONE_BUTTON, Blocks.END_ROD, Blocks.LIGHTNING_ROD, Blocks.IRON_BARS,
         Blocks.HAY_BLOCK, Blocks.CARVED_PUMPKIN, Blocks.JACK_O_LANTERN, Blocks.TARGET, Blocks.REDSTONE_LAMP,
-        Blocks.CHIPPED_ANVIL, Blocks.DAMAGED_ANVIL, Blocks.BRICKS, Blocks.PURPUR_PILLAR, Blocks.SHROOMLIGHT, Blocks.WITHER_ROSE,
+        Blocks.CHIPPED_ANVIL, Blocks.DAMAGED_ANVIL, Blocks.BRICKS, Blocks.PURPUR_PILLAR, Blocks.WITHER_ROSE,
     )
 
     /** The layer that shows in tall cliffs of each rock. */
@@ -456,9 +488,12 @@ object BiomeDresser {
     }
 
     /** Moves the column's top to [target]: builds it up with stone or cuts natural blocks away. */
-    private fun reshape(level: ServerLevel, ground: BlockPos, target: Int): BlockPos {
+    private fun reshape(level: ServerLevel, ground: BlockPos, target: Int, keep: Set<Long>? = null): BlockPos {
         if (target > ground.y) {
-            for (yy in ground.y + 1..target) level.setBlock(BlockPos(ground.x, yy, ground.z), b(Blocks.STONE), FLAGS)
+            for (yy in ground.y + 1..target) {
+                val p = BlockPos(ground.x, yy, ground.z)
+                if (keep == null || p.asLong() !in keep) level.setBlock(p, b(Blocks.STONE), FLAGS)
+            }
         } else if (target < ground.y) {
             for (yy in target + 1..ground.y) {
                 val p = BlockPos(ground.x, yy, ground.z)
@@ -483,7 +518,7 @@ object BiomeDresser {
 
         val zone = surfaceZone(s, hit, x, z, ring)
         val target = targetHeight(s, x, z, ring)
-        val surface = reshape(level, found, target)
+        val surface = reshape(level, found, target, placed[s.id])
         val ctx = Ctx(level, s, surface, randomFor(s, x, z), variantOf(s, zone), hit, exposure(s, x, z, target, ring))
         // a winding route from the hub to the biome's landmark
         if (target >= WATER_Y + 1 && onRoute(s, hit, x, z, ring)) {
@@ -494,6 +529,7 @@ object BiomeDresser {
                 val side = BlockPos(x + 2, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x + 2, z), z)
                 if (level.getBlockState(side).isAir && isNatural(level.getBlockState(side.below()))) {
                     level.setBlock(side, b(Blocks.SPRUCE_FENCE), FLAGS)
+                    protect(s, side); protect(s, side.above())
                     level.setBlock(side.above(), b(if (hit.zone == "ghost" || hit.zone == "dark") Blocks.SOUL_LANTERN else Blocks.LANTERN), FLAGS)
                 }
             }
@@ -600,7 +636,7 @@ object BiomeDresser {
         if (Landmarks.near(s, x, z)) return true
         val found = findGround(level, s, x, z) ?: return false
         if (!isNatural(level.getBlockState(found))) return true
-        val surface = reshape(level, found, G)
+        val surface = reshape(level, found, G, placed[s.id])
         val c = Ctx(level, s, surface, randomFor(s, x, z), 0, hit, exposure(s, x, z, G, ring))
         c.ground(b(Blocks.GRASS_BLOCK), b(Blocks.DIRT))
         when {
@@ -616,7 +652,7 @@ object BiomeDresser {
         val found = findGround(level, s, x, z) ?: return false
         if (!isNatural(level.getBlockState(found))) return true
         val target = targetHeight(s, x, z, ring)
-        val surface = reshape(level, found, target)
+        val surface = reshape(level, found, target, placed[s.id])
         val c = Ctx(level, s, surface, randomFor(s, x, z), 0, ZoneLayout.Hit("rim", dist, 99.0, null), exposure(s, x, z, target, ring))
         val rise = surface.y - G
         val snowLine = 30 + (c.noise(20.0, 42) * 6).toInt()
@@ -701,11 +737,13 @@ object BiomeDresser {
         val clear = SanctuaryConfig.clearTrees.get()
         val air = b(Blocks.AIR)
         var p = BlockPos(x, level.getHeight(Heightmap.Types.MOTION_BLOCKING, x, z) - 1, z)
+        val mine = placed[s.id]
         var guard = 0
         while (guard++ < 120 && p.y > level.minBuildHeight) {
             val st = level.getBlockState(p)
             when {
                 st.isAir -> p = p.below()
+                mine != null && p.asLong() in mine -> p = p.below() // placed by a neighbour in this pass: keep it, look under it
                 st.`is`(BlockTags.LEAVES) -> {
                     if (!clear || !naturalLeaf(st)) return p
                     // take the whole tree while its leaves still show it's a natural one
@@ -935,7 +973,7 @@ object BiomeDresser {
         val soft = if (c.variant == 1) b(Blocks.MOSS_BLOCK) else b(Blocks.COBBLESTONE)
         c.ground(if (steep) c.patch(5.0, 3, b(Blocks.STONE), b(Blocks.ANDESITE)) else c.patch(11.0, 4, b(Blocks.STONE), b(Blocks.ANDESITE), b(Blocks.GRAVEL), b(Blocks.STONE), soft), b(Blocks.STONE))
         when {
-            c.grid(9, 5) && c.roomy() -> c.feature(MiscOverworldFeatures.FOREST_ROCK)
+            c.grid(9, 5) && c.roomy() -> c.feature(MiscOverworldFeatures.FOREST_ROCK, 3, 5)
             c.variant == 0 && c.grid(19, 6) && c.roomy(8) -> c.crystalCluster(b(Blocks.STONE), null, 4 + c.random.nextInt(5))
             c.variant == 1 && c.grid(7, 7) && c.roomy() -> c.boulder(b(Blocks.COBBLESTONE), b(Blocks.MOSSY_COBBLESTONE), 1 + c.random.nextInt(2))
             !steep && c.chance(0.05) -> c.place(b(Blocks.SHORT_GRASS))
@@ -1143,7 +1181,7 @@ object BiomeDresser {
                 if (puddle && c.chance(0.5)) { c.pool(b(Blocks.MUD)); return }
                 c.ground(b(Blocks.MYCELIUM), b(Blocks.DIRT))
                 when {
-                    c.grid(18, 6) && c.roomy(6) -> c.feature(if (c.random.nextBoolean()) TreeFeatures.HUGE_RED_MUSHROOM else TreeFeatures.HUGE_BROWN_MUSHROOM)
+                    c.grid(18, 6) && c.roomy(6) -> c.feature(if (c.random.nextBoolean()) TreeFeatures.HUGE_RED_MUSHROOM else TreeFeatures.HUGE_BROWN_MUSHROOM, 3, 15)
                     c.chance(0.04) -> c.place(c.pick(b(Blocks.RED_MUSHROOM), b(Blocks.BROWN_MUSHROOM)))
                 }
             }
@@ -1340,7 +1378,7 @@ object BiomeDresser {
             0 -> {
                 c.ground(c.patch(9.0, 1, b(Blocks.SNOW_BLOCK), b(Blocks.SNOW_BLOCK), b(Blocks.PACKED_ICE), b(Blocks.BLUE_ICE)), b(Blocks.PACKED_ICE))
                 when {
-                    c.grid(16, 2) && c.roomy(8) -> c.feature(MiscOverworldFeatures.ICE_SPIKE)
+                    c.grid(16, 2) && c.roomy(8) -> c.feature(MiscOverworldFeatures.ICE_SPIKE, 4, 34)
                     c.grid(8, 3) && c.roomy() -> c.crystalCluster(b(Blocks.PACKED_ICE), null, 2 + c.random.nextInt(4))
                     c.chance(0.5) -> c.place(b(Blocks.SNOW))
                 }
