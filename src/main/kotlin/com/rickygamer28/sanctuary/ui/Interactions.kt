@@ -47,8 +47,7 @@ object Interactions {
         val name = pokemon.getDisplayName(false).string
         val live = f.live
         when (action) {
-            "menu" -> ResidentGui(player, f.level, f.s, pokemonId).open()
-            "summary" -> ResidentGui(player, f.level, f.s, pokemonId).open()
+            "menu", "summary" -> return SanctuaryGuis.openResident(player, f.s, pokemonId)
             "pet" -> {
                 if (live == null) return say(player, "$name isn't out right now. Go find it in the ${Residents.zoneName(TypeLogic.homeZone(pokemon, data, ZoneLayout.ring()))}!", net.minecraft.ChatFormatting.GRAY)
                 if (!near(player, live)) return say(player, "Get closer to $name first.", net.minecraft.ChatFormatting.GRAY)

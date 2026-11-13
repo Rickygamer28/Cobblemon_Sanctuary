@@ -44,3 +44,7 @@
 ^com/cobblemon/mod/common/client/render/models/blockbench/FloatingState
 ^com/cobblemon/mod/common/client/gui/TypeIcon
 ^com/cobblemon/mod/common/client/CobblemonResources
+^com/cobblemon/mod/common/api/moves/Move\.class$
+^com/cobblemon/mod/common/api/moves/MoveSet\.class$
+^com/cobblemon/mod/common/api/moves/MoveTemplate\.class$
+^com/cobblemon/mod/common/api/abilities/Ability\.class$

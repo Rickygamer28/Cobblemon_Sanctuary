@@ -1,303 +1,55 @@
 package com.rickygamer28.sanctuary.ui
 
-import com.cobblemon.mod.common.item.PokemonItem
+import com.cobblemon.mod.common.api.pokemon.stats.Stats
+import com.cobblemon.mod.common.api.types.ElementalTypes
 import com.cobblemon.mod.common.pokemon.Pokemon
 import com.rickygamer28.sanctuary.Sanctuaries
+import com.rickygamer28.sanctuary.SanctuaryDimension
 import com.rickygamer28.sanctuary.data.Sanctuary
 import com.rickygamer28.sanctuary.data.SanctuarySize
 import com.rickygamer28.sanctuary.data.SanctuaryState
-import com.rickygamer28.sanctuary.SanctuaryDimension
 import com.rickygamer28.sanctuary.life.Residents
 import com.rickygamer28.sanctuary.life.Sizes
+import com.rickygamer28.sanctuary.net.SanctuaryNet
 import com.rickygamer28.sanctuary.registry.ModContent
 import com.rickygamer28.sanctuary.world.SanctuaryGenerator
 import com.rickygamer28.sanctuary.world.TypeLogic
 import com.rickygamer28.sanctuary.world.ZoneLayout
 import net.minecraft.ChatFormatting
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.nbt.ListTag
+import net.minecraft.nbt.StringTag
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
-import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
-import net.minecraft.world.item.Items
 import java.util.UUID
-
-private fun gray(s: String): Component = Component.literal(s).withStyle(ChatFormatting.GRAY)
-private fun colored(s: String, c: ChatFormatting): Component = Component.literal(s).withStyle(c)
-
-/** The gem icon for a biome. */
-fun zoneIcon(zone: String?): Item = when (zone) {
-    null -> Items.FEATHER
-    else -> Gui.item("cobblemon:${zone}_gem", Items.PAPER)
-}
 
 fun typeName(zone: String) = zone.replaceFirstChar { it.uppercase() }
 
-// ---------------------------------------------------------------------- creating a sanctuary
-
-class PreviewGui(player: ServerPlayer, val level: ServerLevel, val s: Sanctuary) :
-    Gui(player, 3, Component.literal("Create your Sanctuary")) {
-    override fun build() {
-        SanctuaryDimension.level(level.server)?.let { Residents.refreshRoster(it, s, Residents.runtime(s), it.gameTime) }
-        set(4, icon(ItemStack(ModContent.SANCTUARY_CORE_ITEM.get()), colored("A valley for your Pokémon", ChatFormatting.GOLD),
-            gray("This Core opens a path to your own valley"),
-            gray("in the Sanctuary dimension. Your world isn't changed."),
-            gray("Every Pokémon in your PC will live there."),
-            gray("Pokémon in your PC: ${s.residentCount}")))
-        val sizeItems = mapOf(SanctuarySize.SMALL to Items.OAK_SAPLING, SanctuarySize.MEDIUM to Items.AZALEA, SanctuarySize.LARGE to Items.FLOWERING_AZALEA)
-        listOf(11, 13, 15).zip(SanctuarySize.entries).forEach { (slot, size) ->
-            when {
-                !Sizes.allowed(size) -> set(slot, icon(Items.BARRIER, size.label, "Disabled on this server", color = ChatFormatting.DARK_GRAY))
-                !Sizes.unlocked(size, s.residentCount) -> set(slot, icon(Items.GRAY_DYE, size.label, "Radius ${size.radius} blocks", "Needs ${Sizes.residentsNeeded(size)} Pokémon", color = ChatFormatting.DARK_GRAY))
-                else -> set(slot, icon(sizeItems.getValue(size), size.label + if (s.size == size) " (chosen)" else "", "Radius ${size.radius} blocks", "Click to choose", color = ChatFormatting.GREEN, glow = s.size == size)) { _, _ ->
-                    Sanctuaries.setSize(s, player, size)
-                    refresh()
-                }
-            }
-        }
-        set(21, icon(Items.LIME_CONCRETE, "Create", "Make the valley and travel there", color = ChatFormatting.GREEN)) { _, _ ->
-            Sanctuaries.confirm(s, player)
-            goTo { HomeGui(player, level, s) }
-        }
-        set(23, icon(Items.RED_CONCRETE, "Cancel", "Take the Core back", color = ChatFormatting.RED)) { _, _ ->
-            Sanctuaries.cancel(level, s, player)
-            close()
-        }
-        fill(FILLER)
-    }
+/** The colour of a type (from Cobblemon), as 0xRRGGBB. */
+fun typeColor(zone: String?): Int = when (zone) {
+    null -> 0x9AB8D8
+    else -> runCatching { ElementalTypes.get(zone)?.hue }.getOrNull() ?: 0xA8A878
 }
 
-// ---------------------------------------------------------------------- home (Core and Journal)
+private val lastSaid = HashMap<UUID, Pair<String, Int>>()
 
-class HomeGui(player: ServerPlayer, val level: ServerLevel, val s: Sanctuary) :
-    Gui(player, 4, Component.literal("${s.ownerName}'s Sanctuary")) {
-    override fun build() {
-        val rt = Residents.runtime(s)
-        SanctuaryDimension.level(level.server)?.let { Residents.refreshRoster(it, s, rt, it.gameTime) }
-        val owner = s.owner == player.uuid
-        val progress = SanctuaryGenerator.progress(s)
-        set(4, icon(ItemStack(ModContent.SANCTUARY_CORE_ITEM.get()), colored("${s.size.label} Sanctuary", ChatFormatting.GOLD),
-            gray("Residents: ${s.residentCount}"),
-            gray("Out right now: ${rt.live.size}"),
-            gray("Biomes awake: ${s.unlocked.size}/${ZoneLayout.ring().size + 1}"),
-            gray(if (progress != null) "Shaping the valley: $progress%" else "The valley is ready"),
-            gray("Members: " + (listOf(s.ownerName) + s.members.map { s.memberNames[it] ?: "?" }).joinToString(", "))))
-
-        val inside = SanctuaryDimension.isSanctuary(player.level())
-        if (inside) {
-            set(0, icon(Items.ENDER_EYE, "Return home", "Go back to where you came from", color = ChatFormatting.LIGHT_PURPLE)) { _, _ ->
-                close(); player.server.execute { SanctuaryDimension.returnHome(player) }
-            }
-        } else {
-            set(0, icon(Items.ENDER_PEARL, "Travel to the sanctuary", "Visit your Pokémon's valley", color = ChatFormatting.LIGHT_PURPLE, glow = true)) { _, _ ->
-                close(); player.server.execute { Sanctuaries.travel(player, s) }
-            }
-        }
-
-        set(10, icon(Gui.item("cobblemon:poke_ball", Items.ENDER_PEARL), "Residents", "Everyone living here", "Click to browse", color = ChatFormatting.AQUA)) { _, _ ->
-            goTo { ResidentsGui(player, level, s, 0, null) }
-        }
-        set(12, icon(Items.FILLED_MAP, "Biomes", "The biomes and how big they are", color = ChatFormatting.AQUA)) { _, _ ->
-            goTo { BiomesGui(player, level, s) }
-        }
-        set(14, icon(Items.WRITABLE_BOOK, "Events", "What happened recently", color = ChatFormatting.AQUA)) { _, _ ->
-            goTo { EventsGui(player, level, s) }
-        }
-        set(16, icon(ItemStack(ModContent.JOURNAL.get()), colored("Get a Journal", ChatFormatting.AQUA), gray("A replacement Sanctuary Journal"))) { _, _ ->
-            Sanctuaries.giveJournal(player)
-        }
-
-        if (owner) {
-            val next = Sizes.nextSize(s.size)
-            when {
-                next == null -> set(20, icon(Items.EMERALD_BLOCK, "Largest size", "Your valley can't grow any bigger", color = ChatFormatting.GREEN))
-                Sizes.unlocked(next, s.residentCount) -> set(20, icon(Items.EMERALD, "Expand to ${next.label}", "Free! You have ${s.residentCount} Pokémon", "Radius ${next.radius} blocks", color = ChatFormatting.GREEN, glow = true)) { _, _ ->
-                    Sanctuaries.expand(s, player); refresh()
-                }
-                else -> set(20, icon(Items.GRAY_DYE, "Expand to ${next.label}", "Needs ${Sizes.residentsNeeded(next)} Pokémon", "You have ${s.residentCount}", color = ChatFormatting.DARK_GRAY))
-            }
-            set(22, icon(Items.BRUSH, "Reshape the valley", "Rebuild every biome from scratch", "(only natural ground; your builds stay)", color = ChatFormatting.GOLD)) { _, _ ->
-                s.rebuild(); Sanctuaries.data(level).setDirty()
-                say(player, "Reshaping the valley. Stay inside so it stays loaded.")
-                refresh()
-            }
-            set(24, icon(Items.PLAYER_HEAD, "Invite a friend", "Type /sanctuary invite <name>", "Their PC Pokémon will live here too", color = ChatFormatting.AQUA))
-        } else {
-            set(24, icon(Items.BARRIER, "Leave sanctuary", "Your Pokémon go back to your PC", color = ChatFormatting.RED)) { _, _ ->
-                Sanctuaries.leave(player, s); close()
-            }
-        }
-        fill(FILLER)
-    }
+/** Short feedback: shown on the Sanctuary screen if it's open, otherwise above the hotbar. */
+fun say(player: ServerPlayer, text: String, color: ChatFormatting = ChatFormatting.WHITE) {
+    lastSaid[player.uuid] = text to (color.color ?: 0xFFFFFF)
+    player.displayClientMessage(Component.literal(text).withStyle(color), true)
 }
 
-// ---------------------------------------------------------------------- residents list
-
-class ResidentsGui(player: ServerPlayer, val level: ServerLevel, val s: Sanctuary, val page: Int, val filter: String?) :
-    Gui(player, 6, Component.literal(if (filter == null) "Residents" else "Residents — ${Residents.zoneName(filter)}")) {
-    override fun build() {
-        val rt = Residents.runtime(s)
-        if (rt.roster.isEmpty()) Residents.refreshRoster(level, s, rt, level.gameTime)
-        val ring = ZoneLayout.ring()
-        val all = rt.roster.map { it to TypeLogic.homeZone(it.pokemon, s.residents[it.pokemon.uuid], ring) }
-        val list = all.filter { filter == null || it.second == filter }
-            .sortedWith(compareBy({ it.second ?: "~" }, { it.first.pokemon.species.name }))
-        val pages = ((list.size + 44) / 45).coerceAtLeast(1)
-        val p = page.coerceIn(0, pages - 1)
-        list.drop(p * 45).take(45).forEachIndexed { i, (e, home) ->
-            val pk = e.pokemon
-            val out = rt.live.containsKey(pk.uuid)
-            set(i, residentIcon(pk, home, out, e.ownerName)) { _, _ -> goTo { ResidentGui(player, level, s, pk.uuid) } }
-        }
-        set(45, icon(Items.ARROW, "Back", color = ChatFormatting.YELLOW)) { _, _ -> goTo { HomeGui(player, level, s) } }
-        if (p > 0) set(47, icon(Items.PAPER, "Previous page", "Page $p of $pages", color = ChatFormatting.YELLOW)) { _, _ -> goTo { ResidentsGui(player, level, s, p - 1, filter) } }
-        // filter cycles through the biomes that have residents
-        val zones = listOf<String?>(null) + all.map { it.second }.distinct().sortedBy { it ?: "~" }
-        val nextFilter = zones[(zones.indexOf(filter) + 1) % zones.size]
-        set(49, icon(ItemStack(if (filter == null) Items.COMPASS else zoneIcon(filter)), colored("Showing: " + (if (filter == null) "everyone" else Residents.zoneName(filter)), ChatFormatting.AQUA),
-            gray("${list.size} Pokémon"), gray("Click to show: " + (if (nextFilter == null) "everyone" else Residents.zoneName(nextFilter))))) { _, _ ->
-            goTo { ResidentsGui(player, level, s, 0, nextFilter) }
-        }
-        if (p < pages - 1) set(51, icon(Items.PAPER, "Next page", "Page ${p + 2} of $pages", color = ChatFormatting.YELLOW)) { _, _ -> goTo { ResidentsGui(player, level, s, p + 1, filter) } }
-        set(53, icon(Items.BARRIER, "Close", color = ChatFormatting.RED)) { _, _ -> close() }
-        for (i in 45..53) if (container.getItem(i).isEmpty) set(i, FILLER)
-    }
-}
-
-fun residentIcon(pk: Pokemon, home: String?, out: Boolean, ownerName: String): ItemStack {
-    val types = TypeLogic.currentTypes(pk).joinToString("/") { typeName(it) }
-    return Gui.icon(
-        PokemonItem.from(pk),
-        pk.getDisplayName(false).copy().withStyle(if (out) ChatFormatting.GREEN else ChatFormatting.WHITE),
-        gray("Lv.${pk.level} · $types"),
-        gray("Home: ${Residents.zoneName(home)}"),
-        gray(if (out) "Out in the sanctuary right now" else "Somewhere in the sanctuary"),
-        gray("Trainer: $ownerName"),
-        colored("Click for more", ChatFormatting.YELLOW),
-    )
-}
-
-// ---------------------------------------------------------------------- one resident
-
-class ResidentGui(player: ServerPlayer, val level: ServerLevel, val s: Sanctuary, val pokemonId: UUID) :
-    Gui(player, 5, Component.literal("Resident")) {
-    override fun build() {
-        val rt = Residents.runtime(s)
-        val entry = Residents.findRoster(rt, pokemonId)
-        val pk = rt.live[pokemonId]?.pokemon ?: entry?.pokemon
-        if (pk == null) {
-            set(13, icon(Items.BARRIER, "This Pokémon has left the sanctuary", color = ChatFormatting.RED))
-            set(36, icon(Items.ARROW, "Back", color = ChatFormatting.YELLOW)) { _, _ -> goTo { ResidentsGui(player, level, s, 0, null) } }
-            fill(FILLER)
-            return
-        }
-        val ring = ZoneLayout.ring()
-        val owner = pk.getOwnerUUID() == player.uuid
-        val home = TypeLogic.homeZone(pk, s.residents[pokemonId], ring)
-        val out = rt.live.containsKey(pokemonId)
-
-        // relationships
-        val rels = s.relationships.entries.mapNotNull { (k, v) ->
-            val parts = k.split('|')
-            if (parts.size != 2) return@mapNotNull null
-            val other = when (pokemonId.toString()) { parts[0] -> parts[1]; parts[1] -> parts[0]; else -> return@mapNotNull null }
-            runCatching { UUID.fromString(other) }.getOrNull()?.let { it to v }
-        }
-        fun nameOf(u: UUID) = Residents.findRoster(rt, u)?.pokemon?.getDisplayName(false)?.string ?: "someone who left"
-        val friends = rels.filter { it.second >= 40 }.sortedByDescending { it.second }.take(4).map { nameOf(it.first) }
-        val rivals = rels.filter { it.second <= -30 }.sortedBy { it.second }.take(4).map { nameOf(it.first) }
-        val types = TypeLogic.currentTypes(pk).joinToString("/") { typeName(it) }
-        set(4, icon(
-            PokemonItem.from(pk), pk.getDisplayName(false).copy().withStyle(ChatFormatting.GOLD),
-            gray("${pk.species.name} · Lv.${pk.level} · $types"),
-            gray("Home: ${Residents.zoneName(home)}"),
-            gray("Friendship: ${pk.friendship}"),
-            gray("Nature: ${runCatching { typeName(pk.nature.name.path) }.getOrDefault("?")} · Ability: ${runCatching { typeName(pk.ability.name) }.getOrDefault("?")}"),
-            colored("Friends: " + friends.ifEmpty { listOf("none yet") }.joinToString(", "), ChatFormatting.LIGHT_PURPLE),
-            colored("Rivals: " + rivals.ifEmpty { listOf("none") }.joinToString(", "), ChatFormatting.RED),
-            gray(if (out) "Out in the sanctuary right now" else "Not out right now"),
-        ))
-
-        set(10, icon(Items.POPPY, "Pet", "Give it some love", if (out) "" else "(it needs to be out and near you)", color = ChatFormatting.LIGHT_PURPLE)) { _, _ ->
-            Interactions.act(player, pokemonId, "pet", null); refresh()
-        }
-        set(11, icon(Items.SLIME_BALL, "Play", "Play with it", color = ChatFormatting.YELLOW)) { _, _ ->
-            Interactions.act(player, pokemonId, "play", null); refresh()
-        }
-        set(12, icon(Gui.item("cobblemon:oran_berry", Items.SWEET_BERRIES), "Feed", "Give it a berry from your inventory", color = ChatFormatting.GREEN)) { _, _ ->
-            Interactions.act(player, pokemonId, "feed", null); refresh()
-        }
-        val hasWhistle = player.inventory.contains(ItemStack(ModContent.WHISTLE.get()))
-        set(14, icon(ItemStack(ModContent.WHISTLE.get()), colored("Call", if (hasWhistle) ChatFormatting.AQUA else ChatFormatting.DARK_GRAY),
-            gray(if (hasWhistle) "Whistle for it to come to you" else "You need a Whistle in your inventory"))) { _, _ ->
-            Interactions.act(player, pokemonId, "call", null); close()
-        }
-        if (owner) {
-            set(16, icon(Gui.item("cobblemon:poke_ball", Items.ENDER_PEARL), "Take with you", "Move it to your party", "Put it back in your PC and it goes home", color = ChatFormatting.GOLD)) { _, _ ->
-                Interactions.act(player, pokemonId, "take", null); close()
-            }
-            val options = TypeLogic.zoneTypes(pk).ifEmpty { listOf(ZoneLayout.HUB) + ring.filter { it in s.unlocked } }.distinct()
-            if (options.size > 1) {
-                set(22, icon(Items.OAK_SIGN, "Set Home", "Choose which biome it lives in", color = ChatFormatting.WHITE))
-                options.take(17).forEachIndexed { i, z ->
-                    val slot = 23 + i
-                    if (z == home) set(slot, icon(zoneIcon(z), Residents.zoneName(z), "Current home", color = ChatFormatting.GREEN, glow = true))
-                    else set(slot, icon(zoneIcon(z), Residents.zoneName(z), "Click to move here", color = ChatFormatting.WHITE)) { _, _ ->
-                        Interactions.act(player, pokemonId, "home", z); refresh()
-                    }
-                }
-            }
-        }
-        set(36, icon(Items.ARROW, "Back", color = ChatFormatting.YELLOW)) { _, _ -> goTo { ResidentsGui(player, level, s, 0, null) } }
-        set(44, icon(Items.BARRIER, "Close", color = ChatFormatting.RED)) { _, _ -> close() }
-        fill(FILLER)
-    }
-}
-
-// ---------------------------------------------------------------------- biomes
-
-class BiomesGui(player: ServerPlayer, val level: ServerLevel, val s: Sanctuary) :
-    Gui(player, 3, Component.literal("Biomes")) {
-    override fun build() {
-        val zones = listOf(ZoneLayout.HUB) + ZoneLayout.ring()
-        zones.take(26).forEachIndexed { i, zone ->
-            val count = s.typeCounts[zone] ?: 0
-            if (zone in s.unlocked) {
-                val pct = if (zone == ZoneLayout.HUB) 100 else (((ZoneLayout.extent(s, zone) - s.size.hubRadius) / (s.size.radius - s.size.hubRadius)) * 100).toInt()
-                set(i, icon(zoneIcon(zone), Residents.zoneName(zone), "$count Pokémon live here", "$pct% grown", color = ChatFormatting.GREEN)) { _, _ ->
-                    goTo { ResidentsGui(player, level, s, 0, zone) }
-                }
-            } else {
-                set(i, icon(Items.GRAY_DYE, Residents.zoneName(zone), "Asleep", "Needs a ${typeName(zone)}-type Pokémon", color = ChatFormatting.DARK_GRAY))
-            }
-        }
-        set(26, icon(Items.ARROW, "Back", color = ChatFormatting.YELLOW)) { _, _ -> goTo { HomeGui(player, level, s) } }
-        fill(FILLER)
-    }
-}
-
-// ---------------------------------------------------------------------- events
-
-class EventsGui(player: ServerPlayer, val level: ServerLevel, val s: Sanctuary) :
-    Gui(player, 5, Component.literal("Events")) {
-    override fun build() {
-        val events = s.events.toList().reversed()
-        if (events.isEmpty()) set(13, icon(Items.PAPER, "Nothing has happened yet", color = ChatFormatting.GRAY))
-        events.take(36).forEachIndexed { i, e ->
-            set(i, icon(Items.PAPER, e, if (i == 0) "Most recent" else "", color = ChatFormatting.WHITE))
-        }
-        set(36, icon(Items.ARROW, "Back", color = ChatFormatting.YELLOW)) { _, _ -> goTo { HomeGui(player, level, s) } }
-        fill(FILLER)
-    }
-}
-
-/** Opens the right window for a player and sanctuary. */
+/** Builds what the Sanctuary screen shows and sends it to the player. */
 object SanctuaryGuis {
-    fun openCore(player: ServerPlayer, level: ServerLevel, s: Sanctuary) {
+    private fun json(player: ServerPlayer, c: Component): String = Component.Serializer.toJson(c, player.registryAccess())
+
+    fun openCore(player: ServerPlayer, @Suppress("UNUSED_PARAMETER") level: ServerLevel, s: Sanctuary) {
         when {
-            s.state == SanctuaryState.PREVIEW && s.owner == player.uuid -> PreviewGui(player, level, s).open()
+            s.state == SanctuaryState.PREVIEW && s.owner == player.uuid -> send(player, s, "create", open = true)
             s.state == SanctuaryState.PREVIEW -> say(player, "${s.ownerName} is planning a sanctuary here.")
-            s.isMember(player.uuid) -> HomeGui(player, level, s).open()
+            s.isMember(player.uuid) -> send(player, s, "home", open = true)
             else -> say(player, "This sanctuary belongs to ${s.ownerName}.")
         }
     }
@@ -305,14 +57,224 @@ object SanctuaryGuis {
     fun openJournal(player: ServerPlayer, section: String = "home") {
         val (level, s) = Sanctuaries.current(player) ?: return say(player, "You don't belong to a sanctuary yet. Craft and place a Sanctuary Core to start one.")
         if (s.state == SanctuaryState.PREVIEW) return openCore(player, level, s)
-        when (section) {
-            "residents" -> ResidentsGui(player, level, s, 0, null).open()
-            else -> HomeGui(player, level, s).open()
+        send(player, s, if (section == "residents") "residents" else "home", open = true)
+    }
+
+    fun openResident(player: ServerPlayer, s: Sanctuary, pokemon: UUID) = send(player, s, "resident", pokemon, open = true)
+
+    fun close(player: ServerPlayer) = SanctuaryNet.send(player, CompoundTag().also { it.putBoolean("close", true) })
+
+    fun send(player: ServerPlayer, s: Sanctuary, page: String, pokemon: UUID? = null, open: Boolean = false) {
+        val rt = Residents.runtime(s)
+        SanctuaryDimension.level(player.server)?.let { if (rt.roster.isEmpty() || page != "resident") Residents.refreshRoster(it, s, rt, it.gameTime) }
+        val t = CompoundTag()
+        t.putBoolean("open", open)
+        t.putString("page", page)
+        t.putString("id", s.id.toString())
+        t.putBoolean("isOwner", s.owner == player.uuid)
+        t.putString("ownerName", s.ownerName)
+        t.putInt("size", s.size.ordinal)
+        t.putString("sizeLabel", s.size.label)
+        t.putInt("radius", s.size.radius)
+        t.putBoolean("preview", s.state == SanctuaryState.PREVIEW)
+        t.putInt("residents", s.residentCount)
+        t.putInt("live", rt.live.size)
+        t.putInt("progress", SanctuaryGenerator.progress(s) ?: -1)
+        t.putBoolean("inside", SanctuaryDimension.isSanctuary(player.level()))
+        val ring = ZoneLayout.ring()
+        t.putInt("awake", s.unlocked.size)
+        t.putInt("zones", ring.size + 1)
+        Sizes.nextSize(s.size)?.let { next ->
+            t.putString("nextLabel", next.label)
+            t.putInt("nextNeeded", Sizes.residentsNeeded(next))
+            t.putInt("nextRadius", next.radius)
+            t.putBoolean("nextAllowed", Sizes.allowed(next))
         }
+        t.put("sizes", ListTag().also { list ->
+            for (size in SanctuarySize.entries) list.add(CompoundTag().also {
+                it.putString("label", size.label)
+                it.putInt("radius", size.radius)
+                it.putBoolean("allowed", Sizes.allowed(size))
+                it.putBoolean("unlocked", Sizes.unlocked(size, s.residentCount))
+                it.putInt("needed", Sizes.residentsNeeded(size))
+                it.putInt("cap", Residents.spawnCap(size))
+            })
+        })
+        t.put("members", ListTag().also { list ->
+            list.add(CompoundTag().also { it.putString("name", s.ownerName); it.putUUID("u", s.owner); it.putBoolean("owner", true) })
+            for (m in s.members) list.add(CompoundTag().also { it.putString("name", s.memberNames[m] ?: "?"); it.putUUID("u", m); it.putBoolean("owner", false) })
+        })
+        if (s.owner == player.uuid) {
+            t.put("online", ListTag().also { list ->
+                player.server.playerList.players.filter { !s.isMember(it.uuid) }.take(24).forEach { list.add(StringTag.valueOf(it.gameProfile.name)) }
+            })
+        }
+        t.put("biomes", ListTag().also { list ->
+            for (zone in listOf(ZoneLayout.HUB) + ring) list.add(CompoundTag().also {
+                val count = s.typeCounts[zone] ?: 0
+                it.putString("zone", zone)
+                it.putString("name", Residents.zoneName(zone))
+                it.putInt("color", typeColor(zone))
+                it.putBoolean("awake", zone in s.unlocked)
+                it.putInt("count", if (zone == ZoneLayout.HUB) rosterHomes(s).count { h -> h == ZoneLayout.HUB } else count)
+                val pct = if (zone == ZoneLayout.HUB) 100 else (((ZoneLayout.extent(s, zone) - s.size.hubRadius) / (s.size.radius - s.size.hubRadius)) * 100).toInt().coerceIn(0, 100)
+                it.putInt("pct", pct)
+            })
+        })
+        t.put("events", ListTag().also { list -> s.events.toList().reversed().forEach { list.add(StringTag.valueOf(it)) } })
+        t.putBoolean("hasWhistle", player.inventory.contains(ItemStack(ModContent.WHISTLE.get())))
+
+        if (page == "residents") {
+            t.put("mons", ListTag().also { list ->
+                for (e in rt.roster.take(3000)) {
+                    val pk = e.pokemon
+                    list.add(CompoundTag().also {
+                        it.putUUID("u", pk.uuid)
+                        it.putString("sp", pk.species.resourceIdentifier.toString())
+                        it.put("as", ListTag().also { a -> pk.aspects.forEach { x -> a.add(StringTag.valueOf(x)) } })
+                        it.putString("n", json(player, pk.getDisplayName(false)))
+                        it.putInt("l", pk.level)
+                        it.putString("h", TypeLogic.homeZone(pk, s.residents[pk.uuid], ring) ?: "")
+                        it.putBoolean("o", rt.live.containsKey(pk.uuid))
+                        it.putBoolean("m", pk.getOwnerUUID() == player.uuid)
+                        it.putBoolean("sh", pk.shiny)
+                        it.putString("tr", e.ownerName)
+                        it.put("t", ListTag().also { l -> TypeLogic.currentTypes(pk).forEach { x -> l.add(StringTag.valueOf(x)) } })
+                    })
+                }
+            })
+        }
+        if (page == "resident" && pokemon != null) {
+            val pk = rt.live[pokemon]?.pokemon ?: Residents.findRoster(rt, pokemon)?.pokemon
+            if (pk != null) t.put("mon", detail(player, s, pk, ring))
+            else t.putString("gone", "This Pokémon has left the sanctuary.")
+            t.putUUID("monId", pokemon)
+        }
+        lastSaid.remove(player.uuid)?.let { (text, color) -> t.putString("toast", text); t.putInt("toastColor", color) }
+        SanctuaryNet.send(player, t)
+    }
+
+    private fun rosterHomes(s: Sanctuary): List<String?> {
+        val ring = ZoneLayout.ring()
+        return Residents.runtime(s).roster.map { TypeLogic.homeZone(it.pokemon, s.residents[it.pokemon.uuid], ring) }
+    }
+
+    private fun detail(player: ServerPlayer, s: Sanctuary, pk: Pokemon, ring: List<String>): CompoundTag {
+        val rt = Residents.runtime(s)
+        val t = CompoundTag()
+        val id = pk.uuid
+        t.putUUID("u", id)
+        t.putString("sp", pk.species.resourceIdentifier.toString())
+        t.put("as", ListTag().also { a -> pk.aspects.forEach { x -> a.add(StringTag.valueOf(x)) } })
+        t.putString("n", json(player, pk.getDisplayName(false)))
+        t.putString("species", json(player, pk.species.translatedName))
+        t.putInt("dex", pk.species.nationalPokedexNumber)
+        t.putInt("l", pk.level)
+        t.putBoolean("sh", pk.shiny)
+        t.putString("gender", pk.gender.name)
+        t.putBoolean("m", pk.getOwnerUUID() == player.uuid)
+        t.putBoolean("o", rt.live.containsKey(id))
+        t.putString("tr", Residents.findRoster(rt, id)?.ownerName ?: s.ownerName)
+        val home = TypeLogic.homeZone(pk, s.residents[id], ring)
+        t.putString("h", home ?: "")
+        t.put("t", ListTag().also { l -> TypeLogic.currentTypes(pk).forEach { x -> l.add(StringTag.valueOf(x)) } })
+        t.putInt("friendship", pk.friendship)
+        t.putString("nature", runCatching { pk.nature.displayName }.getOrDefault(""))
+        t.putString("ability", runCatching { pk.ability.name }.getOrDefault(""))
+        t.putInt("hpNow", pk.currentHealth)
+        val stats = listOf(Stats.HP, Stats.ATTACK, Stats.DEFENCE, Stats.SPECIAL_ATTACK, Stats.SPECIAL_DEFENCE, Stats.SPEED)
+        t.putIntArray("stats", intArrayOf(pk.maxHealth, pk.attack, pk.defence, pk.specialAttack, pk.specialDefence, pk.speed))
+        t.putIntArray("ivs", stats.map { pk.ivs.getOrDefault(it) }.toIntArray())
+        t.putIntArray("evs", stats.map { pk.evs.getOrDefault(it) }.toIntArray())
+        t.put("moves", ListTag().also { list ->
+            for (m in pk.moveSet.getMoves()) list.add(CompoundTag().also {
+                it.putString("n", json(player, m.displayName))
+                it.putString("t", m.type.name)
+                it.putInt("pp", m.currentPp)
+                it.putInt("max", m.maxPp)
+            })
+        })
+        // friends and rivals
+        val rels = s.relationships.entries.mapNotNull { (k, v) ->
+            val parts = k.split('|')
+            if (parts.size != 2) return@mapNotNull null
+            val other = when (id.toString()) { parts[0] -> parts[1]; parts[1] -> parts[0]; else -> return@mapNotNull null }
+            runCatching { UUID.fromString(other) }.getOrNull()?.let { it to v }
+        }
+        fun people(list: List<Pair<UUID, Int>>) = ListTag().also { l ->
+            for ((u, v) in list) l.add(CompoundTag().also {
+                val other = Residents.findRoster(rt, u)?.pokemon
+                it.putString("n", if (other != null) json(player, other.getDisplayName(false)) else json(player, Component.literal("someone who left")))
+                it.putInt("v", v)
+            })
+        }
+        t.put("friends", people(rels.filter { it.second >= 40 }.sortedByDescending { it.second }.take(5)))
+        t.put("rivals", people(rels.filter { it.second <= -30 }.sortedBy { it.second }.take(5)))
+        val options = TypeLogic.zoneTypes(pk).ifEmpty { listOf(ZoneLayout.HUB) + ring.filter { it in s.unlocked } }.distinct()
+        t.put("homes", ListTag().also { l -> options.forEach { l.add(StringTag.valueOf(it)) } })
+        return t
     }
 }
 
-/** Short feedback above the hotbar. */
-fun say(player: ServerPlayer, text: String, color: ChatFormatting = ChatFormatting.WHITE) {
-    player.displayClientMessage(Component.literal(text).withStyle(color), true)
+/** Handles the buttons pressed on the Sanctuary screen. */
+object ScreenActions {
+    fun handle(player: ServerPlayer, t: CompoundTag) {
+        val id = runCatching { UUID.fromString(t.getString("id")) }.getOrNull() ?: return
+        val (level, s) = Sanctuaries.find(player.server, id) ?: return SanctuaryGuis.close(player)
+        if (!s.isMember(player.uuid)) return SanctuaryGuis.close(player)
+        val owner = s.owner == player.uuid
+        val page = t.getString("page").ifEmpty { "home" }
+        val pokemon = if (t.hasUUID("p")) t.getUUID("p") else null
+        val v = t.getString("v")
+        fun refresh(p: String = page) = SanctuaryGuis.send(player, s, p, pokemon)
+        fun ownerOnly(): Boolean { if (!owner) say(player, "Only the owner can do that.", ChatFormatting.RED); return owner }
+
+        when (t.getString("a")) {
+            "view" -> refresh()
+            "size" -> {
+                if (ownerOnly() && s.state == SanctuaryState.PREVIEW) runCatching { SanctuarySize.valueOf(v) }.getOrNull()?.let { Sanctuaries.setSize(s, player, it) }
+                refresh("create")
+            }
+            "create" -> {
+                if (ownerOnly() && s.state == SanctuaryState.PREVIEW) Sanctuaries.confirm(s, player)
+                refresh(if (s.state == SanctuaryState.PREVIEW) "create" else "home")
+            }
+            "cancel" -> {
+                if (ownerOnly() && s.state == SanctuaryState.PREVIEW) Sanctuaries.cancel(level, s, player)
+                SanctuaryGuis.close(player)
+            }
+            "travel" -> { SanctuaryGuis.close(player); player.server.execute { Sanctuaries.travel(player, s) } }
+            "return" -> { SanctuaryGuis.close(player); player.server.execute { SanctuaryDimension.returnHome(player) } }
+            "expand" -> { if (ownerOnly()) Sanctuaries.expand(s, player); refresh("home") }
+            "reshape" -> {
+                if (ownerOnly()) {
+                    s.rebuild()
+                    Sanctuaries.data(level).setDirty()
+                    say(player, "Reshaping the valley. Stay inside so it stays loaded.", ChatFormatting.GREEN)
+                }
+                refresh("home")
+            }
+            "journal" -> { Sanctuaries.giveJournal(player); say(player, "Here's a new Journal.", ChatFormatting.GREEN); refresh() }
+            "invite" -> {
+                if (ownerOnly()) {
+                    val target = player.server.playerList.getPlayerByName(v)
+                    if (target == null) say(player, "$v isn't online.", ChatFormatting.RED)
+                    else { Sanctuaries.invite(player, target); say(player, "Invited ${target.gameProfile.name}. They can accept in chat.", ChatFormatting.GREEN) }
+                }
+                refresh("members")
+            }
+            "kick" -> {
+                if (ownerOnly() && pokemon != null) Sanctuaries.removeMember(s, pokemon)?.let { say(player, "$it no longer lives here.", ChatFormatting.YELLOW) }
+                SanctuaryGuis.send(player, s, "members")
+            }
+            "leave" -> { if (!owner) Sanctuaries.leave(player, s); SanctuaryGuis.close(player) }
+            "act" -> {
+                val target = pokemon ?: return
+                val action = v
+                Interactions.act(player, target, action, t.getString("w").ifEmpty { null })
+                if (action == "call" || action == "take") SanctuaryGuis.close(player)
+                else SanctuaryGuis.send(player, s, "resident", target)
+            }
+        }
+    }
 }

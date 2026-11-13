@@ -231,6 +231,17 @@ object Sanctuaries {
         say(player, "You left the sanctuary. Your Pokémon are back in your PC.", ChatFormatting.GRAY)
     }
 
+    /** The owner removes a member. Returns their name, or null if they weren't a member. */
+    fun removeMember(s: Sanctuary, member: UUID): String? {
+        if (member == s.owner || !s.members.remove(member)) return null
+        val name = s.memberNames.remove(member) ?: "?"
+        val rt = Residents.runtime(s)
+        rt.live.values.filter { it.owner == member }.forEach { Residents.despawn(rt, it) }
+        rt.rosterDirty = true
+        s.logEvent("$name no longer lives in the sanctuary.")
+        return name
+    }
+
     // ------------------------------------------------------------------ hub bell
 
     fun ringBell(level: ServerLevel, pos: BlockPos, player: ServerPlayer) {

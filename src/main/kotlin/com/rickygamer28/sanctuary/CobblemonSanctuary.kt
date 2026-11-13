@@ -34,6 +34,7 @@ class CobblemonSanctuary(modBus: IEventBus, container: ModContainer) {
 
     init {
         ModContent.register(modBus)
+        modBus.addListener(net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent::class.java) { com.rickygamer28.sanctuary.net.SanctuaryNet.register(it) }
         container.registerConfig(ModConfig.Type.SERVER, SanctuaryConfig.spec)
 
         val bus = NeoForge.EVENT_BUS

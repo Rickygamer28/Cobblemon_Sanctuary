@@ -165,12 +165,15 @@ object Residents {
         }
     }
 
+    /** How many residents can be out at once in a sanctuary of [size]. */
+    fun spawnCap(size: com.rickygamer28.sanctuary.data.SanctuarySize): Int = when (size) {
+        com.rickygamer28.sanctuary.data.SanctuarySize.SMALL -> SanctuaryConfig.spawnCapSmall.get()
+        com.rickygamer28.sanctuary.data.SanctuarySize.MEDIUM -> SanctuaryConfig.spawnCapMedium.get()
+        com.rickygamer28.sanctuary.data.SanctuarySize.LARGE -> SanctuaryConfig.spawnCapLarge.get()
+    }
+
     private fun updateSpawns(level: ServerLevel, s: Sanctuary, rt: SanctuaryRuntime, players: List<ServerPlayer>, now: Long) {
-        val cap = when (s.size) {
-            com.rickygamer28.sanctuary.data.SanctuarySize.SMALL -> SanctuaryConfig.spawnCapSmall.get()
-            com.rickygamer28.sanctuary.data.SanctuarySize.MEDIUM -> SanctuaryConfig.spawnCapMedium.get()
-            com.rickygamer28.sanctuary.data.SanctuarySize.LARGE -> SanctuaryConfig.spawnCapLarge.get()
-        }
+        val cap = spawnCap(s.size)
         val range = SanctuaryConfig.spawnRange.get().toDouble()
         if (now - rt.shuffleAt > 20L * 60 * 10) { rt.shuffleSeed = level.random.nextLong(); rt.shuffleAt = now }
         val ring = ZoneLayout.ring()
