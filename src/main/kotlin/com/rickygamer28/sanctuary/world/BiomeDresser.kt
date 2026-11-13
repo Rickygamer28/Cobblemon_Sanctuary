@@ -175,9 +175,13 @@ object BiomeDresser {
         }
         if (!naturalLeaves) return false
         // keep trees the sanctuary planted itself (their base column is already dressed) and trees rooted outside
-        val base = seen.filter { level.getBlockState(it).`is`(BlockTags.LOGS) }.minByOrNull { it.y } ?: start
-        val idx = ColumnOrder.indexOf(base.x - s.center.x, base.z - s.center.z)
-        if (idx < 0 || idx >= ColumnOrder.countWithin(s.size.radius) || s.dressed.get(idx)) return false
+        val logs = seen.filter { level.getBlockState(it).`is`(BlockTags.LOGS) }.ifEmpty { listOf(start) }
+        val lowest = logs.minOf { it.y }
+        val limit = ColumnOrder.countWithin(s.size.radius)
+        for (base in logs.filter { it.y == lowest }) {
+            val idx = ColumnOrder.indexOf(base.x - s.center.x, base.z - s.center.z)
+            if (idx < 0 || idx >= limit || s.dressed.get(idx)) return false
+        }
         val air = Blocks.AIR.defaultBlockState()
         for (p in seen) level.setBlock(p, air, FLAGS)
         return true
