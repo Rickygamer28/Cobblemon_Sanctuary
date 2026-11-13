@@ -7,7 +7,6 @@ import com.mojang.brigadier.context.CommandContext
 import com.rickygamer28.sanctuary.data.SanctuarySize
 import com.rickygamer28.sanctuary.life.Residents
 import com.rickygamer28.sanctuary.ui.Interactions
-import com.rickygamer28.sanctuary.ui.Menus
 import com.rickygamer28.sanctuary.ui.Text
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.Commands
