@@ -44,9 +44,10 @@ object TypeLogic {
     fun waterOnly(pokemon: Pokemon): Boolean = runCatching {
         val moving = pokemon.form.behaviour.moving
         val landless = !moving.walk.canWalk || moving.walk.avoidsLand
-        // a real swimmer: a Water type that swims and can't fly (floating Pokémon like Doublade can't "walk" either)
-        landless && moving.swim.canSwimInWater && !moving.swim.avoidsWater && !moving.fly.canFly &&
-            pokemon.form.types.any { it.name.equals("water", ignoreCase = true) }
+        // a Water type that can't get around on land: fish and whales, but also sea-floor dwellers like Shellos or
+        // Corsola. Pokémon that fly or float (Pelipper, Jellicent) can cross land, and non-Water floaters like
+        // Doublade aren't sea creatures at all.
+        landless && !moving.fly.canFly && pokemon.form.types.any { it.name.equals("water", ignoreCase = true) }
     }.getOrDefault(false)
 
     /** The zone this Pokémon calls home, or null for a traveler that hasn't settled anywhere. */
