@@ -81,6 +81,14 @@ class CobblemonSanctuary(modBus: IEventBus, container: ModContainer) {
     private fun onEntityJoin(event: EntityJoinLevelEvent) {
         val entity = event.entity as? PokemonEntity ?: return
         val level = event.level as? ServerLevel ?: return
+        // no wild Pokémon inside a sanctuary: only residents live there
+        if (entity.tethering == null && SanctuaryConfig.blockWildSpawns.get() && runCatching { entity.pokemon.isWild() && !entity.isBattleClone() }.getOrDefault(false)) {
+            val s = SanctuaryData.get(level).containing(entity.blockPosition())
+            if (s != null && s.state == com.rickygamer28.sanctuary.data.SanctuaryState.ACTIVE) {
+                event.isCanceled = true
+                return
+            }
+        }
         val tethering = entity.tethering ?: return
         if (tethering is SanctuaryTethering) return
         if (SanctuaryData.get(level).at(tethering.pasturePos) == null) return
