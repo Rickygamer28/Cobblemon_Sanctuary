@@ -8,7 +8,6 @@ import net.minecraft.core.particles.ItemParticleOption
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.server.level.ServerLevel
-import net.minecraft.tags.BlockTags
 import net.minecraft.world.entity.ai.memory.MemoryModuleType
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
@@ -93,19 +92,29 @@ object Routines {
         keepAsleep(r)
     }
 
+    /**
+     * Cobblemon puts a drowsy Pokémon with nowhere to walk to sleep by itself (with its real sleeping pose), if its
+     * species sleeps and likes the spot; otherwise it just rests there quietly.
+     */
     private fun keepAsleep(r: LiveResident) {
         val brain = r.entity.brain
         brain.eraseMemory(MemoryModuleType.WALK_TARGET)
         runCatching { brain.setMemory(CobblemonMemories.POKEMON_DROWSY, true) }
-        runCatching { brain.setMemory(CobblemonMemories.POKEMON_SLEEPING, true) }
+    }
+
+    /** Never send a resident back to its PC still asleep. */
+    fun clearSleep(r: LiveResident) {
+        runCatching {
+            val st = r.pokemon.status
+            if (st != null && st.status.name.path == "sleep") r.pokemon.status = null
+        }
     }
 
     fun wake(r: LiveResident) {
         r.napping = false
         r.napSpot = null
-        val brain = r.entity.brain
-        runCatching { brain.eraseMemory(CobblemonMemories.POKEMON_SLEEPING) }
-        runCatching { brain.eraseMemory(CobblemonMemories.POKEMON_DROWSY) }
+        // Cobblemon's own wake-up task lets it get up once it's no longer drowsy
+        runCatching { r.entity.brain.eraseMemory(CobblemonMemories.POKEMON_DROWSY) }
         if (r.entity.level().random.nextInt(3) == 0) Effects.play(r.entity, Effects.CRY)
     }
 
@@ -152,6 +161,5 @@ object Routines {
             if (other === r || other.entity.distanceToSqr(r.entity) > 5.0 * 5.0) continue
             if (other.busyUntil > now || other.snackSpot != null) s.addRelation(r.pokemonId, other.pokemonId, 2)
         }
-        @Suppress("UNUSED_EXPRESSION") BlockTags.LEAVES
     }
 }

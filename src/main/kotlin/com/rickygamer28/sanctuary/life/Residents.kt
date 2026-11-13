@@ -322,6 +322,7 @@ object Residents {
 
     fun despawn(rt: SanctuaryRuntime, r: LiveResident) {
         rt.live.remove(r.pokemonId)
+        Routines.clearSleep(r)
         MegaCompat.onDespawn(r.entity)
         if (!r.entity.isRemoved) {
             Effects.poof(r.entity)
