@@ -164,6 +164,12 @@ class Sanctuary(
     /** Logs, rocks, pools, campfires… placed around the biomes for residents to visit (position → kind). */
     val props: MutableMap<Long, String> = linkedMapOf()
 
+    /** Dens residents go into to rest and come out of (centre → "zone:direction"). */
+    val dens: MutableMap<Long, String> = linkedMapOf()
+
+    /** How many residents are out at once: 0 normal, 1 more, 2 everyone. */
+    var crowd: Int = 0
+
     /** Biome variant chosen per type for this sanctuary. */
     val variants: MutableMap<String, Int> = mutableMapOf()
 
@@ -183,6 +189,7 @@ class Sanctuary(
         meadow = BitSet()
         berrySpots.clear()
         props.clear()
+        dens.clear()
         needsCheck = true
         generationDirty = true
     }
@@ -231,6 +238,9 @@ class Sanctuary(
         t.putLongArray("BerrySpots", berrySpots.toLongArray())
         t.putLongArray("PropPos", props.keys.toLongArray())
         t.put("PropKind", ListTag().also { l -> props.values.forEach { l.add(net.minecraft.nbt.StringTag.valueOf(it)) } })
+        t.putLongArray("DenPos", dens.keys.toLongArray())
+        t.put("DenInfo", ListTag().also { l -> dens.values.forEach { l.add(net.minecraft.nbt.StringTag.valueOf(it)) } })
+        t.putInt("Crowd", crowd)
         t.putUUID("Id", id)
         t.putUUID("Owner", owner)
         t.putString("OwnerName", ownerName)
@@ -320,7 +330,11 @@ class Sanctuary(
                 val pos = t.getLongArray("PropPos")
                 val kinds = t.getList("PropKind", Tag.TAG_STRING.toInt())
                 for (i in pos.indices) if (i < kinds.size) s.props[pos[i]] = kinds.getString(i)
+                val dp = t.getLongArray("DenPos")
+                val di = t.getList("DenInfo", Tag.TAG_STRING.toInt())
+                for (i in dp.indices) if (i < di.size) s.dens[dp[i]] = di.getString(i)
             }
+            s.crowd = t.getInt("Crowd")
             if (t.contains("PortalPos")) s.portalPos = BlockPos.of(t.getLong("PortalPos"))
             t.getList("Members", Tag.TAG_COMPOUND.toInt()).forEach { e ->
                 val c = e as CompoundTag
@@ -368,6 +382,7 @@ class Sanctuary(
             if (version < DATA_VERSION && version > 0 && !onlyWater) {
                 s.berrySpots.clear()
                 s.props.clear()
+                s.dens.clear()
                 // the terrain is being rebuilt: landmarks get rebuilt on the new ground too
                 s.landmarks.forEach { (k, v) -> if (v != Long.MIN_VALUE) s.staleLandmarks[k] = v }
                 s.landmarks.clear()

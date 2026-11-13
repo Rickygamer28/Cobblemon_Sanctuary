@@ -72,6 +72,10 @@ class LiveResident(
     var dozeUntil = 0L
     /** Last time a visit made it fonder of its trainer. */
     var lastFondAt = -100000L
+    /** Going back to rest: walking into a den (or out of sight, or diving), then gone. */
+    var leaving = false
+    var leaveTarget: BlockPos? = null
+    var leaveSince = 0L
     val pokemon: Pokemon get() = entity.pokemon
     val name get() = entity.pokemon.getDisplayName(false).string
 }
@@ -86,6 +90,8 @@ class SanctuaryRuntime(val id: UUID) {
     var rosterDirty = true
     var shuffleSeed = 0L
     var shuffleAt = 0L
+    /** Whether it was night at the last shift change (null before the first one). */
+    var shiftNight: Boolean? = null
     var gatherUntil = 0L
     val scenes = ArrayList<Scene>()
     var anchors: Map<String, Pair<Int, Int>> = emptyMap()
@@ -230,10 +236,32 @@ object Residents {
         com.rickygamer28.sanctuary.data.SanctuarySize.HUGE -> SanctuaryConfig.spawnCapHuge.get()
     }
 
+    /** How many of this sanctuary's residents are out at once, with its crowd setting. */
+    fun spawnCap(s: Sanctuary): Int {
+        val base = spawnCap(s.size)
+        if (!SanctuaryConfig.allowBigCrowds.get()) return base
+        return when (s.crowd) {
+            1 -> (base * SanctuaryConfig.crowdMoreMultiplier.get()).toInt()
+            2 -> maxOf(base, SanctuaryConfig.crowdEveryoneMax.get())
+            else -> base
+        }
+    }
+
     private fun updateSpawns(level: ServerLevel, s: Sanctuary, rt: SanctuaryRuntime, players: List<ServerPlayer>, now: Long) {
-        val cap = spawnCap(s.size)
+        val cap = spawnCap(s)
+        val everyone = s.crowd == 2 && SanctuaryConfig.allowBigCrowds.get()
         val range = SanctuaryConfig.spawnRange.get().toDouble()
-        if (now - rt.shuffleAt > 20L * 60 * 10) { rt.shuffleSeed = level.random.nextLong(); rt.shuffleAt = now }
+        // shift change at dusk and dawn (and now and then in between): a different set of residents comes out
+        val night = Routines.isNight(level)
+        val rotate = SanctuaryConfig.rotationMinutes.get()
+        if (rt.shiftNight != night || (rotate > 0 && now - rt.shuffleAt > 20L * 60 * rotate)) {
+            if (rt.shiftNight != null && rt.shiftNight != night) {
+                s.logEvent(if (night) "Night fell: the night owls came out and the others went home to their dens." else "Morning came: the day crowd came out of their dens.")
+            }
+            rt.shiftNight = night
+            rt.shuffleSeed = level.random.nextLong()
+            rt.shuffleAt = now
+        }
         val ring = ZoneLayout.ring()
 
         fun distToPlayers(zone: String?): Double {
@@ -242,7 +270,7 @@ object Residents {
         }
 
         // group by biome, then take one from each nearby biome in turn so every biome gets residents out
-        class Cand(val e: RosterEntry, val rank: Int)
+        class Cand(val e: RosterEntry, val rank: Int, val shift: Int)
         val byZone = HashMap<String, MutableList<Cand>>()
         val zoneDist = HashMap<String, Double>()
         for (e in rt.roster) {
@@ -251,11 +279,14 @@ object Residents {
             if (home != null && home !in s.unlocked) continue
             val key = home ?: "~travelers"
             val d = zoneDist.getOrPut(key) { distToPlayers(home) }
-            if (d > range + s.size.radius / 3.0) continue
+            if (!everyone && d > range + s.size.radius / 3.0) continue
             val rank = (e.pokemon.uuid.hashCode().toLong() xor rt.shuffleSeed).hashCode()
-            byZone.getOrPut(key) { ArrayList() } += Cand(e, rank)
+            // night owls come first at night and last by day
+            val owl = runCatching { TypeLogic.currentTypes(e.pokemon).any { it == "ghost" || it == "dark" } }.getOrDefault(false)
+            val shift = if (owl == night) 0 else 1
+            byZone.getOrPut(key) { ArrayList() } += Cand(e, rank, shift)
         }
-        val queues = byZone.entries.sortedBy { zoneDist[it.key] ?: 0.0 }.map { ArrayDeque(it.value.sortedBy { c -> c.rank }) }
+        val queues = byZone.entries.sortedBy { zoneDist[it.key] ?: 0.0 }.map { ArrayDeque(it.value.sortedWith(compareBy({ c -> c.shift }, { c -> c.rank }))) }
         val wanted = ArrayList<RosterEntry>()
         while (wanted.size < cap && queues.any { it.isNotEmpty() }) {
             for (q in queues) {
@@ -265,21 +296,31 @@ object Residents {
         }
         val wantedIds = wanted.map { it.pokemon.uuid }.toHashSet()
 
-        // despawn the ones no longer wanted (not while in a scene), farthest from the players first, and never
-        // right in front of someone: those wait until nobody is close enough to see them go
+        // the ones no longer wanted go back to rest: out of sight they just go; near a player they walk into a den
+        // (or out of sight, or dive), so nobody sees them vanish
         val hidden = SanctuaryConfig.despawnHiddenDistance.get().toDouble()
         fun nearestPlayer(r: LiveResident) = players.minOfOrNull { it.distanceToSqr(r.entity) } ?: Double.MAX_VALUE
         var removed = 0
-        for (r in rt.live.values.filter { it.pokemonId !in wantedIds && it.busyUntil < now }.sortedByDescending { nearestPlayer(it) }) {
-            if (removed >= 6) break
-            if (nearestPlayer(r) < hidden * hidden) break
-            despawn(rt, r)
-            removed++
+        var sent = 0
+        for (r in rt.live.values.toList()) {
+            if (r.leaving && r.pokemonId in wantedIds) { r.leaving = false; r.leaveTarget = null; r.busyUntil = 0 } // wanted again
+        }
+        for (r in rt.live.values.filter { it.pokemonId !in wantedIds && !it.leaving && it.busyUntil < now }.sortedByDescending { nearestPlayer(it) }) {
+            if (nearestPlayer(r) >= hidden * hidden) {
+                if (removed >= 6) continue
+                despawn(rt, r, quiet = true)
+                removed++
+            } else {
+                if (sent >= 4) break
+                Leaving.start(level, s, rt, r, now)
+                sent++
+            }
         }
         // spawn a few new ones each second to avoid lag spikes
         var spawned = 0
+        val out = rt.live.values.count { !it.leaving }
         for (e in wanted) {
-            if (spawned >= 8 || rt.live.size >= cap) break
+            if (spawned >= 8 || out + spawned >= cap) break
             if (rt.live.containsKey(e.pokemon.uuid)) continue
             if (spawn(level, s, rt, e, null, players) != null) spawned++
         }
@@ -293,15 +334,22 @@ object Residents {
         val swimmer = TypeLogic.waterOnly(pokemon)
         val spawnZone = if (swimmer) "water" else home ?: s.unlocked.random()
         if (swimmer && "water" !in s.unlocked) return null
+        var fromDen: com.rickygamer28.sanctuary.world.Dens.Den? = null
         val pos = at ?: run {
-            // a few random spots in its biome; take the one closest to a player so residents are seen
-            // a random spot anywhere in its biome (in loaded chunks), preferably within sight of a player
             val range = SanctuaryConfig.spawnRange.get().toDouble()
-            val candidates = (0 until if (swimmer) 24 else 8).mapNotNull { ZoneLayout.randomPoint(s, spawnZone, level.random, ring) }
+            fun nearPlayer(x: Int, z: Int) = players.isEmpty() || players.any { val dx = it.x - x; val dz = it.z - z; dx * dx + dz * dz < range * range }
+            // out of a den of its biome (it walks out), preferably one near a player
+            if (!swimmer) {
+                val dens = com.rickygamer28.sanctuary.world.Dens.near(level, s, spawnZone).filter { com.rickygamer28.sanctuary.world.Dens.intact(level, it) }
+                val den = dens.filter { nearPlayer(it.center.x, it.center.z) }.randomOrNull() ?: dens.randomOrNull()
+                if (den != null && level.random.nextInt(4) != 0) { fromDen = den; return@run den.inside }
+            }
+            // otherwise a random spot of its biome where nobody is looking
+            val candidates = (0 until if (swimmer) 24 else 12).mapNotNull { ZoneLayout.randomPoint(s, spawnZone, level.random, ring) }
                 .filter { level.hasChunk(it.first shr 4, it.second shr 4) }
                 .filter { !swimmer || Behaviour.isWater(level, it.first, it.second) }
-            val seen = candidates.filter { p -> players.isEmpty() || players.any { val dx = it.x - p.first; val dz = it.z - p.second; dx * dx + dz * dz < range * range } }
-            val pt = (seen.ifEmpty { candidates }).randomOrNull() ?: return null
+                .filter { unseen(players, it.first, it.second) }
+            val pt = (candidates.filter { nearPlayer(it.first, it.second) }.ifEmpty { candidates }).randomOrNull() ?: return null
             BlockPos(pt.first, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, pt.first, pt.second), pt.second)
         }
         MegaCompat.cleanStale(pokemon)
@@ -331,19 +379,42 @@ object Residents {
         live.nextMeetAt = level.gameTime + 200 + level.random.nextInt(400)
         tethering.roamCheck = { p -> Behaviour.canRoam(s, rt, live, p) }
         rt.live[pokemon.uuid] = live
-        runCatching {
+        val den = fromDen
+        if (den != null) {
+            // out of the den and a few steps into the open
+            walkTo(entity, Residents.surface(level, den.front.x, den.front.z), 0.4f, 1)
+            live.busyUntil = level.gameTime + 60
+        } else if (at != null) runCatching {
+            // called out on purpose (a whistle, a hatching): the usual send-out beam
             entity.beamMode = 2
             entity.after(1.5f) { entity.beamMode = 0 }
         }
         return live
     }
 
-    fun despawn(rt: SanctuaryRuntime, r: LiveResident) {
+    /**
+     * True if (x, z) is out of every player's sight: far enough away, or behind them.
+     */
+    fun unseen(players: List<ServerPlayer>, x: Int, z: Int): Boolean {
+        val hidden = SanctuaryConfig.despawnHiddenDistance.get().toDouble()
+        return players.all { p ->
+            val dx = x + 0.5 - p.x
+            val dz = z + 0.5 - p.z
+            val d2 = dx * dx + dz * dz
+            if (d2 >= hidden * hidden) return@all true
+            if (d2 < 12.0 * 12.0) return@all false
+            val look = p.lookAngle
+            val len = Math.sqrt(d2)
+            (look.x * dx + look.z * dz) / (len * Math.max(1e-6, Math.sqrt(look.x * look.x + look.z * look.z))) < -0.35
+        }
+    }
+
+    fun despawn(rt: SanctuaryRuntime, r: LiveResident, quiet: Boolean = false) {
         rt.live.remove(r.pokemonId)
         Routines.clearSleep(r)
         MegaCompat.onDespawn(r.entity)
         if (!r.entity.isRemoved) {
-            Effects.poof(r.entity)
+            if (!quiet) Effects.poof(r.entity)
             r.entity.discard()
         }
         if (r.entity.pokemon.tetheringId == r.tethering.tetheringId) r.entity.pokemon.tetheringId = null
@@ -351,7 +422,7 @@ object Residents {
 
     fun despawnAll(rt: SanctuaryRuntime) {
         rt.scenes.clear()
-        rt.live.values.toList().forEach { despawn(rt, it) }
+        rt.live.values.toList().forEach { despawn(rt, it, quiet = true) }
     }
 
     /** Called when a sanctuary is removed or the server stops. */

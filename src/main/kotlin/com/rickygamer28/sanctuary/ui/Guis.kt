@@ -79,7 +79,16 @@ object SanctuaryGuis {
         t.putInt("radius", s.size.radius)
         t.putBoolean("preview", s.state == SanctuaryState.PREVIEW)
         t.putInt("residents", s.residentCount)
-        t.putInt("live", rt.live.size)
+        t.putInt("live", rt.live.values.count { !it.leaving })
+        t.putInt("capNow", Residents.spawnCap(s))
+        t.putInt("crowd", s.crowd)
+        t.putBoolean("crowdAllowed", com.rickygamer28.sanctuary.SanctuaryConfig.allowBigCrowds.get())
+        run {
+            val base = Residents.spawnCap(s.size)
+            val more = (base * com.rickygamer28.sanctuary.SanctuaryConfig.crowdMoreMultiplier.get()).toInt()
+            val all = minOf(maxOf(base, com.rickygamer28.sanctuary.SanctuaryConfig.crowdEveryoneMax.get()), maxOf(base, s.residentCount))
+            t.putIntArray("crowdCaps", intArrayOf(base, more, all))
+        }
         t.putInt("progress", SanctuaryGenerator.progress(s) ?: -1)
         t.putBoolean("inside", SanctuaryDimension.isSanctuary(player.level()))
         val ring = ZoneLayout.ring()
@@ -301,6 +310,18 @@ object ScreenActions {
             "travel" -> { SanctuaryGuis.close(player); player.server.execute { Sanctuaries.travel(player, s) } }
             "return" -> { SanctuaryGuis.close(player); player.server.execute { SanctuaryDimension.returnHome(player) } }
             "expand" -> { if (ownerOnly()) Sanctuaries.expand(s, player); refresh("home") }
+            "crowd" -> {
+                val c = v.toIntOrNull()?.coerceIn(0, 2) ?: 0
+                if (ownerOnly()) {
+                    if (c > 0 && !com.rickygamer28.sanctuary.SanctuaryConfig.allowBigCrowds.get()) say(player, "Bigger crowds are turned off on this server.", ChatFormatting.RED)
+                    else {
+                        s.crowd = c
+                        Sanctuaries.data(level).setDirty()
+                        say(player, when (c) { 1 -> "More Pokémon will be out at once."; 2 -> "Every resident will come out."; else -> "Back to the normal number of Pokémon out." }, ChatFormatting.GREEN)
+                    }
+                }
+                refresh("home")
+            }
             "reshape" -> {
                 if (ownerOnly()) {
                     s.rebuild()

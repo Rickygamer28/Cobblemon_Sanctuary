@@ -670,7 +670,7 @@ object BiomeDresser {
     }
 
     /** A route, or one of the hub's paths, runs through (x, z). */
-    private fun pathAt(s: Sanctuary, x: Int, z: Int, ring: List<String>): Boolean {
+    fun pathAt(s: Sanctuary, x: Int, z: Int, ring: List<String>): Boolean {
         val hit = ZoneLayout.locate(s, x, z, ring) ?: return true
         if (hit.zone == ZoneLayout.HUB) {
             val dx = x - s.center.x

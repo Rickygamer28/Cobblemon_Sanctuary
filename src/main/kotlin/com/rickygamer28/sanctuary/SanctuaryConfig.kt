@@ -163,6 +163,21 @@ object SanctuaryConfig {
     val playFightXpMaxLevel: ModConfigSpec.IntValue = builder
         .comment("Residents stop gaining experience from play-fights at this level.")
         .defineInRange("playFightXpMaxLevel", 100, 1, 100)
+    val dens: ModConfigSpec.BooleanValue = builder
+        .comment("Build dens in every biome that residents walk into to rest and come out of.")
+        .define("dens", true)
+    val rotationMinutes: ModConfigSpec.IntValue = builder
+        .comment("Besides the shift change at dusk and dawn, which residents are out changes every this many minutes (0 = only at dusk and dawn).")
+        .defineInRange("rotationMinutes", 40, 0, 1440)
+    val allowBigCrowds: ModConfigSpec.BooleanValue = builder
+        .comment("Let sanctuary owners choose 'More' or 'Everyone' for how many Pokémon are out at once (heavier on performance).")
+        .define("allowBigCrowds", true)
+    val crowdMoreMultiplier: ModConfigSpec.DoubleValue = builder
+        .comment("'More': this many times the normal number of Pokémon out at once.")
+        .defineInRange("crowdMoreMultiplier", 1.75, 1.0, 10.0)
+    val crowdEveryoneMax: ModConfigSpec.IntValue = builder
+        .comment("'Everyone': every resident comes out, up to this many at once.")
+        .defineInRange("crowdEveryoneMax", 800, 1, 5000)
     val despawnHiddenDistance: ModConfigSpec.IntValue = builder
         .comment("Residents are only sent back to rest (to make room for others) when no player is within this many blocks.")
         .defineInRange("despawnHiddenDistance", 48, 0, 256)

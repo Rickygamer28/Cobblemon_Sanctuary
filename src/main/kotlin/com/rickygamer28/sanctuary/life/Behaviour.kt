@@ -46,6 +46,7 @@ object Behaviour {
         for (r in residents) {
             val e = r.entity
             if (e.isRemoved) continue
+            if (r.leaving) { Leaving.tick(level, s, rt, r, now); continue }
             if (r.swimmer) { swim(level, s, rt, r, now); continue }
             if (PropVisits.tickActivity(level, s, rt, r, now)) continue
             if (now < r.busyUntil) continue

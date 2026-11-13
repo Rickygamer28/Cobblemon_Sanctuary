@@ -118,6 +118,7 @@ object SanctuaryGenerator {
             if (Landmarks.near(s, x, z)) continue
             looseBlocks(level, x, z)
             if (s.meadow.get(idx)) continue
+            Dens.maybeBuild(level, s, x, z, ring)
             val top = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1
             val target = BiomeDresser.targetHeight(s, x, z, ring)
             if (!tooTall(level, s, x, z, ring, top, target)) continue
@@ -207,7 +208,9 @@ object SanctuaryGenerator {
         }
         if (s.generationDirty) {
             s.generationDirty = false
-            if (s.needsCheck) { s.needsCheck = false; scheduleCheck(s.id) }
+            // after every building pass: check for leftovers, loose plants, and add dens to new ground
+            s.needsCheck = false
+            scheduleCheck(s.id)
             cursors[s.id] = 0
             missedUnloaded[s.id] = false
             if (s.unlockedChanged) { s.unlockedChanged = false; recheckMeadow += s.id }

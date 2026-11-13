@@ -92,6 +92,8 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
     private val hits = ArrayList<Hit>()
     private val stacks = HashMap<String, ItemStack>()
     private var tooltip: List<Component>? = null
+    /** The crowd setting waiting for the player to confirm the performance warning (-1 = none). */
+    private var confirmCrowd = -1
     private var portrait: ModelWidget? = null
     private var portraitKey: String? = null
     private lateinit var search: EditBox
@@ -272,7 +274,44 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
             g.fill(tx, ty + 15, tx + tw, ty + 16, toastColor)
             g.drawCenteredString(font, font.plainSubstrByWidth(msg, tw - 8), tx + tw / 2, ty + 4, toastColor)
         }
+        if (confirmCrowd > 0) crowdWarning(g, mouseX, mouseY)
         tooltip?.let { g.renderComponentTooltip(font, it, mouseX, mouseY) }
+    }
+
+    /** "Are you sure?" for the bigger crowd settings, for people on slower computers. */
+    private fun crowdWarning(g: GuiGraphics, mx: Int, my: Int) {
+        tooltip = null
+        g.pose().pushPose()
+        g.pose().translate(0f, 0f, 400f)
+        g.fill(px, py, px + pw, py + ph, 0xC0000000.toInt())
+        hit(0, 0, width, height) { } // clicks outside the box do nothing
+        val everyone = confirmCrowd == 2
+        val caps = data.getIntArray("crowdCaps")
+        val n = caps.getOrElse(confirmCrowd) { 0 }
+        val bw = min(300, pw - 40)
+        val lines = listOf(
+            "Up to $n Pokémon will be out at once instead of ${caps.getOrElse(0) { 0 }}.",
+            "That looks much livelier, but every Pokémon costs performance:",
+            "on slower computers (or busy servers) this can mean low FPS,",
+            "lag and long loading in the valley.",
+            if (everyone) "'Everyone' is only meant for strong PCs." else "Try it, and switch back to Normal if the game gets slow.",
+            "You can change this back at any time.",
+        )
+        val bh = 48 + lines.size * 11 + 28
+        val bx = px + (pw - bw) / 2
+        val by = py + (ph - bh) / 2
+        box(g, bx - 1, by - 1, bw + 2, bh + 2, BAD)
+        box(g, bx, by, bw, bh, PANEL)
+        g.fill(bx, by, bx + bw, by + 3, BAD)
+        text(g, "⚠ Performance warning", bx + 10, by + 12, BAD, true)
+        text(g, if (everyone) "Show every resident?" else "Show more Pokémon?", bx + 10, by + 26, TEXT)
+        var ly = by + 42
+        for (l in lines) { text(g, fit(l, bw - 20), bx + 10, ly, SUB); ly += 11 }
+        val half = (bw - 30) / 2
+        val choice = confirmCrowd
+        button(g, bx + 10, by + bh - 28, half, 20, "Yes, show them", if (everyone) BAD else GOLD, mx, my) { send("crowd", "$choice", page = "home"); confirmCrowd = -1 }
+        button(g, bx + 20 + half, by + bh - 28, half, 20, "Cancel", ACCENT, mx, my, filled = false) { confirmCrowd = -1 }
+        g.pose().popPose()
     }
 
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
@@ -297,6 +336,7 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
     }
 
     override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
+        if (confirmCrowd > 0 && keyCode == 256) { confirmCrowd = -1; return true }
         if (search.isFocused && keyCode != 256) return search.keyPressed(keyCode, scanCode, modifiers)
         return super.keyPressed(keyCode, scanCode, modifiers)
     }
@@ -514,7 +554,7 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
         // stat cards
         val gap = 6
         val sw = (w - gap * 3) / 4
-        val cap = data.getList("sizes", Tag.TAG_COMPOUND.toInt()).let { if (data.getInt("size") < it.size) it.getCompound(data.getInt("size")).getInt("cap") else 0 }
+        val cap = data.getInt("capNow")
         val prog = data.getInt("progress")
         val stats = listOf(
             Triple("Residents", "${data.getInt("residents")}", ACCENT),
@@ -557,8 +597,36 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
         else button(g, x, ay, bw, 22, "Travel to the valley", PURPLE, mx, my) { send("travel") }
         button(g, x + bw + gap, ay, bw, 22, "Reshape the valley", GOLD, mx, my, enabled = owner, why = "Only the owner can reshape it", filled = false) { send("reshape", page = "home") }
         button(g, x + (bw + gap) * 2, ay, bw, 22, "New Journal", ACCENT, mx, my, filled = false) { send("journal", page = "home") }
+        // how many Pokémon are out at once
+        val cy = ay + 28
+        val caps = data.getIntArray("crowdCaps")
+        val crowd = data.getInt("crowd")
+        val allowed = data.getBoolean("crowdAllowed")
+        text(g, "Pokémon out at once:", x, cy + 5, SUB)
+        val labels = listOf("Normal", "More", "Everyone")
+        val colors = listOf(GOOD, GOLD, BAD)
+        var cx = x + font.width("Pokémon out at once:") + 8
+        val cw = (x + w - cx - gap * 2) / 3
+        for (i in 0..2) {
+            val label = "${labels[i]} (${caps.getOrElse(i) { 0 }})"
+            val ok = owner && (i == 0 || allowed)
+            if (i == crowd) {
+                box(g, cx, cy, cw, 18, colors[i])
+                g.drawCenteredString(font, fit(label, cw - 6), cx + cw / 2, cy + 5, 0xFFFFFFFF.toInt())
+            } else {
+                button(g, cx, cy, cw, 18, label, colors[i], mx, my, enabled = ok, filled = false,
+                    why = if (!owner) "Only the owner can change this" else "Turned off on this server") {
+                    if (i == 0) send("crowd", "0", page = "home") else confirmCrowd = i
+                }
+            }
+            if (i > 0 && over(mx, my, cx, cy, cw, 18)) tooltip = listOf(
+                Component.literal("⚠ Heavier on your computer").withStyle(net.minecraft.ChatFormatting.GOLD),
+                Component.literal("Up to ${caps.getOrElse(i) { 0 }} Pokémon out at once.").withStyle(net.minecraft.ChatFormatting.GRAY),
+            )
+            cx += cw + gap
+        }
         // recent events
-        val ey = ay + 32
+        val ey = cy + 26
         text(g, "Recently", x, ey, SUB)
         val basket = if (data.getBoolean("hasBasket")) "Gathering Basket: ${data.getInt("basketItems")} items" else "No Gathering Basket placed yet"
         text(g, basket, x + w - font.width(basket), ey, if (data.getBoolean("hasBasket")) GOLD else DIM)
