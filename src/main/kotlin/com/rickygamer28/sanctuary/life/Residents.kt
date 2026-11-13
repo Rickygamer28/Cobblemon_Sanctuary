@@ -245,6 +245,8 @@ object Residents {
             BlockPos(pt.first, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, pt.first, pt.second), pt.second)
         }
         MegaCompat.cleanStale(pokemon)
+        // the sanctuary is a place to rest: residents come out healthy
+        if (pokemon.currentHealth < pokemon.maxHealth) runCatching { pokemon.heal() }
         val entity = PokemonEntity(level, pokemon)
         entity.setPos(pos.x + 0.5, pos.y.toDouble(), pos.z + 0.5)
         val r = s.size.radius + 32

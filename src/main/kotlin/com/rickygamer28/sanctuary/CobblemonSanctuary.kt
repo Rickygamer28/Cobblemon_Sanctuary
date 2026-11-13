@@ -42,6 +42,7 @@ class CobblemonSanctuary(modBus: IEventBus, container: ModContainer) {
         bus.addListener(RegisterCommandsEvent::class.java) { onRegisterCommands(it) }
         bus.addListener(PlayerInteractEvent.EntityInteract::class.java) { onEntityInteract(it) }
         bus.addListener(EntityJoinLevelEvent::class.java) { onEntityJoin(it) }
+        bus.addListener(net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent::class.java) { onDamage(it) }
         bus.addListener(BlockEvent.BreakEvent::class.java) { onBlockBreak(it) }
         bus.addListener(ServerStoppingEvent::class.java) { onServerStopping(it) }
         bus.addListener(ChunkEvent.Load::class.java) { onChunkLoad(it) }
@@ -85,6 +86,16 @@ class CobblemonSanctuary(modBus: IEventBus, container: ModContainer) {
      * Residents saved with the world come back with a plain tethering; drop them and let the sanctuary respawn them.
      * Also keeps wild Pokémon out of the sanctuaries.
      */
+    /** Nothing hurts Pokémon in the Sanctuary: no cactus, magma, falls, drowning or attacks. Only /kill still works. */
+    private fun onDamage(event: net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent) {
+        val entity = event.entity as? PokemonEntity ?: return
+        if (entity.level().isClientSide || !SanctuaryDimension.isSanctuary(entity.level())) return
+        val source = event.source
+        if (source.`is`(net.minecraft.world.damagesource.DamageTypes.FELL_OUT_OF_WORLD) || source.`is`(net.minecraft.world.damagesource.DamageTypes.GENERIC_KILL)) return
+        event.isCanceled = true
+        entity.clearFire()
+    }
+
     private fun onEntityJoin(event: EntityJoinLevelEvent) {
         val entity = event.entity as? PokemonEntity ?: return
         val level = event.level as? ServerLevel ?: return
