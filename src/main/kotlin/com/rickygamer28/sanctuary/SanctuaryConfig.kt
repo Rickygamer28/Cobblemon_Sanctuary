@@ -103,6 +103,13 @@ object SanctuaryConfig {
     val megaMinSeconds: ModConfigSpec.IntValue = builder.defineInRange("megaMinSeconds", 30, 1, 3600)
     val megaMaxSeconds: ModConfigSpec.IntValue = builder.defineInRange("megaMaxSeconds", 300, 1, 3600)
 
+    val awayLife: ModConfigSpec.BooleanValue = builder
+        .comment("Residents keep meeting, making friends and rivals and laying eggs while nobody is in the sanctuary.")
+        .define("awayLife", true)
+    val awayLifeRate: ModConfigSpec.DoubleValue = builder
+        .comment("How busy life is while you're away: about (residents / 12 × this) meetings per minute.")
+        .defineInRange("awayLifeRate", 1.0, 0.0, 10.0)
+
     val megaEnabled: ModConfigSpec.BooleanValue = builder
         .comment("Let residents Mega Evolve during play-fights (needs Mega Showdown and the Pokémon holding its Mega Stone).")
         .define("megaEnabled", true)

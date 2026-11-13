@@ -126,6 +126,12 @@ class Sanctuary(
     /** Landmarks built on terrain that has been rebuilt since: they get taken down and built again. */
     val staleLandmarks: MutableMap<String, Long> = mutableMapOf()
 
+    /** What happened while nobody was in the sanctuary, for the next visitor's summary. */
+    var awayMeetings = 0
+    var awayFriends = 0
+    var awayRivals = 0
+    var awayEggs = 0
+
     /** Biome variant chosen per type for this sanctuary. */
     val variants: MutableMap<String, Int> = mutableMapOf()
 
@@ -225,6 +231,7 @@ class Sanctuary(
         val st = CompoundTag()
         staleLandmarks.forEach { (k, v) -> st.putLong(k, v) }
         t.put("StaleLandmarks", st)
+        t.putIntArray("Away", intArrayOf(awayMeetings, awayFriends, awayRivals, awayEggs))
         t.putInt("Version", DATA_VERSION)
         t.putInt("OldWall", oldWallRadius)
         val packed = IntArray((originY.size + 1) / 2) { i ->
@@ -290,6 +297,7 @@ class Sanctuary(
             mt.allKeys.forEach { k -> s.mates[k] = mt.getLong(k) }
             val lm = t.getCompound("Landmarks")
             lm.allKeys.forEach { k -> s.landmarks[k] = lm.getLong(k) }
+            t.getIntArray("Away").let { a -> if (a.size == 4) { s.awayMeetings = a[0]; s.awayFriends = a[1]; s.awayRivals = a[2]; s.awayEggs = a[3] } }
             val st = t.getCompound("StaleLandmarks")
             st.allKeys.forEach { k -> s.staleLandmarks[k] = st.getLong(k) }
             if (t.getInt("Version") < DATA_VERSION && t.getInt("Version") > 0) {

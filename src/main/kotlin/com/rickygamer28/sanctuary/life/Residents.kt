@@ -51,6 +51,8 @@ class LiveResident(
 
 /** Runtime state of one sanctuary (not saved; rebuilt from the PCs). */
 class SanctuaryRuntime(val id: UUID) {
+    /** Whether players were in the sanctuary last second (to greet the next visitor with a summary). */
+    var hadPlayers = false
     val live = HashMap<UUID, LiveResident>()
     var roster: List<RosterEntry> = emptyList()
     var rosterAt = -100000L
@@ -95,7 +97,13 @@ object Residents {
         cleanUp(rt)
         if (players.isEmpty()) {
             despawnAll(rt)
+            rt.hadPlayers = false
+            AwayLife.tick(level, s, rt, now)
             return
+        }
+        if (!rt.hadPlayers) {
+            rt.hadPlayers = true
+            AwayLife.welcome(s, players)
         }
         updateSpawns(level, s, rt, players, now)
         Behaviour.tickSecond(level, s, rt, now)

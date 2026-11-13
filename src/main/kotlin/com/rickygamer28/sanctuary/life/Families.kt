@@ -4,6 +4,7 @@ import com.cobblemon.mod.common.Cobblemon
 import com.cobblemon.mod.common.api.pokemon.PokemonProperties
 import com.cobblemon.mod.common.api.pokemon.egg.EggGroup
 import com.cobblemon.mod.common.api.pokemon.stats.Stats
+import com.cobblemon.mod.common.entity.pokemon.PokemonEntity
 import com.cobblemon.mod.common.pokemon.FormData
 import com.cobblemon.mod.common.pokemon.Gender
 import com.cobblemon.mod.common.pokemon.Pokemon
@@ -72,8 +73,19 @@ object Families {
         return (a.gender == Gender.MALE && b.gender == Gender.FEMALE) || (a.gender == Gender.FEMALE && b.gender == Gender.MALE)
     }
 
+    /** A parent-to-be: a resident that is out in the valley, or one living there while nobody is around. */
+    class Mate(val id: UUID, val pokemon: Pokemon, val owner: UUID, val ownerName: String, val home: String?, val entity: PokemonEntity?) {
+        val name: String get() = pokemon.getDisplayName(false).string
+
+        companion object {
+            fun of(r: LiveResident, s: Sanctuary) = Mate(r.pokemonId, r.pokemon, r.owner,
+                Residents.findRoster(Residents.runtime(s), r.pokemonId)?.ownerName ?: s.ownerName, r.home, r.entity)
+            fun of(e: RosterEntry, home: String?) = Mate(e.pokemon.uuid, e.pokemon, e.owner, e.ownerName, home, null)
+        }
+    }
+
     /** The parent whose species the baby takes: the mother, or the one that isn't Ditto. */
-    private fun mother(a: LiveResident, b: LiveResident): Pair<LiveResident, LiveResident> {
+    private fun mother(a: Mate, b: Mate): Pair<Mate, Mate> {
         val pa = a.pokemon
         val pb = b.pokemon
         return when {
@@ -96,45 +108,66 @@ object Families {
         return form
     }
 
-    private fun parentOf(r: LiveResident) = EggParent(r.pokemonId, r.name, r.pokemon.species.resourceIdentifier.toString(), r.pokemon.aspects.toList())
+    private fun parentOf(r: Mate) = EggParent(r.id, r.name, r.pokemon.species.resourceIdentifier.toString(), r.pokemon.aspects.toList())
 
     // ------------------------------------------------------------------ laying
 
-    /** Called at the end of a nuzzle between two residents. */
+    /** Called at the end of a nuzzle between two residents that are out in the valley. */
     fun afterNuzzle(level: ServerLevel, s: Sanctuary, a: LiveResident, b: LiveResident) {
-        if (!SanctuaryConfig.eggsEnabled.get()) return
         if (a.entity.isRemoved || b.entity.isRemoved) return
-        if (s.relation(a.pokemonId, b.pokemonId) < SanctuaryConfig.familyFriendship.get()) return
-        if (s.eggs.size >= SanctuaryConfig.maxEggs.get()) return
-        val key = Sanctuary.key(a.pokemonId, b.pokemonId)
-        val now = level.gameTime
-        val last = s.mates[key]
-        if (last != null && now - last < SanctuaryConfig.eggCooldownMinutes.get() * 1200L) return
-        if (a.followUntil > now || b.followUntil > now) return // babies are too young
-        if (!runCatching { canBreed(a.pokemon, b.pokemon) }.getOrDefault(false)) return
-        if (level.random.nextDouble() >= SanctuaryConfig.eggChance.get()) return
-        s.mates[key] = now
-        runCatching { layEgg(level, s, a, b) }.onFailure { CobblemonSanctuary.LOGGER.warn("Couldn't lay an egg", it) }
+        if (a.followUntil > level.gameTime || b.followUntil > level.gameTime) return // babies are too young
+        tryEgg(level, s, Mate.of(a, s), Mate.of(b, s))
     }
 
-    private fun layEgg(level: ServerLevel, s: Sanctuary, a: LiveResident, b: LiveResident) {
+    /** Two close friends nuzzled: maybe they start a family. Returns true if an egg was laid. */
+    fun tryEgg(level: ServerLevel, s: Sanctuary, a: Mate, b: Mate): Boolean {
+        if (!SanctuaryConfig.eggsEnabled.get()) return false
+        if (s.relation(a.id, b.id) < SanctuaryConfig.familyFriendship.get()) return false
+        if (s.eggs.size >= SanctuaryConfig.maxEggs.get()) return false
+        val key = Sanctuary.key(a.id, b.id)
+        val now = level.gameTime
+        val last = s.mates[key]
+        if (last != null && now - last < SanctuaryConfig.eggCooldownMinutes.get() * 1200L) return false
+        if (!runCatching { canBreed(a.pokemon, b.pokemon) }.getOrDefault(false)) return false
+        if (level.random.nextDouble() >= SanctuaryConfig.eggChance.get()) return false
+        s.mates[key] = now
+        return runCatching { layEgg(level, s, a, b); true }.onFailure { CobblemonSanctuary.LOGGER.warn("Couldn't lay an egg", it) }.getOrDefault(false)
+    }
+
+    private fun layEgg(level: ServerLevel, s: Sanctuary, a: Mate, b: Mate) {
         val (mom, dad) = mother(a, b)
         val baby = makeBaby(mom.pokemon, dad.pokemon, level)
-        val zone = mom.home ?: ZoneLayout.locate(s, mom.entity.blockX, mom.entity.blockZ)?.zone ?: ZoneLayout.HUB
-        val nest = placeNest(level, s, mom.entity.blockPosition())
+        val momEntity = mom.entity?.takeIf { !it.isRemoved }
+        val zone = mom.home ?: momEntity?.let { ZoneLayout.locate(s, it.blockX, it.blockZ)?.zone } ?: ZoneLayout.HUB
+        // out in the valley: the nest goes right there; otherwise it's made the next time someone is around
+        val nest = momEntity?.let { placeNest(level, s, it.blockPosition()) }
         val cycles = runCatching { baby.species.eggCycles }.getOrDefault(20).coerceIn(1, 120)
-        val ownerName = Residents.findRoster(Residents.runtime(s), mom.pokemonId)?.ownerName ?: s.ownerName
-        val egg = EggData(UUID.randomUUID(), mom.owner, ownerName, baby.saveToNBT(level.registryAccess(), CompoundTag()),
+        val egg = EggData(UUID.randomUUID(), mom.owner, mom.ownerName, baby.saveToNBT(level.registryAccess(), CompoundTag()),
             parentOf(mom), parentOf(dad), zone, nest, level.gameTime, cycles)
         s.eggs[egg.id] = egg
-        Effects.hearts(mom.entity); Effects.hearts(dad.entity)
-        Effects.play(mom.entity, Effects.CRY)
-        level.playSound(null, mom.entity.blockPosition(), SoundEvents.CHICKEN_EGG, SoundSource.NEUTRAL, 1f, 0.8f)
+        if (momEntity != null) {
+            Effects.hearts(momEntity); dad.entity?.let { Effects.hearts(it) }
+            Effects.play(momEntity, Effects.CRY)
+            level.playSound(null, momEntity.blockPosition(), SoundEvents.CHICKEN_EGG, SoundSource.NEUTRAL, 1f, 0.8f)
+        }
         s.logEvent("${mom.name} and ${dad.name} had an egg in the ${Residents.zoneName(zone)}!")
         Sanctuaries.data(level).setDirty()
         level.server.playerList.getPlayer(egg.owner)?.let {
             it.sendSystemMessage(Component.literal("🥚 ${mom.name} and ${dad.name} had an egg! Open the Nest in your Journal.").withStyle(ChatFormatting.LIGHT_PURPLE))
         }
+    }
+
+    /** Eggs laid while nobody was around get their nest once their biome is loaded. */
+    private fun placeMissingNests(level: ServerLevel, s: Sanctuary) {
+        var placed = 0
+        for (egg in s.eggs.values) {
+            if (egg.nest != null || placed >= 2) continue
+            val pt = ZoneLayout.randomPoint(s, egg.zone, level.random) ?: continue
+            if (!level.hasChunk(pt.first shr 4, pt.second shr 4)) continue
+            egg.nest = placeNest(level, s, BlockPos(pt.first, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, pt.first, pt.second), pt.second))
+            placed++
+        }
+        if (placed > 0) Sanctuaries.data(level).setDirty()
     }
 
     fun makeBaby(mother: Pokemon, father: Pokemon, level: ServerLevel): Pokemon {
@@ -359,6 +392,7 @@ object Families {
     // ------------------------------------------------------------------ newborns follow their parents
 
     fun tickSecond(level: ServerLevel, s: Sanctuary, rt: SanctuaryRuntime, now: Long) {
+        if (now % 100L < 20L) placeMissingNests(level, s)
         for (r in rt.live.values) {
             val parents = r.followParents ?: continue
             if (now >= r.followUntil) { r.followParents = null; r.visitZone = null; continue }
