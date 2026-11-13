@@ -464,10 +464,10 @@ object BiomeDresser {
             }
             "rock" -> {
                 // rolling stony hills; real crags only rise in a few parts, with rocky knolls (tors) dotted around
-                val hills = f(s, wx, wz, 64.0, 34, 3) * 3.2 + 2.0
-                val cragField = smooth((f01(s, xd, zd, 120.0, 35, 2) - (if (variant == 1) 0.64 else 0.56)) / 0.2)
-                val crag = Math.pow(ridge(s, wx, wz, 48.0, 36, 2), 1.6) * (if (variant == 2) 10.0 else 15.0) * cragField
-                val tors = smooth((f01(s, wx, wz, 14.0, 37, 2) - 0.8) / 0.1) * 3.0 * (1 - cragField)
+                val hills = f(s, wx, wz, 56.0, 34, 3) * 3.6 + 2.4
+                val cragField = smooth((f01(s, xd, zd, 110.0, 35, 2) - (if (variant == 1) 0.54 else 0.48)) / 0.2)
+                val crag = Math.pow(ridge(s, wx, wz, 46.0, 36, 2), 1.5) * (if (variant == 2) 11.0 else 17.0) * cragField
+                val tors = smooth((f01(s, wx, wz, 14.0, 37, 2) - 0.78) / 0.1) * 3.0 * (1 - cragField)
                 hills + crag + tors
             }
             "fighting" -> if (variant == 2) softTerrace(smooth((f01(s, wx, wz, 70.0, 38, 2) - 0.35) / 0.35) * 12, 6)
