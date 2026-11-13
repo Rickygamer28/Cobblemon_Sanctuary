@@ -41,8 +41,12 @@ object Landmarks {
         "psychic" to "an amethyst spire", "steel" to "an old radio tower", "electric" to "a power line", "ice" to "a frozen spire",
     )
 
+    /** Stored for a biome whose landmark is part of the terrain itself (the volcano): nothing to protect. */
+    const val NONE = Long.MIN_VALUE
+
     /** Is (x, z) on a landmark? The terrain builder leaves those columns alone. */
     fun near(s: Sanctuary, x: Int, z: Int): Boolean = s.landmarks.values.any {
+        if (it == NONE) return@any false
         val p = BlockPos.of(it)
         val dx = p.x - x
         val dz = p.z - z
@@ -51,6 +55,7 @@ object Landmarks {
 
     /** Builds at most one missing landmark whose area is loaded. */
     fun tick(level: ServerLevel, s: Sanctuary) {
+        fixVolcano(s)
         val ring = ZoneLayout.ring()
         for (zone in ring) {
             if (zone !in s.unlocked || s.landmarks.containsKey(zone)) continue
@@ -60,11 +65,28 @@ object Landmarks {
             val variant = BiomeDresser.variantOf(s, zone)
             val base = BlockPos(ax, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, ax, az) - 1, az)
             val random = RandomSource.create(s.seed xor zone.hashCode().toLong())
+            if (zone == "fire" && variant == 0) { s.landmarks[zone] = NONE; continue } // the volcano is the landmark
             runCatching { build(level, s, zone, variant, base, random) }
             s.landmarks[zone] = base.asLong()
             NAMES[zone]?.let { s.logEvent("${it.replaceFirstChar { c -> c.uppercase() }} rose in the ${zone.replaceFirstChar { c -> c.uppercase() }} biome.") }
             return
         }
+    }
+
+    /**
+     * Older versions saved the volcano's crater as the Fire landmark, so after the valley grew, the old crater
+     * was protected and stood there as a pillar. Forget it and let the builder reshape that spot.
+     */
+    private fun fixVolcano(s: Sanctuary) {
+        val pos = s.landmarks["fire"] ?: return
+        if (pos == NONE || BiomeDresser.variantOf(s, "fire") != 0) return
+        s.landmarks["fire"] = NONE
+        val p = BlockPos.of(pos)
+        for (dx in -RADIUS - 2..RADIUS + 2) for (dz in -RADIUS - 2..RADIUS + 2) {
+            val idx = ColumnOrder.indexOf(p.x + dx - s.center.x, p.z + dz - s.center.z)
+            if (idx >= 0) s.dressed.clear(idx)
+        }
+        s.generationDirty = true
     }
 
     // ------------------------------------------------------------------ helpers

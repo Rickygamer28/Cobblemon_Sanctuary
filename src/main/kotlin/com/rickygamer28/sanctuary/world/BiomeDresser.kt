@@ -415,7 +415,7 @@ object BiomeDresser {
         val i = ring.indexOf(zone)
         if (i < 0) return false
         // the route ends at the landmark (which stays where it was built, even after the valley grows)
-        val mark = s.landmarks[zone]?.takeIf { !(zone == "fire" && variantOf(s, zone) == 0) }?.let { BlockPos.of(it) }
+        val mark = s.landmarks[zone]?.takeIf { it != Landmarks.NONE && !(zone == "fire" && variantOf(s, zone) == 0) }?.let { BlockPos.of(it) }
         val (ax, az) = mark?.let { it.x to it.z } ?: ZoneLayout.anchor(s, zone, ring)
         val adx = (ax - s.center.x).toDouble()
         val adz = (az - s.center.z).toDouble()
