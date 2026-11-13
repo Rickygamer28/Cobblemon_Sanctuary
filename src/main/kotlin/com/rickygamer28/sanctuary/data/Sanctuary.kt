@@ -84,6 +84,9 @@ class Sanctuary(
     /** Dressed columns that are only a meadow, because their biome was still asleep. */
     var meadow: BitSet = BitSet()
 
+    /** Biomes to build again on the next pass even where they're already built. Not saved. */
+    val rebuildZones: MutableSet<String> = mutableSetOf()
+
     /** Look for leftover pillars once the valley is built (after loading and after each rebuild). Not saved. */
     var needsCheck: Boolean = true
 
@@ -249,7 +252,7 @@ class Sanctuary(
 
     companion object {
         /** Bump to make existing sanctuaries rebuild their biomes after a generator change. */
-        const val DATA_VERSION = 9
+        const val DATA_VERSION = 10
 
         fun key(a: UUID, b: UUID): String = if (a < b) "$a|$b" else "$b|$a"
 
@@ -276,8 +279,12 @@ class Sanctuary(
             res.allKeys.forEach { k -> runCatching { s.residents[UUID.fromString(k)] = ResidentData.load(res.getCompound(k)) } }
             val rel = t.getCompound("Relationships")
             rel.allKeys.forEach { k -> s.relationships[k] = rel.getInt(k) }
-            s.dressed = if (t.getInt("Version") >= DATA_VERSION) BitSet.valueOf(t.getLongArray("Dressed")) else BitSet()
-            s.meadow = if (t.getInt("Version") >= DATA_VERSION) BitSet.valueOf(t.getLongArray("Meadow")) else BitSet()
+            val version = t.getInt("Version")
+            // version 9 → 10 only changed the Water biome: rebuild just that part (and the shores next to it)
+            val onlyWater = version == 9
+            if (onlyWater) s.rebuildZones += "water"
+            s.dressed = if (version >= DATA_VERSION || onlyWater) BitSet.valueOf(t.getLongArray("Dressed")) else BitSet()
+            s.meadow = if (version >= DATA_VERSION || onlyWater) BitSet.valueOf(t.getLongArray("Meadow")) else BitSet()
             s.oldWallRadius = t.getInt("OldWall")
             // the sizes got bigger: grow the valley like an expansion (old wall down, new wall and mountains further out)
             val savedRadius = if (t.contains("Radius")) t.getInt("Radius") else SanctuarySize.OLD_RADIUS.getOrElse(s.size.ordinal) { s.size.radius }
@@ -304,7 +311,7 @@ class Sanctuary(
             t.getIntArray("Away").let { a -> if (a.size == 4) { s.awayMeetings = a[0]; s.awayFriends = a[1]; s.awayRivals = a[2]; s.awayEggs = a[3] } }
             val st = t.getCompound("StaleLandmarks")
             st.allKeys.forEach { k -> s.staleLandmarks[k] = st.getLong(k) }
-            if (t.getInt("Version") < DATA_VERSION && t.getInt("Version") > 0) {
+            if (version < DATA_VERSION && version > 0 && !onlyWater) {
                 // the terrain is being rebuilt: landmarks get rebuilt on the new ground too
                 s.landmarks.forEach { (k, v) -> if (v != Long.MIN_VALUE) s.staleLandmarks[k] = v }
                 s.landmarks.clear()

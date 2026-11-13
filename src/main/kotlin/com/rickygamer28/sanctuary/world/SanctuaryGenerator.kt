@@ -184,7 +184,8 @@ object SanctuaryGenerator {
             if ((scanned and 31) == 0 && System.nanoTime() > deadline) break
             val idx = i++
             val meadowDone = s.meadow.get(idx)
-            if (s.dressed.get(idx) && !(meadowDone && recheck)) continue
+            val redo = s.rebuildZones.isNotEmpty()
+            if (s.dressed.get(idx) && !(meadowDone && recheck) && !redo) continue
             val ox = ColumnOrder.dx[idx]
             val oz = ColumnOrder.dz[idx]
             val x = s.center.x + ox
@@ -192,6 +193,12 @@ object SanctuaryGenerator {
             val dist = sqrt((ox * ox + oz * oz).toDouble())
             val inside = dist <= radius
             val hit = if (inside) ZoneLayout.locate(s, x, z, ring) else null
+            if (redo && s.dressed.get(idx) && !(meadowDone && recheck)) {
+                // only the biomes being rebuilt (and the strip next to them, whose shape blends with them)
+                val touched = hit != null && (hit.zone in s.rebuildZones || (hit.neighbour in s.rebuildZones && hit.edgeDistance < 26))
+                if (!touched || meadowDone) continue
+                s.dressed.clear(idx)
+            }
             if (inside && hit == null) continue
             // a biome that hasn't woken up is a plain meadow until a Pokémon of its type moves in (the wall is always built)
             val asleep = inside && hit!!.zone !in s.unlocked && dist <= radius - 1.6
@@ -220,6 +227,7 @@ object SanctuaryGenerator {
         if (i >= total) {
             cursors.remove(s.id)
             BiomeDresser.endPass(s)
+            s.rebuildZones.clear()
             recheckMeadow -= s.id
             if (missedUnloaded[s.id] == true) retryAt[s.id] = now + 600
             else if (s.oldWallRadius > 0) s.oldWallRadius = 0

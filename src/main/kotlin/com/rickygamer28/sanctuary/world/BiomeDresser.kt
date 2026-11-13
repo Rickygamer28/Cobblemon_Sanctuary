@@ -338,7 +338,7 @@ object BiomeDresser {
             "water" -> when (variant) {
                 2 -> { // mangrove delta: winding channels between low banks
                     val ch = ridge(s, wx, wz, 30.0, 7, 3)
-                    -3.4 * smooth((ch - 0.72) / 0.12) + f01(s, xd, zd, 14.0, 8, 2) * 1.2
+                    -2.6 * smooth((ch - 0.66) / 0.22) + f01(s, xd, zd, 30.0, 8, 2) * 1.2
                 }
                 else -> {
                     // a smaller lake in the middle, with real land around it: grassy banks and beaches
@@ -347,7 +347,7 @@ object BiomeDresser {
                     val land = 1.6 + f(s, wx, wz, 54.0, 9, 2) * 2.2
                     val base = land * (1 - m) + (-1.0 - depth * m) * m
                     // a few proper islands in the deep part
-                    val island = smooth((f01(s, wx, wz, 32.0, 6, 2) - (if (variant == 1) 0.62 else 0.68)) / 0.05) * smooth((m - 0.55) / 0.25)
+                    val island = smooth((f01(s, wx, wz, 32.0, 6, 2) - (if (variant == 1) 0.6 else 0.66)) / 0.14) * smooth((m - 0.55) / 0.25)
                     base + island * (2.5 - base)
                 }
             }
@@ -882,12 +882,6 @@ object BiomeDresser {
             return
         }
         val lagoon = c.variant == 1
-        if (depth == 0) {
-            c.level.setBlock(c.surface, b(Blocks.WATER), FLAGS)
-            c.level.setBlock(c.surface.below(), b(Blocks.SAND), FLAGS)
-            if (c.chance(0.04)) c.waterTop(b(Blocks.LILY_PAD))
-            return
-        }
         if (depth >= 1) {
             c.flood()
             val bed = when {
