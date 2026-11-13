@@ -40,8 +40,15 @@ object TypeLogic {
 
     fun canFlyInFlocks(pokemon: Pokemon) = FLYING in currentTypes(pokemon)
 
+    /** Pokémon that can't go on land (Sharpedo, Wailord, Magikarp…), from Cobblemon's own movement data. */
+    fun waterOnly(pokemon: Pokemon): Boolean = runCatching {
+        val walk = pokemon.form.behaviour.moving.walk
+        !walk.canWalk || walk.avoidsLand
+    }.getOrDefault(false)
+
     /** The zone this Pokémon calls home, or null for a traveler that hasn't settled anywhere. */
     fun homeZone(pokemon: Pokemon, data: ResidentData?, ring: List<String>): String? {
+        if ("water" in ring && waterOnly(pokemon)) return "water"
         val options = zoneTypes(pokemon)
         val choice = data?.homeChoice
         if (choice != null) {
@@ -52,7 +59,7 @@ object TypeLogic {
     }
 
     /** The other biome a dual-type Pokémon belongs to, if any. */
-    fun secondZone(pokemon: Pokemon, home: String?): String? = zoneTypes(pokemon).firstOrNull { it != home }
+    fun secondZone(pokemon: Pokemon, home: String?): String? = if (waterOnly(pokemon)) null else zoneTypes(pokemon).firstOrNull { it != home }
 
     private fun typesOf(form: FormData): List<String> = form.types.map { it.name.lowercase() }
 

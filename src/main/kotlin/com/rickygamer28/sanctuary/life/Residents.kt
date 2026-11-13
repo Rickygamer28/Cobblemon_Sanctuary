@@ -47,6 +47,10 @@ class LiveResident(
     /** A newborn follows its parents around for a while after hatching. */
     var followParents: Pair<UUID, UUID>? = null
     var followUntil = 0L
+    /** Can't go on land: stays in the water. */
+    var swimmer = false
+    /** When a swimmer was first seen out of the water (0 = in the water). */
+    var strandedSince = 0L
     val pokemon: Pokemon get() = entity.pokemon
     val name get() = entity.pokemon.getDisplayName(false).string
 }
@@ -261,13 +265,16 @@ object Residents {
         if (pokemon.tetheringId != null || pokemon.entity != null) return null
         val ring = ZoneLayout.ring()
         val home = TypeLogic.homeZone(pokemon, s.residents[pokemon.uuid], ring)
-        val spawnZone = home ?: s.unlocked.random()
+        val swimmer = TypeLogic.waterOnly(pokemon)
+        val spawnZone = if (swimmer) "water" else home ?: s.unlocked.random()
+        if (swimmer && "water" !in s.unlocked) return null
         val pos = at ?: run {
             // a few random spots in its biome; take the one closest to a player so residents are seen
             // a random spot anywhere in its biome (in loaded chunks), preferably within sight of a player
             val range = SanctuaryConfig.spawnRange.get().toDouble()
-            val candidates = (0 until 8).mapNotNull { ZoneLayout.randomPoint(s, spawnZone, level.random, ring) }
+            val candidates = (0 until if (swimmer) 24 else 8).mapNotNull { ZoneLayout.randomPoint(s, spawnZone, level.random, ring) }
                 .filter { level.hasChunk(it.first shr 4, it.second shr 4) }
+                .filter { !swimmer || Behaviour.isWater(level, it.first, it.second) }
             val seen = candidates.filter { p -> players.isEmpty() || players.any { val dx = it.x - p.first; val dz = it.z - p.second; dx * dx + dz * dz < range * range } }
             val pt = (seen.ifEmpty { candidates }).randomOrNull() ?: return null
             BlockPos(pt.first, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, pt.first, pt.second), pt.second)
@@ -294,6 +301,7 @@ object Residents {
         live.home = home
         live.second = TypeLogic.secondZone(pokemon, home)
         live.flyer = TypeLogic.canFlyInFlocks(pokemon)
+        live.swimmer = swimmer
         live.nextMeetAt = level.gameTime + 200 + level.random.nextInt(400)
         tethering.roamCheck = { p -> Behaviour.canRoam(s, rt, live, p) }
         rt.live[pokemon.uuid] = live

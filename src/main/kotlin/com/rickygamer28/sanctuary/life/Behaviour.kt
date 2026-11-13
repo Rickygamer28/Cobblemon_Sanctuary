@@ -12,7 +12,17 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType
 object Behaviour {
 
     /** Used by Cobblemon's wander AI (through the tethering) to decide whether a spot is allowed. */
+    /** Is the top of the column at (x, z) water? */
+    fun isWater(level: ServerLevel, x: Int, z: Int): Boolean {
+        val y = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, x, z) - 1
+        return level.getFluidState(BlockPos(x, y, z)).`is`(net.minecraft.tags.FluidTags.WATER)
+    }
+
+    private fun wet(level: net.minecraft.world.level.Level, pos: BlockPos) =
+        level.getFluidState(pos).`is`(net.minecraft.tags.FluidTags.WATER) || level.getFluidState(pos.below()).`is`(net.minecraft.tags.FluidTags.WATER)
+
     fun canRoam(s: Sanctuary, rt: SanctuaryRuntime, r: LiveResident, pos: BlockPos): Boolean {
+        if (r.swimmer) return wet(r.entity.level(), pos) && ZoneLayout.locate(s, pos.x, pos.z) != null
         val hit = ZoneLayout.locate(s, pos.x, pos.z) ?: return false
         val now = r.entity.level().gameTime
         val home = r.home
@@ -35,7 +45,9 @@ object Behaviour {
 
         for (r in residents) {
             val e = r.entity
-            if (e.isRemoved || now < r.busyUntil) continue
+            if (e.isRemoved) continue
+            if (r.swimmer) { swim(level, s, rt, r, now); continue }
+            if (now < r.busyUntil) continue
 
             // Cobblemon lets some Pokémon hunt each other; in the sanctuary that becomes play-fighting
             val target = e.brain.getMemory(MemoryModuleType.ATTACK_TARGET).orElse(null)
@@ -102,6 +114,32 @@ object Behaviour {
         flocks(level, s, rt, now)
         avoidRivals(s, rt, now)
         Scenes.findMeetings(level, s, rt, now)
+    }
+
+    /** Water-only residents: swim around the lakes, and never stay stranded on land. */
+    private fun swim(level: ServerLevel, s: Sanctuary, rt: SanctuaryRuntime, r: LiveResident, now: Long) {
+        val e = r.entity
+        r.visitZone = null
+        r.waypoints.clear()
+        if (e.isInWater || wet(level, e.blockPosition())) {
+            r.strandedSince = 0L
+            if (level.random.nextInt(40) == 0 && !e.brain.hasMemoryValue(net.minecraft.world.entity.ai.memory.MemoryModuleType.WALK_TARGET)) swimSomewhere(level, s, r)
+            return
+        }
+        if (r.strandedSince == 0L) r.strandedSince = now
+        // on land: head for the water; if it can't get there soon, it goes back to resting (and comes out in the water)
+        if (now - r.strandedSince > 20L * 8) Residents.despawn(rt, r) else if ((now - r.strandedSince) % 60L < 20L) swimSomewhere(level, s, r, near = true)
+    }
+
+    private fun swimSomewhere(level: ServerLevel, s: Sanctuary, r: LiveResident, near: Boolean = false) {
+        val random = level.random
+        repeat(12) {
+            val pt = if (near) (r.entity.blockX + random.nextInt(25) - 12) to (r.entity.blockZ + random.nextInt(25) - 12)
+                else ZoneLayout.randomPoint(s, "water", random) ?: return@repeat
+            if (!level.hasChunk(pt.first shr 4, pt.second shr 4) || !isWater(level, pt.first, pt.second)) return@repeat
+            Residents.walkTo(r.entity, Residents.surface(level, pt.first, pt.second).below(), 0.5f, 2)
+            return
+        }
     }
 
     fun goHome(level: ServerLevel, s: Sanctuary, r: LiveResident, viaHub: Boolean) {
