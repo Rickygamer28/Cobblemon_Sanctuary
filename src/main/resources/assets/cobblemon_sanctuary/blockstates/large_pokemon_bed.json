@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "cobblemon_sanctuary:block/large_pokemon_bed"
+    },
+    "facing=east": {
+      "model": "cobblemon_sanctuary:block/large_pokemon_bed",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "cobblemon_sanctuary:block/large_pokemon_bed",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "cobblemon_sanctuary:block/large_pokemon_bed",
+      "y": 270
+    }
+  }
+}

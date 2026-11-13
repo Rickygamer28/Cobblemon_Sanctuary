@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "cobblemon_sanctuary:block/bed_part"
+      }
+    }
+  ]
+}

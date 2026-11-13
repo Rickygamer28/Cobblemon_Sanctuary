@@ -67,8 +67,111 @@ abstract class DecorationBlock(properties: Properties, private val kind: String,
     }
 }
 
-class PokemonBedBlock(properties: Properties) : DecorationBlock(properties, "player_bed", box(0.0, 0.0, 0.0, 16.0, 6.0, 16.0)) {
-    override fun codec() = simpleCodec(::PokemonBedBlock)
+/**
+ * A plush bed in three sizes, for small, big and huge Pokémon: 1×1, 2×2 or 3×3 blocks. The block placed holds the
+ * whole model; the other blocks of a bigger bed are invisible parts that point back to it.
+ */
+open class PokemonBedBlock(properties: Properties, val size: Int) :
+    DecorationBlock(properties, kindFor(size), box(0.0, 0.0, 0.0, 16.0, 5.0, 16.0)) {
+    override fun codec() = simpleCodec { PokemonBedBlock(it, 1) }
+
+    override fun getStateForPlacement(context: BlockPlaceContext): BlockState? {
+        val state = super.getStateForPlacement(context) ?: return null
+        val level = context.level
+        for (off in cells(size, state.getValue(FACING))) {
+            if (off.x == 0 && off.z == 0) continue
+            if (!level.getBlockState(context.clickedPos.offset(off)).canBeReplaced(context)) return null
+        }
+        return state
+    }
+
+    override fun setPlacedBy(level: Level, pos: BlockPos, state: BlockState, placer: LivingEntity?, stack: ItemStack) {
+        for (off in cells(size, state.getValue(FACING))) {
+            if (off.x == 0 && off.z == 0) continue
+            val part = com.rickygamer28.sanctuary.registry.ModContent.BED_PART.get().defaultBlockState()
+                .setValue(BedPartBlock.DX, 2 - off.x).setValue(BedPartBlock.DZ, 2 - off.z)
+            level.setBlock(pos.offset(off), part, UPDATE_ALL)
+        }
+        super.setPlacedBy(level, pos, state, placer, stack)
+    }
+
+    override fun onRemove(state: BlockState, level: Level, pos: BlockPos, newState: BlockState, movedByPiston: Boolean) {
+        if (!state.`is`(newState.block)) {
+            for (off in cells(size, state.getValue(FACING))) {
+                if (off.x == 0 && off.z == 0) continue
+                val p = pos.offset(off)
+                if (BedPartBlock.masterOf(level, p) == pos) level.setBlock(p, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), UPDATE_ALL)
+            }
+        }
+        super.onRemove(state, level, pos, newState, movedByPiston)
+    }
+
+    companion object {
+        fun kindFor(size: Int) = when (size) { 2 -> "player_bed_large"; 3 -> "player_bed_huge"; else -> "player_bed" }
+
+        /** The blocks a bed covers, relative to the one placed (it turns with the bed). */
+        fun cells(size: Int, facing: Direction): List<BlockPos> {
+            val base = when (size) {
+                2 -> listOf(0 to 0, 1 to 0, 0 to 1, 1 to 1)
+                3 -> (-1..1).flatMap { x -> (-1..1).map { z -> x to z } }
+                else -> listOf(0 to 0)
+            }
+            val turns = when (facing) { Direction.EAST -> 1; Direction.SOUTH -> 2; Direction.WEST -> 3; else -> 0 }
+            return base.map { (x0, z0) ->
+                var x = x0; var z = z0
+                repeat(turns) { val t = x; x = -z; z = t }
+                BlockPos(x, 0, z)
+            }
+        }
+    }
+}
+
+class LargePokemonBedBlock(properties: Properties) : PokemonBedBlock(properties, 2) {
+    override fun codec() = simpleCodec(::LargePokemonBedBlock)
+}
+
+class HugePokemonBedBlock(properties: Properties) : PokemonBedBlock(properties, 3) {
+    override fun codec() = simpleCodec(::HugePokemonBedBlock)
+}
+
+/** An invisible part of a big bed; breaking it breaks the bed. */
+class BedPartBlock(properties: Properties) : Block(properties) {
+    init { registerDefaultState(stateDefinition.any().setValue(DX, 2).setValue(DZ, 2)) }
+
+    override fun createBlockStateDefinition(builder: StateDefinition.Builder<Block, BlockState>) { builder.add(DX, DZ) }
+
+    override fun getShape(state: BlockState, level: BlockGetter, pos: BlockPos, context: CollisionContext): VoxelShape = SHAPE
+
+    override fun getCloneItemStack(level: net.minecraft.world.level.LevelReader, pos: BlockPos, state: BlockState): ItemStack =
+        masterOf(level, pos)?.let { level.getBlockState(it).block.asItem().defaultInstance } ?: ItemStack.EMPTY
+
+    override fun playerWillDestroy(level: Level, pos: BlockPos, state: BlockState, player: Player): BlockState {
+        masterOf(level, pos)?.let { if (!level.isClientSide) level.destroyBlock(it, !player.abilities.instabuild, player) }
+        return super.playerWillDestroy(level, pos, state, player)
+    }
+
+    override fun onRemove(state: BlockState, level: Level, pos: BlockPos, newState: BlockState, movedByPiston: Boolean) {
+        if (!state.`is`(newState.block) && !level.isClientSide) {
+            val m = BlockPos(pos.x - 2 + state.getValue(DX), pos.y, pos.z - 2 + state.getValue(DZ))
+            if (level.getBlockState(m).block is PokemonBedBlock) level.destroyBlock(m, true)
+        }
+        super.onRemove(state, level, pos, newState, movedByPiston)
+    }
+
+    companion object {
+        /** Offset to the bed's main block, +2 (so 0..4). */
+        val DX: IntegerProperty = IntegerProperty.create("dx", 0, 4)
+        val DZ: IntegerProperty = IntegerProperty.create("dz", 0, 4)
+        private val SHAPE: VoxelShape = box(0.0, 0.0, 0.0, 16.0, 5.0, 16.0)
+
+        /** The main block of the bed this part belongs to, if it's still there. */
+        fun masterOf(level: BlockGetter, pos: BlockPos): BlockPos? {
+            val st = level.getBlockState(pos)
+            if (st.block !is BedPartBlock) return null
+            val m = BlockPos(pos.x - 2 + st.getValue(DX), pos.y, pos.z - 2 + st.getValue(DZ))
+            return if (level.getBlockState(m).block is PokemonBedBlock) m else null
+        }
+    }
 }
 
 class BouncyBallBlock(properties: Properties) : DecorationBlock(properties, "player_toy", box(4.0, 0.0, 4.0, 12.0, 8.0, 12.0)) {

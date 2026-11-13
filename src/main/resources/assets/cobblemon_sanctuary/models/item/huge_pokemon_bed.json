@@ -1,0 +1,60 @@
+{
+  "parent": "cobblemon_sanctuary:block/huge_pokemon_bed",
+  "display": {
+    "gui": {
+      "rotation": [
+        30,
+        225,
+        0
+      ],
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.21,
+        0.21,
+        0.21
+      ]
+    },
+    "ground": {
+      "scale": [
+        0.1,
+        0.1,
+        0.1
+      ]
+    },
+    "fixed": {
+      "scale": [
+        0.17,
+        0.17,
+        0.17
+      ]
+    },
+    "thirdperson_righthand": {
+      "rotation": [
+        75,
+        45,
+        0
+      ],
+      "scale": [
+        0.13,
+        0.13,
+        0.13
+      ]
+    },
+    "firstperson_righthand": {
+      "rotation": [
+        0,
+        45,
+        0
+      ],
+      "scale": [
+        0.13,
+        0.13,
+        0.13
+      ]
+    }
+  }
+}

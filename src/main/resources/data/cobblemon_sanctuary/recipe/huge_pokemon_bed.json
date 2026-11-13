@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "decorations",
+  "ingredients": [
+    {
+      "item": "cobblemon_sanctuary:large_pokemon_bed"
+    },
+    {
+      "item": "cobblemon_sanctuary:large_pokemon_bed"
+    },
+    {
+      "tag": "minecraft:wool"
+    },
+    {
+      "tag": "minecraft:wool"
+    }
+  ],
+  "result": {
+    "id": "cobblemon_sanctuary:huge_pokemon_bed",
+    "count": 1
+  }
+}

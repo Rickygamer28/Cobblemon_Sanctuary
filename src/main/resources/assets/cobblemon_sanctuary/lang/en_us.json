@@ -12,5 +12,8 @@
   "block.cobblemon_sanctuary.gathering_basket": "Gathering Basket",
   "block.cobblemon_sanctuary.pokemon_bed": "Pokémon Bed",
   "block.cobblemon_sanctuary.bouncy_ball": "Bouncy Ball",
-  "block.cobblemon_sanctuary.feeding_trough": "Feeding Trough"
+  "block.cobblemon_sanctuary.feeding_trough": "Feeding Trough",
+  "block.cobblemon_sanctuary.large_pokemon_bed": "Large Pokémon Bed",
+  "block.cobblemon_sanctuary.huge_pokemon_bed": "Huge Pokémon Bed",
+  "block.cobblemon_sanctuary.bed_part": "Pokémon Bed"
 }

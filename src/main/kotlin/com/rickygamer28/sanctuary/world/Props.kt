@@ -40,6 +40,8 @@ object Props {
         val bed: Boolean = false,
         /** Only on dirt or grass (flowers and the like). */
         val soil: Boolean = false,
+        /** How many blocks across it is (big beds fit big Pokémon). */
+        val size: Int = 1,
         /** Placed by a player: every resident likes it. */
         val placed: Boolean = false,
         /** Builds it on the column; returns the spot residents walk to (null if it couldn't be built). */
@@ -250,6 +252,8 @@ object Props {
         Kind("berry_tree", "a berry tree", Action.SNIFF, false, setOf("grass", "bug", "normal", "fairy", "water")),
         // decorations players place
         Kind("player_bed", "a Pokémon bed", Action.NAP, true, emptySet(), bed = true, placed = true),
+        Kind("player_bed_large", "a large Pokémon bed", Action.NAP, true, emptySet(), bed = true, size = 2, placed = true),
+        Kind("player_bed_huge", "a huge Pokémon bed", Action.NAP, true, emptySet(), bed = true, size = 3, placed = true),
         Kind("player_toy", "a bouncy ball", Action.PLAY, false, emptySet(), gathering = true, placed = true),
         Kind("player_trough", "a feeding trough", Action.EAT, false, emptySet(), gathering = true, placed = true),
     ).associateBy { it.id }

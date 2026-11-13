@@ -37,6 +37,12 @@ object PropVisits {
     private fun likes(r: LiveResident, kind: Props.Kind): Boolean =
         runCatching { TypeLogic.currentTypes(r.pokemon).any { it in kind.types } }.getOrDefault(false)
 
+    /** How many blocks across a bed must be for this Pokémon. */
+    fun bedSizeFor(r: LiveResident): Int = r.entity.bbWidth.let { w -> if (w <= 1.2f) 1 else if (w <= 2.4f) 2 else 3 }
+
+    /** Beds have to be big enough (a Wailord doesn't fit in a small one); everything else fits. */
+    private fun fits(r: LiveResident, kind: Props.Kind) = !kind.bed || !kind.placed || kind.size >= bedSizeFor(r)
+
     // ------------------------------------------------------------------ choosing where to go
 
     /** Picks a spot to visit (its favourite now and then). Returns true if it set off. */
@@ -62,6 +68,7 @@ object PropVisits {
             val pos = BlockPos.of(p)
             if (abs(pos.x - here.x) > RANGE || abs(pos.z - here.z) > RANGE) return
             if (!level.isLoaded(pos) || !Behaviour.canRoam(s, rt, r, pos)) return
+            if (!fits(r, kind)) return
             var w = (if (likes(r, kind)) 4.0 else 1.0) * (if (p == rd?.favourite) 3.0 else 1.0)
             if (kind.placed) w = 4.0 * when (kind.action) {
                 Props.Action.PLAY -> r.personality.tag
@@ -256,7 +263,7 @@ object PropVisits {
     /** A soft spot near [from] to sleep on (a mossy mound, a snow pile…), or null. */
     fun bedNear(level: ServerLevel, s: Sanctuary, rt: SanctuaryRuntime, r: LiveResident, from: BlockPos): BlockPos? =
         s.props.entries.asSequence()
-            .filter { kindOf(it.value)?.bed == true }
+            .filter { e -> kindOf(e.value)?.let { it.bed && fits(r, it) } == true }
             .map { BlockPos.of(it.key) }
             .filter { abs(it.x - from.x) < 24 && abs(it.z - from.z) < 24 && level.isLoaded(it) && Behaviour.canRoam(s, rt, r, it) }
             .minByOrNull { it.distSqr(from) }

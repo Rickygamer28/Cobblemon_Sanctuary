@@ -1,7 +1,10 @@
 package com.rickygamer28.sanctuary.registry
 
 import com.rickygamer28.sanctuary.CobblemonSanctuary
+import com.rickygamer28.sanctuary.block.BedPartBlock
 import com.rickygamer28.sanctuary.block.BouncyBallBlock
+import com.rickygamer28.sanctuary.block.HugePokemonBedBlock
+import com.rickygamer28.sanctuary.block.LargePokemonBedBlock
 import com.rickygamer28.sanctuary.block.EggNestBlock
 import com.rickygamer28.sanctuary.block.FeedingTroughBlock
 import com.rickygamer28.sanctuary.block.PokemonBedBlock
@@ -56,7 +59,16 @@ object ModContent {
         GatheringBasketBlock(BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(0.8f).sound(SoundType.BAMBOO_WOOD).noOcclusion())
     }
     val POKEMON_BED: DeferredBlock<PokemonBedBlock> = BLOCKS.register("pokemon_bed") { ->
-        PokemonBedBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED).strength(0.6f).sound(SoundType.WOOL).noOcclusion())
+        PokemonBedBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED).strength(0.6f).sound(SoundType.WOOL).noOcclusion(), 1)
+    }
+    val LARGE_POKEMON_BED: DeferredBlock<LargePokemonBedBlock> = BLOCKS.register("large_pokemon_bed") { ->
+        LargePokemonBedBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED).strength(0.6f).sound(SoundType.WOOL).noOcclusion())
+    }
+    val HUGE_POKEMON_BED: DeferredBlock<HugePokemonBedBlock> = BLOCKS.register("huge_pokemon_bed") { ->
+        HugePokemonBedBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED).strength(0.6f).sound(SoundType.WOOL).noOcclusion())
+    }
+    val BED_PART: DeferredBlock<BedPartBlock> = BLOCKS.register("bed_part") { ->
+        BedPartBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED).strength(0.6f).sound(SoundType.WOOL).noOcclusion().noLootTable())
     }
     val BOUNCY_BALL: DeferredBlock<BouncyBallBlock> = BLOCKS.register("bouncy_ball") { ->
         BouncyBallBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_LIGHT_BLUE).strength(0.3f).sound(SoundType.WOOL).noOcclusion())
@@ -84,6 +96,8 @@ object ModContent {
         net.minecraft.world.item.BlockItem(GATHERING_BASKET.get(), Item.Properties())
     }
     val POKEMON_BED_ITEM: DeferredItem<Item> = ITEMS.register("pokemon_bed") { -> net.minecraft.world.item.BlockItem(POKEMON_BED.get(), Item.Properties()) }
+    val LARGE_POKEMON_BED_ITEM: DeferredItem<Item> = ITEMS.register("large_pokemon_bed") { -> net.minecraft.world.item.BlockItem(LARGE_POKEMON_BED.get(), Item.Properties()) }
+    val HUGE_POKEMON_BED_ITEM: DeferredItem<Item> = ITEMS.register("huge_pokemon_bed") { -> net.minecraft.world.item.BlockItem(HUGE_POKEMON_BED.get(), Item.Properties()) }
     val BOUNCY_BALL_ITEM: DeferredItem<Item> = ITEMS.register("bouncy_ball") { -> net.minecraft.world.item.BlockItem(BOUNCY_BALL.get(), Item.Properties()) }
     val FEEDING_TROUGH_ITEM: DeferredItem<Item> = ITEMS.register("feeding_trough") { -> net.minecraft.world.item.BlockItem(FEEDING_TROUGH.get(), Item.Properties()) }
     val POKEMON_EGG: DeferredItem<PokemonEggItem> = ITEMS.register("pokemon_egg") { ->
@@ -106,6 +120,8 @@ object ModContent {
                 output.accept(INCUBATOR_ITEM.get())
                 output.accept(GATHERING_BASKET_ITEM.get())
                 output.accept(POKEMON_BED_ITEM.get())
+                output.accept(LARGE_POKEMON_BED_ITEM.get())
+                output.accept(HUGE_POKEMON_BED_ITEM.get())
                 output.accept(BOUNCY_BALL_ITEM.get())
                 output.accept(FEEDING_TROUGH_ITEM.get())
             }
