@@ -130,6 +130,7 @@ object Families {
         val form = babyForm(mother)
         val aspects = form.aspects.joinToString(" ")
         val baby = PokemonProperties.parse("species=${form.species.resourceIdentifier} level=1 $aspects".trim()).create()
+        if (baby.species != form.species) { baby.species = form.species; baby.level = 1; baby.initialize() }
         val random = level.random
         // three stats come from the parents
         for (stat in STATS.shuffled().take(3)) {
