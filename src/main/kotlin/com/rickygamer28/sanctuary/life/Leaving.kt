@@ -23,12 +23,15 @@ object Leaving {
         if (r.napping || r.dozeUntil > 0) { r.dozeUntil = 0; Routines.wake(r) }
         if (r.swimmer) { r.leaveTarget = null; return }
         val here = r.entity.blockPosition()
-        // the nearest den it may walk to, its own biome's first
-        val den = Dens.all(s)
+        // one of the nearest dens it may walk to (its own biome's first), not always the same one, so they don't queue
+        val dens = Dens.all(s)
             .filter { level.isLoaded(it.mouth) && it.mouth.distSqr(here) < 96.0 * 96.0 && Behaviour.canRoam(s, rt, r, it.mouth) }
             .sortedBy { it.mouth.distSqr(here) * (if (it.zone == r.home) 1.0 else 2.5) }
-            .firstOrNull { Dens.intact(level, it) }
-        r.leaveTarget = den?.mouth ?: awayFromPlayers(level, s, r)
+            .filter { Dens.intact(level, it) }
+            .take(3).toList()
+        val den = dens.randomOrNull()
+        // into the hollow, at a random spot across the tunnel's width
+        r.leaveTarget = den?.let { if (it.big) it.mouth.relative(it.dir.clockWise, level.random.nextInt(3) - 1) else it.mouth } ?: awayFromPlayers(level, s, r)
         r.leaveTarget?.let { Residents.walkTo(r.entity, it, 0.45f, 0) }
     }
 
@@ -60,7 +63,7 @@ object Leaving {
         }
         val target = r.leaveTarget
         if (target != null) {
-            if (e.blockPosition().closerThan(target, 1.7) || e.boundingBox.inflate(0.6).contains(target.x + 0.5, target.y + 0.5, target.z + 0.5)) {
+            if (e.blockPosition().closerThan(target, 2.2) || e.boundingBox.inflate(1.0).contains(target.x + 0.5, target.y + 0.5, target.z + 0.5)) {
                 // into the den
                 level.sendParticles(ParticleTypes.POOF, target.x + 0.5, target.y + 0.4, target.z + 0.5, 3, 0.2, 0.1, 0.2, 0.01)
                 Residents.despawn(rt, r, quiet = true)

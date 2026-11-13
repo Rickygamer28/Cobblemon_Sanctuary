@@ -201,6 +201,7 @@ object SanctuaryGenerator {
                 if (now >= at && level.players().isNotEmpty()) { repairAgainAt.remove(s.id); scheduleCheck(s.id) }
             }
             if (now % 40L == 0L) Landmarks.tick(level, s)
+            if (now % 40L == 20L) Dens.upgrade(level, s)
             val retry = retryAt[s.id] ?: return
             if (now < retry) return
             retryAt.remove(s.id)

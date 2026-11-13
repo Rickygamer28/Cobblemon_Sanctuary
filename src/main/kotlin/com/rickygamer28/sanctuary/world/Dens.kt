@@ -41,30 +41,41 @@ object Dens {
     )
     private val CUSTOM = Style(Blocks.STONE, Blocks.COBBLESTONE, Blocks.STONE)
 
-    private const val GRID = 32
+    private const val GRID = 36
     private const val CAP = 600
     private const val FLAGS = Block.UPDATE_CLIENTS
+    /** Radius of a den's mound. */
+    private const val R = 4
 
-    class Den(val center: BlockPos, val zone: String, val dir: Direction) {
+    /**
+     * A den: [big] ones (1.2.1+) are a wide dome with a 3×3 tunnel into a 3×3×3 hollow, so several residents can
+     * come and go at once; the first small ones are upgraded where there's room.
+     */
+    class Den(val center: BlockPos, val zone: String, val dir: Direction, val big: Boolean) {
         /** The open end of the tunnel, where residents walk in and out. */
-        val mouth: BlockPos get() = center.relative(dir, 2).above()
-        /** Inside, at the end of the tunnel. */
-        val inside: BlockPos get() = center.relative(dir, 1).above()
-        /** Just in front of it, outside. */
-        val front: BlockPos get() = center.relative(dir, 4).above()
+        val mouth: BlockPos get() = center.relative(dir, if (big) R else 2).above()
+        /** Inside, in the hollow. */
+        val inside: BlockPos get() = if (big) center.above() else center.relative(dir, 1).above()
+        /** In front of it, outside. */
+        val front: BlockPos get() = center.relative(dir, if (big) R + 3 else 4).above()
+        /** The roof above the hollow. */
+        val roof: BlockPos get() = center.above(if (big) 4 else 3)
     }
 
     fun all(s: Sanctuary): Sequence<Den> = s.dens.entries.asSequence().mapNotNull { (k, v) -> decode(k, v) }
 
     private fun decode(k: Long, v: String): Den? {
-        val zone = v.substringBefore(':')
-        val dir = Direction.from2DDataValue(v.substringAfter(':').toIntOrNull() ?: return null)
-        return Den(BlockPos.of(k), zone, dir)
+        val parts = v.split(':')
+        if (parts.size < 2) return null
+        val dir = Direction.from2DDataValue(parts[1].toIntOrNull() ?: return null)
+        return Den(BlockPos.of(k), parts[0], dir, parts.getOrNull(2) == "big")
     }
+
+    private fun encode(zone: String, dir: Direction) = "$zone:${dir.get2DDataValue()}:big"
 
     /** Is the den still standing (and its tunnel still open)? */
     fun intact(level: ServerLevel, d: Den): Boolean =
-        level.getBlockState(d.mouth).isAir && !level.getBlockState(d.center.above(3)).isAir
+        level.getBlockState(d.mouth).isAir && !level.getBlockState(d.roof).isAir
 
     /** Dens of [zone] (or any den, if [zone] is null) in loaded chunks. */
     fun near(level: ServerLevel, s: Sanctuary, zone: String?): List<Den> =
@@ -72,9 +83,40 @@ object Dens {
 
     private fun b(block: Block): BlockState = block.defaultBlockState()
 
+    private fun groundAt(level: ServerLevel, x: Int, z: Int) = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1
+
+    /** Room for a big den at [center]: gently sloped, dry, free of paths, landmarks, spots and berry trees. */
+    private fun roomFor(level: ServerLevel, s: Sanctuary, center: BlockPos, ring: List<String>, ignore: Set<Long> = emptySet()): Boolean {
+        val x = center.x
+        val z = center.z
+        val span = R + 1
+        for (dx in -span..span) for (dz in -span..span) {
+            val px = x + dx
+            val pz = z + dz
+            if (!level.hasChunk(px shr 4, pz shr 4)) return false
+            val top = groundAt(level, px, pz)
+            val ground = BlockPos(px, top, pz)
+            if (ground.asLong() in ignore || ignore.contains(BlockPos(px, 0, pz).asLong())) continue
+            if (abs(top - center.y) > 2) return false
+            if (!level.getFluidState(ground).isEmpty) return false
+            if (abs(dx) == span || abs(dz) == span || (dx == 0 && dz == 0)) {
+                if (BiomeDresser.pathAt(s, px, pz, ring) || Landmarks.near(s, px, pz)) return false
+            }
+        }
+        if (s.props.keys.any { BlockPos.of(it).let { p -> abs(p.x - x) <= R + 3 && abs(p.z - z) <= R + 3 } }) return false
+        if (s.berrySpots.any { BlockPos.of(it).let { p -> abs(p.x - x) <= R + 2 && abs(p.z - z) <= R + 2 } }) return false
+        return true
+    }
+
+    /** A direction whose way in is level with the den (not up a step or down a drop). */
+    private fun entrance(level: ServerLevel, center: BlockPos, random: net.minecraft.util.RandomSource): Direction? =
+        Direction.Plane.HORIZONTAL.toList().shuffled(java.util.Random(random.nextLong())).firstOrNull { d ->
+            (R..R + 3).all { i -> val p = center.relative(d, i); abs(groundAt(level, p.x, p.z) - center.y) <= 1 }
+        }
+
     /**
      * Called for every finished column by the valley's check pass: builds a den on one spot per grid cell, if the
-     * ground there is flat and free.
+     * ground there is gentle and free.
      */
     fun maybeBuild(level: ServerLevel, s: Sanctuary, x: Int, z: Int, ring: List<String>) {
         val salt = 900
@@ -86,67 +128,81 @@ object Dens {
         val hit = ZoneLayout.locate(s, x, z, ring) ?: return
         val zone = hit.zone
         if (zone != ZoneLayout.HUB && zone !in s.unlocked) return
-        val center = BlockPos(x, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1, z)
+        val center = BlockPos(x, groundAt(level, x, z), z)
         if (s.dens.containsKey(center.asLong())) return
-        if (hit.dist > s.size.radius - 12 || (zone != ZoneLayout.HUB && hit.edgeDistance < 8)) return
-        if (zone == ZoneLayout.HUB && hit.dist < 16) return
+        if (s.dens.keys.any { BlockPos.of(it).let { p -> abs(p.x - x) < 16 && abs(p.z - z) < 16 } }) return
+        if (hit.dist > s.size.radius - 14 || (zone != ZoneLayout.HUB && hit.edgeDistance < 10)) return
+        if (zone == ZoneLayout.HUB && hit.dist < 18) return
         if (center.y < SanctuaryDimension.GROUND_Y) return
-        // flat, dry and free all around (room for the mound and the way in)
-        for (dx in -4..4) for (dz in -4..4) {
-            val px = x + dx
-            val pz = z + dz
-            if (!level.hasChunk(px shr 4, pz shr 4)) return
-            val top = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, px, pz) - 1
-            if (abs(top - center.y) > 2) return
-            val ground = BlockPos(px, top, pz)
-            if (!level.getFluidState(ground).isEmpty || !BiomeDresser.isNatural(level.getBlockState(ground))) return
-            for (dy in 1..3) {
-                val st = level.getBlockState(ground.above(dy))
-                if (!st.isAir && !(st.canBeReplaced() && st.fluidState.isEmpty)) return
-            }
-            if (abs(dx) == 4 || abs(dz) == 4 || (dx == 0 && dz == 0)) {
-                if (BiomeDresser.pathAt(s, px, pz, ring) || Landmarks.near(s, px, pz)) return
-            }
-        }
-        if (s.props.keys.any { BlockPos.of(it).let { p -> abs(p.x - x) <= 5 && abs(p.z - z) <= 5 } }) return
-        if (s.berrySpots.any { BlockPos.of(it).let { p -> abs(p.x - x) <= 4 && abs(p.z - z) <= 4 } }) return
+        if (!BiomeDresser.isNatural(level.getBlockState(center))) return
+        if (!roomFor(level, s, center, ring)) return
         val random = net.minecraft.util.RandomSource.create(s.seed xor center.asLong())
-        // the way in must be at the den's own level, not up a step or down a drop
-        fun groundAt(p: BlockPos) = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, p.x, p.z) - 1
-        val dir = Direction.Plane.HORIZONTAL.toList().shuffled(java.util.Random(random.nextLong())).firstOrNull { d ->
-            (2..4).all { i -> abs(groundAt(center.relative(d, i)) - center.y) <= 1 }
-        } ?: return
+        val dir = entrance(level, center, random) ?: return
         build(level, center, STYLES[zone] ?: CUSTOM, dir, random)
-        s.dens[center.asLong()] = "$zone:${dir.get2DDataValue()}"
+        s.dens[center.asLong()] = encode(zone, dir)
+    }
+
+    /** Turns the first, small dens into big ones where there's room (a couple at a time). */
+    fun upgrade(level: ServerLevel, s: Sanctuary) {
+        if (!SanctuaryConfig.dens.get()) return
+        val ring = ZoneLayout.ring()
+        var done = 0
+        for (d in all(s).filter { !it.big }.toList()) {
+            if (done >= 2) return
+            if (!level.isLoaded(d.center) || !level.hasChunk((d.center.x + R + 1) shr 4, (d.center.z + R + 1) shr 4) ||
+                !level.hasChunk((d.center.x - R - 1) shr 4, (d.center.z - R - 1) shr 4)) continue
+            done++
+            val random = net.minecraft.util.RandomSource.create(s.seed xor d.center.asLong())
+            // the old mound stands on the ground: measure around it, not on top of it
+            val old = HashSet<Long>()
+            for (dx in -2..2) for (dz in -2..2) old += BlockPos(d.center.x + dx, 0, d.center.z + dz).asLong()
+            if (!roomFor(level, s, d.center, ring, old)) { s.dens[d.center.asLong()] = encode(d.zone, d.dir).removeSuffix(":big") + ":small"; continue }
+            val dir = if ((R..R + 3).all { i -> val p = d.center.relative(d.dir, i); abs(groundAt(level, p.x, p.z) - d.center.y) <= 1 }) d.dir
+                else entrance(level, d.center, random) ?: d.dir
+            build(level, d.center, STYLES[d.zone] ?: CUSTOM, dir, random)
+            s.dens[d.center.asLong()] = encode(d.zone, dir)
+        }
     }
 
     private fun build(level: ServerLevel, center: BlockPos, st: Style, dir: Direction, random: net.minecraft.util.RandomSource) {
         fun put(p: BlockPos, block: Block) {
             val cur = level.getBlockState(p)
-            if (cur.isAir || cur.canBeReplaced()) level.setBlock(p, b(block), FLAGS)
+            if (cur.isAir || cur.canBeReplaced() || BiomeDresser.isNatural(cur)) level.setBlock(p, b(block), FLAGS)
         }
         fun pick() = if (random.nextInt(4) == 0) st.accent else st.main
         val base = center.above()
-        // a rounded mound: 5×5 without corners, then 3×3, then a cap
-        for (dx in -2..2) for (dz in -2..2) {
-            if (abs(dx) == 2 && abs(dz) == 2) continue
-            val p = base.offset(dx, 0, dz)
-            put(p, pick())
-            // where the ground dips, fill under it so the mound doesn't float
-            for (dy in 1..2) { val q = p.below(dy); val cur = level.getBlockState(q); if (cur.isAir || cur.canBeReplaced()) put(q, st.main) else break }
+        // a wide dome: about 4 high in the middle, down to 1 at the edge
+        var topY = 0
+        for (dx in -R..R) for (dz in -R..R) {
+            val d = Math.sqrt((dx * dx + dz * dz).toDouble())
+            if (d > R + 0.4) continue
+            val h = Math.round(Math.sqrt(Math.max(0.0, (R + 0.6) * (R + 0.6) - d * d)) * 0.85).toInt().coerceAtLeast(1)
+            if (dx == 0 && dz == 0) topY = h
+            for (dy in 0 until h) put(base.offset(dx, dy, dz), if (dy == h - 1) st.cap else pick())
+            // where the ground dips, fill under it so the dome doesn't float
+            for (dy in 1..3) {
+                val q = base.offset(dx, -dy, dz)
+                val cur = level.getBlockState(q)
+                if (cur.isAir || cur.canBeReplaced()) level.setBlock(q, b(st.main), FLAGS) else break
+            }
         }
-        for (dx in -1..1) for (dz in -1..1) put(base.offset(dx, 1, dz), if (abs(dx) + abs(dz) == 2) st.cap else pick())
-        put(base.above(2), st.cap)
-        for ((dx, dz) in listOf(1 to 0, -1 to 0, 0 to 1, 0 to -1)) if (random.nextBoolean()) put(base.offset(dx, 2, dz), st.cap)
-        // the hollow and the tunnel to it (two high)
-        for (i in 0..2) for (dy in 0..1) level.setBlock(base.relative(dir, i).above(dy), b(Blocks.AIR), FLAGS)
-        st.floor?.let { level.setBlock(center, b(it), FLAGS) }
+        // the hollow (3×3×3) and a tunnel 3 wide and 3 high out to the edge
+        val side = dir.clockWise
+        for (dx in -1..1) for (dz in -1..1) for (dy in 0..2) level.setBlock(base.offset(dx, dy, dz), b(Blocks.AIR), FLAGS)
+        for (i in 2..R + 1) for (w in -1..1) for (dy in 0..2) {
+            val p = base.relative(dir, i).relative(side, w).above(dy)
+            if (i > R && !level.getBlockState(p).isAir && !level.getBlockState(p).canBeReplaced()) continue
+            level.setBlock(p, b(Blocks.AIR), FLAGS)
+        }
+        // a frame around the way in, so it reads as an entrance
+        for (dy in 0..3) for (w in listOf(-2, 2)) put(base.relative(dir, R).relative(side, w).above(dy), st.cap)
+        for (w in -2..2) put(base.relative(dir, R).relative(side, w).above(3), st.cap)
+        // floor
+        st.floor?.let { f -> for (dx in -1..1) for (dz in -1..1) level.setBlock(center.offset(dx, 0, dz), b(f), FLAGS) }
         // a little decoration on top
         st.deco?.let { deco ->
-            val top = base.above(3)
-            if (level.getBlockState(top).isAir && !level.getBlockState(top.below()).isAir) {
-                level.setBlock(top, b(deco), FLAGS)
-            }
+            val top = base.above(topY)
+            if (level.getBlockState(top).isAir && !level.getBlockState(top.below()).isAir) level.setBlock(top, b(deco), FLAGS)
         }
     }
 }

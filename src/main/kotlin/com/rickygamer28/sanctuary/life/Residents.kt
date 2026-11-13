@@ -92,6 +92,8 @@ class SanctuaryRuntime(val id: UUID) {
     var shuffleAt = 0L
     /** Whether it was night at the last shift change (null before the first one). */
     var shiftNight: Boolean? = null
+    /** When a resident last came out of each den. */
+    val denUsed = HashMap<Long, Long>()
     var gatherUntil = 0L
     val scenes = ArrayList<Scene>()
     var anchors: Map<String, Pair<Int, Int>> = emptyMap()
@@ -340,9 +342,15 @@ object Residents {
             fun nearPlayer(x: Int, z: Int) = players.isEmpty() || players.any { val dx = it.x - x; val dz = it.z - z; dx * dx + dz * dz < range * range }
             // out of a den of its biome (it walks out), preferably one near a player
             if (!swimmer) {
-                val dens = com.rickygamer28.sanctuary.world.Dens.near(level, s, spawnZone).filter { com.rickygamer28.sanctuary.world.Dens.intact(level, it) }
+                // a den nobody came out of in the last few seconds, so they don't pile up at one entrance
+                val dens = com.rickygamer28.sanctuary.world.Dens.near(level, s, spawnZone)
+                    .filter { level.gameTime - (rt.denUsed[it.center.asLong()] ?: -1000L) > 60 && com.rickygamer28.sanctuary.world.Dens.intact(level, it) }
                 val den = dens.filter { nearPlayer(it.center.x, it.center.z) }.randomOrNull() ?: dens.randomOrNull()
-                if (den != null && level.random.nextInt(4) != 0) { fromDen = den; return@run den.inside }
+                if (den != null && level.random.nextInt(4) != 0) {
+                    fromDen = den
+                    rt.denUsed[den.center.asLong()] = level.gameTime
+                    return@run if (den.big) den.inside.offset(level.random.nextInt(3) - 1, 0, level.random.nextInt(3) - 1) else den.inside
+                }
             }
             // otherwise a random spot of its biome where nobody is looking
             val candidates = (0 until if (swimmer) 24 else 12).mapNotNull { ZoneLayout.randomPoint(s, spawnZone, level.random, ring) }
@@ -381,8 +389,9 @@ object Residents {
         rt.live[pokemon.uuid] = live
         val den = fromDen
         if (den != null) {
-            // out of the den and a few steps into the open
-            walkTo(entity, Residents.surface(level, den.front.x, den.front.z), 0.4f, 1)
+            // out of the den and off into the open, each in its own direction
+            val out = den.center.relative(den.dir, 7 + level.random.nextInt(6)).relative(den.dir.clockWise, level.random.nextInt(11) - 5)
+            walkTo(entity, Residents.surface(level, out.x, out.z), 0.45f, 2)
             live.busyUntil = level.gameTime + 60
         } else if (at != null) runCatching {
             // called out on purpose (a whistle, a hatching): the usual send-out beam
