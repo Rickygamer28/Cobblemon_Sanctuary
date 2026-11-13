@@ -61,7 +61,7 @@ object SanctuaryGenerator {
     private val retryAt = HashMap<UUID, Long>()
     private val missedUnloaded = HashMap<UUID, Boolean>()
 
-    fun forget(id: UUID) { cursors.remove(id); retryAt.remove(id); missedUnloaded.remove(id) }
+    fun forget(id: UUID) { cursors.remove(id); retryAt.remove(id); missedUnloaded.remove(id); BiomePainter.forget(id) }
 
     fun isGrowing(s: Sanctuary) = s.generationDirty || cursors.containsKey(s.id)
 
@@ -75,6 +75,7 @@ object SanctuaryGenerator {
     fun tick(level: ServerLevel, data: SanctuaryData, s: Sanctuary) {
         if (s.state != SanctuaryState.ACTIVE) return
         val now = level.gameTime
+        if (now % 10L == 0L) BiomePainter.tick(level, s)
         if (!s.generationDirty && !cursors.containsKey(s.id)) {
             val retry = retryAt[s.id] ?: return
             if (now < retry) return
@@ -111,7 +112,7 @@ object SanctuaryGenerator {
                 com.rickygamer28.sanctuary.CobblemonSanctuary.LOGGER.warn("Couldn't dress column $x,$z", e)
                 true
             }
-            if (ok) s.dressed.set(idx)
+            if (ok) { s.dressed.set(idx); BiomePainter.mark(s, x, z) }
             budget--
         }
         if (i >= total) {

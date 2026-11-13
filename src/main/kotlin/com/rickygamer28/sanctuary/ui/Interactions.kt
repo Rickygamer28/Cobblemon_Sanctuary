@@ -39,7 +39,7 @@ object Interactions {
     }
 
     fun act(player: ServerPlayer, pokemonId: UUID, action: String, arg: String?) {
-        val f = find(player, pokemonId) ?: return player.sendSystemMessage(Text.error("That Pokémon doesn't live in your sanctuary."))
+        val f = find(player, pokemonId) ?: return say(player, "That Pokémon doesn't live in your sanctuary.", net.minecraft.ChatFormatting.RED)
         val pokemon = f.live?.pokemon ?: f.entry?.pokemon ?: return
         val now = f.level.gameTime
         val data = f.s.resident(pokemonId)
@@ -47,11 +47,11 @@ object Interactions {
         val name = pokemon.getDisplayName(false).string
         val live = f.live
         when (action) {
-            "menu" -> Menus.resident(player, f.s, pokemon)
+            "menu" -> ResidentGui(player, f.level, f.s, pokemonId).open()
             "summary" -> Menus.summary(player, f.s, pokemon)
             "pet" -> {
-                if (live == null) return player.sendSystemMessage(Text.info("$name isn't out right now. Go find it in the ${Residents.zoneName(TypeLogic.homeZone(pokemon, data, ZoneLayout.ring()))}!"))
-                if (!near(player, live)) return player.sendSystemMessage(Text.info("Get closer to $name first."))
+                if (live == null) return say(player, "$name isn't out right now. Go find it in the ${Residents.zoneName(TypeLogic.homeZone(pokemon, data, ZoneLayout.ring()))}!", net.minecraft.ChatFormatting.GRAY)
+                if (!near(player, live)) return say(player, "Get closer to $name first.", net.minecraft.ChatFormatting.GRAY)
                 Residents.stop(live.entity)
                 live.entity.lookControl.setLookAt(player)
                 Effects.play(live.entity, Effects.CRY)
@@ -59,11 +59,11 @@ object Interactions {
                 if (now - data.lastPet >= PET_COOLDOWN) {
                     data.lastPet = now
                     if (owner) pokemon.incrementFriendship(2)
-                    player.sendSystemMessage(Text.good("$name loves it!"))
-                } else player.sendSystemMessage(Text.info("$name enjoys the attention."))
+                    say(player, "$name loves it!", net.minecraft.ChatFormatting.GREEN)
+                } else say(player, "$name enjoys the attention.", net.minecraft.ChatFormatting.GRAY)
             }
             "play" -> {
-                if (live == null || !near(player, live)) return player.sendSystemMessage(Text.info("Get close to $name first."))
+                if (live == null || !near(player, live)) return say(player, "Get close to $name first.", net.minecraft.ChatFormatting.GRAY)
                 live.busyUntil = now + 60
                 Residents.walkTo(live.entity, player.blockPosition(), 0.55f, 2)
                 live.entity.after(1.0f) { Effects.play(live.entity, Effects.ATTACK); Effects.sparks(live.entity) }
@@ -72,12 +72,12 @@ object Interactions {
                     data.lastPlay = now
                     if (owner) pokemon.incrementFriendship(1)
                 }
-                player.sendSystemMessage(Text.good("$name plays with you!"))
+                say(player, "$name plays with you!", net.minecraft.ChatFormatting.GREEN)
             }
             "feed" -> {
-                if (live == null || !near(player, live)) return player.sendSystemMessage(Text.info("Get close to $name first."))
+                if (live == null || !near(player, live)) return say(player, "Get close to $name first.", net.minecraft.ChatFormatting.GRAY)
                 val slot = (0 until player.inventory.containerSize).firstOrNull { player.inventory.getItem(it).`is`(BERRIES) }
-                    ?: return player.sendSystemMessage(Text.error("You need a berry in your inventory."))
+                    ?: return say(player, "You need a berry in your inventory.", net.minecraft.ChatFormatting.RED)
                 val berry = player.inventory.getItem(slot)
                 val berryName = berry.hoverName.string
                 if (!player.isCreative) berry.shrink(1)
@@ -89,17 +89,17 @@ object Interactions {
                     data.lastFeed = now
                     if (owner) pokemon.incrementFriendship(3)
                 }
-                player.sendSystemMessage(Text.good("$name happily eats the $berryName."))
+                say(player, "$name happily eats the $berryName.", net.minecraft.ChatFormatting.GREEN)
                 // nearby residents notice the food
                 Residents.runtime(f.s).live.values.filter { it !== live && it.entity.distanceToSqr(live.entity) < 100 && now >= it.busyUntil }.take(3)
                     .forEach { Residents.walkTo(it.entity, player.blockPosition(), 0.45f, 3) }
             }
             "home" -> {
-                if (!owner) return player.sendSystemMessage(Text.error("Only its trainer can change its home."))
+                if (!owner) return say(player, "Only its trainer can change its home.", net.minecraft.ChatFormatting.RED)
                 val zone = arg ?: return
                 val ring = ZoneLayout.ring()
                 val options = TypeLogic.zoneTypes(pokemon).ifEmpty { listOf(ZoneLayout.HUB) + ring }
-                if (zone !in options) return player.sendSystemMessage(Text.error("$name can't live there."))
+                if (zone !in options) return say(player, "$name can't live there.", net.minecraft.ChatFormatting.RED)
                 data.homeChoice = zone
                 if (live != null) {
                     live.home = zone
@@ -107,40 +107,40 @@ object Interactions {
                     Behaviour.commute(f.level, f.s, live, zone)
                 }
                 f.s.logEvent("$name moved to the ${Residents.zoneName(zone)}.")
-                player.sendSystemMessage(Text.good("$name will now live in the ${Residents.zoneName(zone)}."))
+                say(player, "$name will now live in the ${Residents.zoneName(zone)}.", net.minecraft.ChatFormatting.GREEN)
             }
             "take" -> {
-                if (!owner) return player.sendSystemMessage(Text.error("Only its trainer can take it."))
+                if (!owner) return say(player, "Only its trainer can take it.", net.minecraft.ChatFormatting.RED)
                 val party = Cobblemon.storage.getParty(player)
-                if (party.occupied() >= 6) return player.sendSystemMessage(Text.error("Your party is full."))
+                if (party.occupied() >= 6) return say(player, "Your party is full.", net.minecraft.ChatFormatting.RED)
                 val rt = Residents.runtime(f.s)
                 if (live != null) Residents.despawn(rt, live)
                 pokemon.tetheringId = null
                 val pc = Cobblemon.storage.getPC(player)
-                if (!pc.remove(pokemon)) return player.sendSystemMessage(Text.error("Couldn't take $name out of your PC."))
+                if (!pc.remove(pokemon)) return say(player, "Couldn't take $name out of your PC.", net.minecraft.ChatFormatting.RED)
                 if (!party.add(pokemon)) {
                     pc.add(pokemon)
-                    return player.sendSystemMessage(Text.error("Couldn't add $name to your party."))
+                    return say(player, "Couldn't add $name to your party.", net.minecraft.ChatFormatting.RED)
                 }
                 rt.rosterDirty = true
-                player.sendSystemMessage(Text.good("$name joined your party. Put it back in your PC and it goes home."))
+                say(player, "$name joined your party. Put it back in your PC and it goes home.", net.minecraft.ChatFormatting.GREEN)
             }
             "call" -> {
-                if (!player.inventory.contains(ItemStack(ModContent.WHISTLE.get()))) return player.sendSystemMessage(Text.error("You need a Whistle."))
+                if (!player.inventory.contains(ItemStack(ModContent.WHISTLE.get()))) return say(player, "You need a Whistle.", net.minecraft.ChatFormatting.RED)
                 val here = Sanctuaries.data(player.serverLevel()).containing(player.blockPosition())
-                if (here == null || here.id != f.s.id) return player.sendSystemMessage(Text.error("You need to be inside the sanctuary."))
+                if (here == null || here.id != f.s.id) return say(player, "You need to be inside the sanctuary.", net.minecraft.ChatFormatting.RED)
                 val rt = Residents.runtime(f.s)
                 val target = live ?: f.entry?.let { Residents.spawn(f.level, f.s, rt, it, Residents.surface(f.level, player.blockX + 2, player.blockZ + 2)) }
-                    ?: return player.sendSystemMessage(Text.error("$name can't come right now."))
+                    ?: return say(player, "$name can't come right now.", net.minecraft.ChatFormatting.RED)
                 val zone = ZoneLayout.locate(f.s, player.blockX, player.blockZ)?.zone
                 target.visitZone = zone
                 target.visitUntil = now + 20L * 90
                 target.waypoints.clear()
                 Residents.walkTo(target.entity, player.blockPosition(), 0.6f, 2)
                 player.serverLevel().playSound(null, player.blockPosition(), net.minecraft.sounds.SoundEvents.NOTE_BLOCK_FLUTE.value(), net.minecraft.sounds.SoundSource.PLAYERS, 1f, 1.6f)
-                player.sendSystemMessage(Text.good("You whistle for $name!"))
+                say(player, "You whistle for $name!", net.minecraft.ChatFormatting.GREEN)
             }
-            else -> player.sendSystemMessage(Text.error("Unknown action."))
+            else -> say(player, "Unknown action.", net.minecraft.ChatFormatting.RED)
         }
         Sanctuaries.data(f.level).setDirty()
     }

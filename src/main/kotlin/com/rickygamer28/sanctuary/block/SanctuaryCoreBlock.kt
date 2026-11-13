@@ -1,7 +1,7 @@
 package com.rickygamer28.sanctuary.block
 
 import com.rickygamer28.sanctuary.Sanctuaries
-import com.rickygamer28.sanctuary.ui.Menus
+import com.rickygamer28.sanctuary.ui.SanctuaryGuis
 import net.minecraft.core.BlockPos
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
@@ -25,7 +25,7 @@ class SanctuaryCoreBlock(properties: Properties) : Block(properties) {
     override fun useWithoutItem(state: BlockState, level: Level, pos: BlockPos, player: Player, hitResult: BlockHitResult): InteractionResult {
         if (level is ServerLevel && player is ServerPlayer) {
             val s = Sanctuaries.data(level).at(pos)
-            if (s != null) Menus.core(player, level, s)
+            if (s != null) SanctuaryGuis.openCore(player, level, s)
         }
         return InteractionResult.sidedSuccess(level.isClientSide)
     }

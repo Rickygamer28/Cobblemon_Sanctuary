@@ -69,7 +69,7 @@ object SanctuaryCommand {
     }
 
     private fun journal(ctx: CommandContext<CommandSourceStack>, section: String, page: Int): Int {
-        Menus.journal(ctx.source.playerOrException, section, page)
+        com.rickygamer28.sanctuary.ui.SanctuaryGuis.openJournal(ctx.source.playerOrException, section)
         return 1
     }
 
@@ -99,7 +99,7 @@ object SanctuaryCommand {
             }
             "journal" -> if (s.isMember(player.uuid)) Sanctuaries.giveJournal(player)
             "outline" -> if (s.isMember(player.uuid)) Residents.runtime(s).outlineUntil = level.gameTime + 20L * 15
-            "menu" -> Menus.core(player, level, s)
+            "menu" -> com.rickygamer28.sanctuary.ui.SanctuaryGuis.openCore(player, level, s)
             else -> return 0
         }
         return 1

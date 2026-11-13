@@ -175,18 +175,28 @@ object Residents {
             return players.minOf { val dx = it.x - ax; val dz = it.z - az; Math.sqrt(dx * dx + dz * dz) }
         }
 
-        val scored = rt.roster.mapNotNull { e ->
-            if (e.pokemon.currentHealth <= 0) return@mapNotNull null
+        // group by biome, then take one from each nearby biome in turn so every biome gets residents out
+        class Cand(val e: RosterEntry, val rank: Int)
+        val byZone = HashMap<String, MutableList<Cand>>()
+        val zoneDist = HashMap<String, Double>()
+        for (e in rt.roster) {
+            if (e.pokemon.currentHealth <= 0) continue
             val home = TypeLogic.homeZone(e.pokemon, s.residents[e.pokemon.uuid], ring)
-            if (home != null && home !in s.unlocked) return@mapNotNull null
-            val d = distToPlayers(home)
-            if (d > range + s.size.radius / 3.0) return@mapNotNull null
-            val bucket = (d / 32).toInt()
+            if (home != null && home !in s.unlocked) continue
+            val key = home ?: "~travelers"
+            val d = zoneDist.getOrPut(key) { distToPlayers(home) }
+            if (d > range + s.size.radius / 3.0) continue
             val rank = (e.pokemon.uuid.hashCode().toLong() xor rt.shuffleSeed).hashCode()
-            Triple(e, bucket, rank)
-        }.sortedWith(compareBy<Triple<RosterEntry, Int, Int>> { it.second }.thenBy { it.third })
-
-        val wanted = scored.take(cap).map { it.first }
+            byZone.getOrPut(key) { ArrayList() } += Cand(e, rank)
+        }
+        val queues = byZone.entries.sortedBy { zoneDist[it.key] ?: 0.0 }.map { ArrayDeque(it.value.sortedBy { c -> c.rank }) }
+        val wanted = ArrayList<RosterEntry>()
+        while (wanted.size < cap && queues.any { it.isNotEmpty() }) {
+            for (q in queues) {
+                if (wanted.size >= cap) break
+                q.removeFirstOrNull()?.let { wanted += it.e }
+            }
+        }
         val wantedIds = wanted.map { it.pokemon.uuid }.toHashSet()
 
         // despawn the ones no longer wanted (not while in a scene)
@@ -203,19 +213,22 @@ object Residents {
         for (e in wanted) {
             if (spawned >= 4 || rt.live.size >= cap) break
             if (rt.live.containsKey(e.pokemon.uuid)) continue
-            if (spawn(level, s, rt, e, null) != null) spawned++
+            if (spawn(level, s, rt, e, null, players) != null) spawned++
         }
     }
 
-    fun spawn(level: ServerLevel, s: Sanctuary, rt: SanctuaryRuntime, e: RosterEntry, at: BlockPos?): LiveResident? {
+    fun spawn(level: ServerLevel, s: Sanctuary, rt: SanctuaryRuntime, e: RosterEntry, at: BlockPos?, players: List<ServerPlayer> = emptyList()): LiveResident? {
         val pokemon = e.pokemon
         if (pokemon.tetheringId != null || pokemon.entity != null) return null
         val ring = ZoneLayout.ring()
         val home = TypeLogic.homeZone(pokemon, s.residents[pokemon.uuid], ring)
         val spawnZone = home ?: s.unlocked.random()
         val pos = at ?: run {
-            val pt = ZoneLayout.randomPoint(s, spawnZone, level.random, ring) ?: return null
-            if (!level.hasChunk(pt.first shr 4, pt.second shr 4)) return null
+            // a few random spots in its biome; take the one closest to a player so residents are seen
+            val pt = (0 until 6).mapNotNull { ZoneLayout.randomPoint(s, spawnZone, level.random, ring) }
+                .filter { level.hasChunk(it.first shr 4, it.second shr 4) }
+                .minByOrNull { p -> players.minOfOrNull { val dx = it.x - p.first; val dz = it.z - p.second; dx * dx + dz * dz } ?: 0.0 }
+                ?: return null
             BlockPos(pt.first, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, pt.first, pt.second), pt.second)
         }
         val entity = PokemonEntity(level, pokemon)

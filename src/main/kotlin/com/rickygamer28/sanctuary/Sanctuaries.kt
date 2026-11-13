@@ -70,7 +70,7 @@ object Sanctuaries {
         data.setDirty()
         Residents.refreshRoster(level, s, Residents.runtime(s), level.gameTime)
         giveJournalOnce(player)
-        Menus.core(player, level, s)
+        player.server.execute { com.rickygamer28.sanctuary.ui.SanctuaryGuis.openCore(player, level, s) }
     }
 
     fun onCoreRemoved(level: ServerLevel, pos: BlockPos) {
@@ -105,7 +105,6 @@ object Sanctuaries {
         }
         s.size = size
         data(level).setDirty()
-        Menus.core(player, level, s)
     }
 
     fun confirm(level: ServerLevel, s: Sanctuary, player: ServerPlayer) {
