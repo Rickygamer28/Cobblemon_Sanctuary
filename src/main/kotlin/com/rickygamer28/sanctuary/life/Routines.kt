@@ -57,7 +57,7 @@ object Routines {
             }
             return true
         }
-        if (!night && !r.swimmer && level.random.nextInt(700) == 0) planMeal(level, s, rt, r, now)
+        if (!night && !r.swimmer && level.random.nextInt(1500) == 0) planMeal(level, s, rt, r, now)
         return false
     }
 

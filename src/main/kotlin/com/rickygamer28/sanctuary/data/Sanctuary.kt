@@ -171,6 +171,7 @@ class Sanctuary(
     fun rebuild() {
         dressed = BitSet()
         meadow = BitSet()
+        berrySpots.clear()
         needsCheck = true
         generationDirty = true
     }
@@ -279,7 +280,7 @@ class Sanctuary(
 
     companion object {
         /** Bump to make existing sanctuaries rebuild their biomes after a generator change. */
-        const val DATA_VERSION = 10
+        const val DATA_VERSION = 11
 
         fun key(a: UUID, b: UUID): String = if (a < b) "$a|$b" else "$b|$a"
 
@@ -347,6 +348,7 @@ class Sanctuary(
             val st = t.getCompound("StaleLandmarks")
             st.allKeys.forEach { k -> s.staleLandmarks[k] = st.getLong(k) }
             if (version < DATA_VERSION && version > 0 && !onlyWater) {
+                s.berrySpots.clear()
                 // the terrain is being rebuilt: landmarks get rebuilt on the new ground too
                 s.landmarks.forEach { (k, v) -> if (v != Long.MIN_VALUE) s.staleLandmarks[k] = v }
                 s.landmarks.clear()
