@@ -110,6 +110,9 @@ class Sanctuary(
     /** When each pair (sorted "a|b") last had an egg, in game time. */
     val mates: MutableMap<String, Long> = mutableMapOf()
 
+    /** Where each biome's landmark stands (packed BlockPos), once built. */
+    val landmarks: MutableMap<String, Long> = mutableMapOf()
+
     /** Biome variant chosen per type for this sanctuary. */
     val variants: MutableMap<String, Int> = mutableMapOf()
 
@@ -200,6 +203,9 @@ class Sanctuary(
         val mt = CompoundTag()
         mates.forEach { (k, v) -> mt.putLong(k, v) }
         t.put("Mates", mt)
+        val lm = CompoundTag()
+        landmarks.forEach { (k, v) -> lm.putLong(k, v) }
+        t.put("Landmarks", lm)
         t.putInt("Version", DATA_VERSION)
         t.putInt("OldWall", oldWallRadius)
         val packed = IntArray((originY.size + 1) / 2) { i ->
@@ -254,6 +260,8 @@ class Sanctuary(
             }
             val mt = t.getCompound("Mates")
             mt.allKeys.forEach { k -> s.mates[k] = mt.getLong(k) }
+            val lm = t.getCompound("Landmarks")
+            lm.allKeys.forEach { k -> s.landmarks[k] = lm.getLong(k) }
             val vars = t.getCompound("Variants")
             vars.allKeys.forEach { k -> s.variants[k] = vars.getInt(k) }
             return s

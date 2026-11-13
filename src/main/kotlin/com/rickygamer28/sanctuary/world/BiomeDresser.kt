@@ -356,6 +356,7 @@ object BiomeDresser {
         if (s.oldWallRadius in 1 until s.size.radius && abs(hit.dist - (s.oldWallRadius - 0.8)) < 1.6) clearWall(level, x, z)
         if (SanctuaryConfig.buildWall.get() && hit.dist > s.size.radius - 1.6) return wall(level, s, x, z)
         if (hit.zone !in s.unlocked) return true
+        if (Landmarks.near(s, x, z)) return true
 
         val found = findGround(level, s, x, z) ?: return false
         if (!isNatural(level.getBlockState(found))) return true
@@ -370,6 +371,20 @@ object BiomeDresser {
         val target = targetHeight(s, x, z, ring)
         val surface = reshape(level, found, target)
         val ctx = Ctx(level, s, surface, randomFor(s, x, z), variantOf(s, zone), hit, exposure(s, x, z, target, ring))
+        // a winding route from the hub to the biome's landmark
+        if (target >= WATER_Y + 1 && onRoute(s, hit, x, z, ring)) {
+            val (top, fill) = routeBlocks(hit.zone, variantOf(s, hit.zone))
+            ctx.ground(if (ctx.noise(2.5, 91) > 0.82) fill else top, fill)
+            if (Math.floorMod(x * 7 + z * 13, 37) == 0 && hit.dist > s.size.hubRadius + 10) {
+                // a little lamp along the way, just off the path
+                val side = BlockPos(x + 2, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x + 2, z), z)
+                if (level.getBlockState(side).isAir && isNatural(level.getBlockState(side.below()))) {
+                    level.setBlock(side, b(Blocks.SPRUCE_FENCE), FLAGS)
+                    level.setBlock(side.above(), b(if (hit.zone == "ghost" || hit.zone == "dark") Blocks.SOUL_LANTERN else Blocks.LANTERN), FLAGS)
+                }
+            }
+            return true
+        }
         when (zone) {
             ZoneLayout.HUB -> hub(ctx)
             "water" -> water(ctx)
@@ -391,6 +406,43 @@ object BiomeDresser {
             else -> custom(ctx, zone)
         }
         return true
+    }
+
+    /** Is (x, z) on the route that winds from the hub out to [hit]'s landmark? */
+    private fun onRoute(s: Sanctuary, hit: ZoneLayout.Hit, x: Int, z: Int, ring: List<String>): Boolean {
+        val zone = hit.zone
+        if (zone == ZoneLayout.HUB || hit.edgeDistance < 4) return false
+        val i = ring.indexOf(zone)
+        if (i < 0) return false
+        val (ax, az) = ZoneLayout.anchor(s, zone, ring)
+        val adx = (ax - s.center.x).toDouble()
+        val adz = (az - s.center.z).toDouble()
+        val anchorDist = sqrt(adx * adx + adz * adz)
+        if (hit.dist < s.size.hubRadius - 5 || hit.dist > anchorDist - 3) return false
+        // distance from the straight line hub → landmark, bent by noise so the route winds
+        val len = anchorDist.coerceAtLeast(1.0)
+        val ux = adx / len
+        val uz = adz / len
+        val px = (x - s.center.x).toDouble()
+        val pz = (z - s.center.z).toDouble()
+        val along = px * ux + pz * uz
+        val side = px * uz - pz * ux
+        val bend = (Noise.value(s.seed + 909 + i, along / 26.0, 0.5) - 0.5) * 16 * smooth((along - s.size.hubRadius) / 20.0) * smooth((anchorDist - along) / 14.0)
+        return abs(side - bend) < 1.3
+    }
+
+    private fun routeBlocks(zone: String, variant: Int): Pair<BlockState, BlockState> = when (zone) {
+        "water" -> b(Blocks.SAND) to b(Blocks.SANDSTONE)
+        "ground" -> if (variant == 2) b(Blocks.MUD_BRICKS) to b(Blocks.PACKED_MUD) else b(Blocks.SMOOTH_SANDSTONE) to b(Blocks.SANDSTONE)
+        "rock", "dragon" -> b(Blocks.GRAVEL) to b(Blocks.COBBLESTONE)
+        "steel" -> b(Blocks.POLISHED_ANDESITE) to b(Blocks.GRAVEL)
+        "fire" -> b(Blocks.POLISHED_BLACKSTONE_BRICKS) to b(Blocks.BLACKSTONE)
+        "ghost" -> b(Blocks.SOUL_SOIL) to b(Blocks.COBBLED_DEEPSLATE)
+        "psychic" -> b(Blocks.CALCITE) to b(Blocks.SMOOTH_BASALT)
+        "ice" -> b(Blocks.PACKED_ICE) to b(Blocks.SNOW_BLOCK)
+        "poison" -> b(Blocks.MUD_BRICKS) to b(Blocks.PACKED_MUD)
+        "dark" -> b(Blocks.COARSE_DIRT) to b(Blocks.PODZOL)
+        else -> b(Blocks.DIRT_PATH) to b(Blocks.COARSE_DIRT)
     }
 
     /** The mountains around the valley. */

@@ -88,6 +88,8 @@ object SanctuaryGenerator {
         val now = level.gameTime
         if (now % 10L == 0L) BiomePainter.tick(level, s)
         if (!s.generationDirty && !cursors.containsKey(s.id)) {
+            // the valley is built: put up the landmarks of awake biomes
+            if (now % 40L == 0L) Landmarks.tick(level, s)
             val retry = retryAt[s.id] ?: return
             if (now < retry) return
             retryAt.remove(s.id)

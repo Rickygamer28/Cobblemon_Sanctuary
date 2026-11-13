@@ -878,7 +878,7 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
                 text(g, "${b.count} Pokémon", bx + 28, by + 17, SUB)
                 bar(g, bx + 28, by + 27, tw - 36, 3, b.pct / 100.0, c)
                 if (hover) {
-                    tooltip = listOf(Component.literal(b.name).withColor(c), Component.literal("${b.count} Pokémon live here").withColor(SUB), Component.literal("${b.pct}% grown").withColor(SUB))
+                    tooltip = listOf(Component.literal(b.name).withColor(c), Component.literal("${b.count} Pokémon live here").withColor(SUB), Component.literal(if (b.pct >= 100) "The liveliest biome" else "${b.pct}% as lively as the busiest biome").withColor(SUB))
                     hit(bx, by, tw, th) { filterZone = b.zone; goTab("residents") }
                 }
             } else {

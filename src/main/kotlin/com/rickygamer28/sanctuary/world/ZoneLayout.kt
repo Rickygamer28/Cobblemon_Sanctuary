@@ -93,14 +93,10 @@ object ZoneLayout {
     }
 
     /** How far out a biome currently reaches (it grows with the number of Pokémon of that type). */
+    /** How far out a biome reaches (the whole way to the wall: every biome is fully built once it wakes up). */
     fun extent(s: Sanctuary, zone: String): Double {
         if (zone == HUB) return s.size.hubRadius.toDouble()
-        val count = s.typeCounts[zone] ?: 0
-        if (count <= 0) return 0.0
-        val full = SanctuaryConfig.growthFullAt.get().coerceAtLeast(1)
-        val growth = (0.3 + 0.7 * count.toDouble() / full).coerceAtMost(1.0)
-        val hub = s.size.hubRadius.toDouble()
-        return hub + growth * (s.size.radius - hub)
+        return s.size.radius - 6.0
     }
 
     /** The middle of a ring biome (used for volcanoes, peaks and spawning order). */
@@ -112,22 +108,27 @@ object ZoneLayout {
         return (s.center.x + sin(a) * d).toInt() to (s.center.z - cos(a) * d).toInt()
     }
 
-    /** A random spot inside a biome (x, z), or null if the biome has no room yet. */
+    /**
+     * A random spot inside a biome (x, z), spread evenly over the biome's whole area
+     * (not bunched up near the middle), or null if none was found.
+     */
     fun randomPoint(s: Sanctuary, zone: String, random: RandomSource, ring: List<String> = ring()): Pair<Int, Int>? {
         if (zone == HUB) {
             val ang = random.nextDouble() * 2 * PI
-            val d = random.nextDouble() * (s.size.hubRadius - 4).coerceAtLeast(2)
+            val outer = (s.size.hubRadius - 6).coerceAtLeast(3).toDouble()
+            val d = sqrt(9.0 + random.nextDouble() * (outer * outer - 9.0))
             return (s.center.x + sin(ang) * d).toInt() to (s.center.z - cos(ang) * d).toInt()
         }
         val i = ring.indexOf(zone)
         if (i < 0) return null
-        val ext = extent(s, zone)
-        val inner = s.size.hubRadius + 5.0
-        if (ext <= inner + 2) return null
+        val inner = s.size.hubRadius + 6.0
+        val outer = extent(s, zone) - 2
+        if (outer <= inner + 2) return null
         val w = 360.0 / ring.size
         repeat(24) {
-            val d = inner + random.nextDouble() * (ext - 3 - inner)
-            val raw = Math.toRadians(i * w + w * (-0.3 + random.nextDouble() * 1.6))
+            // area-uniform: more points further out, where there's more room
+            val d = sqrt(inner * inner + random.nextDouble() * (outer * outer - inner * inner))
+            val raw = Math.toRadians(i * w + w * (-0.2 + random.nextDouble() * 1.4))
             val x = (s.center.x + sin(raw) * d).toInt()
             val z = (s.center.z - cos(raw) * d).toInt()
             if (locate(s, x, z, ring)?.zone == zone) return x to z

@@ -155,7 +155,7 @@ object Residents {
         val i = ring.indexOf(zone)
         val w = 2 * Math.PI / ring.size
         val a = (i + 0.5) * w
-        val d = (s.size.hubRadius + ZoneLayout.extent(s, zone)) / 2
+        val d = (s.size.hubRadius + ZoneLayout.extent(s, zone)) * 0.55
         return (s.center.x + sin(a) * d).toInt() to (s.center.z - cos(a) * d).toInt()
     }
 
@@ -238,10 +238,12 @@ object Residents {
         val spawnZone = home ?: s.unlocked.random()
         val pos = at ?: run {
             // a few random spots in its biome; take the one closest to a player so residents are seen
-            val pt = (0 until 6).mapNotNull { ZoneLayout.randomPoint(s, spawnZone, level.random, ring) }
+            // a random spot anywhere in its biome (in loaded chunks), preferably within sight of a player
+            val range = SanctuaryConfig.spawnRange.get().toDouble()
+            val candidates = (0 until 8).mapNotNull { ZoneLayout.randomPoint(s, spawnZone, level.random, ring) }
                 .filter { level.hasChunk(it.first shr 4, it.second shr 4) }
-                .minByOrNull { p -> players.minOfOrNull { val dx = it.x - p.first; val dz = it.z - p.second; dx * dx + dz * dz } ?: 0.0 }
-                ?: return null
+            val seen = candidates.filter { p -> players.isEmpty() || players.any { val dx = it.x - p.first; val dz = it.z - p.second; dx * dx + dz * dz < range * range } }
+            val pt = (seen.ifEmpty { candidates }).randomOrNull() ?: return null
             BlockPos(pt.first, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, pt.first, pt.second), pt.second)
         }
         MegaCompat.cleanStale(pokemon)

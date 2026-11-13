@@ -118,7 +118,9 @@ object SanctuaryGuis {
                 it.putInt("color", typeColor(zone))
                 it.putBoolean("awake", zone in s.unlocked)
                 it.putInt("count", if (zone == ZoneLayout.HUB) rosterHomes(s).count { h -> h == ZoneLayout.HUB } else count)
-                val pct = if (zone == ZoneLayout.HUB) 100 else (((ZoneLayout.extent(s, zone) - s.size.hubRadius) / (s.size.radius - s.size.hubRadius)) * 100).toInt().coerceIn(0, 100)
+                // how lively the biome is: its share of the residents, compared with the busiest biome
+                val busiest = (s.typeCounts.values.maxOrNull() ?: 1).coerceAtLeast(1)
+                val pct = if (zone == ZoneLayout.HUB) 100 else (count * 100 / busiest).coerceIn(0, 100)
                 it.putInt("pct", pct)
             })
         })
