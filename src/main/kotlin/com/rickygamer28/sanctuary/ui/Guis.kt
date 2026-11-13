@@ -126,7 +126,7 @@ object SanctuaryGuis {
 
         if (page == "residents") {
             t.put("mons", ListTag().also { list ->
-                for (e in rt.roster.take(3000)) {
+                for (e in rt.roster.take(2000)) {
                     val pk = e.pokemon
                     list.add(CompoundTag().also {
                         it.putUUID("u", pk.uuid)
