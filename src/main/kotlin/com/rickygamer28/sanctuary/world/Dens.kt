@@ -41,7 +41,7 @@ object Dens {
     )
     private val CUSTOM = Style(Blocks.STONE, Blocks.COBBLESTONE, Blocks.STONE)
 
-    private const val GRID = 38
+    private const val GRID = 32
     private const val CAP = 600
     private const val FLAGS = Block.UPDATE_CLIENTS
 
@@ -64,7 +64,7 @@ object Dens {
 
     /** Is the den still standing (and its tunnel still open)? */
     fun intact(level: ServerLevel, d: Den): Boolean =
-        level.getBlockState(d.mouth).isAir && !level.getBlockState(d.center.above(2)).isAir
+        level.getBlockState(d.mouth).isAir && !level.getBlockState(d.center.above(3)).isAir
 
     /** Dens of [zone] (or any den, if [zone] is null) in loaded chunks. */
     fun near(level: ServerLevel, s: Sanctuary, zone: String?): List<Den> =
@@ -97,7 +97,7 @@ object Dens {
             val pz = z + dz
             if (!level.hasChunk(px shr 4, pz shr 4)) return
             val top = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, px, pz) - 1
-            if (abs(top - center.y) > 1) return
+            if (abs(top - center.y) > 2) return
             val ground = BlockPos(px, top, pz)
             if (!level.getFluidState(ground).isEmpty || !BiomeDresser.isNatural(level.getBlockState(ground))) return
             for (dy in 1..3) {
@@ -111,7 +111,11 @@ object Dens {
         if (s.props.keys.any { BlockPos.of(it).let { p -> abs(p.x - x) <= 5 && abs(p.z - z) <= 5 } }) return
         if (s.berrySpots.any { BlockPos.of(it).let { p -> abs(p.x - x) <= 4 && abs(p.z - z) <= 4 } }) return
         val random = net.minecraft.util.RandomSource.create(s.seed xor center.asLong())
-        val dir = Direction.Plane.HORIZONTAL.getRandomDirection(random)
+        // the way in must be at the den's own level, not up a step or down a drop
+        fun groundAt(p: BlockPos) = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, p.x, p.z) - 1
+        val dir = Direction.Plane.HORIZONTAL.toList().shuffled(java.util.Random(random.nextLong())).firstOrNull { d ->
+            (2..4).all { i -> abs(groundAt(center.relative(d, i)) - center.y) <= 1 }
+        } ?: return
         build(level, center, STYLES[zone] ?: CUSTOM, dir, random)
         s.dens[center.asLong()] = "$zone:${dir.get2DDataValue()}"
     }
@@ -126,7 +130,10 @@ object Dens {
         // a rounded mound: 5×5 without corners, then 3×3, then a cap
         for (dx in -2..2) for (dz in -2..2) {
             if (abs(dx) == 2 && abs(dz) == 2) continue
-            put(base.offset(dx, 0, dz), pick())
+            val p = base.offset(dx, 0, dz)
+            put(p, pick())
+            // where the ground dips, fill under it so the mound doesn't float
+            for (dy in 1..2) { val q = p.below(dy); val cur = level.getBlockState(q); if (cur.isAir || cur.canBeReplaced()) put(q, st.main) else break }
         }
         for (dx in -1..1) for (dz in -1..1) put(base.offset(dx, 1, dz), if (abs(dx) + abs(dz) == 2) st.cap else pick())
         put(base.above(2), st.cap)
