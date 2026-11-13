@@ -16,7 +16,8 @@ enum class SanctuarySize(val radius: Int, val label: String) {
     MEDIUM(160, "Medium"),
     LARGE(224, "Large");
 
-    val hubRadius: Int get() = radius / 4
+    /** The Normal hub in the middle (a third of the radius by default; see hubPercent in the config). */
+    val hubRadius: Int get() = radius * runCatching { com.rickygamer28.sanctuary.SanctuaryConfig.hubPercent.get() }.getOrDefault(33) / 100
 
     companion object {
         val MAX_RADIUS = LARGE.radius
@@ -155,7 +156,7 @@ class Sanctuary(
 
     companion object {
         /** Bump to make existing sanctuaries rebuild their biomes after a generator change. */
-        const val DATA_VERSION = 3
+        const val DATA_VERSION = 4
 
         fun key(a: UUID, b: UUID): String = if (a < b) "$a|$b" else "$b|$a"
 
