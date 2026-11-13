@@ -261,7 +261,7 @@ object SanctuaryGuis {
         t.put("children", ListTag().also { l ->
             s.families.entries.filter { it.value.first == id || it.value.second == id }.take(6).forEach { l.add(StringTag.valueOf(nameOf(it.key))) }
         })
-        val options = TypeLogic.zoneTypes(pk).ifEmpty { listOf(ZoneLayout.HUB) + ring.filter { it in s.unlocked } }.distinct()
+        val options = if (TypeLogic.waterOnly(pk) && "water" in ring) listOf("water") else TypeLogic.zoneTypes(pk).ifEmpty { listOf(ZoneLayout.HUB) + ring.filter { it in s.unlocked } }.distinct()
         t.put("homes", ListTag().also { l -> options.forEach { l.add(StringTag.valueOf(it)) } })
         return t
     }
