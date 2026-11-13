@@ -95,6 +95,33 @@ object SanctuaryConfig {
     val megaMinSeconds: ModConfigSpec.IntValue = builder.defineInRange("megaMinSeconds", 30, 1, 3600)
     val megaMaxSeconds: ModConfigSpec.IntValue = builder.defineInRange("megaMaxSeconds", 300, 1, 3600)
 
+    val megaEnabled: ModConfigSpec.BooleanValue = builder
+        .comment("Let residents Mega Evolve during play-fights (needs Mega Showdown and the Pokémon holding its Mega Stone).")
+        .define("megaEnabled", true)
+
+    // ---- families and eggs
+    val eggsEnabled: ModConfigSpec.BooleanValue = builder
+        .comment("Close friends can start a family and lay eggs in the sanctuary. Eggs never hatch on their own.")
+        .define("eggsEnabled", true)
+    val familyFriendship: ModConfigSpec.IntValue = builder
+        .comment("How close two residents must be (relationship, 0..100) before they can have an egg.")
+        .defineInRange("familyFriendship", 70, 0, 100)
+    val eggChance: ModConfigSpec.DoubleValue = builder
+        .comment("Chance that a nuzzle between two close friends ends with an egg.")
+        .defineInRange("eggChance", 0.2, 0.0, 1.0)
+    val eggCooldownMinutes: ModConfigSpec.IntValue = builder
+        .comment("Minutes before the same pair can have another egg.")
+        .defineInRange("eggCooldownMinutes", 30, 0, 100000)
+    val maxEggs: ModConfigSpec.IntValue = builder
+        .comment("Most eggs that can wait in the nests of one sanctuary.")
+        .defineInRange("maxEggs", 40, 1, 500)
+    val eggStepsPerCycle: ModConfigSpec.IntValue = builder
+        .comment("Blocks to walk per egg cycle when carrying an egg (most Pokémon have 20 cycles).")
+        .defineInRange("eggStepsPerCycle", 32, 1, 1000)
+    val incubatorSecondsPerCycle: ModConfigSpec.IntValue = builder
+        .comment("Seconds per egg cycle in an Incubator.")
+        .defineInRange("incubatorSecondsPerCycle", 12, 1, 3600)
+
     val maxSanctuariesPerPlayer: ModConfigSpec.IntValue = builder
         .comment("How many sanctuaries one player can own or belong to.")
         .defineInRange("maxSanctuariesPerPlayer", 1, 1, 16)

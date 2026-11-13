@@ -5,5 +5,8 @@
   "item.cobblemon_sanctuary.sanctuary_journal": "Sanctuary Journal",
   "item.cobblemon_sanctuary.sanctuary_journal.tooltip": "Use to read about your sanctuary. Right-click a resident with it to interact.",
   "item.cobblemon_sanctuary.whistle": "Whistle",
-  "item.cobblemon_sanctuary.whistle.tooltip": "Lets you call residents from the Journal."
+  "item.cobblemon_sanctuary.whistle.tooltip": "Lets you call residents from the Journal.",
+  "block.cobblemon_sanctuary.incubator": "Incubator",
+  "block.cobblemon_sanctuary.egg_nest": "Nest",
+  "item.cobblemon_sanctuary.pokemon_egg": "Pokémon Egg"
 }

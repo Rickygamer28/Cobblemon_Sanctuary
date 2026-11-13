@@ -58,6 +58,15 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
         val home: String, val out: Boolean, val mine: Boolean, val shiny: Boolean, val trainer: String, val types: List<String>,
     )
 
+    private class Parent(val name: String, val species: ResourceLocation?, val aspects: Set<String>)
+
+    private class Egg(
+        val id: UUID, val mine: Boolean, val owner: String, val zone: String, val nest: Boolean, val age: Long, val steps: Int,
+        val mom: Parent, val dad: Parent, val species: ResourceLocation?, val aspects: Set<String>, val speciesName: String,
+        val gender: String, val shiny: Boolean, val nature: String, val ability: String, val types: List<String>,
+        val ivs: IntArray, val moves: List<String>,
+    )
+
     private class Biome(val zone: String, val name: String, val color: Int, val awake: Boolean, val count: Int, val pct: Int)
 
     private class Hit(val x: Int, val y: Int, val w: Int, val h: Int, val action: (Int) -> Unit)
@@ -67,6 +76,8 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
     private var tab: String = initial.getString("page").let { if (it == "members" || it.isEmpty()) "home" else it }
     private var mons: List<Mon> = emptyList()
     private var biomes: List<Biome> = emptyList()
+    private var eggs: List<Egg> = emptyList()
+    private var confirmDiscard: UUID? = null
     private var detail: CompoundTag? = null
     private var detailId: UUID? = null
     private var detailTab = "info"
@@ -100,7 +111,7 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
         tab = when {
             page == "create" -> "create"
             tab == "create" -> page
-            page == "resident" && tab != "resident" && tag.getBoolean("open") -> "resident"
+            tag.getBoolean("open") && page.isNotEmpty() && page != "members" -> page
             else -> tab
         }
         parse(tag)
@@ -124,10 +135,26 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
             val b = bl.getCompound(i)
             Biome(b.getString("zone"), b.getString("name"), b.getInt("color"), b.getBoolean("awake"), b.getInt("count"), b.getInt("pct"))
         }
+        if (tag.contains("eggs")) {
+            val el = tag.getList("eggs", Tag.TAG_COMPOUND.toInt())
+            fun parent(c: CompoundTag) = Parent(c.getString("n"), ResourceLocation.tryParse(c.getString("sp")), strings(c.getList("as", Tag.TAG_STRING.toInt())).toSet())
+            eggs = (0 until el.size).map { i ->
+                val e = el.getCompound(i)
+                Egg(e.getUUID("u"), e.getBoolean("mine"), e.getString("owner"), e.getString("zone"), e.getBoolean("nest"), e.getLong("age"), e.getInt("steps"),
+                    parent(e.getCompound("mom")), parent(e.getCompound("dad")), ResourceLocation.tryParse(e.getString("sp")),
+                    strings(e.getList("as", Tag.TAG_STRING.toInt())).toSet(), text(e.getString("species")), e.getString("gender"), e.getBoolean("sh"),
+                    e.getString("nature"), e.getString("ability"), strings(e.getList("t", Tag.TAG_STRING.toInt())), e.getIntArray("ivs"),
+                    strings(e.getList("moves", Tag.TAG_STRING.toInt())).map { text(it) })
+            }
+        }
         if (tag.contains("mon")) {
             val m = tag.getCompound("mon")
             // resolve the text once
             for (key in listOf("n", "species")) m.putString(key, text(m.getString(key)))
+            for (key in listOf("parents", "children")) {
+                val l = m.getList(key, Tag.TAG_STRING.toInt())
+                for (i in 0 until l.size) l[i] = net.minecraft.nbt.StringTag.valueOf(text(l.getString(i)))
+            }
             for (key in listOf("friends", "rivals")) {
                 val l = m.getList(key, Tag.TAG_COMPOUND.toInt())
                 for (i in 0 until l.size) l.getCompound(i).let { it.putString("n", text(it.getString("n"))) }
@@ -233,6 +260,7 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
             tab == "resident" -> residentPage(g, cx, cy, cw, ch, mouseX, mouseY, partialTick)
             tab == "biomes" -> biomesPage(g, cx, cy, cw, ch, mouseX, mouseY)
             tab == "events" -> eventsPage(g, cx, cy, cw, ch)
+            tab == "nest" -> nestPage(g, cx, cy, cw, ch, mouseX, mouseY)
             tab == "members" -> membersPage(g, cx, cy, cw, ch, mouseX, mouseY)
         }
         if (search.visible) search.render(g, mouseX, mouseY, partialTick)
@@ -398,6 +426,7 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
             Triple("home", "Overview", ItemStack(ModContent.SANCTUARY_CORE_ITEM.get())),
             Triple("residents", "Residents", itemOf("cobblemon:poke_ball", Items.ENDER_PEARL)),
             Triple("biomes", "Biomes", itemOf("cobblemon:grass_gem", Items.OAK_SAPLING)),
+            Triple("nest", "Nest", ItemStack(ModContent.POKEMON_EGG.get())),
             Triple("events", "Journal", ItemStack(ModContent.JOURNAL.get())),
             Triple("members", "Members", ItemStack(Items.PLAYER_HEAD)),
         )
@@ -409,8 +438,14 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
             if (active) g.fill(x + 5, ty + 3, x + 7, ty + 19, ACCENT)
             item(g, icon, x + 11, ty + 3)
             text(g, label, x + 31, ty + 7, if (active) TEXT else SUB)
+            if (key == "nest" && eggs.isNotEmpty()) {
+                val badge = "${eggs.size}"
+                val bw = font.width(badge) + 6
+                box(g, x + SIDE_W - 10 - bw - 2, ty + 6, bw, 11, 0xFFD05C8A.toInt())
+                g.drawCenteredString(font, badge, x + SIDE_W - 12 - bw / 2, ty + 8, 0xFFFFFFFF.toInt())
+            }
             hit(x + 5, ty, SIDE_W - 10, 22) { goTab(key) }
-            ty += 25
+            ty += 24
         }
         // little summary at the bottom
         val by = py + ph - 46
@@ -764,6 +799,15 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
             for (line in lines.take(2)) { g.drawString(font, line, x + 70, ly, if (names.isEmpty()) DIM else c, false); ly += 10 }
             ly += 2
         }
+        fun family(key: String, label: String) {
+            val l = d.getList(key, Tag.TAG_STRING.toInt())
+            if (l.isEmpty()) return
+            text(g, label, x, ly, SUB)
+            text(g, fit((0 until l.size).joinToString(" & ".takeIf { key == "parents" } ?: ", ") { l.getString(it) }, w - 70), x + 70, ly, GOLD)
+            ly += 12
+        }
+        family("parents", "Parents")
+        family("children", "Children")
         if (ly < y + h - 20) people("friends", "Friends", 0xFFF07CB4.toInt())
         if (ly < y + h - 10) people("rivals", "Rivals", BAD)
     }
@@ -864,6 +908,92 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
             box(g, x + 2, ly + 1, 5, 5, if (i == 0) ACCENT else mix(ACCENT, 0x182029, 0.5f))
             for (line in ls) { g.drawString(font, line, x + 14, ly, if (i == 0) TEXT else SUB, false); ly += 10 }
             ly += 8
+        }
+        g.disableScissor()
+        scrollbar(g, x + w + 4, gy, gh)
+    }
+
+    // ------------------------------------------------------------------ nest registry
+
+    private fun nestPage(g: GuiGraphics, x: Int, y: Int, w: Int, h: Int, mx: Int, my: Int) {
+        text(g, if (data.getBoolean("eggsOn")) "Eggs laid by close friends. They wait in their nests until you decide." else "Eggs are turned off on this server.", x, y, SUB)
+        val gy = y + 15
+        val gh = h - 17
+        if (eggs.isEmpty()) {
+            g.drawCenteredString(font, "No eggs yet.", x + w / 2, gy + 34, DIM)
+            g.drawCenteredString(font, "Residents who become very close friends sometimes start a family.", x + w / 2, gy + 48, DIM)
+            return
+        }
+        val cardH = 74
+        val gap = 5
+        maxScroll = max(0.0, eggs.size * (cardH + gap) - gap - gh.toDouble())
+        scroll = scroll.coerceIn(0.0, maxScroll)
+        g.enableScissor(x - 2, gy, x + w + 2, gy + gh)
+        eggs.forEachIndexed { i, e ->
+            val cy = gy + i * (cardH + gap) - scroll.toInt()
+            if (cy > gy + gh || cy + cardH < gy) return@forEachIndexed
+            val zc = opaque(color(e.zone))
+            box(g, x, cy, w, cardH, CARD)
+            g.fill(x + 1, cy + 1, x + 3, cy + cardH - 1, zc)
+            // egg (and what's inside)
+            box(g, x + 8, cy + 8, 40, 40, mix(zc, 0x182029, 0.7f))
+            item(g, ItemStack(ModContent.POKEMON_EGG.get()), x + 12, cy + 12, 2f)
+            e.species?.let { item(g, monStack(it, e.aspects), x + 34, cy + 34, 1f) }
+            text(g, if (e.age < 1) "Just laid" else "${e.age} min ago", x + 8, cy + 54, DIM)
+            if (!e.nest) text(g, "no nest", x + 8, cy + 63, DIM)
+            // title
+            val tx = x + 56
+            val gender = when (e.gender) { "MALE" -> " ♂" to BLUE; "FEMALE" -> " ♀" to 0xFFF07CB4.toInt(); else -> "" to SUB }
+            text(g, e.speciesName, tx, cy + 7, TEXT, true)
+            var px2 = tx + font.width(e.speciesName)
+            text(g, gender.first, px2, cy + 7, gender.second, true)
+            px2 += font.width(gender.first) + 4
+            if (e.shiny) { text(g, "★ Shiny", px2, cy + 7, GOLD, true); px2 += font.width("★ Shiny") + 4 }
+            for (t in e.types) px2 += pill(g, typeLabel(t), color(t), px2, cy + 5) + 3
+            // parents
+            val py2 = cy + 20
+            e.mom.species?.let { item(g, monStack(it, e.mom.aspects), tx, py2 - 3) }
+            text(g, e.mom.name, tx + 18, py2 + 1, SUB)
+            val heartX = tx + 22 + font.width(e.mom.name)
+            text(g, "♥", heartX, py2 + 1, 0xFFF07CB4.toInt())
+            e.dad.species?.let { item(g, monStack(it, e.dad.aspects), heartX + 10, py2 - 3) }
+            text(g, e.dad.name, heartX + 28, py2 + 1, SUB)
+            // biome, nature, ability
+            val iy = cy + 36
+            val pw2 = pill(g, zoneName(e.zone), color(e.zone), tx, iy - 2)
+            val natureText = "${Component.translatable(e.nature).string} · ${Component.translatable("cobblemon.ability.${e.ability}").string}"
+            text(g, fit(natureText, w - (tx - x) - pw2 - 92), tx + pw2 + 6, iy, TEXT)
+            // IVs
+            val iv = e.ivs
+            var ix = tx
+            val names = listOf("HP", "Atk", "Def", "SpA", "SpD", "Spe")
+            for (k in 0 until min(6, iv.size)) {
+                val label = "${names[k]} ${iv[k]}"
+                val bw = font.width(label) + 6
+                if (ix + bw > x + w - 84) break
+                box(g, ix, cy + 50, bw, 11, if (iv[k] == 31) 0xFF5A4A1A.toInt() else TRACK)
+                text(g, label, ix + 3, cy + 52, if (iv[k] == 31) GOLD else SUB)
+                ix += bw + 3
+            }
+            text(g, "${e.steps} steps to hatch by walking", tx, cy + 63, DIM)
+            if (over(mx, my, x, cy, w - 84, cardH) && my in gy until gy + gh) {
+                tooltip = listOf(Component.literal(e.speciesName).withColor(TEXT)) +
+                    e.moves.map { Component.literal("• $it").withColor(SUB) } +
+                    listOf(Component.literal("Trainer: ${e.owner}").withColor(DIM))
+            }
+            // buttons
+            val bx = x + w - 80
+            if (e.mine) {
+                val id = e.id
+                button(g, bx, cy + 7, 72, 18, "Hatch here", 0xFF3E9E62.toInt(), mx, my) { confirmDiscard = null; send("egg", "hatch", id, page = "nest") }
+                button(g, bx, cy + 28, 72, 18, "Pick up", 0xFF3F8FCF.toInt(), mx, my) { confirmDiscard = null; send("egg", "pickup", id, page = "nest") }
+                val sure = confirmDiscard == id
+                button(g, bx, cy + 49, 72, 18, if (sure) "Sure?" else "Discard", BAD, mx, my, filled = sure) {
+                    if (sure) { confirmDiscard = null; send("egg", "discard", id, page = "nest") } else confirmDiscard = id
+                }
+            } else {
+                g.drawCenteredString(font, "${e.owner}'s egg", bx + 36, cy + 32, DIM)
+            }
         }
         g.disableScissor()
         scrollbar(g, x + w + 4, gy, gh)

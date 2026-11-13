@@ -42,6 +42,9 @@ class LiveResident(
     var migrating = false
     var migrateUntil = 0L
     var lastLeash = 0L
+    /** A newborn follows its parents around for a while after hatching. */
+    var followParents: Pair<UUID, UUID>? = null
+    var followUntil = 0L
     val pokemon: Pokemon get() = entity.pokemon
     val name get() = entity.pokemon.getDisplayName(false).string
 }
@@ -96,6 +99,8 @@ object Residents {
         }
         updateSpawns(level, s, rt, players, now)
         Behaviour.tickSecond(level, s, rt, now)
+        MegaCompat.tick(now)
+        Families.tickSecond(level, s, rt, now)
     }
 
     private fun playersNear(level: ServerLevel, s: Sanctuary): List<ServerPlayer> {
@@ -239,6 +244,7 @@ object Residents {
                 ?: return null
             BlockPos(pt.first, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, pt.first, pt.second), pt.second)
         }
+        MegaCompat.cleanStale(pokemon)
         val entity = PokemonEntity(level, pokemon)
         entity.setPos(pos.x + 0.5, pos.y.toDouble(), pos.z + 0.5)
         val r = s.size.radius + 32
@@ -269,6 +275,7 @@ object Residents {
 
     fun despawn(rt: SanctuaryRuntime, r: LiveResident) {
         rt.live.remove(r.pokemonId)
+        MegaCompat.onDespawn(r.entity)
         if (!r.entity.isRemoved) {
             Effects.poof(r.entity)
             r.entity.discard()
@@ -288,6 +295,7 @@ object Residents {
     }
 
     fun shutdownAll() {
+        MegaCompat.revertAll()
         runtimes.keys.toList().forEach { shutdown(it) }
     }
 

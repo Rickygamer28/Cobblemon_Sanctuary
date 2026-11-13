@@ -101,6 +101,15 @@ class Sanctuary(
     /** Recent events shown in the Journal, newest last. */
     val events: ArrayDeque<String> = ArrayDeque()
 
+    /** Eggs waiting in the nests, by egg id. */
+    val eggs: LinkedHashMap<UUID, EggData> = LinkedHashMap()
+
+    /** Families: child Pokémon → its two parents. */
+    val families: MutableMap<UUID, Pair<UUID, UUID>> = mutableMapOf()
+
+    /** When each pair (sorted "a|b") last had an egg, in game time. */
+    val mates: MutableMap<String, Long> = mutableMapOf()
+
     /** Biome variant chosen per type for this sanctuary. */
     val variants: MutableMap<String, Int> = mutableMapOf()
 
@@ -180,6 +189,17 @@ class Sanctuary(
         val vars = CompoundTag()
         variants.forEach { (k, v) -> vars.putInt(k, v) }
         t.put("Variants", vars)
+        val eggList = ListTag()
+        eggs.values.forEach { eggList.add(it.save()) }
+        t.put("Eggs", eggList)
+        val fam = ListTag()
+        families.forEach { (child, parents) ->
+            fam.add(CompoundTag().also { it.putUUID("Child", child); it.putUUID("A", parents.first); it.putUUID("B", parents.second) })
+        }
+        t.put("Families", fam)
+        val mt = CompoundTag()
+        mates.forEach { (k, v) -> mt.putLong(k, v) }
+        t.put("Mates", mt)
         t.putInt("Version", DATA_VERSION)
         t.putInt("OldWall", oldWallRadius)
         val packed = IntArray((originY.size + 1) / 2) { i ->
@@ -227,6 +247,13 @@ class Sanctuary(
                 s.originY = ShortArray(packed.size * 2) { i -> ((packed[i / 2] shr (if (i % 2 == 0) 16 else 0)) and 0xFFFF).toShort() }
             }
             t.getList("Events", Tag.TAG_STRING.toInt()).forEach { s.events.addLast(it.asString) }
+            t.getList("Eggs", Tag.TAG_COMPOUND.toInt()).forEach { e -> runCatching { EggData.load(e as CompoundTag) }.getOrNull()?.let { s.eggs[it.id] = it } }
+            t.getList("Families", Tag.TAG_COMPOUND.toInt()).forEach { e ->
+                val c = e as CompoundTag
+                runCatching { s.families[c.getUUID("Child")] = c.getUUID("A") to c.getUUID("B") }
+            }
+            val mt = t.getCompound("Mates")
+            mt.allKeys.forEach { k -> s.mates[k] = mt.getLong(k) }
             val vars = t.getCompound("Variants")
             vars.allKeys.forEach { k -> s.variants[k] = vars.getInt(k) }
             return s

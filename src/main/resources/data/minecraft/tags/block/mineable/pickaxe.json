@@ -1,6 +1,7 @@
 {
   "values": [
     "cobblemon_sanctuary:sanctuary_core",
-    "cobblemon_sanctuary:hub_bell"
+    "cobblemon_sanctuary:hub_bell",
+    "cobblemon_sanctuary:incubator"
   ]
 }

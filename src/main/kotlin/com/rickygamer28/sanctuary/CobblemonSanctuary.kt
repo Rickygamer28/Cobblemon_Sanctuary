@@ -45,6 +45,8 @@ class CobblemonSanctuary(modBus: IEventBus, container: ModContainer) {
         bus.addListener(BlockEvent.BreakEvent::class.java) { onBlockBreak(it) }
         bus.addListener(ServerStoppingEvent::class.java) { onServerStopping(it) }
         bus.addListener(ChunkEvent.Load::class.java) { onChunkLoad(it) }
+        bus.addListener(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post::class.java) { com.rickygamer28.sanctuary.life.Families.onPlayerTick(it.entity) }
+        bus.addListener(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent::class.java) { com.rickygamer28.sanctuary.life.Families.forgetPlayer(it.entity.uuid) }
         LOGGER.info("Cobblemon: Sanctuary loaded")
     }
 

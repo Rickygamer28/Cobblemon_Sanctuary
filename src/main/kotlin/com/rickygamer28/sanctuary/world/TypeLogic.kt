@@ -15,12 +15,18 @@ object TypeLogic {
 
     fun clearCache() = finalTypeCache.clear()
 
-    /** Current typing, lowercase, in order. */
-    fun currentTypes(pokemon: Pokemon): List<String> = pokemon.form.types.map { it.name.lowercase() }
+    /** The form used for typing: a Mega (or Primal) keeps the typing of its normal form. */
+    private fun baseForm(pokemon: Pokemon): FormData {
+        val name = pokemon.form.name.lowercase()
+        return if (name.startsWith("mega") || name == "primal") pokemon.species.standardForm else pokemon.form
+    }
+
+    /** Current typing, lowercase, in order (a Mega keeps its original typing). */
+    fun currentTypes(pokemon: Pokemon): List<String> = baseForm(pokemon).types.map { it.name.lowercase() }
 
     /** Typing of the Pokémon's final evolution; branching lines (Eevee, Tyrogue…) keep their own typing. */
     fun finalTypes(pokemon: Pokemon): List<String> {
-        val form = pokemon.form
+        val form = baseForm(pokemon)
         val key = "${pokemon.species.resourceIdentifier}/${form.name}"
         return finalTypeCache.getOrPut(key) {
             runCatching { resolve(form, 0) }.getOrElse { typesOf(form) }

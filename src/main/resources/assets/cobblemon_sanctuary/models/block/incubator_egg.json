@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "cobblemon_sanctuary:block/incubator_top_egg",
+    "side": "cobblemon_sanctuary:block/incubator_side",
+    "bottom": "cobblemon_sanctuary:block/incubator_bottom"
+  }
+}

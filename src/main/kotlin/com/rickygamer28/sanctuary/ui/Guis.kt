@@ -8,6 +8,7 @@ import com.rickygamer28.sanctuary.SanctuaryDimension
 import com.rickygamer28.sanctuary.data.Sanctuary
 import com.rickygamer28.sanctuary.data.SanctuarySize
 import com.rickygamer28.sanctuary.data.SanctuaryState
+import com.rickygamer28.sanctuary.life.Families
 import com.rickygamer28.sanctuary.life.Residents
 import com.rickygamer28.sanctuary.life.Sizes
 import com.rickygamer28.sanctuary.net.SanctuaryNet
@@ -123,6 +124,8 @@ object SanctuaryGuis {
         })
         t.put("events", ListTag().also { list -> s.events.toList().reversed().forEach { list.add(StringTag.valueOf(it)) } })
         t.putBoolean("hasWhistle", player.inventory.contains(ItemStack(ModContent.WHISTLE.get())))
+        t.putBoolean("eggsOn", com.rickygamer28.sanctuary.SanctuaryConfig.eggsEnabled.get())
+        t.put("eggs", eggs(player, s, ring))
 
         if (page == "residents") {
             t.put("mons", ListTag().also { list ->
@@ -152,6 +155,45 @@ object SanctuaryGuis {
         }
         lastSaid.remove(player.uuid)?.let { (text, color) -> t.putString("toast", text); t.putInt("toastColor", color) }
         SanctuaryNet.send(player, t)
+    }
+
+    private fun eggs(player: ServerPlayer, s: Sanctuary, ring: List<String>): ListTag {
+        val list = ListTag()
+        val access = player.registryAccess()
+        val now = SanctuaryDimension.level(player.server)?.gameTime ?: 0L
+        for (egg in s.eggs.values.toList().asReversed().take(80)) {
+            val baby = runCatching { Pokemon().loadFromNBT(access, egg.pokemon) }.getOrNull() ?: continue
+            list.add(CompoundTag().also {
+                it.putUUID("u", egg.id)
+                it.putBoolean("mine", Families.canManage(s, egg, player))
+                it.putString("owner", egg.ownerName)
+                it.putString("zone", egg.zone)
+                it.putBoolean("nest", egg.nest != null)
+                it.putLong("age", ((now - egg.laidAt) / 1200L).coerceAtLeast(0))
+                it.putInt("cycles", egg.cycles)
+                it.putInt("steps", egg.cycles * com.rickygamer28.sanctuary.SanctuaryConfig.eggStepsPerCycle.get())
+                for ((key, parent) in listOf("mom" to egg.mother, "dad" to egg.father)) {
+                    it.put(key, CompoundTag().also { p ->
+                        p.putString("n", parent.name)
+                        p.putString("sp", parent.species)
+                        p.put("as", ListTag().also { a -> parent.aspects.forEach { x -> a.add(StringTag.valueOf(x)) } })
+                    })
+                }
+                it.putString("sp", baby.species.resourceIdentifier.toString())
+                it.put("as", ListTag().also { a -> baby.aspects.forEach { x -> a.add(StringTag.valueOf(x)) } })
+                it.putString("species", json(player, baby.species.translatedName))
+                it.putString("gender", baby.gender.name)
+                it.putBoolean("sh", baby.shiny)
+                it.putString("nature", runCatching { baby.nature.displayName }.getOrDefault(""))
+                it.putString("ability", runCatching { baby.ability.name }.getOrDefault(""))
+                it.put("t", ListTag().also { l -> TypeLogic.currentTypes(baby).forEach { x -> l.add(StringTag.valueOf(x)) } })
+                val stats = listOf(Stats.HP, Stats.ATTACK, Stats.DEFENCE, Stats.SPECIAL_ATTACK, Stats.SPECIAL_DEFENCE, Stats.SPEED)
+                it.putIntArray("ivs", stats.map { st -> baby.ivs.getOrDefault(st) }.toIntArray())
+                it.putString("ball", runCatching { baby.caughtBall.name.path }.getOrDefault("poke_ball"))
+                it.put("moves", ListTag().also { l -> baby.moveSet.getMoves().forEach { m -> l.add(StringTag.valueOf(json(player, m.displayName))) } })
+            })
+        }
+        return list
     }
 
     private fun rosterHomes(s: Sanctuary): List<String?> {
@@ -210,6 +252,13 @@ object SanctuaryGuis {
         }
         t.put("friends", people(rels.filter { it.second >= 40 }.sortedByDescending { it.second }.take(5)))
         t.put("rivals", people(rels.filter { it.second <= -30 }.sortedBy { it.second }.take(5)))
+        fun nameOf(u: UUID): String = Residents.findRoster(rt, u)?.pokemon?.let { json(player, it.getDisplayName(false)) }
+            ?: s.eggs.values.firstNotNullOfOrNull { e -> listOf(e.mother, e.father).firstOrNull { it.id == u }?.name }?.let { json(player, Component.literal(it)) }
+            ?: json(player, Component.literal("someone who left"))
+        s.families[id]?.let { (a, b) -> t.put("parents", ListTag().also { l -> l.add(StringTag.valueOf(nameOf(a))); l.add(StringTag.valueOf(nameOf(b))) }) }
+        t.put("children", ListTag().also { l ->
+            s.families.entries.filter { it.value.first == id || it.value.second == id }.take(6).forEach { l.add(StringTag.valueOf(nameOf(it.key))) }
+        })
         val options = TypeLogic.zoneTypes(pk).ifEmpty { listOf(ZoneLayout.HUB) + ring.filter { it in s.unlocked } }.distinct()
         t.put("homes", ListTag().also { l -> options.forEach { l.add(StringTag.valueOf(it)) } })
         return t
@@ -268,6 +317,17 @@ object ScreenActions {
                 SanctuaryGuis.send(player, s, "members")
             }
             "leave" -> { if (!owner) Sanctuaries.leave(player, s); SanctuaryGuis.close(player) }
+            "egg" -> {
+                val egg = pokemon?.let { s.eggs[it] }
+                when {
+                    egg == null -> say(player, "That egg isn't here anymore.", ChatFormatting.GRAY)
+                    !Families.canManage(s, egg, player) -> say(player, "Only ${egg.ownerName} can decide about this egg.", ChatFormatting.RED)
+                    v == "hatch" -> Families.hatchInNest(s, egg, player)
+                    v == "pickup" -> Families.pickUp(s, egg, player)
+                    v == "discard" -> Families.discard(s, egg, player)
+                }
+                SanctuaryGuis.send(player, s, "nest")
+            }
             "act" -> {
                 val target = pokemon ?: return
                 val action = v

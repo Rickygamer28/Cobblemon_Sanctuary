@@ -105,6 +105,7 @@ object Scenes {
                 steps += at(20) { _ -> Effects.play(a.entity, Effects.CRY); Effects.play(b.entity, Effects.CRY); Effects.hearts(a.entity); Effects.hearts(b.entity) }
                 steps += at(45) { _ -> Effects.hearts(a.entity); Effects.hearts(b.entity) }
                 steps += at(55, change(4 * friendRate))
+                steps += at(58) { scene -> Families.afterNuzzle(level, s, scene.a, scene.b) }
                 length = 60
             }
             Kind.PLAY_FIGHT -> {
@@ -117,7 +118,7 @@ object Scenes {
                     val def = defender
                     val moves = if (r.nextBoolean()) Effects.ATTACK else Effects.ATTACK_SPECIAL
                     steps += at(t) { _ -> Residents.walkTo(atk.entity, def.entity.blockPosition(), 0.5f, 1) }
-                    steps += at(t + 10) { _ -> Effects.play(atk.entity, moves); MegaCompat.maybeMega(atk.entity) }
+                    steps += at(t + 10) { _ -> Effects.play(atk.entity, moves); MegaCompat.maybeMega(atk.entity, s) }
                     steps += at(t + 22) { _ -> Effects.sparks(def.entity); Effects.play(def.entity, Effects.HIT) }
                     t += 40
                     attacker = def

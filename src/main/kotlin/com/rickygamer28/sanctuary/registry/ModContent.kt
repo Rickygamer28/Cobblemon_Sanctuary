@@ -1,7 +1,12 @@
 package com.rickygamer28.sanctuary.registry
 
 import com.rickygamer28.sanctuary.CobblemonSanctuary
+import com.rickygamer28.sanctuary.block.EggNestBlock
 import com.rickygamer28.sanctuary.block.HubBellBlock
+import com.rickygamer28.sanctuary.block.IncubatorBlock
+import com.rickygamer28.sanctuary.block.IncubatorBlockEntity
+import com.rickygamer28.sanctuary.item.PokemonEggItem
+import net.minecraft.world.level.block.entity.BlockEntityType
 import com.rickygamer28.sanctuary.block.SanctuaryCoreBlock
 import com.rickygamer28.sanctuary.item.JournalItem
 import com.rickygamer28.sanctuary.item.WhistleItem
@@ -23,6 +28,7 @@ import net.neoforged.neoforge.registries.DeferredRegister
 object ModContent {
     private val BLOCKS: DeferredRegister.Blocks = DeferredRegister.createBlocks(CobblemonSanctuary.MOD_ID)
     private val ITEMS: DeferredRegister.Items = DeferredRegister.createItems(CobblemonSanctuary.MOD_ID)
+    private val BLOCK_ENTITIES: DeferredRegister<BlockEntityType<*>> = DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, CobblemonSanctuary.MOD_ID)
     private val TABS: DeferredRegister<CreativeModeTab> = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, CobblemonSanctuary.MOD_ID)
 
     val SANCTUARY_CORE: DeferredBlock<SanctuaryCoreBlock> = BLOCKS.register("sanctuary_core") { ->
@@ -35,6 +41,17 @@ object ModContent {
         HubBellBlock(BlockBehaviour.Properties.of().mapColor(MapColor.GOLD).strength(2.5f).sound(SoundType.ANVIL))
     }
 
+    val EGG_NEST: DeferredBlock<EggNestBlock> = BLOCKS.register("egg_nest") { ->
+        EggNestBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_YELLOW).strength(0.4f).sound(SoundType.GRASS).noOcclusion())
+    }
+    val INCUBATOR: DeferredBlock<IncubatorBlock> = BLOCKS.register("incubator") { ->
+        IncubatorBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE).strength(2.0f).sound(SoundType.COPPER).noOcclusion()
+            .lightLevel { if (it.getValue(IncubatorBlock.HAS_EGG)) 9 else 3 })
+    }
+    val INCUBATOR_ENTITY: DeferredHolder<BlockEntityType<*>, BlockEntityType<IncubatorBlockEntity>> = BLOCK_ENTITIES.register("incubator") { ->
+        BlockEntityType.Builder.of({ pos, state -> IncubatorBlockEntity(pos, state) }, INCUBATOR.get()).build(null)
+    }
+
     val SANCTUARY_CORE_ITEM: DeferredItem<Item> = ITEMS.register("sanctuary_core") { ->
         net.minecraft.world.item.BlockItem(SANCTUARY_CORE.get(), Item.Properties().rarity(Rarity.RARE))
     }
@@ -43,6 +60,12 @@ object ModContent {
     }
     val JOURNAL: DeferredItem<JournalItem> = ITEMS.register("sanctuary_journal") { ->
         JournalItem(Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON))
+    }
+    val INCUBATOR_ITEM: DeferredItem<Item> = ITEMS.register("incubator") { ->
+        net.minecraft.world.item.BlockItem(INCUBATOR.get(), Item.Properties())
+    }
+    val POKEMON_EGG: DeferredItem<PokemonEggItem> = ITEMS.register("pokemon_egg") { ->
+        PokemonEggItem(Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON))
     }
     val WHISTLE: DeferredItem<WhistleItem> = ITEMS.register("whistle") { ->
         WhistleItem(Item.Properties().stacksTo(1))
@@ -58,6 +81,7 @@ object ModContent {
                 output.accept(JOURNAL.get())
                 output.accept(WHISTLE.get())
                 output.accept(HUB_BELL_ITEM.get())
+                output.accept(INCUBATOR_ITEM.get())
             }
             .build()
     }
@@ -65,6 +89,7 @@ object ModContent {
     fun register(bus: IEventBus) {
         BLOCKS.register(bus)
         ITEMS.register(bus)
+        BLOCK_ENTITIES.register(bus)
         TABS.register(bus)
     }
 }
