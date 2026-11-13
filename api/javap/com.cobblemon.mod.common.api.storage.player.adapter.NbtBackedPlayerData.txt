@@ -1,0 +1,8 @@
+public abstract class com.cobblemon.mod.common.api.storage.player.adapter.NbtBackedPlayerData<T extends com.cobblemon.mod.common.api.storage.player.InstancedPlayerData> extends com.cobblemon.mod.common.api.storage.player.adapter.FileBasedPlayerDataStoreBackend<T> {
+  public com.cobblemon.mod.common.api.storage.player.adapter.NbtBackedPlayerData(java.lang.String, com.cobblemon.mod.common.api.storage.player.PlayerInstancedDataStoreType);
+  public abstract com.mojang.serialization.Codec<T> getCodec();
+  public void save(T);
+  public T load(java.util.UUID);
+  private static final void save$lambda$0(net.minecraft.nbt.CompoundTag, java.io.File, com.cobblemon.mod.common.api.storage.player.adapter.NbtBackedPlayerData, com.cobblemon.mod.common.api.storage.player.InstancedPlayerData);
+  private static final com.cobblemon.mod.common.api.storage.player.InstancedPlayerData load$lambda$0(com.cobblemon.mod.common.api.storage.player.adapter.NbtBackedPlayerData, java.util.UUID, java.io.File);
+}

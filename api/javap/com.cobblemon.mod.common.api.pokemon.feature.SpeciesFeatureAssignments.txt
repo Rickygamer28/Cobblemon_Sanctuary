@@ -1,0 +1,25 @@
+public final class com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatureAssignments implements com.cobblemon.mod.common.api.data.JsonDataRegistry<com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatureAssignment> {
+  public static final com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatureAssignments INSTANCE;
+  private static final net.minecraft.resources.ResourceLocation id;
+  private static final net.minecraft.server.packs.PackType type;
+  private static final com.cobblemon.mod.common.api.reactive.SimpleObservable<com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatureAssignments> observable;
+  private static final com.google.gson.Gson gson;
+  private static final com.google.gson.reflect.TypeToken<com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatureAssignment> typeToken;
+  private static final java.lang.String resourcePath;
+  private static final java.util.Map<net.minecraft.resources.ResourceLocation, java.util.Set<java.lang.String>> assignments;
+  private com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatureAssignments();
+  public net.minecraft.resources.ResourceLocation getId();
+  public net.minecraft.server.packs.PackType getType();
+  public com.cobblemon.mod.common.api.reactive.SimpleObservable<com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatureAssignments> getObservable();
+  public com.google.gson.Gson getGson();
+  public com.google.gson.reflect.TypeToken<com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatureAssignment> getTypeToken();
+  public java.lang.String getResourcePath();
+  public void sync(net.minecraft.server.level.ServerPlayer);
+  public void reload(java.util.Map<net.minecraft.resources.ResourceLocation, com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatureAssignment>);
+  public final void loadOnClient(java.util.Map<net.minecraft.resources.ResourceLocation, ? extends java.util.Set<java.lang.String>>);
+  public static final java.util.Set<java.lang.String> getFeatures(com.cobblemon.mod.common.pokemon.Species);
+  public void reload(net.minecraft.server.packs.resources.ResourceManager);
+  public com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatureAssignment parse(java.io.BufferedReader, net.minecraft.resources.ResourceLocation);
+  public java.lang.Object parse(java.io.BufferedReader, net.minecraft.resources.ResourceLocation);
+  static {};
+}

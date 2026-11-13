@@ -1,0 +1,22 @@
+public final class com.cobblemon.mod.common.api.types.tera.gimmick.StellarTeraType$Companion {
+  private com.cobblemon.mod.common.api.types.tera.gimmick.StellarTeraType$Companion();
+  public final net.minecraft.resources.ResourceLocation getID();
+  public com.cobblemon.mod.common.api.types.tera.gimmick.StellarTeraType$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.api.types.tera.gimmick.StellarTeraType implements com.cobblemon.mod.common.api.types.tera.TeraType {
+  public static final com.cobblemon.mod.common.api.types.tera.gimmick.StellarTeraType$Companion Companion;
+  private final net.minecraft.resources.ResourceLocation id;
+  private final java.lang.String name;
+  private final boolean legalAsStatic;
+  private final net.minecraft.network.chat.Component displayName;
+  private static final net.minecraft.resources.ResourceLocation ID;
+  private static final net.minecraft.network.chat.MutableComponent LANG;
+  public com.cobblemon.mod.common.api.types.tera.gimmick.StellarTeraType();
+  public net.minecraft.resources.ResourceLocation getId();
+  public java.lang.String getName();
+  public boolean getLegalAsStatic();
+  public net.minecraft.network.chat.Component getDisplayName();
+  public java.lang.String showdownId();
+  public static final net.minecraft.resources.ResourceLocation access$getID$cp();
+  static {};
+}

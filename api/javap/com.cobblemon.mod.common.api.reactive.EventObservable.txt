@@ -1,0 +1,13 @@
+public final class com.cobblemon.mod.common.api.reactive.EventObservable$post$1 implements kotlin.jvm.functions.Function1<T, kotlin.Unit> {
+  public static final com.cobblemon.mod.common.api.reactive.EventObservable$post$1 INSTANCE;
+  public com.cobblemon.mod.common.api.reactive.EventObservable$post$1();
+  public final void invoke(T);
+  public java.lang.Object invoke(java.lang.Object);
+  static {};
+}
+public class com.cobblemon.mod.common.api.reactive.EventObservable<T> extends com.cobblemon.mod.common.api.reactive.SimpleObservable<T> {
+  public com.cobblemon.mod.common.api.reactive.EventObservable();
+  public final void post(T[], kotlin.jvm.functions.Function1<? super T, kotlin.Unit>);
+  public static void post$default(com.cobblemon.mod.common.api.reactive.EventObservable, java.lang.Object[], kotlin.jvm.functions.Function1, int, java.lang.Object);
+  public final void post(T...);
+}

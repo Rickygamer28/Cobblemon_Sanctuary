@@ -1,0 +1,16 @@
+public final class com.cobblemon.mod.common.api.entity.EntitySideDelegate$DefaultImpls {
+  public static <T extends net.minecraft.world.entity.Entity> void initialize(com.cobblemon.mod.common.api.entity.EntitySideDelegate<T>, T);
+  public static <T extends net.minecraft.world.entity.Entity> void tick(com.cobblemon.mod.common.api.entity.EntitySideDelegate<T>, T);
+  public static <T extends net.minecraft.world.entity.Entity> void onSyncedDataUpdated(com.cobblemon.mod.common.api.entity.EntitySideDelegate<T>, net.minecraft.network.syncher.EntityDataAccessor<?>);
+  public static <T extends net.minecraft.world.entity.Entity> void addToStruct(com.cobblemon.mod.common.api.entity.EntitySideDelegate<T>, com.bedrockk.molang.runtime.struct.QueryStruct);
+}
+public interface com.cobblemon.mod.common.api.entity.EntitySideDelegate<T extends net.minecraft.world.entity.Entity> {
+  public default void initialize(T);
+  public default void tick(T);
+  public default void onSyncedDataUpdated(net.minecraft.network.syncher.EntityDataAccessor<?>);
+  public default void addToStruct(com.bedrockk.molang.runtime.struct.QueryStruct);
+  public static void access$initialize$jd(com.cobblemon.mod.common.api.entity.EntitySideDelegate, net.minecraft.world.entity.Entity);
+  public static void access$tick$jd(com.cobblemon.mod.common.api.entity.EntitySideDelegate, net.minecraft.world.entity.Entity);
+  public static void access$onSyncedDataUpdated$jd(com.cobblemon.mod.common.api.entity.EntitySideDelegate, net.minecraft.network.syncher.EntityDataAccessor);
+  public static void access$addToStruct$jd(com.cobblemon.mod.common.api.entity.EntitySideDelegate, com.bedrockk.molang.runtime.struct.QueryStruct);
+}

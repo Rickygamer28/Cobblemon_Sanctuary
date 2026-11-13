@@ -1,0 +1,14 @@
+public final class com.cobblemon.mod.common.api.events.entity.PokemonEntitySaveEvent {
+  private final com.cobblemon.mod.common.entity.pokemon.PokemonEntity pokemonEntity;
+  private final net.minecraft.nbt.CompoundTag nbt;
+  public com.cobblemon.mod.common.api.events.entity.PokemonEntitySaveEvent(com.cobblemon.mod.common.entity.pokemon.PokemonEntity, net.minecraft.nbt.CompoundTag);
+  public final com.cobblemon.mod.common.entity.pokemon.PokemonEntity getPokemonEntity();
+  public final net.minecraft.nbt.CompoundTag getNbt();
+  public final com.cobblemon.mod.common.entity.pokemon.PokemonEntity component1();
+  public final net.minecraft.nbt.CompoundTag component2();
+  public final com.cobblemon.mod.common.api.events.entity.PokemonEntitySaveEvent copy(com.cobblemon.mod.common.entity.pokemon.PokemonEntity, net.minecraft.nbt.CompoundTag);
+  public static com.cobblemon.mod.common.api.events.entity.PokemonEntitySaveEvent copy$default(com.cobblemon.mod.common.api.events.entity.PokemonEntitySaveEvent, com.cobblemon.mod.common.entity.pokemon.PokemonEntity, net.minecraft.nbt.CompoundTag, int, java.lang.Object);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+}

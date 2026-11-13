@@ -1,0 +1,24 @@
+public final class com.cobblemon.mod.common.CobblemonPartyPools implements com.cobblemon.mod.common.api.data.JsonDataRegistry<com.cobblemon.mod.common.api.npc.PartyPool> {
+  public static final com.cobblemon.mod.common.CobblemonPartyPools INSTANCE;
+  private static final net.minecraft.resources.ResourceLocation id;
+  private static final net.minecraft.server.packs.PackType type;
+  private static final com.google.gson.reflect.TypeToken<com.cobblemon.mod.common.api.npc.PartyPool> typeToken;
+  private static final java.lang.String resourcePath;
+  private static final com.cobblemon.mod.common.api.reactive.SimpleObservable<com.cobblemon.mod.common.CobblemonPartyPools> observable;
+  private static final com.google.gson.Gson gson;
+  private static final java.util.Map<net.minecraft.resources.ResourceLocation, com.cobblemon.mod.common.api.npc.PartyPool> partyPools;
+  private com.cobblemon.mod.common.CobblemonPartyPools();
+  public net.minecraft.resources.ResourceLocation getId();
+  public net.minecraft.server.packs.PackType getType();
+  public com.google.gson.reflect.TypeToken<com.cobblemon.mod.common.api.npc.PartyPool> getTypeToken();
+  public java.lang.String getResourcePath();
+  public com.cobblemon.mod.common.api.reactive.SimpleObservable<com.cobblemon.mod.common.CobblemonPartyPools> getObservable();
+  public com.google.gson.Gson getGson();
+  public final java.util.Map<net.minecraft.resources.ResourceLocation, com.cobblemon.mod.common.api.npc.PartyPool> getPartyPools();
+  public void sync(net.minecraft.server.level.ServerPlayer);
+  public void reload(java.util.Map<net.minecraft.resources.ResourceLocation, com.cobblemon.mod.common.api.npc.PartyPool>);
+  public void reload(net.minecraft.server.packs.resources.ResourceManager);
+  public com.cobblemon.mod.common.api.npc.PartyPool parse(java.io.BufferedReader, net.minecraft.resources.ResourceLocation);
+  public java.lang.Object parse(java.io.BufferedReader, net.minecraft.resources.ResourceLocation);
+  static {};
+}

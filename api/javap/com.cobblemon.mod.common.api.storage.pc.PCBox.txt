@@ -1,0 +1,35 @@
+public class com.cobblemon.mod.common.api.storage.pc.PCBox implements java.lang.Iterable<com.cobblemon.mod.common.pokemon.Pokemon>, kotlin.jvm.internal.markers.KMappedMarker {
+  private final com.cobblemon.mod.common.api.storage.pc.PCStore pc;
+  private final com.cobblemon.mod.common.api.reactive.SimpleObservable<kotlin.Unit> boxChangeEmitter;
+  private boolean emit;
+  private java.lang.String name;
+  private net.minecraft.resources.ResourceLocation wallpaper;
+  private final com.cobblemon.mod.common.pokemon.Pokemon[] pokemon;
+  public com.cobblemon.mod.common.api.storage.pc.PCBox(com.cobblemon.mod.common.api.storage.pc.PCStore);
+  public final com.cobblemon.mod.common.api.storage.pc.PCStore getPc();
+  public java.util.Iterator<com.cobblemon.mod.common.pokemon.Pokemon> iterator();
+  public final com.cobblemon.mod.common.api.reactive.SimpleObservable<kotlin.Unit> getBoxChangeEmitter();
+  protected final boolean getEmit();
+  protected final void setEmit(boolean);
+  public final java.lang.String getName();
+  public final void setName(java.lang.String);
+  public final net.minecraft.resources.ResourceLocation getWallpaper();
+  public final void setWallpaper(net.minecraft.resources.ResourceLocation);
+  protected final com.cobblemon.mod.common.pokemon.Pokemon[] getPokemon();
+  public com.cobblemon.mod.common.pokemon.Pokemon get(int);
+  public void set(int, com.cobblemon.mod.common.pokemon.Pokemon);
+  public final int getBoxNumber();
+  public final int getUnoccupiedSlots();
+  public final com.cobblemon.mod.common.api.storage.pc.PCPosition getFirstAvailablePosition();
+  public void initialize();
+  public final void sort(com.cobblemon.mod.common.api.pokemon.PokemonSortMode, boolean);
+  public final void sendTo(net.minecraft.server.level.ServerPlayer);
+  public net.minecraft.nbt.CompoundTag saveToNBT(net.minecraft.nbt.CompoundTag, net.minecraft.core.RegistryAccess);
+  public com.google.gson.JsonObject saveToJSON(com.google.gson.JsonObject, net.minecraft.core.RegistryAccess);
+  public com.cobblemon.mod.common.api.storage.pc.PCBox loadFromJSON(com.google.gson.JsonObject, net.minecraft.core.RegistryAccess);
+  public com.cobblemon.mod.common.api.storage.pc.PCBox loadFromNBT(net.minecraft.nbt.CompoundTag, net.minecraft.core.RegistryAccess);
+  public java.util.Map<java.lang.Integer, com.cobblemon.mod.common.pokemon.Pokemon> getNonEmptySlots();
+  public java.util.Map<java.lang.Integer, kotlin.jvm.functions.Function1<net.minecraft.core.RegistryAccess, com.cobblemon.mod.common.pokemon.Pokemon>> getNonEmptySlotsForPackets();
+  private static final kotlin.Unit initialize$lambda$1(com.cobblemon.mod.common.api.storage.pc.PCBox, kotlin.Unit);
+  private static final com.cobblemon.mod.common.pokemon.Pokemon getNonEmptySlotsForPackets$lambda$0$0(com.cobblemon.mod.common.pokemon.Pokemon, net.minecraft.core.RegistryAccess);
+}

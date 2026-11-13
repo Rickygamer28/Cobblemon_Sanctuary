@@ -1,0 +1,12 @@
+public final class com.cobblemon.mod.common.util.DistributionUtilsKt {
+  public static final void ifClient(java.lang.Runnable);
+  public static final void ifServer(java.lang.Runnable);
+  public static final void ifDedicatedServer(java.lang.Runnable);
+  public static final <T> java.util.concurrent.CompletableFuture<T> runOnServer(kotlin.jvm.functions.Function0<? extends T>);
+  public static final <T> com.cobblemon.mod.common.api.reactive.ObservableSubscription<T> subscribeOnServer(com.cobblemon.mod.common.api.reactive.Observable<T>, com.cobblemon.mod.common.api.Priority, kotlin.jvm.functions.Function0<kotlin.Unit>);
+  public static com.cobblemon.mod.common.api.reactive.ObservableSubscription subscribeOnServer$default(com.cobblemon.mod.common.api.reactive.Observable, com.cobblemon.mod.common.api.Priority, kotlin.jvm.functions.Function0, int, java.lang.Object);
+  public static final net.minecraft.server.MinecraftServer server();
+  public static final boolean isServerSide(net.minecraft.world.level.Level);
+  private static final void runOnServer$lambda$0(java.util.concurrent.CompletableFuture, kotlin.jvm.functions.Function0);
+  private static final kotlin.Unit subscribeOnServer$lambda$0(kotlin.jvm.functions.Function0, java.lang.Object);
+}

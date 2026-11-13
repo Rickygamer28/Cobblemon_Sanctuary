@@ -1,0 +1,24 @@
+public final class com.cobblemon.mod.common.client.gui.interact.wheel.InteractWheelGuiFactoryKt$WhenMappings {
+  public static final int[] $EnumSwitchMapping$0;
+  static {};
+}
+public final class com.cobblemon.mod.common.client.gui.interact.wheel.InteractWheelGuiFactoryKt {
+  public static final com.cobblemon.mod.common.client.gui.interact.wheel.InteractWheelGUI createPokemonInteractGui(java.util.UUID, boolean, boolean, boolean, boolean);
+  public static final com.cobblemon.mod.common.client.gui.interact.wheel.InteractWheelGUI createPlayerInteractGui(com.cobblemon.mod.common.net.messages.client.PlayerInteractOptionsPacket);
+  private static final java.lang.String getLangKey(com.cobblemon.mod.common.net.messages.client.PlayerInteractOptionsPacket$OptionStatus);
+  private static final void closeGUI();
+  private static final kotlin.Unit createPokemonInteractGui$lambda$0(boolean, java.util.UUID);
+  private static final kotlin.Unit createPokemonInteractGui$lambda$1(boolean, java.util.UUID);
+  private static final kotlin.Unit createPokemonInteractGui$lambda$2(boolean, java.util.UUID);
+  private static final kotlin.Unit createPokemonInteractGui$lambda$3(boolean, java.util.UUID);
+  private static final org.joml.Vector3f createPlayerInteractGui$lambda$0();
+  private static final kotlin.Unit createPlayerInteractGui$lambda$1(com.cobblemon.mod.common.net.messages.client.PlayerInteractOptionsPacket);
+  private static final org.joml.Vector3f createPlayerInteractGui$lambda$2();
+  private static final kotlin.Unit createPlayerInteractGui$lambda$3(com.cobblemon.mod.common.net.messages.client.PlayerInteractOptionsPacket, com.cobblemon.mod.common.client.battle.ClientBattleChallenge, com.cobblemon.mod.common.client.battle.ClientTeamRequest);
+  private static final org.joml.Vector3f createPlayerInteractGui$lambda$4(com.cobblemon.mod.common.net.messages.client.PlayerInteractOptionsPacket);
+  private static final kotlin.Unit createPlayerInteractGui$lambda$5(com.cobblemon.mod.common.net.messages.client.PlayerInteractOptionsPacket);
+  private static final org.joml.Vector3f createPlayerInteractGui$lambda$6$0();
+  private static final kotlin.Unit createPlayerInteractGui$lambda$6$1();
+  private static final org.joml.Vector3f createPlayerInteractGui$lambda$6$2();
+  private static final kotlin.Unit createPlayerInteractGui$lambda$6$3();
+}

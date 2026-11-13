@@ -1,0 +1,29 @@
+public final class com.cobblemon.mod.common.pokemon.ai.CombatBehaviour$Companion {
+  private com.cobblemon.mod.common.pokemon.ai.CombatBehaviour$Companion();
+  public final com.cobblemon.mod.common.pokemon.ai.CombatBehaviour decode(net.minecraft.network.RegistryFriendlyByteBuf);
+  public com.cobblemon.mod.common.pokemon.ai.CombatBehaviour$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.pokemon.ai.CombatBehaviour {
+  public static final com.cobblemon.mod.common.pokemon.ai.CombatBehaviour$Companion Companion;
+  private boolean willDefendSelf;
+  private boolean willFlee;
+  private boolean willDefendOwner;
+  private boolean fightsMelee;
+  private final transient com.cobblemon.mod.common.api.molang.ObjectValue<com.cobblemon.mod.common.pokemon.ai.CombatBehaviour> struct;
+  public com.cobblemon.mod.common.pokemon.ai.CombatBehaviour();
+  public final boolean getWillDefendSelf();
+  public final void setWillDefendSelf(boolean);
+  public final boolean getWillFlee();
+  public final void setWillFlee(boolean);
+  public final boolean getWillDefendOwner();
+  public final void setWillDefendOwner(boolean);
+  public final boolean getFightsMelee();
+  public final void setFightsMelee(boolean);
+  public final com.cobblemon.mod.common.api.molang.ObjectValue<com.cobblemon.mod.common.pokemon.ai.CombatBehaviour> getStruct();
+  public final void encode(net.minecraft.network.RegistryFriendlyByteBuf);
+  private static final java.lang.Object struct$lambda$0$0(com.cobblemon.mod.common.pokemon.ai.CombatBehaviour, com.bedrockk.molang.runtime.MoParams);
+  private static final java.lang.Object struct$lambda$0$1(com.cobblemon.mod.common.pokemon.ai.CombatBehaviour, com.bedrockk.molang.runtime.MoParams);
+  private static final java.lang.Object struct$lambda$0$2(com.cobblemon.mod.common.pokemon.ai.CombatBehaviour, com.bedrockk.molang.runtime.MoParams);
+  private static final java.lang.Object struct$lambda$0$3(com.cobblemon.mod.common.pokemon.ai.CombatBehaviour, com.bedrockk.molang.runtime.MoParams);
+  static {};
+}

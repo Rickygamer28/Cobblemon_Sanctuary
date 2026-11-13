@@ -1,0 +1,12 @@
+public final class com.cobblemon.mod.common.entity.ai.StayAfloatTask extends net.minecraft.world.entity.ai.behavior.Behavior<net.minecraft.world.entity.PathfinderMob> {
+  private final float chance;
+  public com.cobblemon.mod.common.entity.ai.StayAfloatTask(float);
+  public com.cobblemon.mod.common.entity.ai.StayAfloatTask(float, int, kotlin.jvm.internal.DefaultConstructorMarker);
+  protected boolean checkExtraStartConditions(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.PathfinderMob);
+  protected boolean canStillUse(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.PathfinderMob, long);
+  protected void tick(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.PathfinderMob, long);
+  public com.cobblemon.mod.common.entity.ai.StayAfloatTask();
+  public boolean checkExtraStartConditions(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity);
+  public boolean canStillUse(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity, long);
+  public void tick(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity, long);
+}

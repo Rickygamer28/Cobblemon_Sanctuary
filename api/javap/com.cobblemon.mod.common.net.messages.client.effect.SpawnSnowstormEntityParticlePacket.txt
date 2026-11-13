@@ -1,0 +1,49 @@
+public final class com.cobblemon.mod.common.net.messages.client.effect.SpawnSnowstormEntityParticlePacket$Companion {
+  private com.cobblemon.mod.common.net.messages.client.effect.SpawnSnowstormEntityParticlePacket$Companion();
+  public final net.minecraft.resources.ResourceLocation getID();
+  public final com.cobblemon.mod.common.net.messages.client.effect.SpawnSnowstormEntityParticlePacket decode(net.minecraft.network.RegistryFriendlyByteBuf);
+  private static final java.lang.String decode$lambda$0(net.minecraft.network.RegistryFriendlyByteBuf, net.minecraft.network.FriendlyByteBuf);
+  private static final java.lang.String decode$lambda$1(kotlin.jvm.functions.Function1, java.lang.Object);
+  private static final java.lang.Integer decode$lambda$2(net.minecraft.network.FriendlyByteBuf);
+  private static final java.lang.Integer decode$lambda$3(kotlin.jvm.functions.Function1, java.lang.Object);
+  private static final java.util.List decode$lambda$4(net.minecraft.network.RegistryFriendlyByteBuf, net.minecraft.network.FriendlyByteBuf);
+  private static final java.lang.String decode$lambda$4$0(net.minecraft.network.RegistryFriendlyByteBuf, net.minecraft.network.FriendlyByteBuf);
+  private static final java.lang.String decode$lambda$4$1(kotlin.jvm.functions.Function1, java.lang.Object);
+  private static final java.util.List decode$lambda$5(kotlin.jvm.functions.Function1, java.lang.Object);
+  public com.cobblemon.mod.common.net.messages.client.effect.SpawnSnowstormEntityParticlePacket$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.net.messages.client.effect.SpawnSnowstormEntityParticlePacket implements com.cobblemon.mod.common.api.net.NetworkPacket<com.cobblemon.mod.common.net.messages.client.effect.SpawnSnowstormEntityParticlePacket> {
+  public static final com.cobblemon.mod.common.net.messages.client.effect.SpawnSnowstormEntityParticlePacket$Companion Companion;
+  private final net.minecraft.resources.ResourceLocation effectId;
+  private final int sourceEntityId;
+  private final java.util.List<java.lang.String> sourceLocators;
+  private final java.lang.Integer targetedEntityId;
+  private final java.util.List<java.lang.String> targetLocators;
+  private final net.minecraft.resources.ResourceLocation id;
+  private static final net.minecraft.resources.ResourceLocation ID;
+  public com.cobblemon.mod.common.net.messages.client.effect.SpawnSnowstormEntityParticlePacket(net.minecraft.resources.ResourceLocation, int, java.util.List<java.lang.String>, java.lang.Integer, java.util.List<java.lang.String>);
+  public com.cobblemon.mod.common.net.messages.client.effect.SpawnSnowstormEntityParticlePacket(net.minecraft.resources.ResourceLocation, int, java.util.List, java.lang.Integer, java.util.List, int, kotlin.jvm.internal.DefaultConstructorMarker);
+  public final net.minecraft.resources.ResourceLocation getEffectId();
+  public final int getSourceEntityId();
+  public final java.util.List<java.lang.String> getSourceLocators();
+  public final java.lang.Integer getTargetedEntityId();
+  public final java.util.List<java.lang.String> getTargetLocators();
+  public net.minecraft.resources.ResourceLocation getId();
+  public void encode(net.minecraft.network.RegistryFriendlyByteBuf);
+  public void sendToPlayer(net.minecraft.server.level.ServerPlayer);
+  public void sendToPlayers(java.lang.Iterable<? extends net.minecraft.server.level.ServerPlayer>);
+  public void sendToAllPlayers();
+  public void sendToServer();
+  public void sendToPlayersAround(double, double, double, double, net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level>, kotlin.jvm.functions.Function1<? super net.minecraft.server.level.ServerPlayer, java.lang.Boolean>);
+  public net.minecraft.network.protocol.common.custom.CustomPacketPayload$Type<com.cobblemon.mod.common.net.messages.client.effect.SpawnSnowstormEntityParticlePacket> type();
+  private static final kotlin.Unit encode$lambda$0(net.minecraft.network.RegistryFriendlyByteBuf, net.minecraft.network.FriendlyByteBuf, java.lang.String);
+  private static final void encode$lambda$1(kotlin.jvm.functions.Function2, java.lang.Object, java.lang.String);
+  private static final kotlin.Unit encode$lambda$2(net.minecraft.network.RegistryFriendlyByteBuf, net.minecraft.network.FriendlyByteBuf, java.lang.Integer);
+  private static final void encode$lambda$3(kotlin.jvm.functions.Function2, java.lang.Object, java.lang.Integer);
+  private static final kotlin.Unit encode$lambda$4(net.minecraft.network.RegistryFriendlyByteBuf, net.minecraft.network.FriendlyByteBuf, java.util.List);
+  private static final kotlin.Unit encode$lambda$4$0(net.minecraft.network.RegistryFriendlyByteBuf, net.minecraft.network.FriendlyByteBuf, java.lang.String);
+  private static final void encode$lambda$4$1(kotlin.jvm.functions.Function2, java.lang.Object, java.lang.String);
+  private static final void encode$lambda$5(kotlin.jvm.functions.Function2, java.lang.Object, java.util.List);
+  public static final net.minecraft.resources.ResourceLocation access$getID$cp();
+  static {};
+}

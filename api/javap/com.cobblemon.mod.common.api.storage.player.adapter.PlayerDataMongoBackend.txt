@@ -1,0 +1,10 @@
+public final class com.cobblemon.mod.common.api.storage.player.adapter.PlayerDataMongoBackend extends com.cobblemon.mod.common.api.storage.player.adapter.MongoBackedPlayerDataStoreBackend<com.cobblemon.mod.common.api.storage.player.GeneralPlayerData> {
+  private final kotlin.jvm.functions.Function1<java.util.UUID, com.cobblemon.mod.common.api.storage.player.GeneralPlayerData> defaultData;
+  private final com.google.gson.Gson gson;
+  private final com.google.gson.reflect.TypeToken<com.cobblemon.mod.common.api.storage.player.GeneralPlayerData> classToken;
+  public com.cobblemon.mod.common.api.storage.player.adapter.PlayerDataMongoBackend(com.mongodb.client.MongoClient, java.lang.String, java.lang.String);
+  public kotlin.jvm.functions.Function1<java.util.UUID, com.cobblemon.mod.common.api.storage.player.GeneralPlayerData> getDefaultData();
+  public com.google.gson.Gson getGson();
+  public com.google.gson.reflect.TypeToken<com.cobblemon.mod.common.api.storage.player.GeneralPlayerData> getClassToken();
+  private static final com.cobblemon.mod.common.api.storage.player.GeneralPlayerData defaultData$lambda$0(java.util.UUID);
+}

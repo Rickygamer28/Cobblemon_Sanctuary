@@ -1,0 +1,55 @@
+public final class com.cobblemon.mod.common.api.scheduling.ScheduledTask$Builder {
+  private kotlin.jvm.functions.Function1<? super com.cobblemon.mod.common.api.scheduling.ScheduledTask, kotlin.Unit> action;
+  private float delaySeconds;
+  private float interval;
+  private int iterations;
+  private java.lang.String identifier;
+  private com.cobblemon.mod.common.api.scheduling.SchedulingTracker tracker;
+  public com.cobblemon.mod.common.api.scheduling.ScheduledTask$Builder();
+  public final com.cobblemon.mod.common.api.scheduling.ScheduledTask$Builder execute(kotlin.jvm.functions.Function1<? super com.cobblemon.mod.common.api.scheduling.ScheduledTask, kotlin.Unit>);
+  public final com.cobblemon.mod.common.api.scheduling.ScheduledTask$Builder delay(float);
+  public final com.cobblemon.mod.common.api.scheduling.ScheduledTask$Builder interval(float);
+  public final com.cobblemon.mod.common.api.scheduling.ScheduledTask$Builder iterations(int);
+  public final com.cobblemon.mod.common.api.scheduling.ScheduledTask$Builder infiniteIterations();
+  public final com.cobblemon.mod.common.api.scheduling.ScheduledTask$Builder tracker(com.cobblemon.mod.common.api.scheduling.SchedulingTracker);
+  public final com.cobblemon.mod.common.api.scheduling.ScheduledTask build();
+}
+public final class com.cobblemon.mod.common.api.scheduling.ScheduledTask$Companion {
+  private com.cobblemon.mod.common.api.scheduling.ScheduledTask$Companion();
+  public final com.cobblemon.mod.common.api.scheduling.ScheduledTask getBLANK();
+  public com.cobblemon.mod.common.api.scheduling.ScheduledTask$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.api.scheduling.ScheduledTask {
+  public static final com.cobblemon.mod.common.api.scheduling.ScheduledTask$Companion Companion;
+  private final kotlin.jvm.functions.Function1<com.cobblemon.mod.common.api.scheduling.ScheduledTask, kotlin.Unit> action;
+  private final java.lang.String identifier;
+  private final float intervalSeconds;
+  private final int iterations;
+  private final java.util.concurrent.CompletableFuture<kotlin.Unit> future;
+  private float secondsPassed;
+  private int currentIteration;
+  private float secondsRemaining;
+  private boolean expired;
+  private boolean paused;
+  private static final com.cobblemon.mod.common.api.scheduling.ScheduledTask BLANK;
+  public com.cobblemon.mod.common.api.scheduling.ScheduledTask(kotlin.jvm.functions.Function1<? super com.cobblemon.mod.common.api.scheduling.ScheduledTask, kotlin.Unit>, java.lang.String, float, float, int);
+  public com.cobblemon.mod.common.api.scheduling.ScheduledTask(kotlin.jvm.functions.Function1, java.lang.String, float, float, int, int, kotlin.jvm.internal.DefaultConstructorMarker);
+  public final kotlin.jvm.functions.Function1<com.cobblemon.mod.common.api.scheduling.ScheduledTask, kotlin.Unit> getAction();
+  public final java.lang.String getIdentifier();
+  public final float getIntervalSeconds();
+  public final int getIterations();
+  public final java.util.concurrent.CompletableFuture<kotlin.Unit> getFuture();
+  public final float getSecondsPassed();
+  public final void setSecondsPassed(float);
+  public final int getCurrentIteration();
+  public final float getSecondsRemaining();
+  public final boolean getExpired();
+  public final boolean getPaused();
+  public final void setPaused(boolean);
+  public java.lang.String toString();
+  public final void update(float);
+  public final void expire();
+  private static final kotlin.Unit BLANK$lambda$0(com.cobblemon.mod.common.api.scheduling.ScheduledTask);
+  public static final com.cobblemon.mod.common.api.scheduling.ScheduledTask access$getBLANK$cp();
+  static {};
+}

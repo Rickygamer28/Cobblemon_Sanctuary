@@ -1,0 +1,8 @@
+public final class com.cobblemon.mod.common.api.pokemon.experience.Fluctuating extends com.cobblemon.mod.common.api.pokemon.experience.CachedExperienceGroup {
+  public static final com.cobblemon.mod.common.api.pokemon.experience.Fluctuating INSTANCE;
+  private static final java.lang.String name;
+  private com.cobblemon.mod.common.api.pokemon.experience.Fluctuating();
+  public java.lang.String getName();
+  public int getExperience(int);
+  static {};
+}

@@ -1,0 +1,17 @@
+public final class com.cobblemon.mod.common.api.interaction.ShrinkItemEffect$Companion {
+  private com.cobblemon.mod.common.api.interaction.ShrinkItemEffect$Companion();
+  public final java.lang.String getID();
+  public com.cobblemon.mod.common.api.interaction.ShrinkItemEffect$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.api.interaction.ShrinkItemEffect implements com.cobblemon.mod.common.api.interaction.InteractionEffect {
+  public static final com.cobblemon.mod.common.api.interaction.ShrinkItemEffect$Companion Companion;
+  private final int amount;
+  private static final java.lang.String ID;
+  public com.cobblemon.mod.common.api.interaction.ShrinkItemEffect(int);
+  public com.cobblemon.mod.common.api.interaction.ShrinkItemEffect(int, int, kotlin.jvm.internal.DefaultConstructorMarker);
+  public final int getAmount();
+  public void applyEffect(com.cobblemon.mod.common.entity.pokemon.PokemonEntity, net.minecraft.server.level.ServerPlayer);
+  public com.cobblemon.mod.common.api.interaction.ShrinkItemEffect();
+  public static final java.lang.String access$getID$cp();
+  static {};
+}

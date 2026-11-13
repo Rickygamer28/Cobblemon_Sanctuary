@@ -1,0 +1,25 @@
+public final class com.cobblemon.mod.common.api.interaction.PlaySoundEffect$Companion {
+  private com.cobblemon.mod.common.api.interaction.PlaySoundEffect$Companion();
+  public final java.lang.String getID();
+  public com.cobblemon.mod.common.api.interaction.PlaySoundEffect$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.api.interaction.PlaySoundEffect implements com.cobblemon.mod.common.api.interaction.InteractionEffect {
+  public static final com.cobblemon.mod.common.api.interaction.PlaySoundEffect$Companion Companion;
+  private final net.minecraft.resources.ResourceLocation sound;
+  private final net.minecraft.sounds.SoundSource soundSource;
+  private final java.lang.Boolean _playAround;
+  private final java.lang.Double _distance;
+  private final java.lang.Float _volume;
+  private final java.lang.Float _pitch;
+  private static final java.lang.String ID;
+  public com.cobblemon.mod.common.api.interaction.PlaySoundEffect(net.minecraft.resources.ResourceLocation, net.minecraft.sounds.SoundSource, java.lang.Boolean, java.lang.Double, java.lang.Float, java.lang.Float);
+  public final net.minecraft.resources.ResourceLocation getSound();
+  public final net.minecraft.sounds.SoundSource getSoundSource();
+  public void applyEffect(com.cobblemon.mod.common.entity.pokemon.PokemonEntity, net.minecraft.server.level.ServerPlayer);
+  public final boolean getPlayAround();
+  public final double getDistance();
+  public final float getVolume();
+  public final float getPitch();
+  public static final java.lang.String access$getID$cp();
+  static {};
+}

@@ -1,0 +1,15 @@
+public final class com.cobblemon.mod.common.client.render.models.blockbench.animation.BipedWalkAnimation extends com.cobblemon.mod.common.client.render.models.blockbench.animation.PoseAnimation {
+  private final float periodMultiplier;
+  private final float amplitudeMultiplier;
+  private final com.cobblemon.mod.common.client.render.models.blockbench.pose.Bone leftLeg;
+  private final com.cobblemon.mod.common.client.render.models.blockbench.pose.Bone rightLeg;
+  public com.cobblemon.mod.common.client.render.models.blockbench.animation.BipedWalkAnimation(float, float, com.cobblemon.mod.common.client.render.models.blockbench.pose.Bone, com.cobblemon.mod.common.client.render.models.blockbench.pose.Bone);
+  public com.cobblemon.mod.common.client.render.models.blockbench.animation.BipedWalkAnimation(float, float, com.cobblemon.mod.common.client.render.models.blockbench.pose.Bone, com.cobblemon.mod.common.client.render.models.blockbench.pose.Bone, int, kotlin.jvm.internal.DefaultConstructorMarker);
+  public final float getPeriodMultiplier();
+  public final float getAmplitudeMultiplier();
+  public final com.cobblemon.mod.common.client.render.models.blockbench.pose.Bone getLeftLeg();
+  public final com.cobblemon.mod.common.client.render.models.blockbench.pose.Bone getRightLeg();
+  public com.cobblemon.mod.common.client.render.models.blockbench.animation.BipedWalkAnimation(com.cobblemon.mod.common.client.render.models.blockbench.frame.BipedFrame, float, float);
+  public com.cobblemon.mod.common.client.render.models.blockbench.animation.BipedWalkAnimation(com.cobblemon.mod.common.client.render.models.blockbench.frame.BipedFrame, float, float, int, kotlin.jvm.internal.DefaultConstructorMarker);
+  protected void setupAnim(com.cobblemon.mod.common.client.render.models.blockbench.repository.RenderContext, com.cobblemon.mod.common.client.render.models.blockbench.PosableModel, com.cobblemon.mod.common.client.render.models.blockbench.PosableState, float, float, float, float, float, float);
+}

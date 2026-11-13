@@ -1,0 +1,15 @@
+public interface com.cobblemon.mod.common.api.pokemon.stats.StatProvider {
+  public abstract com.cobblemon.mod.common.api.pokemon.stats.StatTypeAdapter getTypeAdapter();
+  public abstract java.util.Collection<com.cobblemon.mod.common.api.pokemon.stats.Stat> all();
+  public abstract java.util.Collection<com.cobblemon.mod.common.api.pokemon.stats.Stat> ofType(com.cobblemon.mod.common.api.pokemon.stats.Stat$Type);
+  public abstract void provide(com.cobblemon.mod.common.pokemon.Species);
+  public abstract void provide(com.cobblemon.mod.common.pokemon.FormData);
+  public abstract com.cobblemon.mod.common.pokemon.EVs createEmptyEVs();
+  public abstract com.cobblemon.mod.common.pokemon.IVs createEmptyIVs(int);
+  public abstract java.lang.String toShowdown(com.cobblemon.mod.common.pokemon.Species, com.cobblemon.mod.common.pokemon.FormData);
+  public abstract int getStatForPokemon(com.cobblemon.mod.common.pokemon.Pokemon, com.cobblemon.mod.common.api.pokemon.stats.Stat);
+  public abstract com.cobblemon.mod.common.api.pokemon.stats.Stat fromIdentifier(net.minecraft.resources.ResourceLocation);
+  public abstract com.cobblemon.mod.common.api.pokemon.stats.Stat fromIdentifierOrThrow(net.minecraft.resources.ResourceLocation);
+  public abstract com.cobblemon.mod.common.api.pokemon.stats.Stat decode(net.minecraft.network.RegistryFriendlyByteBuf);
+  public abstract void encode(net.minecraft.network.RegistryFriendlyByteBuf, com.cobblemon.mod.common.api.pokemon.stats.Stat);
+}

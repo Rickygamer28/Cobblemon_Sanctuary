@@ -1,0 +1,42 @@
+public final class com.cobblemon.mod.common.api.events.pokemon.RidePokemonEvent$ApplyStamina implements com.cobblemon.mod.common.api.events.pokemon.RidePokemonEvent {
+  private final net.minecraft.server.level.ServerPlayer player;
+  private final com.cobblemon.mod.common.entity.pokemon.PokemonEntity pokemon;
+  private float rideStamina;
+  private final java.util.Map<java.lang.String, com.bedrockk.molang.runtime.value.MoValue> context;
+  private final java.util.Map<java.lang.String, kotlin.jvm.functions.Function1<com.bedrockk.molang.runtime.MoParams, com.bedrockk.molang.runtime.value.MoValue>> functions;
+  public com.cobblemon.mod.common.api.events.pokemon.RidePokemonEvent$ApplyStamina(net.minecraft.server.level.ServerPlayer, com.cobblemon.mod.common.entity.pokemon.PokemonEntity, float);
+  public net.minecraft.server.level.ServerPlayer getPlayer();
+  public com.cobblemon.mod.common.entity.pokemon.PokemonEntity getPokemon();
+  public final float getRideStamina();
+  public final void setRideStamina(float);
+  public final java.util.Map<java.lang.String, com.bedrockk.molang.runtime.value.MoValue> getContext();
+  public final java.util.Map<java.lang.String, kotlin.jvm.functions.Function1<com.bedrockk.molang.runtime.MoParams, com.bedrockk.molang.runtime.value.MoValue>> getFunctions();
+  public final void setInfiniteStamina();
+  public final boolean isInfiniteStamina();
+  private static final com.bedrockk.molang.runtime.value.DoubleValue functions$lambda$0(com.cobblemon.mod.common.api.events.pokemon.RidePokemonEvent$ApplyStamina, com.bedrockk.molang.runtime.MoParams);
+  private static final com.bedrockk.molang.runtime.value.DoubleValue functions$lambda$1(com.cobblemon.mod.common.api.events.pokemon.RidePokemonEvent$ApplyStamina, com.bedrockk.molang.runtime.MoParams);
+}
+public final class com.cobblemon.mod.common.api.events.pokemon.RidePokemonEvent$Post implements com.cobblemon.mod.common.api.events.pokemon.RidePokemonEvent {
+  private final net.minecraft.server.level.ServerPlayer player;
+  private final com.cobblemon.mod.common.entity.pokemon.PokemonEntity pokemon;
+  private final java.util.Map<java.lang.String, com.cobblemon.mod.common.api.molang.ObjectValue<? extends net.minecraft.world.entity.LivingEntity>> context;
+  public com.cobblemon.mod.common.api.events.pokemon.RidePokemonEvent$Post(net.minecraft.server.level.ServerPlayer, com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+  public net.minecraft.server.level.ServerPlayer getPlayer();
+  public com.cobblemon.mod.common.entity.pokemon.PokemonEntity getPokemon();
+  public final java.util.Map<java.lang.String, com.cobblemon.mod.common.api.molang.ObjectValue<? extends net.minecraft.world.entity.LivingEntity>> getContext();
+}
+public final class com.cobblemon.mod.common.api.events.pokemon.RidePokemonEvent$Pre extends com.cobblemon.mod.common.api.events.Cancelable implements com.cobblemon.mod.common.api.events.pokemon.RidePokemonEvent {
+  private final net.minecraft.server.level.ServerPlayer player;
+  private final com.cobblemon.mod.common.entity.pokemon.PokemonEntity pokemon;
+  private final java.util.Map<java.lang.String, com.cobblemon.mod.common.api.molang.ObjectValue<? extends net.minecraft.world.entity.LivingEntity>> context;
+  private final java.util.Map<java.lang.String, kotlin.jvm.functions.Function1<com.bedrockk.molang.runtime.MoParams, com.bedrockk.molang.runtime.value.MoValue>> functions;
+  public com.cobblemon.mod.common.api.events.pokemon.RidePokemonEvent$Pre(net.minecraft.server.level.ServerPlayer, com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+  public net.minecraft.server.level.ServerPlayer getPlayer();
+  public com.cobblemon.mod.common.entity.pokemon.PokemonEntity getPokemon();
+  public final java.util.Map<java.lang.String, com.cobblemon.mod.common.api.molang.ObjectValue<? extends net.minecraft.world.entity.LivingEntity>> getContext();
+  public final java.util.Map<java.lang.String, kotlin.jvm.functions.Function1<com.bedrockk.molang.runtime.MoParams, com.bedrockk.molang.runtime.value.MoValue>> getFunctions();
+}
+public interface com.cobblemon.mod.common.api.events.pokemon.RidePokemonEvent {
+  public abstract net.minecraft.server.level.ServerPlayer getPlayer();
+  public abstract com.cobblemon.mod.common.entity.pokemon.PokemonEntity getPokemon();
+}

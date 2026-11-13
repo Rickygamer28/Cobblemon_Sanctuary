@@ -1,0 +1,5 @@
+public final class com.cobblemon.mod.common.util.CommandUtilsKt {
+  public static final <T extends com.mojang.brigadier.builder.ArgumentBuilder<net.minecraft.commands.CommandSourceStack, T>> T appendRequirement(com.mojang.brigadier.builder.ArgumentBuilder<net.minecraft.commands.CommandSourceStack, T>, kotlin.jvm.functions.Function1<? super net.minecraft.commands.CommandSourceStack, java.lang.Boolean>);
+  public static final <S> com.mojang.brigadier.builder.LiteralArgumentBuilder<S> alias(com.mojang.brigadier.tree.LiteralCommandNode<S>, java.lang.String);
+  private static final boolean appendRequirement$lambda$0(kotlin.jvm.functions.Function1, java.lang.Object);
+}

@@ -1,0 +1,3 @@
+public final class com.cobblemon.mod.common.util.MutableLazyKt {
+  public static final <T> com.cobblemon.mod.common.util.MutableLazy<T> mutableLazy(kotlin.jvm.functions.Function0<? extends T>);
+}

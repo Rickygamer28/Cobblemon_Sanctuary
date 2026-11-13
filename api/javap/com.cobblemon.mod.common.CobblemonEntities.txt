@@ -1,0 +1,28 @@
+public final class com.cobblemon.mod.common.CobblemonEntities extends com.cobblemon.mod.common.platform.PlatformRegistry<net.minecraft.core.Registry<net.minecraft.world.entity.EntityType<?>>, net.minecraft.resources.ResourceKey<net.minecraft.core.Registry<net.minecraft.world.entity.EntityType<?>>>, net.minecraft.world.entity.EntityType<?>> {
+  public static final com.cobblemon.mod.common.CobblemonEntities INSTANCE;
+  private static final net.minecraft.core.Registry<net.minecraft.world.entity.EntityType<?>> registry;
+  private static final net.minecraft.resources.ResourceKey<net.minecraft.core.Registry<net.minecraft.world.entity.EntityType<?>>> resourceKey;
+  public static final net.minecraft.resources.ResourceLocation POKEMON_KEY;
+  public static final net.minecraft.world.entity.EntityType<com.cobblemon.mod.common.entity.pokemon.PokemonEntity> POKEMON;
+  public static final net.minecraft.resources.ResourceLocation EMPTY_POKEBALL_KEY;
+  public static final net.minecraft.world.entity.EntityType<com.cobblemon.mod.common.entity.pokeball.EmptyPokeBallEntity> EMPTY_POKEBALL;
+  public static final net.minecraft.resources.ResourceLocation BOAT_KEY;
+  public static final net.minecraft.world.entity.EntityType<com.cobblemon.mod.common.entity.boat.CobblemonBoatEntity> BOAT;
+  public static final net.minecraft.resources.ResourceLocation CHEST_BOAT_KEY;
+  public static final net.minecraft.world.entity.EntityType<com.cobblemon.mod.common.entity.boat.CobblemonChestBoatEntity> CHEST_BOAT;
+  public static final net.minecraft.resources.ResourceLocation POKE_BOBBER_KEY;
+  public static final net.minecraft.world.entity.EntityType<com.cobblemon.mod.common.entity.fishing.PokeRodFishingBobberEntity> POKE_BOBBER;
+  public static final net.minecraft.resources.ResourceLocation GENERIC_BEDROCK_ENTITY_KEY;
+  public static final net.minecraft.world.entity.EntityType<com.cobblemon.mod.common.entity.generic.GenericBedrockEntity> GENERIC_BEDROCK_ENTITY;
+  public static final net.minecraft.resources.ResourceLocation NPC_KEY;
+  public static final net.minecraft.world.entity.EntityType<com.cobblemon.mod.common.entity.npc.NPCEntity> NPC;
+  private com.cobblemon.mod.common.CobblemonEntities();
+  public net.minecraft.core.Registry<net.minecraft.world.entity.EntityType<?>> getRegistry();
+  public net.minecraft.resources.ResourceKey<net.minecraft.core.Registry<net.minecraft.world.entity.EntityType<?>>> getResourceKey();
+  public final void registerAttributes(kotlin.jvm.functions.Function2<? super net.minecraft.world.entity.EntityType<? extends net.minecraft.world.entity.LivingEntity>, ? super net.minecraft.world.entity.ai.attributes.AttributeSupplier$Builder, kotlin.Unit>);
+  private static final com.cobblemon.mod.common.entity.pokemon.PokemonEntity POKEMON$lambda$0(net.minecraft.world.entity.EntityType, net.minecraft.world.level.Level);
+  private static final com.cobblemon.mod.common.entity.pokeball.EmptyPokeBallEntity EMPTY_POKEBALL$lambda$0(net.minecraft.world.entity.EntityType, net.minecraft.world.level.Level);
+  private static final com.cobblemon.mod.common.entity.generic.GenericBedrockEntity GENERIC_BEDROCK_ENTITY$lambda$0(net.minecraft.world.entity.EntityType, net.minecraft.world.level.Level);
+  private static final com.cobblemon.mod.common.entity.npc.NPCEntity NPC$lambda$0(net.minecraft.world.entity.EntityType, net.minecraft.world.level.Level);
+  static {};
+}

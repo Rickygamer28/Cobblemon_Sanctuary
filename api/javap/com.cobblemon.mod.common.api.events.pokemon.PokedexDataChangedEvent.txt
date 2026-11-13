@@ -1,0 +1,42 @@
+public final class com.cobblemon.mod.common.api.events.pokemon.PokedexDataChangedEvent$DefaultImpls {
+  public static com.cobblemon.mod.common.api.pokedex.AbstractPokedexManager getPokedexManager(com.cobblemon.mod.common.api.events.pokemon.PokedexDataChangedEvent);
+  public static java.util.Map<java.lang.String, com.bedrockk.molang.runtime.value.MoValue> getContext(com.cobblemon.mod.common.api.events.pokemon.PokedexDataChangedEvent);
+}
+public final class com.cobblemon.mod.common.api.events.pokemon.PokedexDataChangedEvent$Post implements com.cobblemon.mod.common.api.events.pokemon.PokedexDataChangedEvent {
+  private final com.cobblemon.mod.common.pokedex.scanner.PokedexEntityData dataSource;
+  private final com.cobblemon.mod.common.api.pokedex.PokedexEntryProgress knowledge;
+  private final java.util.UUID playerUUID;
+  private final com.cobblemon.mod.common.api.pokedex.FormDexRecord record;
+  public com.cobblemon.mod.common.api.events.pokemon.PokedexDataChangedEvent$Post(com.cobblemon.mod.common.pokedex.scanner.PokedexEntityData, com.cobblemon.mod.common.api.pokedex.PokedexEntryProgress, java.util.UUID, com.cobblemon.mod.common.api.pokedex.FormDexRecord);
+  public com.cobblemon.mod.common.pokedex.scanner.PokedexEntityData getDataSource();
+  public com.cobblemon.mod.common.api.pokedex.PokedexEntryProgress getKnowledge();
+  public java.util.UUID getPlayerUUID();
+  public com.cobblemon.mod.common.api.pokedex.FormDexRecord getRecord();
+  public com.cobblemon.mod.common.api.pokedex.AbstractPokedexManager getPokedexManager();
+  public java.util.Map<java.lang.String, com.bedrockk.molang.runtime.value.MoValue> getContext();
+}
+public final class com.cobblemon.mod.common.api.events.pokemon.PokedexDataChangedEvent$Pre extends com.cobblemon.mod.common.api.events.Cancelable implements com.cobblemon.mod.common.api.events.pokemon.PokedexDataChangedEvent {
+  private final com.cobblemon.mod.common.pokedex.scanner.PokedexEntityData dataSource;
+  private final com.cobblemon.mod.common.api.pokedex.PokedexEntryProgress knowledge;
+  private final java.util.UUID playerUUID;
+  private final com.cobblemon.mod.common.api.pokedex.FormDexRecord record;
+  private final java.util.Map<java.lang.String, kotlin.jvm.functions.Function1<com.bedrockk.molang.runtime.MoParams, com.bedrockk.molang.runtime.value.MoValue>> functions;
+  public com.cobblemon.mod.common.api.events.pokemon.PokedexDataChangedEvent$Pre(com.cobblemon.mod.common.pokedex.scanner.PokedexEntityData, com.cobblemon.mod.common.api.pokedex.PokedexEntryProgress, java.util.UUID, com.cobblemon.mod.common.api.pokedex.FormDexRecord);
+  public com.cobblemon.mod.common.pokedex.scanner.PokedexEntityData getDataSource();
+  public com.cobblemon.mod.common.api.pokedex.PokedexEntryProgress getKnowledge();
+  public java.util.UUID getPlayerUUID();
+  public com.cobblemon.mod.common.api.pokedex.FormDexRecord getRecord();
+  public final java.util.Map<java.lang.String, kotlin.jvm.functions.Function1<com.bedrockk.molang.runtime.MoParams, com.bedrockk.molang.runtime.value.MoValue>> getFunctions();
+  public com.cobblemon.mod.common.api.pokedex.AbstractPokedexManager getPokedexManager();
+  public java.util.Map<java.lang.String, com.bedrockk.molang.runtime.value.MoValue> getContext();
+}
+public interface com.cobblemon.mod.common.api.events.pokemon.PokedexDataChangedEvent {
+  public abstract com.cobblemon.mod.common.pokedex.scanner.PokedexEntityData getDataSource();
+  public abstract com.cobblemon.mod.common.api.pokedex.PokedexEntryProgress getKnowledge();
+  public abstract java.util.UUID getPlayerUUID();
+  public abstract com.cobblemon.mod.common.api.pokedex.FormDexRecord getRecord();
+  public default com.cobblemon.mod.common.api.pokedex.AbstractPokedexManager getPokedexManager();
+  public default java.util.Map<java.lang.String, com.bedrockk.molang.runtime.value.MoValue> getContext();
+  public static com.cobblemon.mod.common.api.pokedex.AbstractPokedexManager access$getPokedexManager$jd(com.cobblemon.mod.common.api.events.pokemon.PokedexDataChangedEvent);
+  public static java.util.Map access$getContext$jd(com.cobblemon.mod.common.api.events.pokemon.PokedexDataChangedEvent);
+}

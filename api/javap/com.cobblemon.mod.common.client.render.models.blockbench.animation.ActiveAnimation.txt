@@ -1,0 +1,14 @@
+public final class com.cobblemon.mod.common.client.render.models.blockbench.animation.ActiveAnimation$DefaultImpls {
+  public static void start(com.cobblemon.mod.common.client.render.models.blockbench.animation.ActiveAnimation, com.cobblemon.mod.common.client.render.models.blockbench.PosableState);
+  public static void applyEffects(com.cobblemon.mod.common.client.render.models.blockbench.animation.ActiveAnimation, net.minecraft.world.entity.Entity, com.cobblemon.mod.common.client.render.models.blockbench.PosableState, float, float);
+}
+public interface com.cobblemon.mod.common.client.render.models.blockbench.animation.ActiveAnimation {
+  public abstract boolean isTransition();
+  public abstract float getDuration();
+  public abstract boolean getEnduresPrimaryAnimations();
+  public default void start(com.cobblemon.mod.common.client.render.models.blockbench.PosableState);
+  public abstract boolean run(com.cobblemon.mod.common.client.render.models.blockbench.repository.RenderContext, com.cobblemon.mod.common.client.render.models.blockbench.PosableModel, com.cobblemon.mod.common.client.render.models.blockbench.PosableState, float, float, float, float, float, float);
+  public default void applyEffects(net.minecraft.world.entity.Entity, com.cobblemon.mod.common.client.render.models.blockbench.PosableState, float, float);
+  public static void access$start$jd(com.cobblemon.mod.common.client.render.models.blockbench.animation.ActiveAnimation, com.cobblemon.mod.common.client.render.models.blockbench.PosableState);
+  public static void access$applyEffects$jd(com.cobblemon.mod.common.client.render.models.blockbench.animation.ActiveAnimation, net.minecraft.world.entity.Entity, com.cobblemon.mod.common.client.render.models.blockbench.PosableState, float, float);
+}

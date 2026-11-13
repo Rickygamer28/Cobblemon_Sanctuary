@@ -1,0 +1,12 @@
+public final class com.cobblemon.mod.common.util.JsonExtensionsKt {
+  public static final com.google.gson.JsonArray toJsonArrayString(java.util.Collection<java.lang.String>);
+  public static final com.google.gson.JsonArray toJsonArrayBoolean(java.util.Collection<java.lang.Boolean>);
+  public static final com.google.gson.JsonArray toJsonArrayNumber(java.util.Collection<? extends java.lang.Number>);
+  public static final com.google.gson.JsonArray toJsonArrayJsonElement(java.util.Collection<? extends com.google.gson.JsonElement>);
+  public static final boolean isEmpty(com.google.gson.JsonObject);
+  public static final boolean isNotEmpty(com.google.gson.JsonObject);
+  public static final net.minecraft.nbt.Tag asNbt(com.google.gson.JsonElement);
+  public static final <T extends java.lang.Enum<T>> T getFromJSON(T[], com.google.gson.JsonElement, java.lang.String);
+  public static final com.google.gson.JsonElement getFirst(com.google.gson.JsonObject, java.lang.String...);
+  public static final com.cobblemon.mod.common.api.molang.ExpressionLike asExpressionLike(com.google.gson.JsonArray);
+}

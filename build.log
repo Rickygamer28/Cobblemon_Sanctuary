@@ -1,0 +1,64 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+> Configure project :
+Creating Minecraft artifacts without recompilation.
+
+> Task :checkKotlinGradlePluginConfigurationErrors SKIPPED
+
+> Task :createMinecraftArtifacts
+Loaded 131 artifacts from /home/runner/work/Cobblemon_Sanctuary/Cobblemon_Sanctuary/build/tmp/createMinecraftArtifacts/nfrt_artifact_manifest.properties
+[1m*** Started working on [4mdownloadJson[23;0m[23;0m
+ [1m[92m✓[23;0m Completed [4mdownloadJson[23;0m in 0.01s
+[1m*** Started working on [4mdownloadServer[23;0m[23;0m
+[1m*** Started working on [4mdownloadClient[23;0m[23;0m
+[1m*** Started working on [4mdownloadClientMappings[23;0m[23;0m
+ [1m[92m✓[23;0m Completed [4mdownloadServer[23;0m in 0.02s
+ [1m[92m✓[23;0m Completed [4mdownloadClient[23;0m in 0.02s
+ [1m[92m✓[23;0m Completed [4mdownloadClientMappings[23;0m in 0.02s
+[1m*** Started working on [4mstripClient[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mstripClient[23;0m in 0.00s
+[1m*** Started working on [4mmergeMappings[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mmergeMappings[23;0m in 0.00s
+[1m*** Started working on [4mextractServer[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mextractServer[23;0m in 0.00s
+[1m*** Started working on [4mstripServer[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mstripServer[23;0m in 0.00s
+[1m*** Started working on [4mmerge[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mmerge[23;0m in 0.00s
+[1m*** Started working on [4mrename[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mrename[23;0m in 0.00s
+[1m*** Started working on [4mbinaryPatch[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mbinaryPatch[23;0m in 0.00s
+[1m*** Started working on [4mcopyUnpatchedClasses[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mcopyUnpatchedClasses[23;0m in 0.00s
+[1m*** Started working on [4mapplyDevTransforms[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mapplyDevTransforms[23;0m in 0.00s
+[1m*** Started working on [4mbinaryWithNeoForge[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mbinaryWithNeoForge[23;0m in 0.00s
+Total runtime: 1.31s
+
+
+> Task :generateModMetadata
+> Task :processResources
+> Task :jarJar NO-SOURCE
+> Task :processTestResources NO-SOURCE
+
+> Task :compileKotlin
+w: file:///home/runner/work/Cobblemon_Sanctuary/Cobblemon_Sanctuary/src/main/kotlin/com/rickygamer28/sanctuary/block/DecorationBlocks.kt:145:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/Cobblemon_Sanctuary/Cobblemon_Sanctuary/src/main/kotlin/com/rickygamer28/sanctuary/registry/ModContent.kt:80:111 Java type mismatch: inferred type is 'Nothing?', but 'Type<*>' was expected.
+
+> Task :compileJava NO-SOURCE
+> Task :classes
+> Task :jar
+> Task :assemble
+> Task :compileTestKotlin NO-SOURCE
+> Task :compileTestJava NO-SOURCE
+> Task :testClasses UP-TO-DATE
+> Task :test NO-SOURCE
+> Task :check UP-TO-DATE
+> Task :build
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/build-1794594529587.json
+
+BUILD SUCCESSFUL in 28s
+5 actionable tasks: 5 executed

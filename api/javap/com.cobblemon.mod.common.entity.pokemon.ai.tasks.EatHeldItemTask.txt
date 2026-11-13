@@ -1,0 +1,26 @@
+public final class com.cobblemon.mod.common.entity.pokemon.ai.tasks.EatHeldItemTask$Companion {
+  private com.cobblemon.mod.common.entity.pokemon.ai.tasks.EatHeldItemTask$Companion();
+  public com.cobblemon.mod.common.entity.pokemon.ai.tasks.EatHeldItemTask$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.entity.pokemon.ai.tasks.EatHeldItemTask extends net.minecraft.world.entity.ai.behavior.Behavior<com.cobblemon.mod.common.entity.pokemon.PokemonEntity> {
+  public static final com.cobblemon.mod.common.entity.pokemon.ai.tasks.EatHeldItemTask$Companion Companion;
+  private long timelastEaten;
+  private final java.util.List<com.cobblemon.mod.common.pokemon.ai.ObtainableItem> pickupItems;
+  private static final int MAX_DURATION;
+  private static final int COOLDOWN;
+  public com.cobblemon.mod.common.entity.pokemon.ai.tasks.EatHeldItemTask(com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+  public final java.util.List<com.cobblemon.mod.common.pokemon.ai.ObtainableItem> getPickupItems();
+  protected boolean checkExtraStartConditions(net.minecraft.server.level.ServerLevel, com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+  protected boolean canStillUse(net.minecraft.server.level.ServerLevel, com.cobblemon.mod.common.entity.pokemon.PokemonEntity, long);
+  private final boolean canEat(net.minecraft.world.item.ItemStack, com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+  protected void start(net.minecraft.server.level.ServerLevel, com.cobblemon.mod.common.entity.pokemon.PokemonEntity, long);
+  protected void stop(net.minecraft.server.level.ServerLevel, com.cobblemon.mod.common.entity.pokemon.PokemonEntity, long);
+  protected void tick(net.minecraft.server.level.ServerLevel, com.cobblemon.mod.common.entity.pokemon.PokemonEntity, long);
+  private final void spawnFoodParticles(net.minecraft.world.entity.LivingEntity, net.minecraft.world.item.ItemStack);
+  public boolean checkExtraStartConditions(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity);
+  public boolean canStillUse(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity, long);
+  public void start(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity, long);
+  public void stop(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity, long);
+  public void tick(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity, long);
+  static {};
+}

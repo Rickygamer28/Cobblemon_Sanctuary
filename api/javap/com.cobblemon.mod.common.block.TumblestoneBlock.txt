@@ -1,0 +1,32 @@
+public final class com.cobblemon.mod.common.block.TumblestoneBlock$Companion {
+  private com.cobblemon.mod.common.block.TumblestoneBlock$Companion();
+  public final com.mojang.serialization.MapCodec<com.cobblemon.mod.common.block.TumblestoneBlock> getCODEC();
+  public com.cobblemon.mod.common.block.TumblestoneBlock$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.block.TumblestoneBlock extends com.cobblemon.mod.common.block.GrowableStoneBlock implements net.minecraft.world.level.block.SimpleWaterloggedBlock {
+  public static final com.cobblemon.mod.common.block.TumblestoneBlock$Companion Companion;
+  private final int growthChance;
+  private static final com.mojang.serialization.MapCodec<com.cobblemon.mod.common.block.TumblestoneBlock> CODEC;
+  public static final int STAGE_0;
+  public static final int STAGE_1;
+  public static final int STAGE_2;
+  public static final int STAGE_3;
+  public static final int MAX_STAGE;
+  public static final int MIN_STAGE;
+  public com.cobblemon.mod.common.block.TumblestoneBlock(net.minecraft.world.level.block.state.BlockBehaviour$Properties, int, int, int, net.minecraft.world.level.block.Block);
+  public int getGrowthChance();
+  public boolean canGrow(net.minecraft.world.level.block.state.BlockState, net.minecraft.core.BlockPos, net.minecraft.world.level.BlockGetter);
+  protected boolean isRandomlyTicking(net.minecraft.world.level.block.state.BlockState);
+  protected com.mojang.serialization.MapCodec<? extends net.minecraft.world.level.block.DirectionalBlock> codec();
+  protected net.minecraft.world.level.material.FluidState getFluidState(net.minecraft.world.level.block.state.BlockState);
+  protected void createBlockStateDefinition(net.minecraft.world.level.block.state.StateDefinition$Builder<net.minecraft.world.level.block.Block, net.minecraft.world.level.block.state.BlockState>);
+  public net.minecraft.world.level.block.state.BlockState getStateForPlacement(net.minecraft.world.item.context.BlockPlaceContext);
+  protected net.minecraft.world.level.block.state.BlockState updateShape(net.minecraft.world.level.block.state.BlockState, net.minecraft.core.Direction, net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.LevelAccessor, net.minecraft.core.BlockPos, net.minecraft.core.BlockPos);
+  private static final com.mojang.datafixers.kinds.App CODEC$lambda$0(com.mojang.serialization.codecs.RecordCodecBuilder$Instance);
+  private static final java.lang.Integer CODEC$lambda$0$0(com.cobblemon.mod.common.block.TumblestoneBlock);
+  private static final java.lang.Integer CODEC$lambda$0$1(com.cobblemon.mod.common.block.TumblestoneBlock);
+  private static final java.lang.Integer CODEC$lambda$0$2(com.cobblemon.mod.common.block.TumblestoneBlock);
+  private static final net.minecraft.world.level.block.Block CODEC$lambda$0$3(com.cobblemon.mod.common.block.TumblestoneBlock);
+  public static final com.mojang.serialization.MapCodec access$getCODEC$cp();
+  static {};
+}

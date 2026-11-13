@@ -1,0 +1,37 @@
+public final class com.cobblemon.mod.common.api.pokemon.evolution.Evolution$DefaultImpls {
+  public static boolean test(com.cobblemon.mod.common.api.pokemon.evolution.Evolution, com.cobblemon.mod.common.pokemon.Pokemon);
+  public static boolean evolve(com.cobblemon.mod.common.api.pokemon.evolution.Evolution, com.cobblemon.mod.common.pokemon.Pokemon);
+  public static boolean shed(com.cobblemon.mod.common.api.pokemon.evolution.Evolution, com.cobblemon.mod.common.pokemon.Pokemon);
+  public static void forceEvolve(com.cobblemon.mod.common.api.pokemon.evolution.Evolution, com.cobblemon.mod.common.pokemon.Pokemon);
+  public static void evolutionMethod(com.cobblemon.mod.common.api.pokemon.evolution.Evolution, com.cobblemon.mod.common.pokemon.Pokemon);
+  public static void applyTo(com.cobblemon.mod.common.api.pokemon.evolution.Evolution, com.cobblemon.mod.common.pokemon.Pokemon);
+}
+public interface com.cobblemon.mod.common.api.pokemon.evolution.Evolution extends com.cobblemon.mod.common.api.pokemon.evolution.EvolutionLike {
+  public abstract com.cobblemon.mod.common.api.pokemon.PokemonProperties getResult();
+  public abstract com.cobblemon.mod.common.api.pokemon.PokemonProperties getShedder();
+  public abstract boolean getOptional();
+  public abstract void setOptional(boolean);
+  public abstract boolean getConsumeHeldItem();
+  public abstract void setConsumeHeldItem(boolean);
+  public abstract java.util.Set<com.cobblemon.mod.common.api.pokemon.requirement.Requirement> getRequirements();
+  public abstract java.util.Set<com.cobblemon.mod.common.api.moves.MoveTemplate> getLearnableMoves();
+  public abstract com.cobblemon.mod.common.api.drop.DropTable getDrops();
+  public default boolean test(com.cobblemon.mod.common.pokemon.Pokemon);
+  public default boolean evolve(com.cobblemon.mod.common.pokemon.Pokemon);
+  public default boolean shed(com.cobblemon.mod.common.pokemon.Pokemon);
+  public default void forceEvolve(com.cobblemon.mod.common.pokemon.Pokemon);
+  private void evolutionAnimation(net.minecraft.world.entity.Entity);
+  private void cryAnimation(net.minecraft.world.entity.Entity);
+  public default void evolutionMethod(com.cobblemon.mod.common.pokemon.Pokemon);
+  public default void applyTo(com.cobblemon.mod.common.pokemon.Pokemon);
+  private static kotlin.Unit forceEvolve$lambda$0(com.cobblemon.mod.common.api.pokemon.evolution.Evolution, com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+  private static kotlin.Unit forceEvolve$lambda$1(com.cobblemon.mod.common.api.pokemon.evolution.Evolution, com.cobblemon.mod.common.pokemon.Pokemon);
+  private static kotlin.Unit forceEvolve$lambda$2(com.cobblemon.mod.common.api.pokemon.evolution.Evolution, com.cobblemon.mod.common.entity.pokemon.PokemonEntity, com.cobblemon.mod.common.pokemon.Pokemon, net.minecraft.network.chat.MutableComponent);
+  private static kotlin.Unit evolutionMethod$lambda$0(java.util.List, com.cobblemon.mod.common.pokemon.Pokemon, java.lang.Iterable);
+  public static boolean access$test$jd(com.cobblemon.mod.common.api.pokemon.evolution.Evolution, com.cobblemon.mod.common.pokemon.Pokemon);
+  public static boolean access$evolve$jd(com.cobblemon.mod.common.api.pokemon.evolution.Evolution, com.cobblemon.mod.common.pokemon.Pokemon);
+  public static boolean access$shed$jd(com.cobblemon.mod.common.api.pokemon.evolution.Evolution, com.cobblemon.mod.common.pokemon.Pokemon);
+  public static void access$forceEvolve$jd(com.cobblemon.mod.common.api.pokemon.evolution.Evolution, com.cobblemon.mod.common.pokemon.Pokemon);
+  public static void access$evolutionMethod$jd(com.cobblemon.mod.common.api.pokemon.evolution.Evolution, com.cobblemon.mod.common.pokemon.Pokemon);
+  public static void access$applyTo$jd(com.cobblemon.mod.common.api.pokemon.evolution.Evolution, com.cobblemon.mod.common.pokemon.Pokemon);
+}

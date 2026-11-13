@@ -1,0 +1,12 @@
+public interface com.cobblemon.mod.common.api.pokemon.evolution.ContextEvolution<RC, TC> extends com.cobblemon.mod.common.api.pokemon.evolution.Evolution {
+  public abstract TC getRequiredContext();
+  public default boolean attemptEvolution(com.cobblemon.mod.common.pokemon.Pokemon, RC);
+  public abstract boolean testContext(com.cobblemon.mod.common.pokemon.Pokemon, RC);
+  public static boolean access$attemptEvolution$jd(com.cobblemon.mod.common.api.pokemon.evolution.ContextEvolution, com.cobblemon.mod.common.pokemon.Pokemon, java.lang.Object);
+  public static boolean access$test$jd(com.cobblemon.mod.common.api.pokemon.evolution.ContextEvolution, com.cobblemon.mod.common.pokemon.Pokemon);
+  public static boolean access$evolve$jd(com.cobblemon.mod.common.api.pokemon.evolution.ContextEvolution, com.cobblemon.mod.common.pokemon.Pokemon);
+  public static boolean access$shed$jd(com.cobblemon.mod.common.api.pokemon.evolution.ContextEvolution, com.cobblemon.mod.common.pokemon.Pokemon);
+  public static void access$forceEvolve$jd(com.cobblemon.mod.common.api.pokemon.evolution.ContextEvolution, com.cobblemon.mod.common.pokemon.Pokemon);
+  public static void access$evolutionMethod$jd(com.cobblemon.mod.common.api.pokemon.evolution.ContextEvolution, com.cobblemon.mod.common.pokemon.Pokemon);
+  public static void access$applyTo$jd(com.cobblemon.mod.common.api.pokemon.evolution.ContextEvolution, com.cobblemon.mod.common.pokemon.Pokemon);
+}

@@ -1,0 +1,14 @@
+public final class com.cobblemon.mod.common.CobblemonRecipeSerializers extends com.cobblemon.mod.common.platform.PlatformRegistry<net.minecraft.core.Registry<net.minecraft.world.item.crafting.RecipeSerializer<?>>, net.minecraft.resources.ResourceKey<net.minecraft.core.Registry<net.minecraft.world.item.crafting.RecipeSerializer<?>>>, net.minecraft.world.item.crafting.RecipeSerializer<?>> {
+  public static final com.cobblemon.mod.common.CobblemonRecipeSerializers INSTANCE;
+  private static final net.minecraft.world.item.crafting.RecipeSerializer<?> COOKING_POT_COOKING;
+  private static final net.minecraft.world.item.crafting.RecipeSerializer<?> COOKING_POT_SHAPELESS;
+  private static final net.minecraft.world.item.crafting.RecipeSerializer<?> BREWING_STAND;
+  private com.cobblemon.mod.common.CobblemonRecipeSerializers();
+  public final net.minecraft.world.item.crafting.RecipeSerializer<?> getCOOKING_POT_COOKING();
+  public final net.minecraft.world.item.crafting.RecipeSerializer<?> getCOOKING_POT_SHAPELESS();
+  public final net.minecraft.world.item.crafting.RecipeSerializer<?> getBREWING_STAND();
+  public net.minecraft.core.Registry<net.minecraft.world.item.crafting.RecipeSerializer<?>> getRegistry();
+  public net.minecraft.resources.ResourceKey<net.minecraft.core.Registry<net.minecraft.world.item.crafting.RecipeSerializer<?>>> getResourceKey();
+  public final <S extends net.minecraft.world.item.crafting.RecipeSerializer<T>, T extends net.minecraft.world.item.crafting.Recipe<?>> S register(java.lang.String, S);
+  static {};
+}

@@ -1,0 +1,5 @@
+public interface com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatureProvider<T extends com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeature> {
+  public abstract T invoke(com.cobblemon.mod.common.pokemon.Pokemon);
+  public abstract T invoke(net.minecraft.nbt.CompoundTag);
+  public abstract T invoke(com.google.gson.JsonObject);
+}

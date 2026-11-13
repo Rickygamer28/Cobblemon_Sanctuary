@@ -1,0 +1,5 @@
+public final class com.cobblemon.mod.common.api.storage.InvalidSpeciesException extends java.lang.IllegalStateException {
+  private final net.minecraft.resources.ResourceLocation identifier;
+  public com.cobblemon.mod.common.api.storage.InvalidSpeciesException(net.minecraft.resources.ResourceLocation);
+  public final net.minecraft.resources.ResourceLocation getIdentifier();
+}

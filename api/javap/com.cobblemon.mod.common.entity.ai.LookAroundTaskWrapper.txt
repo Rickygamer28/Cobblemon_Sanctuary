@@ -1,0 +1,5 @@
+public final class com.cobblemon.mod.common.entity.ai.LookAroundTaskWrapper extends net.minecraft.world.entity.ai.behavior.LookAtTargetSink {
+  public com.cobblemon.mod.common.entity.ai.LookAroundTaskWrapper(int, int);
+  protected boolean checkExtraStartConditions(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.Mob);
+  public boolean checkExtraStartConditions(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity);
+}

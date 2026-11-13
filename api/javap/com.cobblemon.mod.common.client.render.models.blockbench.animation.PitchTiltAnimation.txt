@@ -1,0 +1,22 @@
+public final class com.cobblemon.mod.common.client.render.models.blockbench.animation.PitchTiltAnimation$Companion {
+  private com.cobblemon.mod.common.client.render.models.blockbench.animation.PitchTiltAnimation$Companion();
+  public com.cobblemon.mod.common.client.render.models.blockbench.animation.PitchTiltAnimation$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.client.render.models.blockbench.animation.PitchTiltAnimation extends com.cobblemon.mod.common.client.render.models.blockbench.animation.PoseAnimation {
+  public static final com.cobblemon.mod.common.client.render.models.blockbench.animation.PitchTiltAnimation$Companion Companion;
+  private final com.cobblemon.mod.common.client.render.models.blockbench.pose.Bone bone;
+  private final float maxChangePerTick;
+  private final float minPitch;
+  private final float maxPitch;
+  public static final java.lang.String PREVIOUS_ANGLE;
+  public static final java.lang.String CORRECTED_ANGLE;
+  public static final java.lang.String PITCHED_TILT;
+  public com.cobblemon.mod.common.client.render.models.blockbench.animation.PitchTiltAnimation(com.cobblemon.mod.common.client.render.models.blockbench.pose.Bone, float, float, float);
+  public com.cobblemon.mod.common.client.render.models.blockbench.animation.PitchTiltAnimation(com.cobblemon.mod.common.client.render.models.blockbench.pose.Bone, float, float, float, int, kotlin.jvm.internal.DefaultConstructorMarker);
+  public final com.cobblemon.mod.common.client.render.models.blockbench.pose.Bone getBone();
+  public final float getMaxChangePerTick();
+  public final float getMinPitch();
+  public final float getMaxPitch();
+  protected void setupAnim(com.cobblemon.mod.common.client.render.models.blockbench.repository.RenderContext, com.cobblemon.mod.common.client.render.models.blockbench.PosableModel, com.cobblemon.mod.common.client.render.models.blockbench.PosableState, float, float, float, float, float, float);
+  static {};
+}

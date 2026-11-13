@@ -1,0 +1,35 @@
+public final class com.cobblemon.mod.common.api.entity.PokemonSideDelegate$DefaultImpls {
+  public static void drop(com.cobblemon.mod.common.api.entity.PokemonSideDelegate, net.minecraft.world.damagesource.DamageSource);
+  public static void updatePostDeath(com.cobblemon.mod.common.api.entity.PokemonSideDelegate);
+  public static void handleStatus(com.cobblemon.mod.common.api.entity.PokemonSideDelegate, byte);
+  public static void spawnShinyParticle(com.cobblemon.mod.common.api.entity.PokemonSideDelegate, net.minecraft.world.entity.player.Player);
+  public static void spawnAspectParticle(com.cobblemon.mod.common.api.entity.PokemonSideDelegate);
+  public static void applyRenderRotation(com.cobblemon.mod.common.api.entity.PokemonSideDelegate, float);
+  public static void updateAge(com.cobblemon.mod.common.api.entity.PokemonSideDelegate, int);
+  public static void initialize(com.cobblemon.mod.common.api.entity.PokemonSideDelegate, com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+  public static void tick(com.cobblemon.mod.common.api.entity.PokemonSideDelegate, com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+  public static void onSyncedDataUpdated(com.cobblemon.mod.common.api.entity.PokemonSideDelegate, net.minecraft.network.syncher.EntityDataAccessor<?>);
+  public static void addToStruct(com.cobblemon.mod.common.api.entity.PokemonSideDelegate, com.bedrockk.molang.runtime.struct.QueryStruct);
+}
+public interface com.cobblemon.mod.common.api.entity.PokemonSideDelegate extends com.cobblemon.mod.common.api.entity.EntitySideDelegate<com.cobblemon.mod.common.entity.pokemon.PokemonEntity> {
+  public abstract void changePokemon(com.cobblemon.mod.common.pokemon.Pokemon);
+  public default void drop(net.minecraft.world.damagesource.DamageSource);
+  public default void updatePostDeath();
+  public default void handleStatus(byte);
+  public default void spawnShinyParticle(net.minecraft.world.entity.player.Player);
+  public default void spawnAspectParticle();
+  public default void applyRenderRotation(float);
+  public abstract void positionRider(net.minecraft.world.entity.Entity, net.minecraft.world.entity.Entity$MoveFunction);
+  public default void updateAge(int);
+  public static void access$drop$jd(com.cobblemon.mod.common.api.entity.PokemonSideDelegate, net.minecraft.world.damagesource.DamageSource);
+  public static void access$updatePostDeath$jd(com.cobblemon.mod.common.api.entity.PokemonSideDelegate);
+  public static void access$handleStatus$jd(com.cobblemon.mod.common.api.entity.PokemonSideDelegate, byte);
+  public static void access$spawnShinyParticle$jd(com.cobblemon.mod.common.api.entity.PokemonSideDelegate, net.minecraft.world.entity.player.Player);
+  public static void access$spawnAspectParticle$jd(com.cobblemon.mod.common.api.entity.PokemonSideDelegate);
+  public static void access$applyRenderRotation$jd(com.cobblemon.mod.common.api.entity.PokemonSideDelegate, float);
+  public static void access$updateAge$jd(com.cobblemon.mod.common.api.entity.PokemonSideDelegate, int);
+  public static void access$initialize$jd(com.cobblemon.mod.common.api.entity.PokemonSideDelegate, com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+  public static void access$tick$jd(com.cobblemon.mod.common.api.entity.PokemonSideDelegate, com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+  public static void access$onSyncedDataUpdated$jd(com.cobblemon.mod.common.api.entity.PokemonSideDelegate, net.minecraft.network.syncher.EntityDataAccessor);
+  public static void access$addToStruct$jd(com.cobblemon.mod.common.api.entity.PokemonSideDelegate, com.bedrockk.molang.runtime.struct.QueryStruct);
+}

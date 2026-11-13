@@ -1,0 +1,19 @@
+public final class com.cobblemon.mod.common.api.events.pokemon.PokemonCapturedEvent {
+  private final com.cobblemon.mod.common.pokemon.Pokemon pokemon;
+  private final net.minecraft.server.level.ServerPlayer player;
+  private final com.cobblemon.mod.common.entity.pokeball.EmptyPokeBallEntity pokeBallEntity;
+  private final java.util.Map<java.lang.String, com.bedrockk.molang.runtime.value.MoValue> context;
+  public com.cobblemon.mod.common.api.events.pokemon.PokemonCapturedEvent(com.cobblemon.mod.common.pokemon.Pokemon, net.minecraft.server.level.ServerPlayer, com.cobblemon.mod.common.entity.pokeball.EmptyPokeBallEntity);
+  public final com.cobblemon.mod.common.pokemon.Pokemon getPokemon();
+  public final net.minecraft.server.level.ServerPlayer getPlayer();
+  public final com.cobblemon.mod.common.entity.pokeball.EmptyPokeBallEntity getPokeBallEntity();
+  public final java.util.Map<java.lang.String, com.bedrockk.molang.runtime.value.MoValue> getContext();
+  public final com.cobblemon.mod.common.pokemon.Pokemon component1();
+  public final net.minecraft.server.level.ServerPlayer component2();
+  public final com.cobblemon.mod.common.entity.pokeball.EmptyPokeBallEntity component3();
+  public final com.cobblemon.mod.common.api.events.pokemon.PokemonCapturedEvent copy(com.cobblemon.mod.common.pokemon.Pokemon, net.minecraft.server.level.ServerPlayer, com.cobblemon.mod.common.entity.pokeball.EmptyPokeBallEntity);
+  public static com.cobblemon.mod.common.api.events.pokemon.PokemonCapturedEvent copy$default(com.cobblemon.mod.common.api.events.pokemon.PokemonCapturedEvent, com.cobblemon.mod.common.pokemon.Pokemon, net.minecraft.server.level.ServerPlayer, com.cobblemon.mod.common.entity.pokeball.EmptyPokeBallEntity, int, java.lang.Object);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+}

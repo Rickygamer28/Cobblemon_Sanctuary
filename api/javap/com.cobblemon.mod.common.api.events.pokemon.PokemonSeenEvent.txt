@@ -1,0 +1,18 @@
+public final class com.cobblemon.mod.common.api.events.pokemon.PokemonSeenEvent extends com.cobblemon.mod.common.api.events.Cancelable {
+  private final java.util.UUID playerId;
+  private final com.cobblemon.mod.common.pokemon.Pokemon pokemon;
+  private final java.util.Map<java.lang.String, com.bedrockk.molang.runtime.value.MoValue> context;
+  private final java.util.Map<java.lang.String, kotlin.jvm.functions.Function1<com.bedrockk.molang.runtime.MoParams, com.bedrockk.molang.runtime.value.MoValue>> functions;
+  public com.cobblemon.mod.common.api.events.pokemon.PokemonSeenEvent(java.util.UUID, com.cobblemon.mod.common.pokemon.Pokemon);
+  public final java.util.UUID getPlayerId();
+  public final com.cobblemon.mod.common.pokemon.Pokemon getPokemon();
+  public final java.util.Map<java.lang.String, com.bedrockk.molang.runtime.value.MoValue> getContext();
+  public final java.util.Map<java.lang.String, kotlin.jvm.functions.Function1<com.bedrockk.molang.runtime.MoParams, com.bedrockk.molang.runtime.value.MoValue>> getFunctions();
+  public final java.util.UUID component1();
+  public final com.cobblemon.mod.common.pokemon.Pokemon component2();
+  public final com.cobblemon.mod.common.api.events.pokemon.PokemonSeenEvent copy(java.util.UUID, com.cobblemon.mod.common.pokemon.Pokemon);
+  public static com.cobblemon.mod.common.api.events.pokemon.PokemonSeenEvent copy$default(com.cobblemon.mod.common.api.events.pokemon.PokemonSeenEvent, java.util.UUID, com.cobblemon.mod.common.pokemon.Pokemon, int, java.lang.Object);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+}

@@ -1,0 +1,18 @@
+public final class com.cobblemon.mod.common.client.gui.interact.wheel.Orientation extends java.lang.Enum<com.cobblemon.mod.common.client.gui.interact.wheel.Orientation> {
+  public static final com.cobblemon.mod.common.client.gui.interact.wheel.Orientation NORTH;
+  public static final com.cobblemon.mod.common.client.gui.interact.wheel.Orientation NORTHEAST;
+  public static final com.cobblemon.mod.common.client.gui.interact.wheel.Orientation EAST;
+  public static final com.cobblemon.mod.common.client.gui.interact.wheel.Orientation SOUTHEAST;
+  public static final com.cobblemon.mod.common.client.gui.interact.wheel.Orientation SOUTH;
+  public static final com.cobblemon.mod.common.client.gui.interact.wheel.Orientation SOUTHWEST;
+  public static final com.cobblemon.mod.common.client.gui.interact.wheel.Orientation WEST;
+  public static final com.cobblemon.mod.common.client.gui.interact.wheel.Orientation NORTHWEST;
+  private static final com.cobblemon.mod.common.client.gui.interact.wheel.Orientation[] $VALUES;
+  private static final kotlin.enums.EnumEntries $ENTRIES;
+  private com.cobblemon.mod.common.client.gui.interact.wheel.Orientation();
+  public static com.cobblemon.mod.common.client.gui.interact.wheel.Orientation[] values();
+  public static com.cobblemon.mod.common.client.gui.interact.wheel.Orientation valueOf(java.lang.String);
+  public static kotlin.enums.EnumEntries<com.cobblemon.mod.common.client.gui.interact.wheel.Orientation> getEntries();
+  private static final com.cobblemon.mod.common.client.gui.interact.wheel.Orientation[] $values();
+  static {};
+}

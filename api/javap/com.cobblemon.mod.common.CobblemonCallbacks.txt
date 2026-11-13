@@ -1,0 +1,26 @@
+public final class com.cobblemon.mod.common.CobblemonCallbacks implements com.cobblemon.mod.common.api.data.DataRegistry {
+  public static final com.cobblemon.mod.common.CobblemonCallbacks INSTANCE;
+  private static final net.minecraft.resources.ResourceLocation id;
+  private static final com.cobblemon.mod.common.api.reactive.SimpleObservable<com.cobblemon.mod.common.CobblemonCallbacks> observable;
+  private static final net.minecraft.server.packs.PackType type;
+  private static final kotlin.Lazy runtime$delegate;
+  private static final java.util.HashMap<net.minecraft.resources.ResourceLocation, java.util.List<com.cobblemon.mod.common.api.molang.ExpressionLike>> clientCallbacks;
+  private static final java.util.HashMap<net.minecraft.resources.ResourceLocation, java.util.List<com.cobblemon.mod.common.api.molang.ExpressionLike>> callbacks;
+  private com.cobblemon.mod.common.CobblemonCallbacks();
+  public net.minecraft.resources.ResourceLocation getId();
+  public com.cobblemon.mod.common.api.reactive.SimpleObservable<com.cobblemon.mod.common.CobblemonCallbacks> getObservable();
+  public net.minecraft.server.packs.PackType getType();
+  public void sync(net.minecraft.server.level.ServerPlayer);
+  public final com.bedrockk.molang.runtime.MoLangRuntime getRuntime();
+  public final java.util.HashMap<net.minecraft.resources.ResourceLocation, java.util.List<com.cobblemon.mod.common.api.molang.ExpressionLike>> getClientCallbacks();
+  public final java.util.HashMap<net.minecraft.resources.ResourceLocation, java.util.List<com.cobblemon.mod.common.api.molang.ExpressionLike>> getCallbacks();
+  public void reload(net.minecraft.server.packs.resources.ResourceManager);
+  public final void run(net.minecraft.resources.ResourceLocation, java.util.Map<java.lang.String, ? extends com.bedrockk.molang.runtime.value.MoValue>, java.util.Map<java.lang.String, ? extends kotlin.jvm.functions.Function1<? super com.bedrockk.molang.runtime.MoParams, ? extends java.lang.Object>>, com.cobblemon.mod.common.api.events.Cancelable);
+  public static void run$default(com.cobblemon.mod.common.CobblemonCallbacks, net.minecraft.resources.ResourceLocation, java.util.Map, java.util.Map, com.cobblemon.mod.common.api.events.Cancelable, int, java.lang.Object);
+  private static final com.bedrockk.molang.runtime.MoLangRuntime runtime_delegate$lambda$0();
+  private static final boolean reload$lambda$0(net.minecraft.resources.ResourceLocation);
+  private static final java.lang.Object run$lambda$0(com.cobblemon.mod.common.api.events.Cancelable, com.bedrockk.molang.runtime.MoParams);
+  private static final java.lang.Object run$lambda$1$0(com.bedrockk.molang.runtime.value.MoValue, com.bedrockk.molang.runtime.MoParams);
+  private static final java.lang.Object run$lambda$2$0(kotlin.jvm.functions.Function1, com.bedrockk.molang.runtime.MoParams);
+  static {};
+}

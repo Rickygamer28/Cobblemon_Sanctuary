@@ -1,0 +1,58 @@
+public final class com.cobblemon.mod.common.api.events.pokemon.ExperienceGainedEvent$Post implements com.cobblemon.mod.common.api.events.pokemon.ExperienceGainedEvent {
+  private final com.cobblemon.mod.common.pokemon.Pokemon pokemon;
+  private final com.cobblemon.mod.common.api.pokemon.experience.ExperienceSource source;
+  private int experience;
+  private final int previousLevel;
+  private final int currentLevel;
+  private final java.util.Set<com.cobblemon.mod.common.api.moves.MoveTemplate> learnedMoves;
+  private final java.util.Map<java.lang.String, com.bedrockk.molang.runtime.value.MoValue> context;
+  public com.cobblemon.mod.common.api.events.pokemon.ExperienceGainedEvent$Post(com.cobblemon.mod.common.pokemon.Pokemon, com.cobblemon.mod.common.api.pokemon.experience.ExperienceSource, int, int, int, java.util.Set<com.cobblemon.mod.common.api.moves.MoveTemplate>);
+  public com.cobblemon.mod.common.pokemon.Pokemon getPokemon();
+  public com.cobblemon.mod.common.api.pokemon.experience.ExperienceSource getSource();
+  public int getExperience();
+  public void setExperience(int);
+  public final int getPreviousLevel();
+  public final int getCurrentLevel();
+  public final java.util.Set<com.cobblemon.mod.common.api.moves.MoveTemplate> getLearnedMoves();
+  public final java.util.Map<java.lang.String, com.bedrockk.molang.runtime.value.MoValue> getContext();
+  public final com.cobblemon.mod.common.pokemon.Pokemon component1();
+  public final com.cobblemon.mod.common.api.pokemon.experience.ExperienceSource component2();
+  public final int component3();
+  public final int component4();
+  public final int component5();
+  public final java.util.Set<com.cobblemon.mod.common.api.moves.MoveTemplate> component6();
+  public final com.cobblemon.mod.common.api.events.pokemon.ExperienceGainedEvent$Post copy(com.cobblemon.mod.common.pokemon.Pokemon, com.cobblemon.mod.common.api.pokemon.experience.ExperienceSource, int, int, int, java.util.Set<com.cobblemon.mod.common.api.moves.MoveTemplate>);
+  public static com.cobblemon.mod.common.api.events.pokemon.ExperienceGainedEvent$Post copy$default(com.cobblemon.mod.common.api.events.pokemon.ExperienceGainedEvent$Post, com.cobblemon.mod.common.pokemon.Pokemon, com.cobblemon.mod.common.api.pokemon.experience.ExperienceSource, int, int, int, java.util.Set, int, java.lang.Object);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+}
+public final class com.cobblemon.mod.common.api.events.pokemon.ExperienceGainedEvent$Pre extends com.cobblemon.mod.common.api.events.Cancelable implements com.cobblemon.mod.common.api.events.pokemon.ExperienceGainedEvent {
+  private final com.cobblemon.mod.common.pokemon.Pokemon pokemon;
+  private final com.cobblemon.mod.common.api.pokemon.experience.ExperienceSource source;
+  private int experience;
+  private final java.util.Map<java.lang.String, com.bedrockk.molang.runtime.value.MoValue> context;
+  private final java.util.Map<java.lang.String, kotlin.jvm.functions.Function1<com.bedrockk.molang.runtime.MoParams, com.bedrockk.molang.runtime.value.MoValue>> functions;
+  public com.cobblemon.mod.common.api.events.pokemon.ExperienceGainedEvent$Pre(com.cobblemon.mod.common.pokemon.Pokemon, com.cobblemon.mod.common.api.pokemon.experience.ExperienceSource, int);
+  public com.cobblemon.mod.common.pokemon.Pokemon getPokemon();
+  public com.cobblemon.mod.common.api.pokemon.experience.ExperienceSource getSource();
+  public int getExperience();
+  public void setExperience(int);
+  public final java.util.Map<java.lang.String, com.bedrockk.molang.runtime.value.MoValue> getContext();
+  public final java.util.Map<java.lang.String, kotlin.jvm.functions.Function1<com.bedrockk.molang.runtime.MoParams, com.bedrockk.molang.runtime.value.MoValue>> getFunctions();
+  public final com.cobblemon.mod.common.pokemon.Pokemon component1();
+  public final com.cobblemon.mod.common.api.pokemon.experience.ExperienceSource component2();
+  public final int component3();
+  public final com.cobblemon.mod.common.api.events.pokemon.ExperienceGainedEvent$Pre copy(com.cobblemon.mod.common.pokemon.Pokemon, com.cobblemon.mod.common.api.pokemon.experience.ExperienceSource, int);
+  public static com.cobblemon.mod.common.api.events.pokemon.ExperienceGainedEvent$Pre copy$default(com.cobblemon.mod.common.api.events.pokemon.ExperienceGainedEvent$Pre, com.cobblemon.mod.common.pokemon.Pokemon, com.cobblemon.mod.common.api.pokemon.experience.ExperienceSource, int, int, java.lang.Object);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+  private static final com.bedrockk.molang.runtime.value.DoubleValue functions$lambda$0(com.cobblemon.mod.common.api.events.pokemon.ExperienceGainedEvent$Pre, com.bedrockk.molang.runtime.MoParams);
+}
+public interface com.cobblemon.mod.common.api.events.pokemon.ExperienceGainedEvent {
+  public abstract com.cobblemon.mod.common.pokemon.Pokemon getPokemon();
+  public abstract com.cobblemon.mod.common.api.pokemon.experience.ExperienceSource getSource();
+  public abstract int getExperience();
+  public abstract void setExperience(int);
+}

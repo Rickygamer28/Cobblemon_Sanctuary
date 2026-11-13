@@ -1,0 +1,3 @@
+public final class com.cobblemon.mod.common.util.CompoundTagExtensionsKt {
+  public static final boolean isPokemonEntity(net.minecraft.nbt.CompoundTag);
+}

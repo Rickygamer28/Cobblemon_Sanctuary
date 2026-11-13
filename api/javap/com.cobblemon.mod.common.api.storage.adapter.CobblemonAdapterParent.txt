@@ -1,0 +1,8 @@
+public abstract class com.cobblemon.mod.common.api.storage.adapter.CobblemonAdapterParent<S> implements com.cobblemon.mod.common.api.storage.adapter.CobblemonAdapter<S> {
+  private final java.util.List<com.cobblemon.mod.common.api.storage.adapter.CobblemonAdapter<?>> children;
+  public com.cobblemon.mod.common.api.storage.adapter.CobblemonAdapterParent();
+  public final java.util.List<com.cobblemon.mod.common.api.storage.adapter.CobblemonAdapter<?>> getChildren();
+  public final com.cobblemon.mod.common.api.storage.adapter.CobblemonAdapter<S> with(com.cobblemon.mod.common.api.storage.adapter.CobblemonAdapter<?>...);
+  public <E extends com.cobblemon.mod.common.api.storage.StorePosition, T extends com.cobblemon.mod.common.api.storage.PokemonStore<E>> T load(java.lang.Class<T>, java.util.UUID, net.minecraft.core.RegistryAccess);
+  public abstract <E extends com.cobblemon.mod.common.api.storage.StorePosition, T extends com.cobblemon.mod.common.api.storage.PokemonStore<E>> T provide(java.lang.Class<T>, java.util.UUID, net.minecraft.core.RegistryAccess);
+}

@@ -1,0 +1,13 @@
+final class com.cobblemon.mod.common.pokemon.ai.ItemBehavior$struct$1$1$1 extends kotlin.jvm.internal.PropertyReference1Impl {
+  public static final com.cobblemon.mod.common.pokemon.ai.ItemBehavior$struct$1$1$1 INSTANCE;
+  com.cobblemon.mod.common.pokemon.ai.ItemBehavior$struct$1$1$1();
+  public java.lang.Object get(java.lang.Object);
+  static {};
+}
+public final class com.cobblemon.mod.common.pokemon.ai.ItemBehavior {
+  private final java.util.List<com.cobblemon.mod.common.pokemon.ai.ObtainableItem> desiredItems;
+  private final transient com.cobblemon.mod.common.api.molang.ObjectValue<com.cobblemon.mod.common.pokemon.ai.ItemBehavior> struct;
+  public com.cobblemon.mod.common.pokemon.ai.ItemBehavior();
+  public final com.cobblemon.mod.common.api.molang.ObjectValue<com.cobblemon.mod.common.pokemon.ai.ItemBehavior> getStruct();
+  private static final java.lang.Object struct$lambda$0$0(com.cobblemon.mod.common.pokemon.ai.ItemBehavior, com.bedrockk.molang.runtime.MoParams);
+}

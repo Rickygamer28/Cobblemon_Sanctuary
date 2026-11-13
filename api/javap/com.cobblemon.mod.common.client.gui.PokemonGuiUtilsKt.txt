@@ -1,0 +1,15 @@
+public final class com.cobblemon.mod.common.client.gui.PokemonGuiUtilsKt$WhenMappings {
+  public static final int[] $EnumSwitchMapping$0;
+  static {};
+}
+public final class com.cobblemon.mod.common.client.gui.PokemonGuiUtilsKt {
+  public static final float HEAD_YAW_FACTOR;
+  public static final float HEAD_PITCH_FACTOR;
+  public static final float SMOOTHING_FACTOR;
+  public static final void drawProfilePokemon(com.cobblemon.mod.common.pokemon.RenderablePokemon, com.mojang.blaze3d.vertex.PoseStack, org.joml.Quaternionf, com.cobblemon.mod.common.entity.PoseType, com.cobblemon.mod.common.client.render.models.blockbench.PosableState, float, float, com.cobblemon.mod.common.client.gui.ProfileTransformType, boolean, float, float, float, float, float, float, int);
+  public static void drawProfilePokemon$default(com.cobblemon.mod.common.pokemon.RenderablePokemon, com.mojang.blaze3d.vertex.PoseStack, org.joml.Quaternionf, com.cobblemon.mod.common.entity.PoseType, com.cobblemon.mod.common.client.render.models.blockbench.PosableState, float, float, com.cobblemon.mod.common.client.gui.ProfileTransformType, boolean, float, float, float, float, float, float, int, int, java.lang.Object);
+  public static final void drawProfilePokemon(net.minecraft.resources.ResourceLocation, com.mojang.blaze3d.vertex.PoseStack, org.joml.Quaternionf, com.cobblemon.mod.common.entity.PoseType, com.cobblemon.mod.common.client.render.models.blockbench.PosableState, float, float, com.cobblemon.mod.common.client.gui.ProfileTransformType, boolean, boolean, float, float, float, float, float, float, int);
+  public static void drawProfilePokemon$default(net.minecraft.resources.ResourceLocation, com.mojang.blaze3d.vertex.PoseStack, org.joml.Quaternionf, com.cobblemon.mod.common.entity.PoseType, com.cobblemon.mod.common.client.render.models.blockbench.PosableState, float, float, com.cobblemon.mod.common.client.gui.ProfileTransformType, boolean, boolean, float, float, float, float, float, float, int, int, java.lang.Object);
+  public static final kotlin.Pair<java.lang.Float, java.lang.Float> calculateHeadYawAndPitch(float, float, org.joml.Quaternionf, int, int, float, float, boolean);
+  private static final kotlin.Unit drawProfilePokemon$lambda$2(com.cobblemon.mod.common.client.render.models.blockbench.PosableModel, com.cobblemon.mod.common.client.render.models.blockbench.repository.RenderContext, com.mojang.blaze3d.vertex.PoseStack, com.mojang.blaze3d.vertex.VertexConsumer, int, int, net.minecraft.client.renderer.MultiBufferSource$BufferSource);
+}

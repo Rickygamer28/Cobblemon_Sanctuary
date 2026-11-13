@@ -1,0 +1,26 @@
+public final class com.cobblemon.mod.common.api.interaction.ServerTeamActionRequest$DefaultImpls {
+  public static java.util.UUID getSenderID(com.cobblemon.mod.common.api.interaction.ServerTeamActionRequest);
+  public static java.util.UUID getReceiverID(com.cobblemon.mod.common.api.interaction.ServerTeamActionRequest);
+  public static void sendToSender(com.cobblemon.mod.common.api.interaction.ServerTeamActionRequest, com.cobblemon.mod.common.api.net.NetworkPacket<?>);
+  public static void sendToReceiver(com.cobblemon.mod.common.api.interaction.ServerTeamActionRequest, com.cobblemon.mod.common.api.net.NetworkPacket<?>);
+  public static void notifySender(com.cobblemon.mod.common.api.interaction.ServerTeamActionRequest, boolean, java.lang.String, java.lang.Object...);
+  public static void notifyReceiver(com.cobblemon.mod.common.api.interaction.ServerTeamActionRequest, boolean, java.lang.String, java.lang.Object...);
+  public static void notify(com.cobblemon.mod.common.api.interaction.ServerTeamActionRequest, net.minecraft.server.level.ServerPlayer, boolean, java.lang.String, java.lang.Object...);
+}
+public interface com.cobblemon.mod.common.api.interaction.ServerTeamActionRequest extends com.cobblemon.mod.common.api.interaction.ServerPlayerActionRequest {
+  public abstract com.cobblemon.mod.common.battles.TeamManager$MultiBattleTeam getSenderTeam();
+  public abstract com.cobblemon.mod.common.battles.TeamManager$MultiBattleTeam getReceiverTeam();
+  public default java.util.UUID getSenderID();
+  public default java.util.UUID getReceiverID();
+  public default void sendToSender(com.cobblemon.mod.common.api.net.NetworkPacket<?>);
+  public default void sendToReceiver(com.cobblemon.mod.common.api.net.NetworkPacket<?>);
+  public default void notifySender(boolean, java.lang.String, java.lang.Object...);
+  public default void notifyReceiver(boolean, java.lang.String, java.lang.Object...);
+  public static java.util.UUID access$getSenderID$jd(com.cobblemon.mod.common.api.interaction.ServerTeamActionRequest);
+  public static java.util.UUID access$getReceiverID$jd(com.cobblemon.mod.common.api.interaction.ServerTeamActionRequest);
+  public static void access$sendToSender$jd(com.cobblemon.mod.common.api.interaction.ServerTeamActionRequest, com.cobblemon.mod.common.api.net.NetworkPacket);
+  public static void access$sendToReceiver$jd(com.cobblemon.mod.common.api.interaction.ServerTeamActionRequest, com.cobblemon.mod.common.api.net.NetworkPacket);
+  public static void access$notifySender$jd(com.cobblemon.mod.common.api.interaction.ServerTeamActionRequest, boolean, java.lang.String, java.lang.Object...);
+  public static void access$notifyReceiver$jd(com.cobblemon.mod.common.api.interaction.ServerTeamActionRequest, boolean, java.lang.String, java.lang.Object...);
+  public static void access$notify$jd(com.cobblemon.mod.common.api.interaction.ServerTeamActionRequest, net.minecraft.server.level.ServerPlayer, boolean, java.lang.String, java.lang.Object...);
+}

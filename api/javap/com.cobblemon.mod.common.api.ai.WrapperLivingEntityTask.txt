@@ -1,0 +1,19 @@
+public final class com.cobblemon.mod.common.api.ai.WrapperLivingEntityTask$Companion {
+  private com.cobblemon.mod.common.api.ai.WrapperLivingEntityTask$Companion();
+  public final <E extends net.minecraft.world.entity.LivingEntity> net.minecraft.world.entity.ai.behavior.BehaviorControl<net.minecraft.world.entity.LivingEntity> wrapped(net.minecraft.world.entity.ai.behavior.BehaviorControl<E>);
+  public com.cobblemon.mod.common.api.ai.WrapperLivingEntityTask$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.api.ai.WrapperLivingEntityTask<T extends net.minecraft.world.entity.LivingEntity> implements net.minecraft.world.entity.ai.behavior.BehaviorControl<net.minecraft.world.entity.LivingEntity> {
+  public static final com.cobblemon.mod.common.api.ai.WrapperLivingEntityTask$Companion Companion;
+  private final net.minecraft.world.entity.ai.behavior.BehaviorControl<T> task;
+  private final java.lang.Class<T> clazz;
+  public com.cobblemon.mod.common.api.ai.WrapperLivingEntityTask(net.minecraft.world.entity.ai.behavior.BehaviorControl<T>, java.lang.Class<T>);
+  public final net.minecraft.world.entity.ai.behavior.BehaviorControl<T> getTask();
+  public final java.lang.Class<T> getClazz();
+  public boolean tryStart(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity, long);
+  public java.lang.String debugString();
+  public void tickOrStop(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity, long);
+  public net.minecraft.world.entity.ai.behavior.Behavior$Status getStatus();
+  public void doStop(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity, long);
+  static {};
+}

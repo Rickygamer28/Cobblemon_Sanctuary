@@ -1,0 +1,12 @@
+public final class com.cobblemon.mod.common.pokemon.evolution.adapters.CobblemonEvolutionAdapter implements com.cobblemon.mod.common.api.pokemon.evolution.adapters.EvolutionAdapter {
+  public static final com.cobblemon.mod.common.pokemon.evolution.adapters.CobblemonEvolutionAdapter INSTANCE;
+  private static final java.lang.String VARIANT;
+  private static final java.util.Map<java.lang.String, kotlin.reflect.KClass<? extends com.cobblemon.mod.common.api.pokemon.evolution.Evolution>> types;
+  private com.cobblemon.mod.common.pokemon.evolution.adapters.CobblemonEvolutionAdapter();
+  public <T extends com.cobblemon.mod.common.api.pokemon.evolution.Evolution> void registerType(java.lang.String, kotlin.reflect.KClass<T>);
+  public com.cobblemon.mod.common.api.pokemon.evolution.Evolution deserialize(com.google.gson.JsonElement, java.lang.reflect.Type, com.google.gson.JsonDeserializationContext);
+  public com.google.gson.JsonElement serialize(com.cobblemon.mod.common.api.pokemon.evolution.Evolution, java.lang.reflect.Type, com.google.gson.JsonSerializationContext);
+  public java.lang.Object deserialize(com.google.gson.JsonElement, java.lang.reflect.Type, com.google.gson.JsonDeserializationContext);
+  public com.google.gson.JsonElement serialize(java.lang.Object, java.lang.reflect.Type, com.google.gson.JsonSerializationContext);
+  static {};
+}

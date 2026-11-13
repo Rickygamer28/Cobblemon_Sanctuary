@@ -1,0 +1,3 @@
+public final class com.cobblemon.mod.common.api.storage.NoPokemonStoreException extends java.lang.Exception {
+  public com.cobblemon.mod.common.api.storage.NoPokemonStoreException(java.lang.String);
+}

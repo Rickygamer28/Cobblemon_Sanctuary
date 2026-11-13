@@ -1,0 +1,9 @@
+public interface com.cobblemon.mod.common.CobblemonClientImplementation {
+  public abstract void registerLayer(net.minecraft.client.model.geom.ModelLayerLocation, java.util.function.Supplier<net.minecraft.client.model.geom.builders.LayerDefinition>);
+  public abstract <T extends net.minecraft.core.particles.ParticleOptions> void registerParticleFactory(net.minecraft.core.particles.ParticleType<T>, kotlin.jvm.functions.Function1<? super net.minecraft.client.particle.SpriteSet, ? extends net.minecraft.client.particle.ParticleProvider<T>>);
+  public abstract void registerBlockRenderType(net.minecraft.client.renderer.RenderType, net.minecraft.world.level.block.Block...);
+  public abstract void registerItemColors(net.minecraft.client.color.item.ItemColor, net.minecraft.world.item.Item...);
+  public abstract void registerBlockColors(net.minecraft.client.color.block.BlockColor, net.minecraft.world.level.block.Block...);
+  public abstract <T extends net.minecraft.world.level.block.entity.BlockEntity> void registerBlockEntityRenderer(net.minecraft.world.level.block.entity.BlockEntityType<? extends T>, net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider<T>);
+  public abstract <T extends net.minecraft.world.entity.Entity> void registerEntityRenderer(net.minecraft.world.entity.EntityType<? extends T>, net.minecraft.client.renderer.entity.EntityRendererProvider<T>);
+}

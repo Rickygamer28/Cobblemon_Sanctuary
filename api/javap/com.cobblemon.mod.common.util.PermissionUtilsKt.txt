@@ -1,0 +1,9 @@
+public final class com.cobblemon.mod.common.util.PermissionUtilsKt {
+  public static final <T extends com.mojang.brigadier.builder.ArgumentBuilder<net.minecraft.commands.CommandSourceStack, T>> T permission(com.mojang.brigadier.builder.ArgumentBuilder<net.minecraft.commands.CommandSourceStack, T>, com.cobblemon.mod.common.api.permission.Permission, boolean);
+  public static com.mojang.brigadier.builder.ArgumentBuilder permission$default(com.mojang.brigadier.builder.ArgumentBuilder, com.cobblemon.mod.common.api.permission.Permission, boolean, int, java.lang.Object);
+  public static final <T extends com.mojang.brigadier.builder.ArgumentBuilder<net.minecraft.commands.CommandSourceStack, T>> T requiresWithPermission(com.mojang.brigadier.builder.ArgumentBuilder<net.minecraft.commands.CommandSourceStack, T>, com.cobblemon.mod.common.api.permission.Permission, kotlin.jvm.functions.Function1<? super net.minecraft.commands.CommandSourceStack, java.lang.Boolean>);
+  private static final boolean permission$lambda$0(com.cobblemon.mod.common.api.permission.Permission, net.minecraft.commands.CommandSourceStack);
+  private static final boolean permission$lambda$1(kotlin.jvm.functions.Function1, java.lang.Object);
+  private static final boolean permission$lambda$2(kotlin.jvm.functions.Function1, net.minecraft.commands.CommandSourceStack);
+  private static final boolean requiresWithPermission$lambda$0(kotlin.jvm.functions.Function1, net.minecraft.commands.CommandSourceStack);
+}

@@ -1,0 +1,24 @@
+public final class com.cobblemon.mod.common.api.pokemon.experience.ExperienceGroup$Companion$dummy$1 implements com.cobblemon.mod.common.api.pokemon.experience.ExperienceGroup {
+  private final java.lang.String name;
+  com.cobblemon.mod.common.api.pokemon.experience.ExperienceGroup$Companion$dummy$1(java.lang.String);
+  public java.lang.String getName();
+  public int getExperience(int);
+  public int getLevel(int);
+  public net.minecraft.network.chat.MutableComponent getTranslatedName();
+}
+public final class com.cobblemon.mod.common.api.pokemon.experience.ExperienceGroup$Companion {
+  static final com.cobblemon.mod.common.api.pokemon.experience.ExperienceGroup$Companion $$INSTANCE;
+  private com.cobblemon.mod.common.api.pokemon.experience.ExperienceGroup$Companion();
+  public final com.cobblemon.mod.common.api.pokemon.experience.ExperienceGroup dummy(java.lang.String);
+  static {};
+}
+public final class com.cobblemon.mod.common.api.pokemon.experience.ExperienceGroup$DefaultImpls {
+  public static net.minecraft.network.chat.MutableComponent getTranslatedName(com.cobblemon.mod.common.api.pokemon.experience.ExperienceGroup);
+}
+public interface com.cobblemon.mod.common.api.pokemon.experience.ExperienceGroup extends com.cobblemon.mod.common.api.LevelCurve {
+  public static final com.cobblemon.mod.common.api.pokemon.experience.ExperienceGroup$Companion Companion;
+  public abstract java.lang.String getName();
+  public default net.minecraft.network.chat.MutableComponent getTranslatedName();
+  public static net.minecraft.network.chat.MutableComponent access$getTranslatedName$jd(com.cobblemon.mod.common.api.pokemon.experience.ExperienceGroup);
+  static {};
+}

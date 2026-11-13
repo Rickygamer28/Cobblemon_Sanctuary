@@ -1,0 +1,15 @@
+public final class com.cobblemon.mod.common.api.pokemon.helditem.HeldItemProvider {
+  public static final com.cobblemon.mod.common.api.pokemon.helditem.HeldItemProvider INSTANCE;
+  private static final com.cobblemon.mod.common.api.PrioritizedList<com.cobblemon.mod.common.api.pokemon.helditem.HeldItemManager> managers;
+  private com.cobblemon.mod.common.api.pokemon.helditem.HeldItemProvider();
+  public static final com.cobblemon.mod.common.api.pokemon.helditem.HeldItemManager provide(com.cobblemon.mod.common.battles.pokemon.BattlePokemon);
+  public static final java.lang.String provideShowdownId(com.cobblemon.mod.common.battles.pokemon.BattlePokemon);
+  public static final void register(com.cobblemon.mod.common.api.pokemon.helditem.HeldItemManager, com.cobblemon.mod.common.api.Priority);
+  public static void register$default(com.cobblemon.mod.common.api.pokemon.helditem.HeldItemManager, com.cobblemon.mod.common.api.Priority, int, java.lang.Object);
+  public static final void unregister(com.cobblemon.mod.common.api.pokemon.helditem.HeldItemManager, com.cobblemon.mod.common.api.Priority);
+  public static void unregister$default(com.cobblemon.mod.common.api.pokemon.helditem.HeldItemManager, com.cobblemon.mod.common.api.Priority, int, java.lang.Object);
+  public static final java.util.List<com.cobblemon.mod.common.api.pokemon.helditem.HeldItemManager> managers();
+  public static final void register(com.cobblemon.mod.common.api.pokemon.helditem.HeldItemManager);
+  public static final void unregister(com.cobblemon.mod.common.api.pokemon.helditem.HeldItemManager);
+  static {};
+}

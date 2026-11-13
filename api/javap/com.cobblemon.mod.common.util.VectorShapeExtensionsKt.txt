@@ -1,0 +1,5 @@
+public final class com.cobblemon.mod.common.util.VectorShapeExtensionsKt {
+  public static final net.minecraft.world.phys.shapes.VoxelShape voxelShape(double, double, double, double, double, double, net.minecraft.core.Direction);
+  public static final net.minecraft.world.phys.shapes.VoxelShape rotateShape(net.minecraft.core.Direction, net.minecraft.core.Direction, net.minecraft.world.phys.shapes.VoxelShape);
+  private static final void rotateShape$lambda$0(kotlin.jvm.internal.Ref$ObjectRef, double, double, double, double, double, double);
+}

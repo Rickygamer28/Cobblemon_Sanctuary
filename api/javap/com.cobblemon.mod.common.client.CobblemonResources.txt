@@ -1,0 +1,13 @@
+public final class com.cobblemon.mod.common.client.CobblemonResources {
+  public static final com.cobblemon.mod.common.client.CobblemonResources INSTANCE;
+  private static final net.minecraft.resources.ResourceLocation RED;
+  private static final net.minecraft.resources.ResourceLocation WHITE;
+  private static final net.minecraft.resources.ResourceLocation PHASE_BEAM;
+  private static final net.minecraft.resources.ResourceLocation DEFAULT_LARGE;
+  private com.cobblemon.mod.common.client.CobblemonResources();
+  public final net.minecraft.resources.ResourceLocation getRED();
+  public final net.minecraft.resources.ResourceLocation getWHITE();
+  public final net.minecraft.resources.ResourceLocation getPHASE_BEAM();
+  public final net.minecraft.resources.ResourceLocation getDEFAULT_LARGE();
+  static {};
+}

@@ -1,0 +1,31 @@
+public final class com.cobblemon.mod.common.client.render.models.blockbench.animation.PoseTransitionAnimation implements com.cobblemon.mod.common.client.render.models.blockbench.animation.ActiveAnimation {
+  private final com.cobblemon.mod.common.client.render.models.blockbench.pose.Pose beforePose;
+  private final com.cobblemon.mod.common.client.render.models.blockbench.pose.Pose afterPose;
+  private final int durationTicks;
+  private final kotlin.jvm.functions.Function1<java.lang.Float, java.lang.Float> curve;
+  private final boolean isTransition;
+  private final boolean enduresPrimaryAnimations;
+  private final float duration;
+  private boolean initialized;
+  private float startTime;
+  private float endTime;
+  public com.cobblemon.mod.common.client.render.models.blockbench.animation.PoseTransitionAnimation(com.cobblemon.mod.common.client.render.models.blockbench.pose.Pose, com.cobblemon.mod.common.client.render.models.blockbench.pose.Pose, int, kotlin.jvm.functions.Function1<? super java.lang.Float, java.lang.Float>);
+  public com.cobblemon.mod.common.client.render.models.blockbench.animation.PoseTransitionAnimation(com.cobblemon.mod.common.client.render.models.blockbench.pose.Pose, com.cobblemon.mod.common.client.render.models.blockbench.pose.Pose, int, kotlin.jvm.functions.Function1, int, kotlin.jvm.internal.DefaultConstructorMarker);
+  public final com.cobblemon.mod.common.client.render.models.blockbench.pose.Pose getBeforePose();
+  public final com.cobblemon.mod.common.client.render.models.blockbench.pose.Pose getAfterPose();
+  public final int getDurationTicks();
+  public final kotlin.jvm.functions.Function1<java.lang.Float, java.lang.Float> getCurve();
+  public boolean isTransition();
+  public boolean getEnduresPrimaryAnimations();
+  public float getDuration();
+  public final boolean getInitialized();
+  public final void setInitialized(boolean);
+  public final float getStartTime();
+  public final void setStartTime(float);
+  public final float getEndTime();
+  public final void setEndTime(float);
+  public final void initialize(com.cobblemon.mod.common.client.render.models.blockbench.PosableState);
+  public boolean run(com.cobblemon.mod.common.client.render.models.blockbench.repository.RenderContext, com.cobblemon.mod.common.client.render.models.blockbench.PosableModel, com.cobblemon.mod.common.client.render.models.blockbench.PosableState, float, float, float, float, float, float);
+  public void start(com.cobblemon.mod.common.client.render.models.blockbench.PosableState);
+  public void applyEffects(net.minecraft.world.entity.Entity, com.cobblemon.mod.common.client.render.models.blockbench.PosableState, float, float);
+}

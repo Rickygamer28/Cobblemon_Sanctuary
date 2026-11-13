@@ -1,0 +1,59 @@
+final class com.cobblemon.mod.common.api.pokemon.stats.Stat$Companion$ALL_CODEC$1 extends kotlin.jvm.internal.FunctionReferenceImpl implements kotlin.jvm.functions.Function1<net.minecraft.resources.ResourceLocation, com.cobblemon.mod.common.api.pokemon.stats.Stat> {
+  com.cobblemon.mod.common.api.pokemon.stats.Stat$Companion$ALL_CODEC$1(java.lang.Object);
+  public final com.cobblemon.mod.common.api.pokemon.stats.Stat invoke(net.minecraft.resources.ResourceLocation);
+  public java.lang.Object invoke(java.lang.Object);
+}
+final class com.cobblemon.mod.common.api.pokemon.stats.Stat$Companion$ALL_CODEC$2 extends kotlin.jvm.internal.PropertyReference1Impl {
+  public static final com.cobblemon.mod.common.api.pokemon.stats.Stat$Companion$ALL_CODEC$2 INSTANCE;
+  com.cobblemon.mod.common.api.pokemon.stats.Stat$Companion$ALL_CODEC$2();
+  public java.lang.Object get(java.lang.Object);
+  static {};
+}
+public final class com.cobblemon.mod.common.api.pokemon.stats.Stat$Companion {
+  static final com.cobblemon.mod.common.api.pokemon.stats.Stat$Companion $$INSTANCE;
+  private static final com.mojang.serialization.Codec<com.cobblemon.mod.common.api.pokemon.stats.Stat> ALL_CODEC;
+  private static final com.mojang.serialization.Codec<com.cobblemon.mod.common.api.pokemon.stats.Stat> PERMANENT_ONLY_CODEC;
+  private static final com.mojang.serialization.Codec<com.cobblemon.mod.common.api.pokemon.stats.Stat> BATTLE_ONLY_CODEC;
+  private com.cobblemon.mod.common.api.pokemon.stats.Stat$Companion();
+  public final com.mojang.serialization.Codec<com.cobblemon.mod.common.api.pokemon.stats.Stat> getALL_CODEC();
+  public static void getALL_CODEC$annotations();
+  public final com.mojang.serialization.Codec<com.cobblemon.mod.common.api.pokemon.stats.Stat> getPERMANENT_ONLY_CODEC();
+  public static void getPERMANENT_ONLY_CODEC$annotations();
+  public final com.mojang.serialization.Codec<com.cobblemon.mod.common.api.pokemon.stats.Stat> getBATTLE_ONLY_CODEC();
+  public static void getBATTLE_ONLY_CODEC$annotations();
+  private static final java.lang.String ALL_CODEC$lambda$0(net.minecraft.resources.ResourceLocation);
+  private static final com.mojang.serialization.DataResult PERMANENT_ONLY_CODEC$lambda$0(com.cobblemon.mod.common.api.pokemon.stats.Stat);
+  private static final java.lang.String PERMANENT_ONLY_CODEC$lambda$0$0(com.cobblemon.mod.common.api.pokemon.stats.Stat);
+  private static final com.mojang.serialization.DataResult PERMANENT_ONLY_CODEC$lambda$1(kotlin.jvm.functions.Function1, java.lang.Object);
+  private static final com.cobblemon.mod.common.api.pokemon.stats.Stat PERMANENT_ONLY_CODEC$lambda$2(com.cobblemon.mod.common.api.pokemon.stats.Stat);
+  private static final com.cobblemon.mod.common.api.pokemon.stats.Stat PERMANENT_ONLY_CODEC$lambda$3(kotlin.jvm.functions.Function1, java.lang.Object);
+  private static final com.mojang.serialization.DataResult BATTLE_ONLY_CODEC$lambda$0(com.cobblemon.mod.common.api.pokemon.stats.Stat);
+  private static final java.lang.String BATTLE_ONLY_CODEC$lambda$0$0(com.cobblemon.mod.common.api.pokemon.stats.Stat);
+  private static final com.mojang.serialization.DataResult BATTLE_ONLY_CODEC$lambda$1(kotlin.jvm.functions.Function1, java.lang.Object);
+  private static final com.cobblemon.mod.common.api.pokemon.stats.Stat BATTLE_ONLY_CODEC$lambda$2(com.cobblemon.mod.common.api.pokemon.stats.Stat);
+  private static final com.cobblemon.mod.common.api.pokemon.stats.Stat BATTLE_ONLY_CODEC$lambda$3(kotlin.jvm.functions.Function1, java.lang.Object);
+  static {};
+}
+public final class com.cobblemon.mod.common.api.pokemon.stats.Stat$Type extends java.lang.Enum<com.cobblemon.mod.common.api.pokemon.stats.Stat$Type> {
+  public static final com.cobblemon.mod.common.api.pokemon.stats.Stat$Type PERMANENT;
+  public static final com.cobblemon.mod.common.api.pokemon.stats.Stat$Type BATTLE_ONLY;
+  private static final com.cobblemon.mod.common.api.pokemon.stats.Stat$Type[] $VALUES;
+  private static final kotlin.enums.EnumEntries $ENTRIES;
+  private com.cobblemon.mod.common.api.pokemon.stats.Stat$Type();
+  public static com.cobblemon.mod.common.api.pokemon.stats.Stat$Type[] values();
+  public static com.cobblemon.mod.common.api.pokemon.stats.Stat$Type valueOf(java.lang.String);
+  public static kotlin.enums.EnumEntries<com.cobblemon.mod.common.api.pokemon.stats.Stat$Type> getEntries();
+  private static final com.cobblemon.mod.common.api.pokemon.stats.Stat$Type[] $values();
+  static {};
+}
+public interface com.cobblemon.mod.common.api.pokemon.stats.Stat {
+  public static final com.cobblemon.mod.common.api.pokemon.stats.Stat$Companion Companion;
+  public abstract net.minecraft.resources.ResourceLocation getIdentifier();
+  public abstract net.minecraft.network.chat.Component getDisplayName();
+  public abstract com.cobblemon.mod.common.api.pokemon.stats.Stat$Type getType();
+  public abstract java.lang.String getShowdownId();
+  public static com.mojang.serialization.Codec<com.cobblemon.mod.common.api.pokemon.stats.Stat> getALL_CODEC();
+  public static com.mojang.serialization.Codec<com.cobblemon.mod.common.api.pokemon.stats.Stat> getPERMANENT_ONLY_CODEC();
+  public static com.mojang.serialization.Codec<com.cobblemon.mod.common.api.pokemon.stats.Stat> getBATTLE_ONLY_CODEC();
+  static {};
+}

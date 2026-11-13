@@ -1,0 +1,7 @@
+public final class com.cobblemon.mod.common.api.item.HealingSource$Force implements com.cobblemon.mod.common.api.item.HealingSource {
+  public static final com.cobblemon.mod.common.api.item.HealingSource$Force INSTANCE;
+  private com.cobblemon.mod.common.api.item.HealingSource$Force();
+  static {};
+}
+public interface com.cobblemon.mod.common.api.item.HealingSource {
+}

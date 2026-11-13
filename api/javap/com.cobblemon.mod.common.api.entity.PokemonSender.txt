@@ -1,0 +1,4 @@
+public interface com.cobblemon.mod.common.api.entity.PokemonSender {
+  public abstract java.util.concurrent.CompletableFuture<kotlin.Unit> sendingOut(com.cobblemon.mod.common.pokemon.Pokemon);
+  public abstract java.util.concurrent.CompletableFuture<kotlin.Unit> recalling(com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+}

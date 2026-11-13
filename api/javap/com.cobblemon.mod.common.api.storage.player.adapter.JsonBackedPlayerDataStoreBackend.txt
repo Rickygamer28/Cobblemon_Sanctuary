@@ -1,0 +1,9 @@
+public abstract class com.cobblemon.mod.common.api.storage.player.adapter.JsonBackedPlayerDataStoreBackend<T extends com.cobblemon.mod.common.api.storage.player.InstancedPlayerData> extends com.cobblemon.mod.common.api.storage.player.adapter.FileBasedPlayerDataStoreBackend<T> {
+  public com.cobblemon.mod.common.api.storage.player.adapter.JsonBackedPlayerDataStoreBackend(java.lang.String, com.cobblemon.mod.common.api.storage.player.PlayerInstancedDataStoreType);
+  public abstract com.google.gson.Gson getGson();
+  public abstract com.google.gson.reflect.TypeToken<T> getClassToken();
+  public void save(T);
+  public T load(java.util.UUID);
+  private static final void save$lambda$0(java.io.File, com.cobblemon.mod.common.api.storage.player.adapter.JsonBackedPlayerDataStoreBackend, com.cobblemon.mod.common.api.storage.player.InstancedPlayerData, java.lang.String);
+  private static final com.cobblemon.mod.common.api.storage.player.InstancedPlayerData load$lambda$0(com.cobblemon.mod.common.api.storage.player.adapter.JsonBackedPlayerDataStoreBackend, java.util.UUID, java.io.File);
+}

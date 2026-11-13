@@ -1,0 +1,16 @@
+public final class com.cobblemon.mod.common.entity.PosableEntity$DefaultImpls {
+  public static void addPosableFunctions(com.cobblemon.mod.common.entity.PosableEntity, com.bedrockk.molang.runtime.struct.QueryStruct);
+  public static void playAnimation(com.cobblemon.mod.common.entity.PosableEntity, java.lang.String, java.util.List<java.lang.String>);
+  public static void playAnimation$default(com.cobblemon.mod.common.entity.PosableEntity, java.lang.String, java.util.List, int, java.lang.Object);
+}
+public interface com.cobblemon.mod.common.entity.PosableEntity {
+  public abstract com.cobblemon.mod.common.entity.PoseType getCurrentPoseType();
+  public abstract com.cobblemon.mod.common.api.entity.EntitySideDelegate<?> getDelegate();
+  public abstract com.bedrockk.molang.runtime.struct.QueryStruct getStruct();
+  public default void addPosableFunctions(com.bedrockk.molang.runtime.struct.QueryStruct);
+  public default void playAnimation(java.lang.String, java.util.List<java.lang.String>);
+  public static void playAnimation$default(com.cobblemon.mod.common.entity.PosableEntity, java.lang.String, java.util.List, int, java.lang.Object);
+  private static java.lang.Object addPosableFunctions$lambda$0(com.cobblemon.mod.common.entity.PosableEntity, com.bedrockk.molang.runtime.MoParams);
+  public static void access$addPosableFunctions$jd(com.cobblemon.mod.common.entity.PosableEntity, com.bedrockk.molang.runtime.struct.QueryStruct);
+  public static void access$playAnimation$jd(com.cobblemon.mod.common.entity.PosableEntity, java.lang.String, java.util.List);
+}

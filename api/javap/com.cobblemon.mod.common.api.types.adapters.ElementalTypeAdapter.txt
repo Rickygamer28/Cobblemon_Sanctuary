@@ -1,0 +1,9 @@
+public final class com.cobblemon.mod.common.api.types.adapters.ElementalTypeAdapter implements com.google.gson.JsonSerializer<com.cobblemon.mod.common.api.types.ElementalType>, com.google.gson.JsonDeserializer<com.cobblemon.mod.common.api.types.ElementalType> {
+  public static final com.cobblemon.mod.common.api.types.adapters.ElementalTypeAdapter INSTANCE;
+  private com.cobblemon.mod.common.api.types.adapters.ElementalTypeAdapter();
+  public com.google.gson.JsonElement serialize(com.cobblemon.mod.common.api.types.ElementalType, java.lang.reflect.Type, com.google.gson.JsonSerializationContext);
+  public com.cobblemon.mod.common.api.types.ElementalType deserialize(com.google.gson.JsonElement, java.lang.reflect.Type, com.google.gson.JsonDeserializationContext);
+  public com.google.gson.JsonElement serialize(java.lang.Object, java.lang.reflect.Type, com.google.gson.JsonSerializationContext);
+  public java.lang.Object deserialize(com.google.gson.JsonElement, java.lang.reflect.Type, com.google.gson.JsonDeserializationContext);
+  static {};
+}

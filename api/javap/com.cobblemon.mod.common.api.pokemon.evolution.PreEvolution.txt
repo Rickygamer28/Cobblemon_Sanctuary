@@ -1,0 +1,13 @@
+public final class com.cobblemon.mod.common.api.pokemon.evolution.PreEvolution$Companion {
+  static final com.cobblemon.mod.common.api.pokemon.evolution.PreEvolution$Companion $$INSTANCE;
+  private com.cobblemon.mod.common.api.pokemon.evolution.PreEvolution$Companion();
+  public final com.cobblemon.mod.common.api.pokemon.evolution.PreEvolution of(com.cobblemon.mod.common.pokemon.Species, com.cobblemon.mod.common.pokemon.FormData);
+  public static com.cobblemon.mod.common.api.pokemon.evolution.PreEvolution of$default(com.cobblemon.mod.common.api.pokemon.evolution.PreEvolution$Companion, com.cobblemon.mod.common.pokemon.Species, com.cobblemon.mod.common.pokemon.FormData, int, java.lang.Object);
+  static {};
+}
+public interface com.cobblemon.mod.common.api.pokemon.evolution.PreEvolution {
+  public static final com.cobblemon.mod.common.api.pokemon.evolution.PreEvolution$Companion Companion;
+  public abstract com.cobblemon.mod.common.pokemon.Species getSpecies();
+  public abstract com.cobblemon.mod.common.pokemon.FormData getForm();
+  static {};
+}

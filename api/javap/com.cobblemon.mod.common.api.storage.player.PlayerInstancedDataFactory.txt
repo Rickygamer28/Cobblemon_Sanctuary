@@ -1,0 +1,16 @@
+public final class com.cobblemon.mod.common.api.storage.player.PlayerInstancedDataFactory$DefaultImpls {
+  public static <T extends com.cobblemon.mod.common.api.storage.player.InstancedPlayerData> T getForPlayer(com.cobblemon.mod.common.api.storage.player.PlayerInstancedDataFactory<T>, net.minecraft.world.entity.player.Player);
+  public static <T extends com.cobblemon.mod.common.api.storage.player.InstancedPlayerData> void saveSingle(com.cobblemon.mod.common.api.storage.player.PlayerInstancedDataFactory<T>, net.minecraft.world.entity.player.Player);
+}
+public interface com.cobblemon.mod.common.api.storage.player.PlayerInstancedDataFactory<T extends com.cobblemon.mod.common.api.storage.player.InstancedPlayerData> {
+  public abstract void setup(net.minecraft.server.MinecraftServer);
+  public default T getForPlayer(net.minecraft.world.entity.player.Player);
+  public abstract T getForPlayer(java.util.UUID);
+  public abstract void saveAll();
+  public default void saveSingle(net.minecraft.world.entity.player.Player);
+  public abstract void saveSingle(java.util.UUID);
+  public abstract void onPlayerDisconnect(net.minecraft.server.level.ServerPlayer);
+  public abstract void sendToPlayer(net.minecraft.server.level.ServerPlayer);
+  public static com.cobblemon.mod.common.api.storage.player.InstancedPlayerData access$getForPlayer$jd(com.cobblemon.mod.common.api.storage.player.PlayerInstancedDataFactory, net.minecraft.world.entity.player.Player);
+  public static void access$saveSingle$jd(com.cobblemon.mod.common.api.storage.player.PlayerInstancedDataFactory, net.minecraft.world.entity.player.Player);
+}

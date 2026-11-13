@@ -1,0 +1,11 @@
+final class com.cobblemon.mod.common.api.pokemon.experience.CachedExperienceGroup$thresholds$1 extends kotlin.jvm.internal.FunctionReferenceImpl implements kotlin.jvm.functions.Function1<java.lang.Integer, java.lang.Integer> {
+  com.cobblemon.mod.common.api.pokemon.experience.CachedExperienceGroup$thresholds$1(java.lang.Object);
+  public final java.lang.Integer invoke(int);
+  public java.lang.Object invoke(java.lang.Object);
+}
+public abstract class com.cobblemon.mod.common.api.pokemon.experience.CachedExperienceGroup implements com.cobblemon.mod.common.api.pokemon.experience.ExperienceGroup {
+  private final com.cobblemon.mod.common.api.CachedLevelThresholds thresholds;
+  public com.cobblemon.mod.common.api.pokemon.experience.CachedExperienceGroup();
+  public int getLevel(int);
+  public net.minecraft.network.chat.MutableComponent getTranslatedName();
+}

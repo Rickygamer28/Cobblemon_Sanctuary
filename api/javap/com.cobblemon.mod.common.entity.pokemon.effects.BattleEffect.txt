@@ -1,0 +1,9 @@
+public abstract class com.cobblemon.mod.common.entity.pokemon.effects.BattleEffect implements com.cobblemon.mod.common.api.entity.pokemon.EntityEffect {
+  private final boolean battleOnly;
+  public com.cobblemon.mod.common.entity.pokemon.effects.BattleEffect();
+  public boolean getBattleOnly();
+  public java.util.concurrent.CompletableFuture<com.cobblemon.mod.common.entity.pokemon.PokemonEntity> start(com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+  public java.util.concurrent.CompletableFuture<com.cobblemon.mod.common.entity.pokemon.PokemonEntity> end(com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+  protected abstract void apply(com.cobblemon.mod.common.entity.pokemon.PokemonEntity, java.util.concurrent.CompletableFuture<com.cobblemon.mod.common.entity.pokemon.PokemonEntity>);
+  protected abstract void revert(com.cobblemon.mod.common.entity.pokemon.PokemonEntity, java.util.concurrent.CompletableFuture<com.cobblemon.mod.common.entity.pokemon.PokemonEntity>);
+}

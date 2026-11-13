@@ -1,0 +1,27 @@
+public final class com.cobblemon.mod.common.pokemon.EVs extends com.cobblemon.mod.common.pokemon.PokemonStats {
+  public static final com.cobblemon.mod.common.pokemon.EVs$Companion Companion;
+  private final kotlin.ranges.IntRange acceptableRange;
+  private final int defaultValue;
+  public static final int MAX_STAT_VALUE;
+  public static final int MAX_TOTAL_VALUE;
+  private static final com.mojang.serialization.Codec<com.cobblemon.mod.common.pokemon.EVs> CODEC;
+  private static final net.minecraft.network.codec.StreamCodec<io.netty.buffer.ByteBuf, com.cobblemon.mod.common.pokemon.EVs> STREAM_CODEC;
+  public com.cobblemon.mod.common.pokemon.EVs();
+  public kotlin.ranges.IntRange getAcceptableRange();
+  public int getDefaultValue();
+  protected boolean canSet(com.cobblemon.mod.common.api.pokemon.stats.Stat, int);
+  public final int add(com.cobblemon.mod.common.api.pokemon.stats.Stat, int);
+  public final int add(com.cobblemon.mod.common.api.pokemon.stats.Stat, int, com.cobblemon.mod.common.api.pokemon.stats.EvSource);
+  private final int performAdd(com.cobblemon.mod.common.api.pokemon.stats.Stat, int);
+  private static final com.mojang.serialization.DataResult CODEC$lambda$0(java.util.Map);
+  private static final java.lang.String CODEC$lambda$0$0();
+  private static final com.mojang.serialization.DataResult CODEC$lambda$1(kotlin.jvm.functions.Function1, java.lang.Object);
+  private static final java.util.Map CODEC$lambda$2(com.cobblemon.mod.common.pokemon.EVs);
+  private static final java.util.Map CODEC$lambda$3(kotlin.jvm.functions.Function1, java.lang.Object);
+  public static final com.cobblemon.mod.common.pokemon.EVs createEmpty();
+  public static final com.mojang.serialization.Codec<com.cobblemon.mod.common.pokemon.EVs> getCODEC();
+  public static final net.minecraft.network.codec.StreamCodec<io.netty.buffer.ByteBuf, com.cobblemon.mod.common.pokemon.EVs> getSTREAM_CODEC();
+  public static final com.mojang.serialization.Codec access$getCODEC$cp();
+  public static final net.minecraft.network.codec.StreamCodec access$getSTREAM_CODEC$cp();
+  static {};
+}

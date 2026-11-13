@@ -1,0 +1,17 @@
+public final class com.cobblemon.mod.common.api.interaction.DropItemEffect$Companion {
+  private com.cobblemon.mod.common.api.interaction.DropItemEffect$Companion();
+  public final java.lang.String getID();
+  public com.cobblemon.mod.common.api.interaction.DropItemEffect$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.api.interaction.DropItemEffect implements com.cobblemon.mod.common.api.interaction.InteractionEffect {
+  public static final com.cobblemon.mod.common.api.interaction.DropItemEffect$Companion Companion;
+  private final net.minecraft.resources.ResourceLocation item;
+  private final kotlin.ranges.IntRange amount;
+  private static final java.lang.String ID;
+  public com.cobblemon.mod.common.api.interaction.DropItemEffect(net.minecraft.resources.ResourceLocation, kotlin.ranges.IntRange);
+  public final net.minecraft.resources.ResourceLocation getItem();
+  public final kotlin.ranges.IntRange getAmount();
+  public void applyEffect(com.cobblemon.mod.common.entity.pokemon.PokemonEntity, net.minecraft.server.level.ServerPlayer);
+  public static final java.lang.String access$getID$cp();
+  static {};
+}

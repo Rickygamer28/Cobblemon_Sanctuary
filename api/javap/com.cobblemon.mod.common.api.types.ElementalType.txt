@@ -1,0 +1,44 @@
+final class com.cobblemon.mod.common.api.types.ElementalType$Companion$BY_STRING_CODEC$2$1 extends kotlin.jvm.internal.FunctionReferenceImpl implements kotlin.jvm.functions.Function1<java.lang.String, com.cobblemon.mod.common.api.types.ElementalType> {
+  com.cobblemon.mod.common.api.types.ElementalType$Companion$BY_STRING_CODEC$2$1(java.lang.Object);
+  public final com.cobblemon.mod.common.api.types.ElementalType invoke(java.lang.String);
+  public java.lang.Object invoke(java.lang.Object);
+}
+public final class com.cobblemon.mod.common.api.types.ElementalType$Companion {
+  private com.cobblemon.mod.common.api.types.ElementalType$Companion();
+  public final com.mojang.serialization.Codec<com.cobblemon.mod.common.api.types.ElementalType> getBY_STRING_CODEC();
+  public static void getBY_STRING_CODEC$annotations();
+  public com.cobblemon.mod.common.api.types.ElementalType$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.api.types.ElementalType implements com.cobblemon.mod.common.api.data.ShowdownIdentifiable {
+  public static final com.cobblemon.mod.common.api.types.ElementalType$Companion Companion;
+  private final java.lang.String name;
+  private final net.minecraft.network.chat.MutableComponent displayName;
+  private final int hue;
+  private final int textureXMultiplier;
+  private final int primaryColor;
+  private final int secondaryColor;
+  private final net.minecraft.resources.ResourceLocation resourceLocation;
+  private final java.lang.String showdownId;
+  private final net.minecraft.resources.ResourceLocation typeGem;
+  private final int order;
+  private static final kotlin.Lazy<com.mojang.serialization.Codec<com.cobblemon.mod.common.api.types.ElementalType>> BY_STRING_CODEC$delegate;
+  public com.cobblemon.mod.common.api.types.ElementalType(java.lang.String, net.minecraft.network.chat.MutableComponent, int, int, int, int, net.minecraft.resources.ResourceLocation, java.lang.String, net.minecraft.resources.ResourceLocation, int);
+  public com.cobblemon.mod.common.api.types.ElementalType(java.lang.String, net.minecraft.network.chat.MutableComponent, int, int, int, int, net.minecraft.resources.ResourceLocation, java.lang.String, net.minecraft.resources.ResourceLocation, int, int, kotlin.jvm.internal.DefaultConstructorMarker);
+  public final java.lang.String getName();
+  public final net.minecraft.network.chat.MutableComponent getDisplayName();
+  public final int getHue();
+  public final int getTextureXMultiplier();
+  public final int getPrimaryColor();
+  public final int getSecondaryColor();
+  public final net.minecraft.resources.ResourceLocation getResourceLocation();
+  public final java.lang.String getShowdownId();
+  public final net.minecraft.resources.ResourceLocation getTypeGem();
+  public final int getOrder();
+  public java.lang.String showdownId();
+  private static final com.mojang.serialization.Codec BY_STRING_CODEC_delegate$lambda$0();
+  private static final java.lang.String BY_STRING_CODEC_delegate$lambda$0$0(com.cobblemon.mod.common.api.types.ElementalType);
+  private static final java.lang.String BY_STRING_CODEC_delegate$lambda$0$1(java.lang.String);
+  public static final com.mojang.serialization.Codec<com.cobblemon.mod.common.api.types.ElementalType> getBY_STRING_CODEC();
+  public static final kotlin.Lazy access$getBY_STRING_CODEC$delegate$cp();
+  static {};
+}

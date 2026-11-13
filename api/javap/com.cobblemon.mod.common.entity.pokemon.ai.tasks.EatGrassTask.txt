@@ -1,0 +1,18 @@
+public final class com.cobblemon.mod.common.entity.pokemon.ai.tasks.EatGrassTask extends net.minecraft.world.entity.ai.behavior.Behavior<com.cobblemon.mod.common.entity.pokemon.PokemonEntity> {
+  private final float eatingChance;
+  private final long cooldownTicks;
+  private final net.minecraft.world.level.block.state.predicate.BlockStatePredicate grassPredicate;
+  private int timer;
+  public com.cobblemon.mod.common.entity.pokemon.ai.tasks.EatGrassTask(float, long);
+  public final float getEatingChance();
+  public final long getCooldownTicks();
+  public final net.minecraft.world.level.block.state.predicate.BlockStatePredicate getGrassPredicate();
+  public final int getTimer();
+  public final void setTimer(int);
+  protected boolean checkExtraStartConditions(net.minecraft.server.level.ServerLevel, com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+  protected void start(net.minecraft.server.level.ServerLevel, com.cobblemon.mod.common.entity.pokemon.PokemonEntity, long);
+  protected boolean canStillUse(net.minecraft.server.level.ServerLevel, com.cobblemon.mod.common.entity.pokemon.PokemonEntity, long);
+  public boolean checkExtraStartConditions(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity);
+  public void start(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity, long);
+  public boolean canStillUse(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity, long);
+}

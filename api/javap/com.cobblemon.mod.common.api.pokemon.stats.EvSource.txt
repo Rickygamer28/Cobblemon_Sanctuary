@@ -1,0 +1,14 @@
+public final class com.cobblemon.mod.common.api.pokemon.stats.EvSource$DefaultImpls {
+  public static boolean isBattle(com.cobblemon.mod.common.api.pokemon.stats.EvSource);
+  public static boolean isInteraction(com.cobblemon.mod.common.api.pokemon.stats.EvSource);
+  public static boolean isSidemod(com.cobblemon.mod.common.api.pokemon.stats.EvSource);
+}
+public interface com.cobblemon.mod.common.api.pokemon.stats.EvSource {
+  public abstract com.cobblemon.mod.common.pokemon.Pokemon getPokemon();
+  public default boolean isBattle();
+  public default boolean isInteraction();
+  public default boolean isSidemod();
+  public static boolean access$isBattle$jd(com.cobblemon.mod.common.api.pokemon.stats.EvSource);
+  public static boolean access$isInteraction$jd(com.cobblemon.mod.common.api.pokemon.stats.EvSource);
+  public static boolean access$isSidemod$jd(com.cobblemon.mod.common.api.pokemon.stats.EvSource);
+}

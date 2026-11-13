@@ -1,0 +1,11 @@
+public class com.cobblemon.mod.common.api.pokemon.experience.BattleExperienceSource implements com.cobblemon.mod.common.api.pokemon.experience.ExperienceSource {
+  private final com.cobblemon.mod.common.api.battles.model.PokemonBattle battle;
+  private final java.util.List<com.cobblemon.mod.common.battles.pokemon.BattlePokemon> facedPokemon;
+  public com.cobblemon.mod.common.api.pokemon.experience.BattleExperienceSource(com.cobblemon.mod.common.api.battles.model.PokemonBattle, java.util.List<? extends com.cobblemon.mod.common.battles.pokemon.BattlePokemon>);
+  public final com.cobblemon.mod.common.api.battles.model.PokemonBattle getBattle();
+  public final java.util.List<com.cobblemon.mod.common.battles.pokemon.BattlePokemon> getFacedPokemon();
+  public boolean isBattle();
+  public boolean isInteraction();
+  public boolean isCommand();
+  public boolean isSidemod();
+}

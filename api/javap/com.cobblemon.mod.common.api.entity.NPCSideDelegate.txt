@@ -1,0 +1,12 @@
+public final class com.cobblemon.mod.common.api.entity.NPCSideDelegate$DefaultImpls {
+  public static void initialize(com.cobblemon.mod.common.api.entity.NPCSideDelegate, com.cobblemon.mod.common.entity.npc.NPCEntity);
+  public static void tick(com.cobblemon.mod.common.api.entity.NPCSideDelegate, com.cobblemon.mod.common.entity.npc.NPCEntity);
+  public static void onSyncedDataUpdated(com.cobblemon.mod.common.api.entity.NPCSideDelegate, net.minecraft.network.syncher.EntityDataAccessor<?>);
+  public static void addToStruct(com.cobblemon.mod.common.api.entity.NPCSideDelegate, com.bedrockk.molang.runtime.struct.QueryStruct);
+}
+public interface com.cobblemon.mod.common.api.entity.NPCSideDelegate extends com.cobblemon.mod.common.api.entity.EntitySideDelegate<com.cobblemon.mod.common.entity.npc.NPCEntity> {
+  public static void access$initialize$jd(com.cobblemon.mod.common.api.entity.NPCSideDelegate, com.cobblemon.mod.common.entity.npc.NPCEntity);
+  public static void access$tick$jd(com.cobblemon.mod.common.api.entity.NPCSideDelegate, com.cobblemon.mod.common.entity.npc.NPCEntity);
+  public static void access$onSyncedDataUpdated$jd(com.cobblemon.mod.common.api.entity.NPCSideDelegate, net.minecraft.network.syncher.EntityDataAccessor);
+  public static void access$addToStruct$jd(com.cobblemon.mod.common.api.entity.NPCSideDelegate, com.bedrockk.molang.runtime.struct.QueryStruct);
+}

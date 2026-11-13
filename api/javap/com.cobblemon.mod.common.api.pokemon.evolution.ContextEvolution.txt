@@ -1,0 +1,9 @@
+public final class com.cobblemon.mod.common.api.pokemon.evolution.ContextEvolution$DefaultImpls {
+  public static <RC, TC> boolean attemptEvolution(com.cobblemon.mod.common.api.pokemon.evolution.ContextEvolution<RC, TC>, com.cobblemon.mod.common.pokemon.Pokemon, RC);
+  public static <RC, TC> boolean test(com.cobblemon.mod.common.api.pokemon.evolution.ContextEvolution<RC, TC>, com.cobblemon.mod.common.pokemon.Pokemon);
+  public static <RC, TC> boolean evolve(com.cobblemon.mod.common.api.pokemon.evolution.ContextEvolution<RC, TC>, com.cobblemon.mod.common.pokemon.Pokemon);
+  public static <RC, TC> boolean shed(com.cobblemon.mod.common.api.pokemon.evolution.ContextEvolution<RC, TC>, com.cobblemon.mod.common.pokemon.Pokemon);
+  public static <RC, TC> void forceEvolve(com.cobblemon.mod.common.api.pokemon.evolution.ContextEvolution<RC, TC>, com.cobblemon.mod.common.pokemon.Pokemon);
+  public static <RC, TC> void evolutionMethod(com.cobblemon.mod.common.api.pokemon.evolution.ContextEvolution<RC, TC>, com.cobblemon.mod.common.pokemon.Pokemon);
+  public static <RC, TC> void applyTo(com.cobblemon.mod.common.api.pokemon.evolution.ContextEvolution<RC, TC>, com.cobblemon.mod.common.pokemon.Pokemon);
+}

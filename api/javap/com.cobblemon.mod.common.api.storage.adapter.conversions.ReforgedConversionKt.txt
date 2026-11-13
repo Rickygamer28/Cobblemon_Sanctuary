@@ -1,0 +1,3 @@
+public final class com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversionKt {
+  public static final int REFORGED_POKEMON_PER_BOX;
+}

@@ -1,0 +1,3 @@
+public final class com.cobblemon.mod.common.util.DrawableExtensionsKt {
+  public static final int scaleIt(net.minecraft.client.gui.components.Renderable, java.lang.Number);
+}

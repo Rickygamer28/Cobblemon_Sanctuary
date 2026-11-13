@@ -1,0 +1,15 @@
+public final class com.cobblemon.mod.common.CobblemonPoiTypes extends com.cobblemon.mod.common.platform.PlatformRegistry<net.minecraft.core.Registry<net.minecraft.world.entity.ai.village.poi.PoiType>, net.minecraft.resources.ResourceKey<net.minecraft.core.Registry<net.minecraft.world.entity.ai.village.poi.PoiType>>, net.minecraft.world.entity.ai.village.poi.PoiType> {
+  public static final com.cobblemon.mod.common.CobblemonPoiTypes INSTANCE;
+  private static final net.minecraft.core.Registry<net.minecraft.world.entity.ai.village.poi.PoiType> registry;
+  private static final net.minecraft.resources.ResourceKey<net.minecraft.core.Registry<net.minecraft.world.entity.ai.village.poi.PoiType>> resourceKey;
+  public static final net.minecraft.resources.ResourceKey<net.minecraft.world.entity.ai.village.poi.PoiType> NURSE_KEY;
+  public static final net.minecraft.resources.ResourceKey<net.minecraft.world.entity.ai.village.poi.PoiType> SACCHARINE_LOG_SLATHERED_KEY;
+  public static final net.minecraft.resources.ResourceKey<net.minecraft.world.entity.ai.village.poi.PoiType> HABITAT_BLOCK_KEY;
+  public static final net.minecraft.world.entity.ai.village.poi.PoiType HABITAT_BLOCK;
+  private com.cobblemon.mod.common.CobblemonPoiTypes();
+  public net.minecraft.core.Registry<net.minecraft.world.entity.ai.village.poi.PoiType> getRegistry();
+  public net.minecraft.resources.ResourceKey<net.minecraft.core.Registry<net.minecraft.world.entity.ai.village.poi.PoiType>> getResourceKey();
+  private final net.minecraft.resources.ResourceKey<net.minecraft.world.entity.ai.village.poi.PoiType> createKey(java.lang.String, net.minecraft.world.level.block.Block, int, int);
+  private final java.util.Set<net.minecraft.world.level.block.state.BlockState> getBlockStates(net.minecraft.world.level.block.Block);
+  static {};
+}

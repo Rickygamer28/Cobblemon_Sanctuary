@@ -1,0 +1,51 @@
+public final class com.cobblemon.mod.common.client.gui.summary.widgets.ModelWidget$Companion {
+  private com.cobblemon.mod.common.client.gui.summary.widgets.ModelWidget$Companion();
+  public com.cobblemon.mod.common.client.gui.summary.widgets.ModelWidget$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.client.gui.summary.widgets.ModelWidget extends com.cobblemon.mod.common.client.gui.summary.widgets.SoundlessWidget {
+  public static final com.cobblemon.mod.common.client.gui.summary.widgets.ModelWidget$Companion Companion;
+  private float baseScale;
+  private float rotationY;
+  private double offsetY;
+  private final boolean playCryOnClick;
+  private final boolean shouldFollowCursor;
+  private final int blockLight;
+  private com.cobblemon.mod.common.pokemon.RenderablePokemon pokemon;
+  private final com.cobblemon.mod.common.client.render.item.HeldItemRenderer heldItemRenderer;
+  private com.cobblemon.mod.common.client.render.models.blockbench.FloatingState state;
+  private java.lang.Long lookStartTime;
+  private kotlin.Pair<java.lang.Float, java.lang.Float> currentYawAndPitch;
+  private final org.joml.Vector3f rotationVector;
+  private boolean shouldRender;
+  public static final long MAX_SECONDS_LOOKING;
+  public com.cobblemon.mod.common.client.gui.summary.widgets.ModelWidget(int, int, int, int, com.cobblemon.mod.common.pokemon.RenderablePokemon, float, float, double, boolean, boolean, int);
+  public com.cobblemon.mod.common.client.gui.summary.widgets.ModelWidget(int, int, int, int, com.cobblemon.mod.common.pokemon.RenderablePokemon, float, float, double, boolean, boolean, int, int, kotlin.jvm.internal.DefaultConstructorMarker);
+  public final float getBaseScale();
+  public final void setBaseScale(float);
+  public final float getRotationY();
+  public final void setRotationY(float);
+  public final double getOffsetY();
+  public final void setOffsetY(double);
+  public final boolean getPlayCryOnClick();
+  public final boolean getShouldFollowCursor();
+  public final int getBlockLight();
+  public final com.cobblemon.mod.common.pokemon.RenderablePokemon getPokemon();
+  public final void setPokemon(com.cobblemon.mod.common.pokemon.RenderablePokemon);
+  public final com.cobblemon.mod.common.client.render.models.blockbench.FloatingState getState();
+  public final void setState(com.cobblemon.mod.common.client.render.models.blockbench.FloatingState);
+  public final java.lang.Long getLookStartTime();
+  public final void setLookStartTime(java.lang.Long);
+  public final kotlin.Pair<java.lang.Float, java.lang.Float> getCurrentYawAndPitch();
+  public final void setCurrentYawAndPitch(kotlin.Pair<java.lang.Float, java.lang.Float>);
+  public final org.joml.Vector3f getRotationVector();
+  public final boolean getShouldRender();
+  public final void setShouldRender(boolean);
+  protected void renderWidget(net.minecraft.client.gui.GuiGraphics, int, int, float);
+  private final void renderPKM(net.minecraft.client.gui.GuiGraphics, float, int, int);
+  public boolean mouseClicked(double, double, int);
+  private final void playCry();
+  private static final java.lang.Object _set_pokemon_$lambda$0(com.cobblemon.mod.common.client.gui.summary.widgets.ModelWidget, com.bedrockk.molang.runtime.MoParams);
+  private static final java.lang.Object _set_pokemon_$lambda$1(com.cobblemon.mod.common.client.gui.summary.widgets.ModelWidget, com.bedrockk.molang.runtime.MoParams);
+  private static final java.lang.Object _set_pokemon_$lambda$2(com.cobblemon.mod.common.client.gui.summary.widgets.ModelWidget, com.bedrockk.molang.runtime.MoParams);
+  static {};
+}

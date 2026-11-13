@@ -1,0 +1,9 @@
+public final class com.cobblemon.mod.common.entity.pokemon.ai.sensors.SacLeavesSensor extends net.minecraft.world.entity.ai.sensing.Sensor<com.cobblemon.mod.common.entity.pokemon.PokemonEntity> {
+  public com.cobblemon.mod.common.entity.pokemon.ai.sensors.SacLeavesSensor();
+  public java.util.Set<net.minecraft.world.entity.ai.memory.MemoryModuleType<net.minecraft.core.BlockPos>> requires();
+  protected void doTick(net.minecraft.server.level.ServerLevel, com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+  private final boolean isValidLeafBlock(net.minecraft.world.level.block.state.BlockState);
+  private static final kotlin.Unit doTick$lambda$0(net.minecraft.server.level.ServerLevel, com.cobblemon.mod.common.entity.pokemon.ai.sensors.SacLeavesSensor, net.minecraft.core.BlockPos, kotlin.jvm.internal.Ref$DoubleRef, kotlin.jvm.internal.Ref$ObjectRef, net.minecraft.core.BlockPos);
+  private static final void doTick$lambda$1(kotlin.jvm.functions.Function1, java.lang.Object);
+  public void doTick(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity);
+}

@@ -1,0 +1,9 @@
+public final class com.cobblemon.mod.common.util.CollectionUtilsKt {
+  public static final com.cobblemon.mod.common.pokemon.PokemonStats ivsOf(kotlin.Pair<? extends com.cobblemon.mod.common.api.pokemon.stats.Stat, java.lang.Integer>...);
+  public static final com.cobblemon.mod.common.pokemon.PokemonStats evsOf(kotlin.Pair<? extends com.cobblemon.mod.common.api.pokemon.stats.Stat, java.lang.Integer>...);
+  public static final <T> T weightedSelection(java.lang.Iterable<? extends T>, kotlin.random.Random, kotlin.jvm.functions.Function1<? super T, ? extends java.lang.Number>);
+  public static java.lang.Object weightedSelection$default(java.lang.Iterable, kotlin.random.Random, kotlin.jvm.functions.Function1, int, java.lang.Object);
+  public static final <T> void swap(java.util.List<T>, int, int);
+  public static final net.minecraft.nbt.ListTag toNbtList(java.util.Collection<? extends net.minecraft.nbt.Tag>);
+  public static final <T> T weightedSelection(java.lang.Iterable<? extends T>, kotlin.jvm.functions.Function1<? super T, ? extends java.lang.Number>);
+}

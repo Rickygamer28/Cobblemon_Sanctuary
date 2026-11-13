@@ -1,0 +1,12 @@
+public final class com.cobblemon.mod.common.pokemon.ai.ObtainableItemCondition$Companion {
+  static final com.cobblemon.mod.common.pokemon.ai.ObtainableItemCondition$Companion $$INSTANCE;
+  private com.cobblemon.mod.common.pokemon.ai.ObtainableItemCondition$Companion();
+  public final com.cobblemon.mod.common.pokemon.ai.ObtainableItemCondition parseFromString(java.lang.String);
+  static {};
+}
+public interface com.cobblemon.mod.common.pokemon.ai.ObtainableItemCondition {
+  public static final com.cobblemon.mod.common.pokemon.ai.ObtainableItemCondition$Companion Companion;
+  public abstract java.lang.String toString();
+  public abstract boolean isItemObtainable(net.minecraft.core.RegistryAccess, net.minecraft.world.item.ItemStack);
+  static {};
+}

@@ -1,0 +1,7 @@
+final class com.cobblemon.mod.common.api.storage.player.adapter.NbtBackedPlayerData$load$1$1<T, R> implements java.util.function.Function {
+  final com.cobblemon.mod.common.api.storage.player.adapter.NbtBackedPlayerData<T> this$0;
+  final java.util.UUID $uuid;
+  com.cobblemon.mod.common.api.storage.player.adapter.NbtBackedPlayerData$load$1$1(com.cobblemon.mod.common.api.storage.player.adapter.NbtBackedPlayerData<T>, java.util.UUID);
+  public final java.lang.Void apply(java.lang.String);
+  public java.lang.Object apply(java.lang.Object);
+}

@@ -1,0 +1,4 @@
+public interface com.cobblemon.mod.common.api.events.pokemon.evolution.EvolutionEvent {
+  public abstract com.cobblemon.mod.common.pokemon.Pokemon getPokemon();
+  public abstract com.cobblemon.mod.common.api.pokemon.evolution.Evolution getEvolution();
+}

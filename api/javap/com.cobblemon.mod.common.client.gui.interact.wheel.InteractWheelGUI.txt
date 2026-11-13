@@ -1,0 +1,37 @@
+public final class com.cobblemon.mod.common.client.gui.interact.wheel.InteractWheelGUI$Companion {
+  private com.cobblemon.mod.common.client.gui.interact.wheel.InteractWheelGUI$Companion();
+  public com.cobblemon.mod.common.client.gui.interact.wheel.InteractWheelGUI$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.client.gui.interact.wheel.InteractWheelGUI$WhenMappings {
+  public static final int[] $EnumSwitchMapping$0;
+  static {};
+}
+public final class com.cobblemon.mod.common.client.gui.interact.wheel.InteractWheelGUI extends net.minecraft.client.gui.screens.Screen implements com.cobblemon.mod.common.client.gui.CobblemonRenderable {
+  public static final com.cobblemon.mod.common.client.gui.interact.wheel.InteractWheelGUI$Companion Companion;
+  private final com.google.common.collect.Multimap<com.cobblemon.mod.common.client.gui.interact.wheel.Orientation, com.cobblemon.mod.common.client.gui.interact.wheel.InteractWheelOption> options;
+  private final java.util.List<com.cobblemon.mod.common.client.gui.interact.wheel.InteractWheelButton> buttons;
+  private int maxPage;
+  private int currentPage;
+  public static final int SIZE;
+  private static final net.minecraft.resources.ResourceLocation backgroundResource;
+  public com.cobblemon.mod.common.client.gui.interact.wheel.InteractWheelGUI(com.google.common.collect.Multimap<com.cobblemon.mod.common.client.gui.interact.wheel.Orientation, com.cobblemon.mod.common.client.gui.interact.wheel.InteractWheelOption>, net.minecraft.network.chat.Component);
+  public boolean keyPressed(int, int, int);
+  protected void renderBlurredBackground(float);
+  protected void renderMenuBackground(net.minecraft.client.gui.GuiGraphics);
+  protected void init();
+  private final void calculateMaxPage();
+  private final void setPage(int);
+  private final void addButton(com.cobblemon.mod.common.client.gui.interact.wheel.Orientation, com.cobblemon.mod.common.client.gui.interact.wheel.InteractWheelOption);
+  public void render(net.minecraft.client.gui.GuiGraphics, int, int, float);
+  private final kotlin.Pair<java.lang.Integer, java.lang.Integer> getBasePosition();
+  private final kotlin.Pair<java.lang.Integer, java.lang.Integer> getButtonPosition(com.cobblemon.mod.common.client.gui.interact.wheel.Orientation);
+  public boolean isPauseScreen();
+  public boolean mouseClicked(double, double, int);
+  private final boolean isMouseInCenter(double, double);
+  private static final void init$lambda$0(com.cobblemon.mod.common.client.gui.interact.wheel.InteractWheelGUI, net.minecraft.client.gui.components.Button);
+  private static final void init$lambda$1(com.cobblemon.mod.common.client.gui.interact.wheel.InteractWheelGUI, net.minecraft.client.gui.components.Button);
+  private static final org.joml.Vector3f addButton$lambda$0();
+  private static final void addButton$lambda$1(com.cobblemon.mod.common.client.gui.interact.wheel.InteractWheelOption, net.minecraft.client.gui.components.Button);
+  private static final boolean addButton$lambda$2(com.cobblemon.mod.common.client.gui.interact.wheel.InteractWheelGUI, double, double);
+  static {};
+}

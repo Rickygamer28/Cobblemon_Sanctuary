@@ -1,0 +1,30 @@
+public final class com.cobblemon.mod.common.api.reactive.CancelableObservable$postThen$1 implements kotlin.jvm.functions.Function1<T, kotlin.Unit> {
+  public static final com.cobblemon.mod.common.api.reactive.CancelableObservable$postThen$1 INSTANCE;
+  public com.cobblemon.mod.common.api.reactive.CancelableObservable$postThen$1();
+  public final void invoke(T);
+  public java.lang.Object invoke(java.lang.Object);
+  static {};
+}
+public final class com.cobblemon.mod.common.api.reactive.CancelableObservable$postThenFinally$1 implements kotlin.jvm.functions.Function1<T, kotlin.Unit> {
+  public static final com.cobblemon.mod.common.api.reactive.CancelableObservable$postThenFinally$1 INSTANCE;
+  public com.cobblemon.mod.common.api.reactive.CancelableObservable$postThenFinally$1();
+  public final void invoke(T);
+  public java.lang.Object invoke(java.lang.Object);
+  static {};
+}
+public final class com.cobblemon.mod.common.api.reactive.CancelableObservable$postThenFinally$2 implements kotlin.jvm.functions.Function1<T, kotlin.Unit> {
+  public static final com.cobblemon.mod.common.api.reactive.CancelableObservable$postThenFinally$2 INSTANCE;
+  public com.cobblemon.mod.common.api.reactive.CancelableObservable$postThenFinally$2();
+  public final void invoke(T);
+  public java.lang.Object invoke(java.lang.Object);
+  static {};
+}
+public class com.cobblemon.mod.common.api.reactive.CancelableObservable<T extends com.cobblemon.mod.common.api.events.Cancelable> extends com.cobblemon.mod.common.api.reactive.EventObservable<T> {
+  public com.cobblemon.mod.common.api.reactive.CancelableObservable();
+  public void emit(T...);
+  public final void postThen(T, kotlin.jvm.functions.Function1<? super T, kotlin.Unit>, kotlin.jvm.functions.Function1<? super T, kotlin.Unit>);
+  public static void postThen$default(com.cobblemon.mod.common.api.reactive.CancelableObservable, com.cobblemon.mod.common.api.events.Cancelable, kotlin.jvm.functions.Function1, kotlin.jvm.functions.Function1, int, java.lang.Object);
+  public final void postThenFinally(T, kotlin.jvm.functions.Function1<? super T, kotlin.Unit>, kotlin.jvm.functions.Function1<? super T, kotlin.Unit>, kotlin.jvm.functions.Function1<? super T, kotlin.Unit>);
+  public static void postThenFinally$default(com.cobblemon.mod.common.api.reactive.CancelableObservable, com.cobblemon.mod.common.api.events.Cancelable, kotlin.jvm.functions.Function1, kotlin.jvm.functions.Function1, kotlin.jvm.functions.Function1, int, java.lang.Object);
+  public void emit(java.lang.Object[]);
+}

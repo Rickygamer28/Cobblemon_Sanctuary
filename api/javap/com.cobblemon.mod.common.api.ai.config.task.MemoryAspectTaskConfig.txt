@@ -1,0 +1,32 @@
+public final class com.cobblemon.mod.common.api.ai.config.task.MemoryAspectTaskConfig$createTask$1 extends net.minecraft.world.entity.ai.behavior.Behavior<net.minecraft.world.entity.LivingEntity> {
+  final com.cobblemon.mod.common.api.ai.config.task.MemoryAspectTaskConfig this$0;
+  final java.lang.String $aspect;
+  com.cobblemon.mod.common.api.ai.config.task.MemoryAspectTaskConfig$createTask$1(com.cobblemon.mod.common.api.ai.config.task.MemoryAspectTaskConfig, java.lang.String, java.util.Map<net.minecraft.world.entity.ai.memory.MemoryModuleType<?>, ? extends net.minecraft.world.entity.ai.memory.MemoryStatus>);
+  protected boolean canStillUse(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity, long);
+  protected void tick(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity, long);
+}
+public final class com.cobblemon.mod.common.api.ai.config.task.MemoryAspectTaskConfig implements com.cobblemon.mod.common.api.ai.config.task.SingleTaskConfig {
+  private net.minecraft.world.entity.ai.memory.MemoryModuleType<?> memory;
+  private com.mojang.datafixers.util.Either<com.bedrockk.molang.Expression, com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable> aspect;
+  public com.cobblemon.mod.common.api.ai.config.task.MemoryAspectTaskConfig();
+  public final net.minecraft.world.entity.ai.memory.MemoryModuleType<?> getMemory();
+  public final void setMemory(net.minecraft.world.entity.ai.memory.MemoryModuleType<?>);
+  public final com.mojang.datafixers.util.Either<com.bedrockk.molang.Expression, com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable> getAspect();
+  public final void setAspect(com.mojang.datafixers.util.Either<com.bedrockk.molang.Expression, com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable>);
+  public java.util.List<com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable> getVariables(net.minecraft.world.entity.LivingEntity, com.cobblemon.mod.common.api.ai.BehaviourConfigurationContext);
+  public net.minecraft.world.entity.ai.behavior.BehaviorControl<? super net.minecraft.world.entity.LivingEntity> createTask(net.minecraft.world.entity.LivingEntity, com.cobblemon.mod.common.api.ai.BehaviourConfigurationContext);
+  public java.util.List<net.minecraft.world.entity.ai.behavior.BehaviorControl<? super net.minecraft.world.entity.LivingEntity>> createTasks(net.minecraft.world.entity.LivingEntity, com.cobblemon.mod.common.api.ai.BehaviourConfigurationContext);
+  public boolean checkCondition(com.bedrockk.molang.runtime.MoLangRuntime, com.mojang.datafixers.util.Either<com.bedrockk.molang.Expression, com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable>);
+  public com.bedrockk.molang.Expression asSimplifiedExpression(com.mojang.datafixers.util.Either<com.bedrockk.molang.Expression, com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable>, net.minecraft.world.entity.LivingEntity);
+  public com.bedrockk.molang.Expression asExpression(com.mojang.datafixers.util.Either<com.bedrockk.molang.Expression, com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable>);
+  public java.lang.String resolveString(com.mojang.datafixers.util.Either<com.bedrockk.molang.Expression, com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable>, com.bedrockk.molang.runtime.MoLangRuntime);
+  public boolean resolveBoolean(com.mojang.datafixers.util.Either<com.bedrockk.molang.Expression, com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable>, com.bedrockk.molang.runtime.MoLangRuntime);
+  public int resolveInt(com.mojang.datafixers.util.Either<com.bedrockk.molang.Expression, com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable>, com.bedrockk.molang.runtime.MoLangRuntime);
+  public double resolveDouble(com.mojang.datafixers.util.Either<com.bedrockk.molang.Expression, com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable>, com.bedrockk.molang.runtime.MoLangRuntime);
+  public float resolveFloat(com.mojang.datafixers.util.Either<com.bedrockk.molang.Expression, com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable>, com.bedrockk.molang.runtime.MoLangRuntime);
+  public com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable stringVariable(java.lang.String, java.lang.String, java.lang.String);
+  public com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable numberVariable(java.lang.String, java.lang.String, java.lang.Number);
+  public com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable booleanVariable(java.lang.String, java.lang.String, boolean);
+  public com.bedrockk.molang.Expression getVariableExpression(java.lang.String);
+  public boolean resolveBooleanVariable(java.lang.String, com.bedrockk.molang.runtime.MoLangRuntime);
+}

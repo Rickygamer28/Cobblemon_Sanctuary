@@ -1,0 +1,17 @@
+public final class com.cobblemon.mod.common.entity.pokemon.ai.sensors.AlphaLevelMatchingSensor$Companion {
+  private com.cobblemon.mod.common.entity.pokemon.ai.sensors.AlphaLevelMatchingSensor$Companion();
+  public final void applyLevelMatching(com.cobblemon.mod.common.entity.pokemon.PokemonEntity, net.minecraft.server.level.ServerPlayer);
+  private final java.lang.Integer getTargetLevel(com.cobblemon.mod.common.pokemon.Pokemon, net.minecraft.server.level.ServerPlayer);
+  private final int minimumEvolutionLevel(com.cobblemon.mod.common.pokemon.Pokemon);
+  public com.cobblemon.mod.common.entity.pokemon.ai.sensors.AlphaLevelMatchingSensor$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.entity.pokemon.ai.sensors.AlphaLevelMatchingSensor extends net.minecraft.world.entity.ai.sensing.Sensor<com.cobblemon.mod.common.entity.pokemon.PokemonEntity> {
+  public static final com.cobblemon.mod.common.entity.pokemon.ai.sensors.AlphaLevelMatchingSensor$Companion Companion;
+  private java.util.UUID lastMatchingPlayerId;
+  private static final double RADIUS_SQR;
+  public com.cobblemon.mod.common.entity.pokemon.ai.sensors.AlphaLevelMatchingSensor();
+  public java.util.Set<net.minecraft.world.entity.ai.memory.MemoryModuleType<java.util.List<net.minecraft.world.entity.player.Player>>> requires();
+  protected void doTick(net.minecraft.server.level.ServerLevel, com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+  public void doTick(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity);
+  static {};
+}

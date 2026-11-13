@@ -1,0 +1,7 @@
+public final class com.cobblemon.mod.common.api.storage.player.adapter.TMMoveNbtBackend extends com.cobblemon.mod.common.api.storage.player.adapter.NbtBackedPlayerData<com.cobblemon.mod.common.api.tms.TMMoveManager> {
+  private final com.mojang.serialization.Codec<com.cobblemon.mod.common.api.tms.TMMoveManager> codec;
+  private final kotlin.jvm.functions.Function1<java.util.UUID, com.cobblemon.mod.common.api.tms.TMMoveManager> defaultData;
+  public com.cobblemon.mod.common.api.storage.player.adapter.TMMoveNbtBackend();
+  public com.mojang.serialization.Codec<com.cobblemon.mod.common.api.tms.TMMoveManager> getCodec();
+  public kotlin.jvm.functions.Function1<java.util.UUID, com.cobblemon.mod.common.api.tms.TMMoveManager> getDefaultData();
+}

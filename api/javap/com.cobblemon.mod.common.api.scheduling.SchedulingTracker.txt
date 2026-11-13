@@ -1,0 +1,7 @@
+public class com.cobblemon.mod.common.api.scheduling.SchedulingTracker {
+  private final java.util.List<com.cobblemon.mod.common.api.scheduling.ScheduledTask> tasks;
+  public com.cobblemon.mod.common.api.scheduling.SchedulingTracker();
+  public final void clear();
+  public final void update(float);
+  public final com.cobblemon.mod.common.api.scheduling.ScheduledTask addTask(com.cobblemon.mod.common.api.scheduling.ScheduledTask);
+}

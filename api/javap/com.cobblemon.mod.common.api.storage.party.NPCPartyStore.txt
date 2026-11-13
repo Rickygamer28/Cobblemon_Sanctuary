@@ -1,0 +1,5 @@
+public final class com.cobblemon.mod.common.api.storage.party.NPCPartyStore extends com.cobblemon.mod.common.api.storage.party.PartyStore {
+  private final com.cobblemon.mod.common.entity.npc.NPCEntity npc;
+  public com.cobblemon.mod.common.api.storage.party.NPCPartyStore(com.cobblemon.mod.common.entity.npc.NPCEntity);
+  public final com.cobblemon.mod.common.entity.npc.NPCEntity getNpc();
+}

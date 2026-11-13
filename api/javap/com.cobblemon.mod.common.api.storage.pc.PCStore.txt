@@ -1,0 +1,77 @@
+final class com.cobblemon.mod.common.api.storage.pc.PCStore$removeListOfBoxes$1 extends kotlin.jvm.internal.FunctionReferenceImpl implements kotlin.jvm.functions.Function1<com.cobblemon.mod.common.pokemon.Pokemon, kotlin.Unit> {
+  com.cobblemon.mod.common.api.storage.pc.PCStore$removeListOfBoxes$1(java.lang.Object);
+  public final void invoke(com.cobblemon.mod.common.pokemon.Pokemon);
+  public java.lang.Object invoke(java.lang.Object);
+}
+final class com.cobblemon.mod.common.api.storage.pc.PCStore$resize$1 extends kotlin.jvm.internal.FunctionReferenceImpl implements kotlin.jvm.functions.Function1<com.cobblemon.mod.common.pokemon.Pokemon, kotlin.Unit> {
+  com.cobblemon.mod.common.api.storage.pc.PCStore$resize$1(java.lang.Object);
+  public final void invoke(com.cobblemon.mod.common.pokemon.Pokemon);
+  public java.lang.Object invoke(java.lang.Object);
+}
+public class com.cobblemon.mod.common.api.storage.pc.PCStore extends com.cobblemon.mod.common.api.storage.PokemonStore<com.cobblemon.mod.common.api.storage.pc.PCPosition> {
+  private final java.util.UUID uuid;
+  private final net.minecraft.network.chat.MutableComponent name;
+  private final java.util.List<com.cobblemon.mod.common.api.storage.pc.PCBox> boxes;
+  private boolean lockedSize;
+  private final com.cobblemon.mod.common.api.storage.BottomlessStore backupStore;
+  private final java.util.Set<java.util.UUID> observingUUIDs;
+  private final java.util.Set<net.minecraft.resources.ResourceLocation> unlockedWallpapers;
+  private final java.util.Set<net.minecraft.resources.ResourceLocation> unseenWallpapers;
+  private final com.cobblemon.mod.common.api.molang.ObjectValue<com.cobblemon.mod.common.api.storage.pc.PCStore> struct;
+  private final com.cobblemon.mod.common.api.reactive.SimpleObservable<kotlin.Unit> pcChangeObservable;
+  public com.cobblemon.mod.common.api.storage.pc.PCStore(java.util.UUID, net.minecraft.network.chat.MutableComponent);
+  public final java.util.UUID getUuid();
+  public final net.minecraft.network.chat.MutableComponent getName();
+  public com.cobblemon.mod.common.api.storage.pc.PCStore(java.util.UUID);
+  public final java.util.List<com.cobblemon.mod.common.api.storage.pc.PCBox> getBoxes();
+  protected final boolean getLockedSize();
+  protected final void setLockedSize(boolean);
+  public final com.cobblemon.mod.common.api.storage.BottomlessStore getBackupStore();
+  public final java.util.Set<java.util.UUID> getObservingUUIDs();
+  public final java.util.Set<net.minecraft.resources.ResourceLocation> getUnlockedWallpapers();
+  public final java.util.Set<net.minecraft.resources.ResourceLocation> getUnseenWallpapers();
+  public java.util.Iterator<com.cobblemon.mod.common.pokemon.Pokemon> iterator();
+  public java.util.List<net.minecraft.server.level.ServerPlayer> getObservingPlayers();
+  public final com.cobblemon.mod.common.api.molang.ObjectValue<com.cobblemon.mod.common.api.storage.pc.PCStore> getStruct();
+  public final void addObserver(net.minecraft.server.level.ServerPlayer);
+  public final void removeObserver(java.util.UUID);
+  public final com.cobblemon.mod.common.api.reactive.SimpleObservable<kotlin.Unit> getPcChangeObservable();
+  public com.cobblemon.mod.common.api.storage.pc.PCPosition getFirstAvailablePosition();
+  public boolean isValidPosition(com.cobblemon.mod.common.api.storage.pc.PCPosition);
+  public void sendTo(net.minecraft.server.level.ServerPlayer);
+  public void initialize();
+  public final void relocateEvictedBoxPokemon(com.cobblemon.mod.common.pokemon.Pokemon);
+  public final void resize(int, boolean, kotlin.jvm.functions.Function1<? super com.cobblemon.mod.common.pokemon.Pokemon, kotlin.Unit>);
+  public static void resize$default(com.cobblemon.mod.common.api.storage.pc.PCStore, int, boolean, kotlin.jvm.functions.Function1, int, java.lang.Object);
+  public final void removeListOfBoxes(java.util.List<? extends com.cobblemon.mod.common.api.storage.pc.PCBox>, boolean, kotlin.jvm.functions.Function1<? super com.cobblemon.mod.common.pokemon.Pokemon, kotlin.Unit>);
+  public static void removeListOfBoxes$default(com.cobblemon.mod.common.api.storage.pc.PCStore, java.util.List, boolean, kotlin.jvm.functions.Function1, int, java.lang.Object);
+  public final void tryRestoreBackedUpPokemon();
+  public net.minecraft.nbt.CompoundTag saveToNBT(net.minecraft.nbt.CompoundTag, net.minecraft.core.RegistryAccess);
+  public com.cobblemon.mod.common.api.storage.PokemonStore<com.cobblemon.mod.common.api.storage.pc.PCPosition> loadFromNBT(net.minecraft.nbt.CompoundTag, net.minecraft.core.RegistryAccess);
+  public final void removeDuplicates();
+  public com.google.gson.JsonObject saveToJSON(com.google.gson.JsonObject, net.minecraft.core.RegistryAccess);
+  public com.cobblemon.mod.common.api.storage.PokemonStore<com.cobblemon.mod.common.api.storage.pc.PCPosition> loadFromJSON(com.google.gson.JsonObject, net.minecraft.core.RegistryAccess);
+  public void set(com.cobblemon.mod.common.api.storage.pc.PCPosition, com.cobblemon.mod.common.pokemon.Pokemon);
+  public boolean remove(com.cobblemon.mod.common.pokemon.Pokemon);
+  public void swap(com.cobblemon.mod.common.api.storage.pc.PCPosition, com.cobblemon.mod.common.api.storage.pc.PCPosition);
+  public com.cobblemon.mod.common.api.storage.StoreCoordinates<com.cobblemon.mod.common.api.storage.pc.PCPosition> loadPositionFromNBT(net.minecraft.nbt.CompoundTag);
+  public void savePositionToNBT(com.cobblemon.mod.common.api.storage.pc.PCPosition, net.minecraft.nbt.CompoundTag);
+  public com.cobblemon.mod.common.api.reactive.SimpleObservable<kotlin.Unit> getAnyChangeObservable();
+  protected void setAtPosition(com.cobblemon.mod.common.api.storage.pc.PCPosition, com.cobblemon.mod.common.pokemon.Pokemon);
+  public com.cobblemon.mod.common.pokemon.Pokemon get(com.cobblemon.mod.common.api.storage.pc.PCPosition);
+  public void onPokemonChanged(com.cobblemon.mod.common.pokemon.Pokemon);
+  public final void clearPC();
+  public final void markWallpapersSeen(java.util.Set<net.minecraft.resources.ResourceLocation>);
+  public final boolean unlockWallpaper(net.minecraft.resources.ResourceLocation, boolean);
+  public static boolean unlockWallpaper$default(com.cobblemon.mod.common.api.storage.pc.PCStore, net.minecraft.resources.ResourceLocation, boolean, int, java.lang.Object);
+  private static final com.cobblemon.mod.common.pokemon.Pokemon set$lambda$0(com.cobblemon.mod.common.pokemon.Pokemon, net.minecraft.core.RegistryAccess);
+  public java.lang.Iterable getObservingPlayers();
+  public com.cobblemon.mod.common.api.storage.StorePosition getFirstAvailablePosition();
+  public boolean isValidPosition(com.cobblemon.mod.common.api.storage.StorePosition);
+  public void set(com.cobblemon.mod.common.api.storage.StorePosition, com.cobblemon.mod.common.pokemon.Pokemon);
+  public void swap(com.cobblemon.mod.common.api.storage.StorePosition, com.cobblemon.mod.common.api.storage.StorePosition);
+  public void savePositionToNBT(com.cobblemon.mod.common.api.storage.StorePosition, net.minecraft.nbt.CompoundTag);
+  public com.cobblemon.mod.common.api.reactive.Observable getAnyChangeObservable();
+  public void setAtPosition(com.cobblemon.mod.common.api.storage.StorePosition, com.cobblemon.mod.common.pokemon.Pokemon);
+  public com.cobblemon.mod.common.pokemon.Pokemon get(com.cobblemon.mod.common.api.storage.StorePosition);
+}

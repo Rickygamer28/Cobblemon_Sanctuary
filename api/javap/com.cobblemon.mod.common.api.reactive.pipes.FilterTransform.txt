@@ -1,0 +1,6 @@
+public final class com.cobblemon.mod.common.api.reactive.pipes.FilterTransform<I> implements com.cobblemon.mod.common.api.reactive.Transform<I, I> {
+  private final kotlin.jvm.functions.Function1<I, java.lang.Boolean> predicate;
+  public com.cobblemon.mod.common.api.reactive.pipes.FilterTransform(kotlin.jvm.functions.Function1<? super I, java.lang.Boolean>);
+  public I invoke(I);
+  public java.lang.Void noTransform(boolean);
+}

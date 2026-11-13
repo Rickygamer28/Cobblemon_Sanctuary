@@ -1,0 +1,13 @@
+neoforge=21.1.266
+moddev=2.0.148
+cobblemon_modrinth_id=xsVHrAsY
+cobblemon_version=1.8.4NF
+recent cobblemon neoforge versions:
+  1.8.4NF  xsVHrAsY
+  1.8.3NF  Gt09DDui
+  1.8.2  9IXh9584
+  1.8.1  7otgw3aH
+  1.8.0  2oL01rSF
+  1.7.3  S1TrAn8c
+  1.7.2  1f6yhGfC
+  1.7.1  Uz1QF4Md

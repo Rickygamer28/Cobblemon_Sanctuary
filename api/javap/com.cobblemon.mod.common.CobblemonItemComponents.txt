@@ -1,0 +1,23 @@
+public final class com.cobblemon.mod.common.CobblemonItemComponents extends com.cobblemon.mod.common.platform.PlatformRegistry<net.minecraft.core.Registry<net.minecraft.core.component.DataComponentType<?>>, net.minecraft.resources.ResourceKey<net.minecraft.core.Registry<net.minecraft.core.component.DataComponentType<?>>>, net.minecraft.core.component.DataComponentType<?>> {
+  public static final com.cobblemon.mod.common.CobblemonItemComponents INSTANCE;
+  public static final net.minecraft.core.component.DataComponentType<com.cobblemon.mod.common.item.components.PokemonItemComponent> POKEMON_ITEM;
+  public static final net.minecraft.core.component.DataComponentType<com.cobblemon.mod.common.item.components.HeldItemEffectComponent> HELD_ITEM_EFFECT;
+  public static final net.minecraft.core.component.DataComponentType<com.cobblemon.mod.common.item.components.RodBaitComponent> BAIT;
+  public static final net.minecraft.core.component.DataComponentType<com.cobblemon.mod.common.item.components.PotComponent> POT_DATA;
+  public static final net.minecraft.core.component.DataComponentType<com.cobblemon.mod.common.item.components.BaitEffectsComponent> BAIT_EFFECTS;
+  public static final net.minecraft.core.component.DataComponentType<com.cobblemon.mod.common.item.components.FlavourComponent> FLAVOUR;
+  public static final net.minecraft.core.component.DataComponentType<com.cobblemon.mod.common.item.components.RideBoostsComponent> RIDE_BOOST;
+  public static final net.minecraft.core.component.DataComponentType<com.cobblemon.mod.common.item.components.FoodColourComponent> FOOD_COLOUR;
+  public static final net.minecraft.core.component.DataComponentType<com.cobblemon.mod.common.item.components.TMMoveComponent> TM_MOVE;
+  public static final net.minecraft.core.component.DataComponentType<com.cobblemon.mod.common.item.components.IngredientComponent> INGREDIENT;
+  public static final net.minecraft.core.component.DataComponentType<com.cobblemon.mod.common.item.components.FoodComponent> FOOD;
+  public static final net.minecraft.core.component.DataComponentType<com.cobblemon.mod.common.item.components.MobEffectsComponent> MOB_EFFECTS;
+  public static final net.minecraft.core.component.DataComponentType<java.lang.Boolean> CRAFTED;
+  private static final net.minecraft.core.Registry<net.minecraft.core.component.DataComponentType<?>> registry;
+  private static final net.minecraft.resources.ResourceKey<net.minecraft.core.Registry<net.minecraft.core.component.DataComponentType<?>>> resourceKey;
+  private com.cobblemon.mod.common.CobblemonItemComponents();
+  public final void register();
+  public net.minecraft.core.Registry<net.minecraft.core.component.DataComponentType<?>> getRegistry();
+  public net.minecraft.resources.ResourceKey<net.minecraft.core.Registry<net.minecraft.core.component.DataComponentType<?>>> getResourceKey();
+  static {};
+}

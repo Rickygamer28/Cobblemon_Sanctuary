@@ -1,0 +1,15 @@
+public final class com.cobblemon.mod.common.api.interaction.ScriptEffect$Companion {
+  private com.cobblemon.mod.common.api.interaction.ScriptEffect$Companion();
+  public final java.lang.String getID();
+  public com.cobblemon.mod.common.api.interaction.ScriptEffect$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.api.interaction.ScriptEffect implements com.cobblemon.mod.common.api.interaction.InteractionEffect {
+  public static final com.cobblemon.mod.common.api.interaction.ScriptEffect$Companion Companion;
+  private final com.cobblemon.mod.common.api.molang.ExpressionLike script;
+  private static final java.lang.String ID;
+  public com.cobblemon.mod.common.api.interaction.ScriptEffect(com.cobblemon.mod.common.api.molang.ExpressionLike);
+  public final com.cobblemon.mod.common.api.molang.ExpressionLike getScript();
+  public void applyEffect(com.cobblemon.mod.common.entity.pokemon.PokemonEntity, net.minecraft.server.level.ServerPlayer);
+  public static final java.lang.String access$getID$cp();
+  static {};
+}

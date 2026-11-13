@@ -1,0 +1,82 @@
+public final class com.cobblemon.mod.common.block.entity.PokemonPastureBlockEntity$Companion {
+  private com.cobblemon.mod.common.block.entity.PokemonPastureBlockEntity$Companion();
+  public final net.minecraft.world.level.block.entity.BlockEntityTicker<com.cobblemon.mod.common.block.entity.PokemonPastureBlockEntity> getTICKER$common();
+  public com.cobblemon.mod.common.block.entity.PokemonPastureBlockEntity$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public class com.cobblemon.mod.common.block.entity.PokemonPastureBlockEntity$Tethering {
+  private final net.minecraft.core.BlockPos minRoamPos;
+  private final net.minecraft.core.BlockPos maxRoamPos;
+  private final java.util.UUID playerId;
+  private final java.lang.String playerName;
+  private final java.util.UUID tetheringId;
+  private final java.util.UUID pokemonId;
+  private final java.util.UUID pcId;
+  private final int entityId;
+  private final net.minecraft.core.BlockPos pasturePos;
+  private final net.minecraft.world.phys.AABB box;
+  public com.cobblemon.mod.common.block.entity.PokemonPastureBlockEntity$Tethering(net.minecraft.core.BlockPos, net.minecraft.core.BlockPos, java.util.UUID, java.lang.String, java.util.UUID, java.util.UUID, java.util.UUID, int, net.minecraft.core.BlockPos);
+  public final net.minecraft.core.BlockPos getMinRoamPos();
+  public final net.minecraft.core.BlockPos getMaxRoamPos();
+  public final java.util.UUID getPlayerId();
+  public final java.lang.String getPlayerName();
+  public final java.util.UUID getTetheringId();
+  public final java.util.UUID getPokemonId();
+  public final java.util.UUID getPcId();
+  public final int getEntityId();
+  public final net.minecraft.core.BlockPos getPasturePos();
+  public final com.cobblemon.mod.common.pokemon.Pokemon getPokemon();
+  public final net.minecraft.world.phys.AABB getBox();
+  public boolean canRoamTo(net.minecraft.core.BlockPos);
+  public final com.cobblemon.mod.common.net.messages.client.pasture.OpenPasturePacket$PasturePokemonDataDTO toDTO(net.minecraft.server.level.ServerPlayer);
+}
+final class com.cobblemon.mod.common.block.entity.PokemonPastureBlockEntity$getInRangeViewerCount$1 extends kotlin.jvm.internal.FunctionReferenceImpl implements kotlin.jvm.functions.Function1<net.minecraft.server.level.ServerPlayer, java.lang.Boolean> {
+  com.cobblemon.mod.common.block.entity.PokemonPastureBlockEntity$getInRangeViewerCount$1(java.lang.Object);
+  public final java.lang.Boolean invoke(net.minecraft.server.level.ServerPlayer);
+  public java.lang.Object invoke(java.lang.Object);
+}
+public final class com.cobblemon.mod.common.block.entity.PokemonPastureBlockEntity extends net.minecraft.world.level.block.entity.BlockEntity {
+  public static final com.cobblemon.mod.common.block.entity.PokemonPastureBlockEntity$Companion Companion;
+  private int ticksUntilCheck;
+  private final java.util.List<com.cobblemon.mod.common.block.entity.PokemonPastureBlockEntity$Tethering> tetheredPokemon;
+  private net.minecraft.core.BlockPos minRoamPos;
+  private net.minecraft.core.BlockPos maxRoamPos;
+  private java.util.UUID ownerId;
+  private java.lang.String ownerName;
+  private static final net.minecraft.world.level.block.entity.BlockEntityTicker<com.cobblemon.mod.common.block.entity.PokemonPastureBlockEntity> TICKER;
+  public com.cobblemon.mod.common.block.entity.PokemonPastureBlockEntity(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);
+  public final int getTicksUntilCheck();
+  public final void setTicksUntilCheck(int);
+  public final java.util.List<com.cobblemon.mod.common.block.entity.PokemonPastureBlockEntity$Tethering> getTetheredPokemon();
+  public final net.minecraft.core.BlockPos getMinRoamPos();
+  public final void setMinRoamPos(net.minecraft.core.BlockPos);
+  public final net.minecraft.core.BlockPos getMaxRoamPos();
+  public final void setMaxRoamPos(net.minecraft.core.BlockPos);
+  public final java.util.UUID getOwnerId();
+  public final void setOwnerId(java.util.UUID);
+  public final java.lang.String getOwnerName();
+  public final void setOwnerName(java.lang.String);
+  public final int getMaxTethered();
+  public final boolean canAddPokemon(net.minecraft.server.level.ServerPlayer, com.cobblemon.mod.common.pokemon.Pokemon, int);
+  public final boolean tether(net.minecraft.server.level.ServerPlayer, com.cobblemon.mod.common.pokemon.Pokemon, net.minecraft.core.Direction);
+  private final void togglePastureOn(boolean);
+  public final boolean isSafeFloor(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+  public final net.minecraft.core.BlockPos makeSuitableY(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, com.cobblemon.mod.common.entity.pokemon.PokemonEntity, net.minecraft.world.phys.AABB);
+  public final void checkPokemon();
+  public final void onBroken();
+  public final void releasePokemon(java.util.UUID);
+  public final java.util.List<java.util.UUID> releaseAllPokemon(java.util.UUID);
+  private final int getInRangeViewerCount(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, double);
+  static int getInRangeViewerCount$default(com.cobblemon.mod.common.block.entity.PokemonPastureBlockEntity, net.minecraft.world.level.Level, net.minecraft.core.BlockPos, double, int, java.lang.Object);
+  private final boolean isPlayerViewing(net.minecraft.server.level.ServerPlayer);
+  protected void loadAdditional(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);
+  protected void saveAdditional(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);
+  private static final boolean canAddPokemon$lambda$1(com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+  private static final boolean canAddPokemon$lambda$2(kotlin.jvm.functions.Function1, java.lang.Object);
+  private static final kotlin.Unit tether$lambda$0(com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+  private static final kotlin.Unit tether$lambda$0$0(com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+  private static final boolean getInRangeViewerCount$lambda$0(kotlin.jvm.functions.Function1, java.lang.Object);
+  private static final void TICKER$lambda$0(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, com.cobblemon.mod.common.block.entity.PokemonPastureBlockEntity);
+  public static final net.minecraft.world.level.block.entity.BlockEntityTicker access$getTICKER$cp();
+  public static final boolean access$isPlayerViewing(com.cobblemon.mod.common.block.entity.PokemonPastureBlockEntity, net.minecraft.server.level.ServerPlayer);
+  static {};
+}

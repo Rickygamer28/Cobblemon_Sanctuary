@@ -1,0 +1,12 @@
+public final class com.cobblemon.mod.common.api.pokemon.requirement.EntityQueryRequirement$DefaultImpls {
+  public static boolean check(com.cobblemon.mod.common.api.pokemon.requirement.EntityQueryRequirement, com.cobblemon.mod.common.pokemon.Pokemon);
+  public static net.minecraft.resources.ResourceLocation getPokedexIcon(com.cobblemon.mod.common.api.pokemon.requirement.EntityQueryRequirement);
+  public static java.lang.String getPokedexTooltip(com.cobblemon.mod.common.api.pokemon.requirement.EntityQueryRequirement);
+}
+public interface com.cobblemon.mod.common.api.pokemon.requirement.EntityQueryRequirement extends com.cobblemon.mod.common.api.pokemon.requirement.Requirement {
+  public default boolean check(com.cobblemon.mod.common.pokemon.Pokemon);
+  public abstract boolean check(com.cobblemon.mod.common.pokemon.Pokemon, net.minecraft.world.entity.LivingEntity);
+  public static boolean access$check$jd(com.cobblemon.mod.common.api.pokemon.requirement.EntityQueryRequirement, com.cobblemon.mod.common.pokemon.Pokemon);
+  public static net.minecraft.resources.ResourceLocation access$getPokedexIcon$jd(com.cobblemon.mod.common.api.pokemon.requirement.EntityQueryRequirement);
+  public static java.lang.String access$getPokedexTooltip$jd(com.cobblemon.mod.common.api.pokemon.requirement.EntityQueryRequirement);
+}

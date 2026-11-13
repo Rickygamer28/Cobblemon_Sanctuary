@@ -1,0 +1,12 @@
+public final class com.cobblemon.mod.common.api.pasture.PastureLinkManager {
+  public static final com.cobblemon.mod.common.api.pasture.PastureLinkManager INSTANCE;
+  private static final java.util.Map<java.util.UUID, com.cobblemon.mod.common.api.pasture.PastureLink> links;
+  private com.cobblemon.mod.common.api.pasture.PastureLinkManager();
+  public final java.util.Map<java.util.UUID, com.cobblemon.mod.common.api.pasture.PastureLink> getLinks();
+  public static final com.cobblemon.mod.common.api.pasture.PastureLink getLinkByPlayerId(java.util.UUID);
+  public static final void createLink(java.util.UUID, com.cobblemon.mod.common.api.pasture.PastureLink);
+  public static final com.cobblemon.mod.common.api.pasture.PastureLink getLinkByPlayer(net.minecraft.server.level.ServerPlayer);
+  public static final void removeAt(net.minecraft.server.level.ServerLevel, net.minecraft.core.BlockPos);
+  private static final boolean removeAt$lambda$0(net.minecraft.server.level.ServerLevel, net.minecraft.core.BlockPos, java.util.Map$Entry);
+  static {};
+}

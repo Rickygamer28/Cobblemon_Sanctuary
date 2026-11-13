@@ -1,0 +1,25 @@
+public final class com.cobblemon.mod.common.api.scheduling.SchedulingFunctionsKt {
+  public static final void after(int, float, boolean, kotlin.jvm.functions.Function0<kotlin.Unit>);
+  public static void after$default(int, float, boolean, kotlin.jvm.functions.Function0, int, java.lang.Object);
+  public static final java.util.concurrent.CompletableFuture<kotlin.Unit> delayedFuture(int, float, boolean);
+  public static java.util.concurrent.CompletableFuture delayedFuture$default(int, float, boolean, int, java.lang.Object);
+  public static final com.cobblemon.mod.common.api.scheduling.ScheduledTask afterOnServer(float, kotlin.jvm.functions.Function0<kotlin.Unit>);
+  public static final com.cobblemon.mod.common.api.scheduling.ScheduledTask afterOnServer(int, net.minecraft.world.level.Level, kotlin.jvm.functions.Function0<kotlin.Unit>);
+  public static final com.cobblemon.mod.common.api.scheduling.ScheduledTask afterOnClient(float, kotlin.jvm.functions.Function0<kotlin.Unit>);
+  public static final com.cobblemon.mod.common.api.scheduling.ScheduledTask afterOnClient(int, net.minecraft.world.level.Level, kotlin.jvm.functions.Function0<kotlin.Unit>);
+  public static final com.cobblemon.mod.common.api.scheduling.ScheduledTask lerp(float, boolean, kotlin.jvm.functions.Function1<? super java.lang.Float, kotlin.Unit>);
+  public static com.cobblemon.mod.common.api.scheduling.ScheduledTask lerp$default(float, boolean, kotlin.jvm.functions.Function1, int, java.lang.Object);
+  public static final com.cobblemon.mod.common.api.scheduling.ScheduledTask lerpOnServer(float, kotlin.jvm.functions.Function1<? super java.lang.Float, kotlin.Unit>);
+  public static com.cobblemon.mod.common.api.scheduling.ScheduledTask lerpOnServer$default(float, kotlin.jvm.functions.Function1, int, java.lang.Object);
+  public static final com.cobblemon.mod.common.api.scheduling.ScheduledTask lerpOnClient(float, kotlin.jvm.functions.Function1<? super java.lang.Float, kotlin.Unit>);
+  public static com.cobblemon.mod.common.api.scheduling.ScheduledTask lerpOnClient$default(float, kotlin.jvm.functions.Function1, int, java.lang.Object);
+  public static final com.cobblemon.mod.common.api.scheduling.ScheduledTask$Builder taskBuilder();
+  public static final java.util.concurrent.CompletableFuture<kotlin.Unit> delayedFuture(float);
+  public static final void after(int, float, kotlin.jvm.functions.Function0<kotlin.Unit>);
+  public static final void after(int, kotlin.jvm.functions.Function0<kotlin.Unit>);
+  public static final void after(kotlin.jvm.functions.Function0<kotlin.Unit>);
+  public static final com.cobblemon.mod.common.api.scheduling.ScheduledTask lerpOnServer(kotlin.jvm.functions.Function1<? super java.lang.Float, kotlin.Unit>);
+  public static final com.cobblemon.mod.common.api.scheduling.ScheduledTask lerpOnClient(kotlin.jvm.functions.Function1<? super java.lang.Float, kotlin.Unit>);
+  private static final kotlin.Unit delayedFuture$lambda$0(java.util.concurrent.CompletableFuture);
+  private static final kotlin.Unit delayedFuture$lambda$1(java.util.concurrent.CompletableFuture);
+}

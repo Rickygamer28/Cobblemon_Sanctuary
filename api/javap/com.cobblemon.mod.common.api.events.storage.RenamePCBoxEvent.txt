@@ -1,0 +1,24 @@
+public final class com.cobblemon.mod.common.api.events.storage.RenamePCBoxEvent$Post implements com.cobblemon.mod.common.api.events.storage.RenamePCBoxEvent {
+  private final net.minecraft.server.level.ServerPlayer player;
+  private final com.cobblemon.mod.common.api.storage.pc.PCBox box;
+  private final java.lang.String name;
+  public com.cobblemon.mod.common.api.events.storage.RenamePCBoxEvent$Post(net.minecraft.server.level.ServerPlayer, com.cobblemon.mod.common.api.storage.pc.PCBox, java.lang.String);
+  public net.minecraft.server.level.ServerPlayer getPlayer();
+  public com.cobblemon.mod.common.api.storage.pc.PCBox getBox();
+  public java.lang.String getName();
+}
+public final class com.cobblemon.mod.common.api.events.storage.RenamePCBoxEvent$Pre extends com.cobblemon.mod.common.api.events.Cancelable implements com.cobblemon.mod.common.api.events.storage.RenamePCBoxEvent {
+  private final net.minecraft.server.level.ServerPlayer player;
+  private final com.cobblemon.mod.common.api.storage.pc.PCBox box;
+  private java.lang.String name;
+  public com.cobblemon.mod.common.api.events.storage.RenamePCBoxEvent$Pre(net.minecraft.server.level.ServerPlayer, com.cobblemon.mod.common.api.storage.pc.PCBox, java.lang.String);
+  public net.minecraft.server.level.ServerPlayer getPlayer();
+  public com.cobblemon.mod.common.api.storage.pc.PCBox getBox();
+  public java.lang.String getName();
+  public void setName(java.lang.String);
+}
+public interface com.cobblemon.mod.common.api.events.storage.RenamePCBoxEvent {
+  public abstract net.minecraft.server.level.ServerPlayer getPlayer();
+  public abstract com.cobblemon.mod.common.api.storage.pc.PCBox getBox();
+  public abstract java.lang.String getName();
+}

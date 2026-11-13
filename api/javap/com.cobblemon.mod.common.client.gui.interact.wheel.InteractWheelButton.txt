@@ -1,0 +1,39 @@
+public final class com.cobblemon.mod.common.client.gui.interact.wheel.InteractWheelButton$Companion$WhenMappings {
+  public static final int[] $EnumSwitchMapping$0;
+  static {};
+}
+public final class com.cobblemon.mod.common.client.gui.interact.wheel.InteractWheelButton$Companion {
+  private com.cobblemon.mod.common.client.gui.interact.wheel.InteractWheelButton$Companion();
+  private final kotlin.Pair<java.lang.Integer, java.lang.Integer> getButtonSize(com.cobblemon.mod.common.client.gui.interact.wheel.Orientation);
+  public static final kotlin.Pair access$getButtonSize(com.cobblemon.mod.common.client.gui.interact.wheel.InteractWheelButton$Companion, com.cobblemon.mod.common.client.gui.interact.wheel.Orientation);
+  public com.cobblemon.mod.common.client.gui.interact.wheel.InteractWheelButton$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.client.gui.interact.wheel.InteractWheelButton$WhenMappings {
+  public static final int[] $EnumSwitchMapping$0;
+  static {};
+}
+public final class com.cobblemon.mod.common.client.gui.interact.wheel.InteractWheelButton extends net.minecraft.client.gui.components.Button implements com.cobblemon.mod.common.client.gui.CobblemonRenderable {
+  public static final com.cobblemon.mod.common.client.gui.interact.wheel.InteractWheelButton$Companion Companion;
+  private final net.minecraft.resources.ResourceLocation iconResource;
+  private final net.minecraft.resources.ResourceLocation secondaryIconResource;
+  private final com.cobblemon.mod.common.client.gui.interact.wheel.Orientation orientation;
+  private final java.lang.String tooltipText;
+  private final boolean isEnabled;
+  private final kotlin.jvm.functions.Function0<org.joml.Vector3f> colour;
+  private final kotlin.jvm.functions.Function2<java.lang.Double, java.lang.Double, java.lang.Boolean> canHover;
+  private float passedTicks;
+  private final int blinkInterval;
+  public static final int ICON_SIZE;
+  public static final float ICON_SCALE;
+  private static final java.util.Map<com.cobblemon.mod.common.client.gui.interact.wheel.Orientation, net.minecraft.resources.ResourceLocation> buttonResources;
+  public com.cobblemon.mod.common.client.gui.interact.wheel.InteractWheelButton(net.minecraft.resources.ResourceLocation, net.minecraft.resources.ResourceLocation, com.cobblemon.mod.common.client.gui.interact.wheel.Orientation, java.lang.String, int, int, boolean, kotlin.jvm.functions.Function0<? extends org.joml.Vector3f>, net.minecraft.client.gui.components.Button$OnPress, kotlin.jvm.functions.Function2<? super java.lang.Double, ? super java.lang.Double, java.lang.Boolean>);
+  public com.cobblemon.mod.common.client.gui.interact.wheel.InteractWheelButton(net.minecraft.resources.ResourceLocation, net.minecraft.resources.ResourceLocation, com.cobblemon.mod.common.client.gui.interact.wheel.Orientation, java.lang.String, int, int, boolean, kotlin.jvm.functions.Function0, net.minecraft.client.gui.components.Button$OnPress, kotlin.jvm.functions.Function2, int, kotlin.jvm.internal.DefaultConstructorMarker);
+  protected void renderWidget(net.minecraft.client.gui.GuiGraphics, int, int, float);
+  private final kotlin.Pair<java.lang.Float, java.lang.Float> getIconPosition(com.cobblemon.mod.common.client.gui.interact.wheel.Orientation);
+  private final kotlin.Pair<net.minecraft.client.gui.navigation.ScreenRectangle, net.minecraft.client.gui.navigation.ScreenRectangle> getOverLapZone(com.cobblemon.mod.common.client.gui.interact.wheel.Orientation);
+  public void playDownSound(net.minecraft.client.sounds.SoundManager);
+  private final boolean isHovered(float, float);
+  public boolean mouseClicked(double, double, int);
+  public net.minecraft.client.gui.components.Tooltip getTooltip();
+  static {};
+}

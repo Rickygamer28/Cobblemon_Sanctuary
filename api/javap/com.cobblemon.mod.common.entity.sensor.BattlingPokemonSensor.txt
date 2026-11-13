@@ -1,0 +1,14 @@
+public final class com.cobblemon.mod.common.entity.sensor.BattlingPokemonSensor$Companion {
+  private com.cobblemon.mod.common.entity.sensor.BattlingPokemonSensor$Companion();
+  public final java.util.Set<net.minecraft.world.entity.ai.memory.MemoryModuleType<?>> getOUTPUT_MEMORY_MODULES();
+  public com.cobblemon.mod.common.entity.sensor.BattlingPokemonSensor$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.entity.sensor.BattlingPokemonSensor extends net.minecraft.world.entity.ai.sensing.Sensor<net.minecraft.world.entity.LivingEntity> {
+  public static final com.cobblemon.mod.common.entity.sensor.BattlingPokemonSensor$Companion Companion;
+  private static final java.util.Set<net.minecraft.world.entity.ai.memory.MemoryModuleType<?>> OUTPUT_MEMORY_MODULES;
+  public com.cobblemon.mod.common.entity.sensor.BattlingPokemonSensor();
+  public java.util.Set<net.minecraft.world.entity.ai.memory.MemoryModuleType<?>> requires();
+  protected void doTick(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity);
+  public static final java.util.Set access$getOUTPUT_MEMORY_MODULES$cp();
+  static {};
+}

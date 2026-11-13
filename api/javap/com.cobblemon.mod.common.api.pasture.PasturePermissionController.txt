@@ -1,0 +1,3 @@
+public interface com.cobblemon.mod.common.api.pasture.PasturePermissionController {
+  public abstract com.cobblemon.mod.common.api.pasture.PasturePermissions permit(net.minecraft.server.level.ServerPlayer, com.cobblemon.mod.common.block.entity.PokemonPastureBlockEntity);
+}

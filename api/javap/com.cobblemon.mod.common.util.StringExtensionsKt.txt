@@ -1,0 +1,10 @@
+public final class com.cobblemon.mod.common.util.StringExtensionsKt {
+  public static final char QUOTE;
+  public static final java.util.List<kotlin.Pair<java.lang.String, java.lang.String>> splitMap(java.lang.String, java.lang.String, java.lang.String);
+  public static final <T, U extends net.minecraft.core.Registry<T>> com.mojang.datafixers.util.Either<net.minecraft.resources.ResourceLocation, net.minecraft.tags.TagKey<T>> asIdentifierOrTag(java.lang.String, net.minecraft.resources.ResourceKey<U>);
+  public static final boolean isLaterVersion(java.lang.String, java.lang.String);
+  public static final com.cobblemon.mod.common.api.pokemon.PokemonProperties toProperties(java.lang.String);
+  public static final com.cobblemon.mod.common.pokemon.Pokemon toPokemon(java.lang.String);
+  public static final java.lang.String endWith(java.lang.String, java.lang.String);
+  public static final java.lang.String startWith(java.lang.String, java.lang.String);
+}

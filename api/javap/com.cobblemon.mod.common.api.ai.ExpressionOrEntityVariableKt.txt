@@ -1,0 +1,3 @@
+public final class com.cobblemon.mod.common.api.ai.ExpressionOrEntityVariableKt {
+  public static final java.util.List<com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable> asVariables(java.util.List<? extends com.mojang.datafixers.util.Either<com.bedrockk.molang.Expression, com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable>>);
+}

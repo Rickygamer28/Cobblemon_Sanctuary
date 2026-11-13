@@ -1,0 +1,7 @@
+public final class com.cobblemon.mod.common.client.render.models.blockbench.animation.WaveSegment {
+  private final net.minecraft.client.model.geom.ModelPart modelPart;
+  private final float length;
+  public com.cobblemon.mod.common.client.render.models.blockbench.animation.WaveSegment(net.minecraft.client.model.geom.ModelPart, float);
+  public final net.minecraft.client.model.geom.ModelPart getModelPart();
+  public final float getLength();
+}

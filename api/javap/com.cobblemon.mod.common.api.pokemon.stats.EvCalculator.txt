@@ -1,0 +1,8 @@
+public final class com.cobblemon.mod.common.api.pokemon.stats.EvCalculator$DefaultImpls {
+  public static java.util.Map<com.cobblemon.mod.common.api.pokemon.stats.Stat, java.lang.Integer> calculate(com.cobblemon.mod.common.api.pokemon.stats.EvCalculator, com.cobblemon.mod.common.battles.pokemon.BattlePokemon);
+}
+public interface com.cobblemon.mod.common.api.pokemon.stats.EvCalculator {
+  public default java.util.Map<com.cobblemon.mod.common.api.pokemon.stats.Stat, java.lang.Integer> calculate(com.cobblemon.mod.common.battles.pokemon.BattlePokemon);
+  public abstract java.util.Map<com.cobblemon.mod.common.api.pokemon.stats.Stat, java.lang.Integer> calculate(com.cobblemon.mod.common.battles.pokemon.BattlePokemon, com.cobblemon.mod.common.battles.pokemon.BattlePokemon);
+  public static java.util.Map access$calculate$jd(com.cobblemon.mod.common.api.pokemon.stats.EvCalculator, com.cobblemon.mod.common.battles.pokemon.BattlePokemon);
+}

@@ -1,0 +1,8 @@
+public final class com.cobblemon.mod.common.CobblemonRecipeBookTypes {
+  public static final com.cobblemon.mod.common.CobblemonRecipeBookTypes INSTANCE;
+  public static final java.lang.String COOKING_POT_NAME;
+  private static final net.minecraft.world.inventory.RecipeBookType COOKING_POT;
+  private com.cobblemon.mod.common.CobblemonRecipeBookTypes();
+  public final net.minecraft.world.inventory.RecipeBookType getCOOKING_POT();
+  static {};
+}

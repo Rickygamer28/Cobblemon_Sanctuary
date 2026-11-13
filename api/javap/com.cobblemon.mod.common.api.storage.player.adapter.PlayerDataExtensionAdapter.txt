@@ -1,0 +1,9 @@
+public final class com.cobblemon.mod.common.api.storage.player.adapter.PlayerDataExtensionAdapter implements com.google.gson.JsonSerializer<com.cobblemon.mod.common.api.storage.player.PlayerDataExtension>, com.google.gson.JsonDeserializer<com.cobblemon.mod.common.api.storage.player.PlayerDataExtension> {
+  public static final com.cobblemon.mod.common.api.storage.player.adapter.PlayerDataExtensionAdapter INSTANCE;
+  private com.cobblemon.mod.common.api.storage.player.adapter.PlayerDataExtensionAdapter();
+  public com.google.gson.JsonElement serialize(com.cobblemon.mod.common.api.storage.player.PlayerDataExtension, java.lang.reflect.Type, com.google.gson.JsonSerializationContext);
+  public com.cobblemon.mod.common.api.storage.player.PlayerDataExtension deserialize(com.google.gson.JsonElement, java.lang.reflect.Type, com.google.gson.JsonDeserializationContext);
+  public com.google.gson.JsonElement serialize(java.lang.Object, java.lang.reflect.Type, com.google.gson.JsonSerializationContext);
+  public java.lang.Object deserialize(com.google.gson.JsonElement, java.lang.reflect.Type, com.google.gson.JsonDeserializationContext);
+  static {};
+}

@@ -1,0 +1,24 @@
+public final class com.cobblemon.mod.common.api.storage.pc.search.Search$Companion {
+  private com.cobblemon.mod.common.api.storage.pc.search.Search$Companion();
+  public final com.cobblemon.mod.common.api.storage.pc.search.Search getDEFAULT();
+  public final com.cobblemon.mod.common.api.storage.pc.search.Search of(java.lang.String);
+  private static final boolean of$lambda$0(com.cobblemon.mod.common.pokemon.Pokemon);
+  private static final boolean of$lambda$1(com.cobblemon.mod.common.pokemon.Pokemon);
+  private static final boolean of$lambda$2(com.cobblemon.mod.common.pokemon.Pokemon);
+  private static final boolean of$lambda$3(com.cobblemon.mod.common.pokemon.Pokemon);
+  private static final boolean of$lambda$4(com.cobblemon.mod.common.pokemon.Pokemon);
+  private static final boolean of$lambda$5(kotlin.jvm.internal.Ref$ObjectRef, com.cobblemon.mod.common.pokemon.Pokemon);
+  public com.cobblemon.mod.common.api.storage.pc.search.Search$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.api.storage.pc.search.Search {
+  public static final com.cobblemon.mod.common.api.storage.pc.search.Search$Companion Companion;
+  private final java.util.Set<com.cobblemon.mod.common.api.storage.pc.search.PokemonFilter> filters;
+  private final java.util.Set<java.util.UUID> passed;
+  private final java.util.Set<java.util.UUID> failed;
+  private static final com.cobblemon.mod.common.api.storage.pc.search.Search DEFAULT;
+  public com.cobblemon.mod.common.api.storage.pc.search.Search(java.util.Set<? extends com.cobblemon.mod.common.api.storage.pc.search.PokemonFilter>, java.util.Set<java.util.UUID>, java.util.Set<java.util.UUID>);
+  public com.cobblemon.mod.common.api.storage.pc.search.Search(java.util.Set, java.util.Set, java.util.Set, int, kotlin.jvm.internal.DefaultConstructorMarker);
+  public final boolean passes(com.cobblemon.mod.common.pokemon.Pokemon);
+  public static final com.cobblemon.mod.common.api.storage.pc.search.Search access$getDEFAULT$cp();
+  static {};
+}

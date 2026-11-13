@@ -1,0 +1,11 @@
+public final class com.cobblemon.mod.common.api.storage.adapter.conversions.CobblemonConverter$DefaultImpls {
+  public static <S> boolean exists(com.cobblemon.mod.common.api.storage.adapter.conversions.CobblemonConverter<S>, java.nio.file.Path);
+}
+public interface com.cobblemon.mod.common.api.storage.adapter.conversions.CobblemonConverter<S> extends com.cobblemon.mod.common.api.storage.adapter.CobblemonAdapter<S> {
+  public abstract java.nio.file.Path root();
+  public default boolean exists(java.nio.file.Path);
+  public abstract com.cobblemon.mod.common.api.storage.party.PlayerPartyStore party(java.util.UUID, net.minecraft.nbt.CompoundTag);
+  public abstract com.cobblemon.mod.common.api.storage.pc.PCStore pc(java.util.UUID, net.minecraft.nbt.CompoundTag);
+  public abstract com.cobblemon.mod.common.pokemon.Pokemon translate(net.minecraft.nbt.CompoundTag);
+  public static boolean access$exists$jd(com.cobblemon.mod.common.api.storage.adapter.conversions.CobblemonConverter, java.nio.file.Path);
+}

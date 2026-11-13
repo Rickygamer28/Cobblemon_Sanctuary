@@ -1,0 +1,22 @@
+public final class com.cobblemon.mod.common.api.ai.CobblemonBehaviour {
+  private final net.minecraft.network.chat.Component name;
+  private final net.minecraft.network.chat.Component description;
+  private final boolean visible;
+  private final net.minecraft.resources.ResourceLocation entityType;
+  private final java.util.List<com.cobblemon.mod.common.api.ai.config.BehaviourConfig> configurations;
+  private final com.cobblemon.mod.common.api.molang.ExpressionLike onRemove;
+  private final com.cobblemon.mod.common.api.molang.ExpressionLike onAdd;
+  public com.cobblemon.mod.common.api.ai.CobblemonBehaviour(net.minecraft.network.chat.Component, net.minecraft.network.chat.Component, boolean, net.minecraft.resources.ResourceLocation, java.util.List<? extends com.cobblemon.mod.common.api.ai.config.BehaviourConfig>, com.cobblemon.mod.common.api.molang.ExpressionLike, com.cobblemon.mod.common.api.molang.ExpressionLike);
+  public com.cobblemon.mod.common.api.ai.CobblemonBehaviour(net.minecraft.network.chat.Component, net.minecraft.network.chat.Component, boolean, net.minecraft.resources.ResourceLocation, java.util.List, com.cobblemon.mod.common.api.molang.ExpressionLike, com.cobblemon.mod.common.api.molang.ExpressionLike, int, kotlin.jvm.internal.DefaultConstructorMarker);
+  public final net.minecraft.network.chat.Component getName();
+  public final net.minecraft.network.chat.Component getDescription();
+  public final boolean getVisible();
+  public final net.minecraft.resources.ResourceLocation getEntityType();
+  public final java.util.List<com.cobblemon.mod.common.api.ai.config.BehaviourConfig> getConfigurations();
+  public final com.cobblemon.mod.common.api.molang.ExpressionLike getOnRemove();
+  public final com.cobblemon.mod.common.api.molang.ExpressionLike getOnAdd();
+  public final boolean canBeApplied(net.minecraft.world.entity.LivingEntity);
+  public final void configure(net.minecraft.world.entity.LivingEntity, com.cobblemon.mod.common.api.ai.BehaviourConfigurationContext);
+  public final void onRemove(net.minecraft.world.entity.LivingEntity);
+  public com.cobblemon.mod.common.api.ai.CobblemonBehaviour();
+}

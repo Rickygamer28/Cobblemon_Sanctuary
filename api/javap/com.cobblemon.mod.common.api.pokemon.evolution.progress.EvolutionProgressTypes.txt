@@ -1,0 +1,27 @@
+public final class com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgressTypes {
+  public static final com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgressTypes INSTANCE;
+  private static final net.minecraft.core.Registry<com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgressType<?>> REGISTRY;
+  private static final com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgressType<com.cobblemon.mod.common.pokemon.evolution.progress.DamageTakenEvolutionProgress> DAMAGE_TAKEN;
+  private static final com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgressType<com.cobblemon.mod.common.pokemon.evolution.progress.DefeatEvolutionProgress> DEFEAT;
+  private static final com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgressType<com.cobblemon.mod.common.pokemon.evolution.progress.LastBattleCriticalHitsEvolutionProgress> LAST_BATTLE_CRITICAL_HITS;
+  private static final com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgressType<com.cobblemon.mod.common.pokemon.evolution.progress.RecoilEvolutionProgress> RECOIL;
+  private static final com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgressType<com.cobblemon.mod.common.pokemon.evolution.progress.UseMoveEvolutionProgress> USE_MOVE;
+  private com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgressTypes();
+  public static final com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgressType<com.cobblemon.mod.common.pokemon.evolution.progress.DamageTakenEvolutionProgress> getDAMAGE_TAKEN();
+  public static void getDAMAGE_TAKEN$annotations();
+  public static final com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgressType<com.cobblemon.mod.common.pokemon.evolution.progress.DefeatEvolutionProgress> getDEFEAT();
+  public static void getDEFEAT$annotations();
+  public static final com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgressType<com.cobblemon.mod.common.pokemon.evolution.progress.LastBattleCriticalHitsEvolutionProgress> getLAST_BATTLE_CRITICAL_HITS();
+  public static void getLAST_BATTLE_CRITICAL_HITS$annotations();
+  public static final com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgressType<com.cobblemon.mod.common.pokemon.evolution.progress.RecoilEvolutionProgress> getRECOIL();
+  public static void getRECOIL$annotations();
+  public static final com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgressType<com.cobblemon.mod.common.pokemon.evolution.progress.UseMoveEvolutionProgress> getUSE_MOVE();
+  public static void getUSE_MOVE$annotations();
+  public static final <T extends com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgress<?>> com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgressType<T> registerType(net.minecraft.resources.ResourceLocation, com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgressType<T>) throws java.lang.IllegalStateException;
+  public final com.mojang.serialization.Codec<com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgress<?>> codec();
+  private static final com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgressType codec$lambda$0(com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgress);
+  private static final com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgressType codec$lambda$1(kotlin.jvm.functions.Function1, java.lang.Object);
+  private static final com.mojang.serialization.MapCodec codec$lambda$2(com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgressType);
+  private static final com.mojang.serialization.MapCodec codec$lambda$3(kotlin.jvm.functions.Function1, java.lang.Object);
+  static {};
+}

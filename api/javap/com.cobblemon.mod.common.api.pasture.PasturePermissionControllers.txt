@@ -1,0 +1,8 @@
+public final class com.cobblemon.mod.common.api.pasture.PasturePermissionControllers {
+  public static final com.cobblemon.mod.common.api.pasture.PasturePermissionControllers INSTANCE;
+  private static final com.cobblemon.mod.common.api.PrioritizedList<com.cobblemon.mod.common.api.pasture.PasturePermissionController> controllers;
+  private com.cobblemon.mod.common.api.pasture.PasturePermissionControllers();
+  public final com.cobblemon.mod.common.api.PrioritizedList<com.cobblemon.mod.common.api.pasture.PasturePermissionController> getControllers();
+  public static final com.cobblemon.mod.common.api.pasture.PasturePermissions permit(net.minecraft.server.level.ServerPlayer, com.cobblemon.mod.common.block.entity.PokemonPastureBlockEntity);
+  static {};
+}

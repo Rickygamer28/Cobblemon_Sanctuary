@@ -1,0 +1,17 @@
+public final class com.cobblemon.mod.common.api.storage.adapter.SerializedStore<S> {
+  private final java.lang.Class<? extends com.cobblemon.mod.common.api.storage.PokemonStore<?>> storeClass;
+  private final java.util.UUID uuid;
+  private final S serializedForm;
+  public com.cobblemon.mod.common.api.storage.adapter.SerializedStore(java.lang.Class<? extends com.cobblemon.mod.common.api.storage.PokemonStore<?>>, java.util.UUID, S);
+  public final java.lang.Class<? extends com.cobblemon.mod.common.api.storage.PokemonStore<?>> getStoreClass();
+  public final java.util.UUID getUuid();
+  public final S getSerializedForm();
+  public final java.lang.Class<? extends com.cobblemon.mod.common.api.storage.PokemonStore<?>> component1();
+  public final java.util.UUID component2();
+  public final S component3();
+  public final com.cobblemon.mod.common.api.storage.adapter.SerializedStore<S> copy(java.lang.Class<? extends com.cobblemon.mod.common.api.storage.PokemonStore<?>>, java.util.UUID, S);
+  public static com.cobblemon.mod.common.api.storage.adapter.SerializedStore copy$default(com.cobblemon.mod.common.api.storage.adapter.SerializedStore, java.lang.Class, java.util.UUID, java.lang.Object, int, java.lang.Object);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+}

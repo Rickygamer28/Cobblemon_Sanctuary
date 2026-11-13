@@ -1,0 +1,7 @@
+public class com.cobblemon.mod.common.api.reactive.SingularObservable<T> extends com.cobblemon.mod.common.api.reactive.SimpleObservable<T> {
+  private boolean completed;
+  private java.util.List<T> completedValue;
+  public com.cobblemon.mod.common.api.reactive.SingularObservable();
+  public com.cobblemon.mod.common.api.reactive.ObservableSubscription<T> subscribe(com.cobblemon.mod.common.api.Priority, kotlin.jvm.functions.Function1<? super T, kotlin.Unit>);
+  public void emit(T...);
+}

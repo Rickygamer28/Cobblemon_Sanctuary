@@ -1,0 +1,22 @@
+public class com.cobblemon.mod.common.api.reactive.SettableObservable<T> implements com.cobblemon.mod.common.api.reactive.Observable<T> {
+  private T value;
+  private final com.cobblemon.mod.common.api.PrioritizedList<com.cobblemon.mod.common.api.reactive.ObservableSubscription<T>> subscriptions;
+  public com.cobblemon.mod.common.api.reactive.SettableObservable(T);
+  public final com.cobblemon.mod.common.api.PrioritizedList<com.cobblemon.mod.common.api.reactive.ObservableSubscription<T>> getSubscriptions();
+  public final com.cobblemon.mod.common.api.reactive.ObservableSubscription<T> subscribeIncludingCurrent(com.cobblemon.mod.common.api.Priority, kotlin.jvm.functions.Function1<? super T, kotlin.Unit>);
+  public static com.cobblemon.mod.common.api.reactive.ObservableSubscription subscribeIncludingCurrent$default(com.cobblemon.mod.common.api.reactive.SettableObservable, com.cobblemon.mod.common.api.Priority, kotlin.jvm.functions.Function1, int, java.lang.Object);
+  public com.cobblemon.mod.common.api.reactive.ObservableSubscription<T> subscribe(com.cobblemon.mod.common.api.Priority, kotlin.jvm.functions.Function1<? super T, kotlin.Unit>);
+  public void unsubscribe(com.cobblemon.mod.common.api.reactive.ObservableSubscription<T>);
+  public void set(T);
+  public void emit(T);
+  public T get();
+  public com.cobblemon.mod.common.api.reactive.ObservableSubscription<T> subscribe(java.util.function.Consumer<T>);
+  public com.cobblemon.mod.common.api.reactive.ObservableSubscription<T> subscribe(com.cobblemon.mod.common.api.Priority, java.util.function.Consumer<T>);
+  public <O> com.cobblemon.mod.common.api.reactive.Observable<O> pipe(com.cobblemon.mod.common.api.reactive.Transform<T, O>);
+  public <O1, O2> com.cobblemon.mod.common.api.reactive.TransformObservable<T, O2> pipe(com.cobblemon.mod.common.api.reactive.Transform<T, O1>, com.cobblemon.mod.common.api.reactive.Transform<O1, O2>);
+  public <O1, O2, O3> com.cobblemon.mod.common.api.reactive.TransformObservable<T, O3> pipe(com.cobblemon.mod.common.api.reactive.Transform<T, O1>, com.cobblemon.mod.common.api.reactive.Transform<O1, O2>, com.cobblemon.mod.common.api.reactive.Transform<O2, O3>);
+  public <O1, O2, O3, O4> com.cobblemon.mod.common.api.reactive.TransformObservable<T, O4> pipe(com.cobblemon.mod.common.api.reactive.Transform<T, O1>, com.cobblemon.mod.common.api.reactive.Transform<O1, O2>, com.cobblemon.mod.common.api.reactive.Transform<O2, O3>, com.cobblemon.mod.common.api.reactive.Transform<O3, O4>);
+  public <O1, O2, O3, O4, O5> com.cobblemon.mod.common.api.reactive.TransformObservable<T, O5> pipe(com.cobblemon.mod.common.api.reactive.Transform<T, O1>, com.cobblemon.mod.common.api.reactive.Transform<O1, O2>, com.cobblemon.mod.common.api.reactive.Transform<O2, O3>, com.cobblemon.mod.common.api.reactive.Transform<O3, O4>, com.cobblemon.mod.common.api.reactive.Transform<O4, O5>);
+  public <O1, O2, O3, O4, O5, O6> com.cobblemon.mod.common.api.reactive.TransformObservable<T, O6> pipe(com.cobblemon.mod.common.api.reactive.Transform<T, O1>, com.cobblemon.mod.common.api.reactive.Transform<O1, O2>, com.cobblemon.mod.common.api.reactive.Transform<O2, O3>, com.cobblemon.mod.common.api.reactive.Transform<O3, O4>, com.cobblemon.mod.common.api.reactive.Transform<O4, O5>, com.cobblemon.mod.common.api.reactive.Transform<O5, O6>);
+  public T await();
+}

@@ -1,0 +1,29 @@
+public final class com.cobblemon.mod.common.api.events.pokemon.interaction.PokemonInteractionGUICreationEvent {
+  private final java.util.UUID pokemonID;
+  private final boolean mountShoulder;
+  private final boolean giveHeld;
+  private final boolean giveCosmetic;
+  private final boolean canRide;
+  private final com.google.common.collect.Multimap<com.cobblemon.mod.common.client.gui.interact.wheel.Orientation, com.cobblemon.mod.common.client.gui.interact.wheel.InteractWheelOption> options;
+  public com.cobblemon.mod.common.api.events.pokemon.interaction.PokemonInteractionGUICreationEvent(java.util.UUID, boolean, boolean, boolean, boolean, com.google.common.collect.Multimap<com.cobblemon.mod.common.client.gui.interact.wheel.Orientation, com.cobblemon.mod.common.client.gui.interact.wheel.InteractWheelOption>);
+  public final java.util.UUID getPokemonID();
+  public final boolean getMountShoulder();
+  public final boolean getGiveHeld();
+  public final boolean getGiveCosmetic();
+  public final boolean getCanRide();
+  public final com.google.common.collect.Multimap<com.cobblemon.mod.common.client.gui.interact.wheel.Orientation, com.cobblemon.mod.common.client.gui.interact.wheel.InteractWheelOption> getOptions();
+  public final void addFillingOption(com.cobblemon.mod.common.client.gui.interact.wheel.InteractWheelOption);
+  public final void addOption(com.cobblemon.mod.common.client.gui.interact.wheel.Orientation, com.cobblemon.mod.common.client.gui.interact.wheel.InteractWheelOption);
+  private final com.cobblemon.mod.common.client.gui.interact.wheel.Orientation getNextFreeOrientation();
+  public final java.util.UUID component1();
+  public final boolean component2();
+  public final boolean component3();
+  public final boolean component4();
+  public final boolean component5();
+  public final com.google.common.collect.Multimap<com.cobblemon.mod.common.client.gui.interact.wheel.Orientation, com.cobblemon.mod.common.client.gui.interact.wheel.InteractWheelOption> component6();
+  public final com.cobblemon.mod.common.api.events.pokemon.interaction.PokemonInteractionGUICreationEvent copy(java.util.UUID, boolean, boolean, boolean, boolean, com.google.common.collect.Multimap<com.cobblemon.mod.common.client.gui.interact.wheel.Orientation, com.cobblemon.mod.common.client.gui.interact.wheel.InteractWheelOption>);
+  public static com.cobblemon.mod.common.api.events.pokemon.interaction.PokemonInteractionGUICreationEvent copy$default(com.cobblemon.mod.common.api.events.pokemon.interaction.PokemonInteractionGUICreationEvent, java.util.UUID, boolean, boolean, boolean, boolean, com.google.common.collect.Multimap, int, java.lang.Object);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+}

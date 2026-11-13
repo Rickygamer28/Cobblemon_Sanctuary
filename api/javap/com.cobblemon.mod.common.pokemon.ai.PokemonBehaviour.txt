@@ -1,0 +1,52 @@
+public final class com.cobblemon.mod.common.pokemon.ai.PokemonBehaviour$Companion {
+  private com.cobblemon.mod.common.pokemon.ai.PokemonBehaviour$Companion();
+  public final com.cobblemon.mod.common.pokemon.ai.PokemonBehaviour decode(net.minecraft.network.RegistryFriendlyByteBuf);
+  public com.cobblemon.mod.common.pokemon.ai.PokemonBehaviour$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public class com.cobblemon.mod.common.pokemon.ai.PokemonBehaviour {
+  public static final com.cobblemon.mod.common.pokemon.ai.PokemonBehaviour$Companion Companion;
+  private final com.cobblemon.mod.common.pokemon.ai.RestBehaviour resting;
+  private com.cobblemon.mod.common.pokemon.ai.MoveBehaviour moving;
+  private final com.cobblemon.mod.common.pokemon.ai.IdleBehaviour idle;
+  private final boolean fireImmune;
+  private final boolean dampensVibrations;
+  private final com.cobblemon.mod.common.pokemon.ai.EntityBehaviour entityInteract;
+  private final com.cobblemon.mod.common.pokemon.ai.ThunderstruckBehaviour lightningHit;
+  private final com.cobblemon.mod.common.pokemon.ai.BlockBehavior blockInteract;
+  private final com.cobblemon.mod.common.pokemon.ai.CombatBehaviour combat;
+  private final com.cobblemon.mod.common.pokemon.ai.HerdBehaviour herd;
+  private final boolean characteristicRainbow;
+  private final com.cobblemon.mod.common.pokemon.ai.ItemBehavior itemInteract;
+  private final boolean freezeImmune;
+  private final transient com.cobblemon.mod.common.api.molang.ObjectValue<com.cobblemon.mod.common.pokemon.ai.PokemonBehaviour> struct;
+  public com.cobblemon.mod.common.pokemon.ai.PokemonBehaviour(com.cobblemon.mod.common.pokemon.ai.RestBehaviour, com.cobblemon.mod.common.pokemon.ai.MoveBehaviour, com.cobblemon.mod.common.pokemon.ai.IdleBehaviour, boolean, boolean, com.cobblemon.mod.common.pokemon.ai.EntityBehaviour, com.cobblemon.mod.common.pokemon.ai.ThunderstruckBehaviour, com.cobblemon.mod.common.pokemon.ai.BlockBehavior, com.cobblemon.mod.common.pokemon.ai.CombatBehaviour, com.cobblemon.mod.common.pokemon.ai.HerdBehaviour, boolean, com.cobblemon.mod.common.pokemon.ai.ItemBehavior, boolean);
+  public com.cobblemon.mod.common.pokemon.ai.PokemonBehaviour(com.cobblemon.mod.common.pokemon.ai.RestBehaviour, com.cobblemon.mod.common.pokemon.ai.MoveBehaviour, com.cobblemon.mod.common.pokemon.ai.IdleBehaviour, boolean, boolean, com.cobblemon.mod.common.pokemon.ai.EntityBehaviour, com.cobblemon.mod.common.pokemon.ai.ThunderstruckBehaviour, com.cobblemon.mod.common.pokemon.ai.BlockBehavior, com.cobblemon.mod.common.pokemon.ai.CombatBehaviour, com.cobblemon.mod.common.pokemon.ai.HerdBehaviour, boolean, com.cobblemon.mod.common.pokemon.ai.ItemBehavior, boolean, int, kotlin.jvm.internal.DefaultConstructorMarker);
+  public final com.cobblemon.mod.common.pokemon.ai.RestBehaviour getResting();
+  public final com.cobblemon.mod.common.pokemon.ai.MoveBehaviour getMoving();
+  public final void setMoving(com.cobblemon.mod.common.pokemon.ai.MoveBehaviour);
+  public final com.cobblemon.mod.common.pokemon.ai.IdleBehaviour getIdle();
+  public final boolean getFireImmune();
+  public final boolean getDampensVibrations();
+  public final com.cobblemon.mod.common.pokemon.ai.EntityBehaviour getEntityInteract();
+  public final com.cobblemon.mod.common.pokemon.ai.ThunderstruckBehaviour getLightningHit();
+  public final com.cobblemon.mod.common.pokemon.ai.BlockBehavior getBlockInteract();
+  public final com.cobblemon.mod.common.pokemon.ai.CombatBehaviour getCombat();
+  public final com.cobblemon.mod.common.pokemon.ai.HerdBehaviour getHerd();
+  public final boolean getCharacteristicRainbow();
+  public final com.cobblemon.mod.common.pokemon.ai.ItemBehavior getItemInteract();
+  public final boolean getFreezeImmune();
+  public final com.cobblemon.mod.common.api.molang.ObjectValue<com.cobblemon.mod.common.pokemon.ai.PokemonBehaviour> getStruct();
+  public final void encode(net.minecraft.network.RegistryFriendlyByteBuf);
+  private static final java.lang.Object struct$lambda$0$0(com.cobblemon.mod.common.pokemon.ai.PokemonBehaviour, com.bedrockk.molang.runtime.MoParams);
+  private static final java.lang.Object struct$lambda$0$1(com.cobblemon.mod.common.pokemon.ai.PokemonBehaviour, com.bedrockk.molang.runtime.MoParams);
+  private static final java.lang.Object struct$lambda$0$2(com.cobblemon.mod.common.pokemon.ai.PokemonBehaviour, com.bedrockk.molang.runtime.MoParams);
+  private static final java.lang.Object struct$lambda$0$3(com.cobblemon.mod.common.pokemon.ai.PokemonBehaviour, com.bedrockk.molang.runtime.MoParams);
+  private static final java.lang.Object struct$lambda$0$4(com.cobblemon.mod.common.pokemon.ai.PokemonBehaviour, com.bedrockk.molang.runtime.MoParams);
+  private static final java.lang.Object struct$lambda$0$5(com.cobblemon.mod.common.pokemon.ai.PokemonBehaviour, com.bedrockk.molang.runtime.MoParams);
+  private static final java.lang.Object struct$lambda$0$6(com.cobblemon.mod.common.pokemon.ai.PokemonBehaviour, com.bedrockk.molang.runtime.MoParams);
+  private static final java.lang.Object struct$lambda$0$7(com.cobblemon.mod.common.pokemon.ai.PokemonBehaviour, com.bedrockk.molang.runtime.MoParams);
+  private static final java.lang.Object struct$lambda$0$8(com.cobblemon.mod.common.pokemon.ai.PokemonBehaviour, com.bedrockk.molang.runtime.MoParams);
+  private static final java.lang.Object struct$lambda$0$9(com.cobblemon.mod.common.pokemon.ai.PokemonBehaviour, com.bedrockk.molang.runtime.MoParams);
+  public com.cobblemon.mod.common.pokemon.ai.PokemonBehaviour();
+  static {};
+}

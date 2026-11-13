@@ -1,0 +1,38 @@
+public final class com.cobblemon.mod.common.api.events.pokemon.PokemonRecallEvent$Post implements com.cobblemon.mod.common.api.events.pokemon.PokemonRecallEvent {
+  private final com.cobblemon.mod.common.pokemon.Pokemon pokemon;
+  private final com.cobblemon.mod.common.entity.pokemon.PokemonEntity oldEntity;
+  private final java.util.Map<java.lang.String, com.bedrockk.molang.runtime.value.MoValue> context;
+  public com.cobblemon.mod.common.api.events.pokemon.PokemonRecallEvent$Post(com.cobblemon.mod.common.pokemon.Pokemon, com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+  public com.cobblemon.mod.common.pokemon.Pokemon getPokemon();
+  public com.cobblemon.mod.common.entity.pokemon.PokemonEntity getOldEntity();
+  public final java.util.Map<java.lang.String, com.bedrockk.molang.runtime.value.MoValue> getContext();
+  public final com.cobblemon.mod.common.pokemon.Pokemon component1();
+  public final com.cobblemon.mod.common.entity.pokemon.PokemonEntity component2();
+  public final com.cobblemon.mod.common.api.events.pokemon.PokemonRecallEvent$Post copy(com.cobblemon.mod.common.pokemon.Pokemon, com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+  public static com.cobblemon.mod.common.api.events.pokemon.PokemonRecallEvent$Post copy$default(com.cobblemon.mod.common.api.events.pokemon.PokemonRecallEvent$Post, com.cobblemon.mod.common.pokemon.Pokemon, com.cobblemon.mod.common.entity.pokemon.PokemonEntity, int, java.lang.Object);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+}
+public final class com.cobblemon.mod.common.api.events.pokemon.PokemonRecallEvent$Pre extends com.cobblemon.mod.common.api.events.Cancelable implements com.cobblemon.mod.common.api.events.pokemon.PokemonRecallEvent {
+  private final com.cobblemon.mod.common.pokemon.Pokemon pokemon;
+  private final com.cobblemon.mod.common.entity.pokemon.PokemonEntity oldEntity;
+  private final java.util.Map<java.lang.String, com.bedrockk.molang.runtime.value.MoValue> context;
+  private final java.util.Map<java.lang.String, kotlin.jvm.functions.Function1<com.bedrockk.molang.runtime.MoParams, com.bedrockk.molang.runtime.value.MoValue>> functions;
+  public com.cobblemon.mod.common.api.events.pokemon.PokemonRecallEvent$Pre(com.cobblemon.mod.common.pokemon.Pokemon, com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+  public com.cobblemon.mod.common.pokemon.Pokemon getPokemon();
+  public com.cobblemon.mod.common.entity.pokemon.PokemonEntity getOldEntity();
+  public final java.util.Map<java.lang.String, com.bedrockk.molang.runtime.value.MoValue> getContext();
+  public final java.util.Map<java.lang.String, kotlin.jvm.functions.Function1<com.bedrockk.molang.runtime.MoParams, com.bedrockk.molang.runtime.value.MoValue>> getFunctions();
+  public final com.cobblemon.mod.common.pokemon.Pokemon component1();
+  public final com.cobblemon.mod.common.entity.pokemon.PokemonEntity component2();
+  public final com.cobblemon.mod.common.api.events.pokemon.PokemonRecallEvent$Pre copy(com.cobblemon.mod.common.pokemon.Pokemon, com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+  public static com.cobblemon.mod.common.api.events.pokemon.PokemonRecallEvent$Pre copy$default(com.cobblemon.mod.common.api.events.pokemon.PokemonRecallEvent$Pre, com.cobblemon.mod.common.pokemon.Pokemon, com.cobblemon.mod.common.entity.pokemon.PokemonEntity, int, java.lang.Object);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+}
+public interface com.cobblemon.mod.common.api.events.pokemon.PokemonRecallEvent {
+  public abstract com.cobblemon.mod.common.pokemon.Pokemon getPokemon();
+  public abstract com.cobblemon.mod.common.entity.pokemon.PokemonEntity getOldEntity();
+}

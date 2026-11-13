@@ -1,0 +1,44 @@
+public final class com.cobblemon.mod.common.api.interaction.RequestManager$Companion {
+  private com.cobblemon.mod.common.api.interaction.RequestManager$Companion();
+  public final boolean register(com.cobblemon.mod.common.api.interaction.RequestManager<?>);
+  public final void onLogoff(net.minecraft.server.level.ServerPlayer);
+  public com.cobblemon.mod.common.api.interaction.RequestManager$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public abstract class com.cobblemon.mod.common.api.interaction.RequestManager<T extends com.cobblemon.mod.common.api.interaction.ServerPlayerActionRequest> {
+  public static final com.cobblemon.mod.common.api.interaction.RequestManager$Companion Companion;
+  private final java.util.Map<java.util.UUID, T> outboundRequests;
+  private final java.util.Map<java.util.UUID, java.util.List<T>> inboundRequests;
+  private static final java.util.List<com.cobblemon.mod.common.api.interaction.RequestManager<?>> managers;
+  public com.cobblemon.mod.common.api.interaction.RequestManager();
+  public final T getOutboundRequest(java.util.UUID);
+  public final T getOutboundRequest(java.util.UUID, java.util.UUID);
+  public final T getOutboundRequestByRecipient(java.util.UUID, java.util.UUID);
+  public final T getOutboundRequest(net.minecraft.server.level.ServerPlayer, java.util.UUID);
+  public final java.util.List<T> getInboundRequests(java.util.UUID);
+  public final T getInboundRequest(java.util.UUID, java.util.UUID);
+  public final T getInboundRequestBySender(java.util.UUID, java.util.UUID);
+  public final T getInboundRequest(net.minecraft.server.level.ServerPlayer, java.util.UUID);
+  public boolean isBusy(net.minecraft.server.level.ServerPlayer);
+  public abstract boolean isValidInteraction(net.minecraft.server.level.ServerPlayer, net.minecraft.server.level.ServerPlayer);
+  protected abstract boolean canAccept(T);
+  protected abstract com.cobblemon.mod.common.api.net.NetworkPacket<?> notificationPacket(T);
+  protected abstract com.cobblemon.mod.common.api.net.NetworkPacket<?> expirationPacket(T);
+  protected final void addRequest(T);
+  protected final boolean removeRequest(T);
+  public void cancelRequest(T, boolean);
+  public static void cancelRequest$default(com.cobblemon.mod.common.api.interaction.RequestManager, com.cobblemon.mod.common.api.interaction.ServerPlayerActionRequest, boolean, int, java.lang.Object);
+  protected void onSend(T);
+  public final boolean sendRequest(T);
+  protected void onAccept(T);
+  public final boolean acceptRequest(net.minecraft.server.level.ServerPlayer, java.util.UUID, net.minecraft.server.level.ServerPlayer);
+  public static boolean acceptRequest$default(com.cobblemon.mod.common.api.interaction.RequestManager, net.minecraft.server.level.ServerPlayer, java.util.UUID, net.minecraft.server.level.ServerPlayer, int, java.lang.Object);
+  protected void onDecline(T);
+  public final void declineRequest(T);
+  public final void declineRequest(net.minecraft.server.level.ServerPlayer, java.util.UUID);
+  protected void onLogoff(net.minecraft.server.level.ServerPlayer);
+  private static final java.util.List addRequest$lambda$0(java.util.UUID);
+  private static final java.util.List addRequest$lambda$1(kotlin.jvm.functions.Function1, java.lang.Object);
+  private static final kotlin.Unit sendRequest$lambda$0(com.cobblemon.mod.common.api.interaction.RequestManager, com.cobblemon.mod.common.api.interaction.ServerPlayerActionRequest);
+  public static final java.util.List access$getManagers$cp();
+  static {};
+}

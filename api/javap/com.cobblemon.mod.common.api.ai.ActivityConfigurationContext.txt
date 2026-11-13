@@ -1,0 +1,9 @@
+public final class com.cobblemon.mod.common.api.ai.ActivityConfigurationContext {
+  private final net.minecraft.world.entity.schedule.Activity activity;
+  private final java.util.List<com.mojang.datafixers.util.Pair<java.lang.Integer, net.minecraft.world.entity.ai.behavior.BehaviorControl<? super net.minecraft.world.entity.LivingEntity>>> tasks;
+  public com.cobblemon.mod.common.api.ai.ActivityConfigurationContext(net.minecraft.world.entity.schedule.Activity);
+  public final net.minecraft.world.entity.schedule.Activity getActivity();
+  public final java.util.List<com.mojang.datafixers.util.Pair<java.lang.Integer, net.minecraft.world.entity.ai.behavior.BehaviorControl<? super net.minecraft.world.entity.LivingEntity>>> getTasks();
+  public final void addTasks(int, net.minecraft.world.entity.ai.behavior.BehaviorControl<? super net.minecraft.world.entity.LivingEntity>...);
+  public final void apply(net.minecraft.world.entity.LivingEntity);
+}

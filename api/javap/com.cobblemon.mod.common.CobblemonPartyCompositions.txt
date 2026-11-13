@@ -1,0 +1,24 @@
+public final class com.cobblemon.mod.common.CobblemonPartyCompositions implements com.cobblemon.mod.common.api.data.JsonDataRegistry<com.cobblemon.mod.common.api.npc.PartyComposition> {
+  public static final com.cobblemon.mod.common.CobblemonPartyCompositions INSTANCE;
+  private static final net.minecraft.resources.ResourceLocation id;
+  private static final net.minecraft.server.packs.PackType type;
+  private static final com.google.gson.reflect.TypeToken<com.cobblemon.mod.common.api.npc.PartyComposition> typeToken;
+  private static final java.lang.String resourcePath;
+  private static final com.cobblemon.mod.common.api.reactive.SimpleObservable<com.cobblemon.mod.common.CobblemonPartyCompositions> observable;
+  private static final com.google.gson.Gson gson;
+  private static final java.util.Map<net.minecraft.resources.ResourceLocation, com.cobblemon.mod.common.api.npc.PartyComposition> partyCompositions;
+  private com.cobblemon.mod.common.CobblemonPartyCompositions();
+  public net.minecraft.resources.ResourceLocation getId();
+  public net.minecraft.server.packs.PackType getType();
+  public com.google.gson.reflect.TypeToken<com.cobblemon.mod.common.api.npc.PartyComposition> getTypeToken();
+  public java.lang.String getResourcePath();
+  public com.cobblemon.mod.common.api.reactive.SimpleObservable<com.cobblemon.mod.common.CobblemonPartyCompositions> getObservable();
+  public com.google.gson.Gson getGson();
+  public final java.util.Map<net.minecraft.resources.ResourceLocation, com.cobblemon.mod.common.api.npc.PartyComposition> getPartyCompositions();
+  public void sync(net.minecraft.server.level.ServerPlayer);
+  public void reload(java.util.Map<net.minecraft.resources.ResourceLocation, com.cobblemon.mod.common.api.npc.PartyComposition>);
+  public void reload(net.minecraft.server.packs.resources.ResourceManager);
+  public com.cobblemon.mod.common.api.npc.PartyComposition parse(java.io.BufferedReader, net.minecraft.resources.ResourceLocation);
+  public java.lang.Object parse(java.io.BufferedReader, net.minecraft.resources.ResourceLocation);
+  static {};
+}

@@ -1,0 +1,17 @@
+public final class com.cobblemon.mod.common.api.storage.StoreCoordinates<T extends com.cobblemon.mod.common.api.storage.StorePosition> {
+  private final com.cobblemon.mod.common.api.storage.PokemonStore<T> store;
+  private final T position;
+  public com.cobblemon.mod.common.api.storage.StoreCoordinates(com.cobblemon.mod.common.api.storage.PokemonStore<T>, T);
+  public final com.cobblemon.mod.common.api.storage.PokemonStore<T> getStore();
+  public final T getPosition();
+  public final void saveToNBT(net.minecraft.nbt.CompoundTag);
+  public final com.cobblemon.mod.common.pokemon.Pokemon get();
+  public final boolean remove();
+  public final com.cobblemon.mod.common.api.storage.PokemonStore<T> component1();
+  public final T component2();
+  public final com.cobblemon.mod.common.api.storage.StoreCoordinates<T> copy(com.cobblemon.mod.common.api.storage.PokemonStore<T>, T);
+  public static com.cobblemon.mod.common.api.storage.StoreCoordinates copy$default(com.cobblemon.mod.common.api.storage.StoreCoordinates, com.cobblemon.mod.common.api.storage.PokemonStore, com.cobblemon.mod.common.api.storage.StorePosition, int, java.lang.Object);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+}

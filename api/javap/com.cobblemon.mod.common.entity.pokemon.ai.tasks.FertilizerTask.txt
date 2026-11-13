@@ -1,0 +1,28 @@
+public final class com.cobblemon.mod.common.entity.pokemon.ai.tasks.FertilizerTask$Companion {
+  private com.cobblemon.mod.common.entity.pokemon.ai.tasks.FertilizerTask$Companion();
+  public com.cobblemon.mod.common.entity.pokemon.ai.tasks.FertilizerTask$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.entity.pokemon.ai.tasks.FertilizerTask extends net.minecraft.world.entity.ai.behavior.Behavior<com.cobblemon.mod.common.entity.pokemon.PokemonEntity> {
+  public static final com.cobblemon.mod.common.entity.pokemon.ai.tasks.FertilizerTask$Companion Companion;
+  private long startTime;
+  private long lastEndEntityAge;
+  private int duration;
+  private java.util.Optional<net.minecraft.core.BlockPos> pos;
+  private static final int MAX_DURATION;
+  public com.cobblemon.mod.common.entity.pokemon.ai.tasks.FertilizerTask();
+  protected boolean checkExtraStartConditions(net.minecraft.server.level.ServerLevel, com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+  protected boolean canStillUse(net.minecraft.server.level.ServerLevel, com.cobblemon.mod.common.entity.pokemon.PokemonEntity, long);
+  protected void start(net.minecraft.server.level.ServerLevel, com.cobblemon.mod.common.entity.pokemon.PokemonEntity, long);
+  private final void addLookWalkTargets(com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+  protected void stop(net.minecraft.server.level.ServerLevel, com.cobblemon.mod.common.entity.pokemon.PokemonEntity, long);
+  protected void tick(net.minecraft.server.level.ServerLevel, com.cobblemon.mod.common.entity.pokemon.PokemonEntity, long);
+  private final net.minecraft.world.item.ItemStack createBoneMealStack();
+  private static final kotlin.Unit addLookWalkTargets$lambda$0(com.cobblemon.mod.common.entity.pokemon.PokemonEntity, net.minecraft.core.BlockPos);
+  private static final void addLookWalkTargets$lambda$1(kotlin.jvm.functions.Function1, java.lang.Object);
+  public boolean checkExtraStartConditions(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity);
+  public boolean canStillUse(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity, long);
+  public void start(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity, long);
+  public void stop(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity, long);
+  public void tick(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity, long);
+  static {};
+}

@@ -1,0 +1,9 @@
+public final class com.cobblemon.mod.common.entity.pokemon.CobblemonAgingDespawner<T extends net.minecraft.world.entity.Entity> implements com.cobblemon.mod.common.api.entity.Despawner<T> {
+  private final kotlin.jvm.functions.Function1<T, java.lang.Integer> getAgeTicks;
+  private final float nearToFar;
+  private final int youngToOld;
+  public com.cobblemon.mod.common.entity.pokemon.CobblemonAgingDespawner(kotlin.jvm.functions.Function1<? super T, java.lang.Integer>);
+  public final kotlin.jvm.functions.Function1<T, java.lang.Integer> getGetAgeTicks();
+  public void beginTracking(T);
+  public boolean shouldDespawn(T);
+}

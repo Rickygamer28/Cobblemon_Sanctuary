@@ -1,0 +1,25 @@
+public interface com.cobblemon.mod.common.api.reactive.Transform<I, O> {
+  public static final com.cobblemon.mod.common.api.reactive.Transform$Companion Companion;
+  public abstract O invoke(I);
+  public default java.lang.Void noTransform(boolean);
+  public static java.lang.Void access$noTransform$jd(com.cobblemon.mod.common.api.reactive.Transform, boolean);
+  static {};
+}
+public final class com.cobblemon.mod.common.api.reactive.TransformObservable<I, O> extends com.cobblemon.mod.common.api.reactive.SimpleObservable<O> {
+  private final com.cobblemon.mod.common.api.reactive.Observable<I> observable;
+  private final com.cobblemon.mod.common.api.reactive.Transform<I, O> transform;
+  private com.cobblemon.mod.common.api.reactive.ObservableSubscription<I> rootSubscription;
+  public com.cobblemon.mod.common.api.reactive.TransformObservable(com.cobblemon.mod.common.api.reactive.Observable<I>, com.cobblemon.mod.common.api.reactive.Transform<I, O>);
+  public final com.cobblemon.mod.common.api.reactive.ObservableSubscription<I> getRootSubscription();
+  public final void setRootSubscription(com.cobblemon.mod.common.api.reactive.ObservableSubscription<I>);
+  public com.cobblemon.mod.common.api.reactive.ObservableSubscription<O> subscribe(com.cobblemon.mod.common.api.Priority, kotlin.jvm.functions.Function1<? super O, kotlin.Unit>);
+  public final void terminate();
+  public final void parentHandler(I);
+  private static final kotlin.Unit subscribe$lambda$0(com.cobblemon.mod.common.api.reactive.TransformObservable, java.lang.Object);
+}
+public final class com.cobblemon.mod.common.api.reactive.pipes.MapTransform<I, O> implements com.cobblemon.mod.common.api.reactive.Transform<I, O> {
+  private final kotlin.jvm.functions.Function1<I, O> mapping;
+  public com.cobblemon.mod.common.api.reactive.pipes.MapTransform(kotlin.jvm.functions.Function1<? super I, ? extends O>);
+  public O invoke(I);
+  public java.lang.Void noTransform(boolean);
+}

@@ -1,0 +1,8 @@
+public final class com.cobblemon.mod.common.api.storage.player.DummyPlayerDataExtension implements com.cobblemon.mod.common.api.storage.player.PlayerDataExtension {
+  private final com.google.gson.JsonObject json;
+  public com.cobblemon.mod.common.api.storage.player.DummyPlayerDataExtension(com.google.gson.JsonObject);
+  public final com.google.gson.JsonObject getJson();
+  public java.lang.String name();
+  public com.google.gson.JsonObject serialize();
+  public com.cobblemon.mod.common.api.storage.player.PlayerDataExtension deserialize(com.google.gson.JsonObject);
+}

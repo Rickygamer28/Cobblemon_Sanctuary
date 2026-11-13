@@ -1,0 +1,6 @@
+public final class com.cobblemon.mod.common.api.drop.EvolutionItemDropEntry extends com.cobblemon.mod.common.api.drop.ItemDropEntry {
+  private final java.util.Set<com.cobblemon.mod.common.api.pokemon.requirement.Requirement> requirements;
+  public com.cobblemon.mod.common.api.drop.EvolutionItemDropEntry();
+  public final java.util.Set<com.cobblemon.mod.common.api.pokemon.requirement.Requirement> getRequirements();
+  public boolean canDrop(com.cobblemon.mod.common.pokemon.Pokemon);
+}

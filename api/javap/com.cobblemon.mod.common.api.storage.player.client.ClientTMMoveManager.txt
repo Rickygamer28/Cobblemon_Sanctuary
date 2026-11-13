@@ -1,0 +1,20 @@
+public final class com.cobblemon.mod.common.api.storage.player.client.ClientTMMoveManager$Companion {
+  private com.cobblemon.mod.common.api.storage.player.client.ClientTMMoveManager$Companion();
+  public final com.cobblemon.mod.common.net.messages.client.SetClientPlayerDataPacket decode(net.minecraft.network.RegistryFriendlyByteBuf);
+  public final void runAction(com.cobblemon.mod.common.api.storage.player.client.ClientInstancedPlayerData);
+  public final void runIncremental(com.cobblemon.mod.common.api.storage.player.client.ClientInstancedPlayerData);
+  private static final java.util.Set decode$lambda$0(int);
+  private static final net.minecraft.resources.ResourceLocation decode$lambda$1(net.minecraft.network.RegistryFriendlyByteBuf, net.minecraft.network.FriendlyByteBuf);
+  private static final net.minecraft.resources.ResourceLocation decode$lambda$2(kotlin.jvm.functions.Function1, java.lang.Object);
+  public com.cobblemon.mod.common.api.storage.player.client.ClientTMMoveManager$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.api.storage.player.client.ClientTMMoveManager implements com.cobblemon.mod.common.api.storage.player.client.ClientInstancedPlayerData {
+  public static final com.cobblemon.mod.common.api.storage.player.client.ClientTMMoveManager$Companion Companion;
+  private final java.util.Set<net.minecraft.resources.ResourceLocation> learnedTMs;
+  public com.cobblemon.mod.common.api.storage.player.client.ClientTMMoveManager(java.util.Set<net.minecraft.resources.ResourceLocation>);
+  public final java.util.Set<net.minecraft.resources.ResourceLocation> getLearnedTMs();
+  public void encode(net.minecraft.network.RegistryFriendlyByteBuf);
+  private static final kotlin.Unit encode$lambda$0(net.minecraft.network.RegistryFriendlyByteBuf, net.minecraft.network.FriendlyByteBuf, net.minecraft.resources.ResourceLocation);
+  private static final void encode$lambda$1(kotlin.jvm.functions.Function2, java.lang.Object, net.minecraft.resources.ResourceLocation);
+  static {};
+}

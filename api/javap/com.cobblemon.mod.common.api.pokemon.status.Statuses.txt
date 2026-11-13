@@ -1,0 +1,20 @@
+public final class com.cobblemon.mod.common.api.pokemon.status.Statuses {
+  public static final com.cobblemon.mod.common.api.pokemon.status.Statuses INSTANCE;
+  private static final java.util.List<com.cobblemon.mod.common.api.pokemon.status.Status> persistentStatuses;
+  private static final java.util.List<com.cobblemon.mod.common.api.pokemon.status.Status> volatileStatuses;
+  private static final java.util.List<com.cobblemon.mod.common.api.pokemon.status.Status> allStatuses;
+  public static final com.cobblemon.mod.common.pokemon.status.statuses.persistent.PoisonStatus POISON;
+  public static final com.cobblemon.mod.common.pokemon.status.statuses.persistent.PoisonBadlyStatus POISON_BADLY;
+  public static final com.cobblemon.mod.common.pokemon.status.statuses.persistent.ParalysisStatus PARALYSIS;
+  public static final com.cobblemon.mod.common.pokemon.status.statuses.persistent.SleepStatus SLEEP;
+  public static final com.cobblemon.mod.common.pokemon.status.statuses.persistent.FrozenStatus FROZEN;
+  public static final com.cobblemon.mod.common.pokemon.status.statuses.persistent.BurnStatus BURN;
+  public static final com.cobblemon.mod.common.pokemon.status.statuses.nonpersistent.AttractStatus ATTRACT;
+  public static final com.cobblemon.mod.common.pokemon.status.statuses.nonpersistent.ConfuseStatus CONFUSE;
+  private com.cobblemon.mod.common.api.pokemon.status.Statuses();
+  public static final <T extends com.cobblemon.mod.common.api.pokemon.status.Status> T registerStatus(T);
+  public static final com.cobblemon.mod.common.api.pokemon.status.Status getStatus(net.minecraft.resources.ResourceLocation);
+  public static final com.cobblemon.mod.common.api.pokemon.status.Status getStatus(java.lang.String);
+  public static final java.util.List<com.cobblemon.mod.common.api.pokemon.status.Status> getPersistentStatuses();
+  static {};
+}

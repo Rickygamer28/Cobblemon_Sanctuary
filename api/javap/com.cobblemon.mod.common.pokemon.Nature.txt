@@ -1,0 +1,22 @@
+public final class com.cobblemon.mod.common.pokemon.Nature {
+  public static final com.cobblemon.mod.common.pokemon.Nature$Companion Companion;
+  private final net.minecraft.resources.ResourceLocation name;
+  private final java.lang.String displayName;
+  private final com.cobblemon.mod.common.api.pokemon.stats.Stat increasedStat;
+  private final com.cobblemon.mod.common.api.pokemon.stats.Stat decreasedStat;
+  private final com.cobblemon.mod.common.api.cooking.Flavour favouriteFlavour;
+  private final com.cobblemon.mod.common.api.cooking.Flavour dislikedFlavour;
+  private static final com.mojang.serialization.Codec<com.cobblemon.mod.common.pokemon.Nature> BY_IDENTIFIER_CODEC;
+  public com.cobblemon.mod.common.pokemon.Nature(net.minecraft.resources.ResourceLocation, java.lang.String, com.cobblemon.mod.common.api.pokemon.stats.Stat, com.cobblemon.mod.common.api.pokemon.stats.Stat, com.cobblemon.mod.common.api.cooking.Flavour, com.cobblemon.mod.common.api.cooking.Flavour);
+  public final net.minecraft.resources.ResourceLocation getName();
+  public final java.lang.String getDisplayName();
+  public final com.cobblemon.mod.common.api.pokemon.stats.Stat getIncreasedStat();
+  public final com.cobblemon.mod.common.api.pokemon.stats.Stat getDecreasedStat();
+  public final com.cobblemon.mod.common.api.cooking.Flavour getFavouriteFlavour();
+  public final com.cobblemon.mod.common.api.cooking.Flavour getDislikedFlavour();
+  public final int modifyStat(com.cobblemon.mod.common.api.pokemon.stats.Stat, int);
+  private static final java.lang.String BY_IDENTIFIER_CODEC$lambda$0(net.minecraft.resources.ResourceLocation);
+  public static final com.mojang.serialization.Codec<com.cobblemon.mod.common.pokemon.Nature> getBY_IDENTIFIER_CODEC();
+  public static final com.mojang.serialization.Codec access$getBY_IDENTIFIER_CODEC$cp();
+  static {};
+}

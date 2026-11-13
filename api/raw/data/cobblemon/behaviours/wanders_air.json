@@ -1,0 +1,1 @@
+{"configurations":[{"activity":"idle","tasksByPriority":{"7":["cobblemon:air_wander"],"9":["cobblemon:fly_in_circles"]},"type":"add_tasks_to_activity"}],"description":"cobblemon.behaviour.wanders_air.desc","name":"cobblemon.behaviour.wanders_air.name"}

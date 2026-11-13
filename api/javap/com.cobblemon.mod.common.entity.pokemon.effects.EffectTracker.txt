@@ -1,0 +1,15 @@
+public final class com.cobblemon.mod.common.entity.pokemon.effects.EffectTracker {
+  private final com.cobblemon.mod.common.entity.pokemon.PokemonEntity entity;
+  private java.util.concurrent.CompletableFuture<com.cobblemon.mod.common.entity.pokemon.PokemonEntity> progress;
+  private com.cobblemon.mod.common.api.entity.pokemon.MocKEffect mockEffect;
+  public com.cobblemon.mod.common.entity.pokemon.effects.EffectTracker(com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+  public final com.cobblemon.mod.common.entity.pokemon.PokemonEntity getEntity();
+  public final java.util.concurrent.CompletableFuture<com.cobblemon.mod.common.entity.pokemon.PokemonEntity> getProgress();
+  public final void setProgress(java.util.concurrent.CompletableFuture<com.cobblemon.mod.common.entity.pokemon.PokemonEntity>);
+  public final com.cobblemon.mod.common.api.entity.pokemon.MocKEffect getMockEffect();
+  public final void setMockEffect(com.cobblemon.mod.common.api.entity.pokemon.MocKEffect);
+  public final java.util.concurrent.CompletableFuture<com.cobblemon.mod.common.entity.pokemon.PokemonEntity> wipe();
+  public final void forceWipe();
+  public final net.minecraft.nbt.CompoundTag saveToNbt(net.minecraft.core.HolderLookup$Provider);
+  public final void loadFromNBT(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);
+}

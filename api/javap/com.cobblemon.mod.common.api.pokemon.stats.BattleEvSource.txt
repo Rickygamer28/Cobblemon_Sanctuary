@@ -1,0 +1,12 @@
+public class com.cobblemon.mod.common.api.pokemon.stats.BattleEvSource implements com.cobblemon.mod.common.api.pokemon.stats.EvSource {
+  private final com.cobblemon.mod.common.api.battles.model.PokemonBattle battle;
+  private final java.util.List<com.cobblemon.mod.common.battles.pokemon.BattlePokemon> facedPokemon;
+  private final com.cobblemon.mod.common.pokemon.Pokemon pokemon;
+  public com.cobblemon.mod.common.api.pokemon.stats.BattleEvSource(com.cobblemon.mod.common.api.battles.model.PokemonBattle, java.util.List<? extends com.cobblemon.mod.common.battles.pokemon.BattlePokemon>, com.cobblemon.mod.common.pokemon.Pokemon);
+  public final com.cobblemon.mod.common.api.battles.model.PokemonBattle getBattle();
+  public final java.util.List<com.cobblemon.mod.common.battles.pokemon.BattlePokemon> getFacedPokemon();
+  public com.cobblemon.mod.common.pokemon.Pokemon getPokemon();
+  public boolean isBattle();
+  public boolean isInteraction();
+  public boolean isSidemod();
+}

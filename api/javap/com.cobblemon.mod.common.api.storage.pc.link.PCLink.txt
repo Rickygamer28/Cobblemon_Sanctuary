@@ -1,0 +1,8 @@
+public class com.cobblemon.mod.common.api.storage.pc.link.PCLink {
+  private final com.cobblemon.mod.common.api.storage.pc.PCStore pc;
+  private final java.util.UUID playerID;
+  public com.cobblemon.mod.common.api.storage.pc.link.PCLink(com.cobblemon.mod.common.api.storage.pc.PCStore, java.util.UUID);
+  public com.cobblemon.mod.common.api.storage.pc.PCStore getPc();
+  public java.util.UUID getPlayerID();
+  public boolean isPermitted(net.minecraft.server.level.ServerPlayer);
+}

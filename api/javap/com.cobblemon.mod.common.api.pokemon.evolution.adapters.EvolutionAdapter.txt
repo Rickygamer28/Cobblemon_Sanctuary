@@ -1,0 +1,3 @@
+public interface com.cobblemon.mod.common.api.pokemon.evolution.adapters.EvolutionAdapter extends com.google.gson.JsonDeserializer<com.cobblemon.mod.common.api.pokemon.evolution.Evolution>, com.google.gson.JsonSerializer<com.cobblemon.mod.common.api.pokemon.evolution.Evolution> {
+  public abstract <T extends com.cobblemon.mod.common.api.pokemon.evolution.Evolution> void registerType(java.lang.String, kotlin.reflect.KClass<T>);
+}

@@ -1,0 +1,14 @@
+public final class com.cobblemon.mod.common.api.storage.player.PlayerDataExtension$Companion {
+  static final com.cobblemon.mod.common.api.storage.player.PlayerDataExtension$Companion $$INSTANCE;
+  private static final java.lang.String NAME_KEY;
+  private com.cobblemon.mod.common.api.storage.player.PlayerDataExtension$Companion();
+  public final java.lang.String getNAME_KEY();
+  static {};
+}
+public interface com.cobblemon.mod.common.api.storage.player.PlayerDataExtension {
+  public static final com.cobblemon.mod.common.api.storage.player.PlayerDataExtension$Companion Companion;
+  public abstract java.lang.String name();
+  public abstract com.google.gson.JsonObject serialize();
+  public abstract com.cobblemon.mod.common.api.storage.player.PlayerDataExtension deserialize(com.google.gson.JsonObject);
+  static {};
+}

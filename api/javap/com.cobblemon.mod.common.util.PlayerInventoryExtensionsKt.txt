@@ -1,0 +1,7 @@
+public final class com.cobblemon.mod.common.util.PlayerInventoryExtensionsKt {
+  public static final void removeAmountIf(net.minecraft.world.entity.player.Inventory, int, java.util.function.Predicate<net.minecraft.world.item.ItemStack>);
+  private static final kotlin.Pair removeAmountIf$lambda$0$0(kotlin.jvm.internal.Ref$IntRef, net.minecraft.world.item.ItemStack);
+  private static final kotlin.Pair removeAmountIf$lambda$0$1(kotlin.jvm.functions.Function1, java.lang.Object);
+  private static final boolean removeAmountIf$lambda$0$2(java.util.function.Predicate, kotlin.Pair);
+  private static final boolean removeAmountIf$lambda$0$3(kotlin.jvm.functions.Function1, java.lang.Object);
+}

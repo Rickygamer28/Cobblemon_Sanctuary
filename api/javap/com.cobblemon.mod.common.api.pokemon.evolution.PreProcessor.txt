@@ -1,0 +1,3 @@
+public interface com.cobblemon.mod.common.api.pokemon.evolution.PreProcessor {
+  public abstract com.cobblemon.mod.common.api.pokemon.evolution.EvolutionController<?, ?> create(com.cobblemon.mod.common.pokemon.Pokemon);
+}

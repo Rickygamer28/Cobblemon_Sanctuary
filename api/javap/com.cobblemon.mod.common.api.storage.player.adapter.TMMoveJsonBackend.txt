@@ -1,0 +1,21 @@
+public final class com.cobblemon.mod.common.api.storage.player.adapter.TMMoveJsonBackend$Companion {
+  private com.cobblemon.mod.common.api.storage.player.adapter.TMMoveJsonBackend$Companion();
+  public final kotlin.jvm.functions.Function1<java.util.UUID, com.cobblemon.mod.common.api.tms.TMMoveManager> getDefaultDataFunc();
+  public com.cobblemon.mod.common.api.storage.player.adapter.TMMoveJsonBackend$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.api.storage.player.adapter.TMMoveJsonBackend extends com.cobblemon.mod.common.api.storage.player.adapter.JsonBackedPlayerDataStoreBackend<com.cobblemon.mod.common.api.tms.TMMoveManager> {
+  public static final com.cobblemon.mod.common.api.storage.player.adapter.TMMoveJsonBackend$Companion Companion;
+  private final com.google.gson.Gson gson;
+  private final com.google.gson.reflect.TypeToken<com.cobblemon.mod.common.api.tms.TMMoveManager> classToken;
+  private final kotlin.jvm.functions.Function1<java.util.UUID, com.cobblemon.mod.common.api.tms.TMMoveManager> defaultData;
+  private static final kotlin.jvm.functions.Function1<java.util.UUID, com.cobblemon.mod.common.api.tms.TMMoveManager> defaultDataFunc;
+  public com.cobblemon.mod.common.api.storage.player.adapter.TMMoveJsonBackend();
+  public com.google.gson.Gson getGson();
+  public com.google.gson.reflect.TypeToken<com.cobblemon.mod.common.api.tms.TMMoveManager> getClassToken();
+  public kotlin.jvm.functions.Function1<java.util.UUID, com.cobblemon.mod.common.api.tms.TMMoveManager> getDefaultData();
+  public void initialize(com.cobblemon.mod.common.api.tms.TMMoveManager);
+  private static final com.cobblemon.mod.common.api.tms.TMMoveManager defaultDataFunc$lambda$0(java.util.UUID);
+  public void initialize(com.cobblemon.mod.common.api.storage.player.InstancedPlayerData);
+  public static final kotlin.jvm.functions.Function1 access$getDefaultDataFunc$cp();
+  static {};
+}

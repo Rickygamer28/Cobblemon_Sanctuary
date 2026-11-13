@@ -1,0 +1,80 @@
+public final class com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversion$ReforgedNatures extends java.lang.Enum<com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversion$ReforgedNatures> {
+  public static final com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversion$ReforgedNatures HARDY;
+  public static final com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversion$ReforgedNatures SERIOUS;
+  public static final com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversion$ReforgedNatures DOCILE;
+  public static final com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversion$ReforgedNatures BASHFUL;
+  public static final com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversion$ReforgedNatures QUIRKY;
+  public static final com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversion$ReforgedNatures LONELY;
+  public static final com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversion$ReforgedNatures BRAVE;
+  public static final com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversion$ReforgedNatures ADAMANT;
+  public static final com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversion$ReforgedNatures NAUGHTY;
+  public static final com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversion$ReforgedNatures BOLD;
+  public static final com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversion$ReforgedNatures RELAXED;
+  public static final com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversion$ReforgedNatures IMPISH;
+  public static final com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversion$ReforgedNatures LAX;
+  public static final com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversion$ReforgedNatures TIMID;
+  public static final com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversion$ReforgedNatures HASTY;
+  public static final com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversion$ReforgedNatures JOLLY;
+  public static final com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversion$ReforgedNatures NAIVE;
+  public static final com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversion$ReforgedNatures MODEST;
+  public static final com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversion$ReforgedNatures MILD;
+  public static final com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversion$ReforgedNatures QUIET;
+  public static final com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversion$ReforgedNatures RASH;
+  public static final com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversion$ReforgedNatures CALM;
+  public static final com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversion$ReforgedNatures GENTLE;
+  public static final com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversion$ReforgedNatures SASSY;
+  public static final com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversion$ReforgedNatures CAREFUL;
+  private static final com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversion$ReforgedNatures[] $VALUES;
+  private static final kotlin.enums.EnumEntries $ENTRIES;
+  private com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversion$ReforgedNatures();
+  public static com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversion$ReforgedNatures[] values();
+  public static com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversion$ReforgedNatures valueOf(java.lang.String);
+  public static kotlin.enums.EnumEntries<com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversion$ReforgedNatures> getEntries();
+  private static final com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversion$ReforgedNatures[] $values();
+  static {};
+}
+public interface com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversion$Translator<R> {
+  public abstract R from(net.minecraft.nbt.CompoundTag, java.lang.String);
+}
+final class com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversion$translate$2 implements com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversion$Translator,kotlin.jvm.internal.FunctionAdapter {
+  public static final com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversion$translate$2 INSTANCE;
+  com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversion$translate$2();
+  public final java.lang.Boolean from(net.minecraft.nbt.CompoundTag, java.lang.String);
+  public final kotlin.Function<?> getFunctionDelegate();
+  public final boolean equals(java.lang.Object);
+  public final int hashCode();
+  public java.lang.Object from(net.minecraft.nbt.CompoundTag, java.lang.String);
+  static {};
+}
+final class com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversion$translate$3 implements com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversion$Translator,kotlin.jvm.internal.FunctionAdapter {
+  public static final com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversion$translate$3 INSTANCE;
+  com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversion$translate$3();
+  public final java.lang.String from(net.minecraft.nbt.CompoundTag, java.lang.String);
+  public final kotlin.Function<?> getFunctionDelegate();
+  public final boolean equals(java.lang.Object);
+  public final int hashCode();
+  public java.lang.Object from(net.minecraft.nbt.CompoundTag, java.lang.String);
+  static {};
+}
+final class com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversion$translate$ball$1 implements com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversion$Translator,kotlin.jvm.internal.FunctionAdapter {
+  public static final com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversion$translate$ball$1 INSTANCE;
+  com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversion$translate$ball$1();
+  public final java.lang.String from(net.minecraft.nbt.CompoundTag, java.lang.String);
+  public final kotlin.Function<?> getFunctionDelegate();
+  public final boolean equals(java.lang.Object);
+  public final int hashCode();
+  public java.lang.Object from(net.minecraft.nbt.CompoundTag, java.lang.String);
+  static {};
+}
+public final class com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversion implements com.cobblemon.mod.common.api.storage.adapter.conversions.CobblemonConverter<net.minecraft.nbt.CompoundTag> {
+  private final java.nio.file.Path base;
+  public com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversion(java.nio.file.Path);
+  public final java.nio.file.Path getBase();
+  public java.nio.file.Path root();
+  public <E extends com.cobblemon.mod.common.api.storage.StorePosition, T extends com.cobblemon.mod.common.api.storage.PokemonStore<E>> T load(java.lang.Class<T>, java.util.UUID, net.minecraft.core.RegistryAccess);
+  public com.cobblemon.mod.common.api.storage.party.PlayerPartyStore party(java.util.UUID, net.minecraft.nbt.CompoundTag);
+  public com.cobblemon.mod.common.api.storage.pc.PCStore pc(java.util.UUID, net.minecraft.nbt.CompoundTag);
+  public com.cobblemon.mod.common.pokemon.Pokemon translate(net.minecraft.nbt.CompoundTag);
+  public final <T> T find(net.minecraft.nbt.CompoundTag, java.lang.String, com.cobblemon.mod.common.api.storage.adapter.conversions.ReforgedConversion$Translator<? extends T>);
+  public boolean exists(java.nio.file.Path);
+}

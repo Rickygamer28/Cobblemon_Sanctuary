@@ -1,0 +1,18 @@
+public final class com.cobblemon.mod.common.api.events.pokemon.ShinyChanceCalculationEvent {
+  private final float baseChance;
+  private final com.cobblemon.mod.common.pokemon.Pokemon pokemon;
+  private final float chance;
+  private boolean isShiny;
+  private final java.util.List<java.lang.Float> modifiers;
+  private final java.util.List<kotlin.jvm.functions.Function3<java.lang.Float, net.minecraft.server.level.ServerPlayer, com.cobblemon.mod.common.pokemon.Pokemon, java.lang.Float>> modificationFunctions;
+  public com.cobblemon.mod.common.api.events.pokemon.ShinyChanceCalculationEvent(float, com.cobblemon.mod.common.pokemon.Pokemon);
+  public final float getBaseChance();
+  public final com.cobblemon.mod.common.pokemon.Pokemon getPokemon();
+  public final float getChance();
+  public final boolean isShiny();
+  public final void setShiny(boolean);
+  public final void addModifier(float);
+  public final void addModificationFunction(kotlin.jvm.functions.Function3<? super java.lang.Float, ? super net.minecraft.server.level.ServerPlayer, ? super com.cobblemon.mod.common.pokemon.Pokemon, java.lang.Float>);
+  public final float calculate(net.minecraft.server.level.ServerPlayer);
+  public final boolean isShiny(net.minecraft.server.level.ServerPlayer);
+}

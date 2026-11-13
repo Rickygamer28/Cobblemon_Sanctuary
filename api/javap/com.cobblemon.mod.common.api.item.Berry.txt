@@ -1,0 +1,15 @@
+public final class com.cobblemon.mod.common.api.item.Berry {
+  private final net.minecraft.resources.ResourceLocation name;
+  private final int spicy;
+  private final int dry;
+  private final int sweet;
+  private final int bitter;
+  private final int sour;
+  public com.cobblemon.mod.common.api.item.Berry(net.minecraft.resources.ResourceLocation, int, int, int, int, int);
+  public final net.minecraft.resources.ResourceLocation getName();
+  public final int getSpicy();
+  public final int getDry();
+  public final int getSweet();
+  public final int getBitter();
+  public final int getSour();
+}

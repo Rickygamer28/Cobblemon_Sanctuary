@@ -1,0 +1,16 @@
+public final class com.cobblemon.mod.common.CobblemonNetwork {
+  public static final com.cobblemon.mod.common.CobblemonNetwork INSTANCE;
+  private static final java.util.List<com.cobblemon.mod.common.net.PacketRegisterInfo<?>> s2cPayloads;
+  private static final java.util.List<com.cobblemon.mod.common.net.PacketRegisterInfo<?>> c2sPayloads;
+  private com.cobblemon.mod.common.CobblemonNetwork();
+  public final void sendPacket(net.minecraft.server.level.ServerPlayer, com.cobblemon.mod.common.api.net.NetworkPacket<?>);
+  public static final void sendToServer(com.cobblemon.mod.common.api.net.NetworkPacket<?>);
+  public static final void sendToAllPlayers(com.cobblemon.mod.common.api.net.NetworkPacket<?>);
+  public static final void sendPacketToPlayers(java.lang.Iterable<? extends net.minecraft.server.level.ServerPlayer>, com.cobblemon.mod.common.api.net.NetworkPacket<?>);
+  public final java.util.List<com.cobblemon.mod.common.net.PacketRegisterInfo<?>> getS2cPayloads();
+  public final java.util.List<com.cobblemon.mod.common.net.PacketRegisterInfo<?>> getC2sPayloads();
+  private final java.util.List<com.cobblemon.mod.common.net.PacketRegisterInfo<?>> generateS2CPacketInfoList();
+  private final java.util.List<com.cobblemon.mod.common.net.PacketRegisterInfo<?>> generateC2SPacketInfoList();
+  public final void sendPacketToPlayer(net.minecraft.server.level.ServerPlayer, com.cobblemon.mod.common.api.net.NetworkPacket<?>);
+  static {};
+}

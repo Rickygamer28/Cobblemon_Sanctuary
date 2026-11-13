@@ -1,0 +1,3 @@
+public interface com.cobblemon.mod.common.api.pokemon.evolution.EvolutionLike {
+  public abstract java.lang.String getId();
+}

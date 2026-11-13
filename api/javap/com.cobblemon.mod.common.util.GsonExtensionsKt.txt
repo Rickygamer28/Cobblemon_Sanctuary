@@ -1,0 +1,8 @@
+public final class com.cobblemon.mod.common.util.GsonExtensionsKt {
+  public static final <T> T fromJson(com.google.gson.Gson, java.io.Reader);
+  public static final <T> T fromJson(com.google.gson.Gson, com.google.gson.JsonElement);
+  public static final <T> T fromJson(com.google.gson.Gson, java.lang.String);
+  public static final com.google.gson.JsonObject singularToPluralList(com.google.gson.JsonObject, java.lang.String, java.lang.String);
+  public static com.google.gson.JsonObject singularToPluralList$default(com.google.gson.JsonObject, java.lang.String, java.lang.String, int, java.lang.Object);
+  public static final com.google.gson.JsonArray normalizeToArray(com.google.gson.JsonElement);
+}

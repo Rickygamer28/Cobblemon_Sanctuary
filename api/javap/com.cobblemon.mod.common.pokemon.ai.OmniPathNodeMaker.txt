@@ -1,0 +1,69 @@
+public final class com.cobblemon.mod.common.pokemon.ai.OmniPathNodeMaker$Companion {
+  private com.cobblemon.mod.common.pokemon.ai.OmniPathNodeMaker$Companion();
+  public com.cobblemon.mod.common.pokemon.ai.OmniPathNodeMaker$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.pokemon.ai.OmniPathNodeMaker$EntriesMappings {
+  public static final kotlin.enums.EnumEntries<net.minecraft.core.Direction> entries$0;
+  static {};
+}
+public final class com.cobblemon.mod.common.pokemon.ai.OmniPathNodeMaker$WhenMappings {
+  public static final int[] $EnumSwitchMapping$0;
+  static {};
+}
+public final class com.cobblemon.mod.common.pokemon.ai.OmniPathNodeMaker extends net.minecraft.world.level.pathfinder.NodeEvaluator {
+  public static final com.cobblemon.mod.common.pokemon.ai.OmniPathNodeMaker$Companion Companion;
+  private final it.unimi.dsi.fastutil.longs.Long2ObjectMap<net.minecraft.world.level.pathfinder.PathType> nodePosToType;
+  private final it.unimi.dsi.fastutil.longs.Long2ObjectMap<net.minecraft.world.level.block.state.BlockState> nodePosToState;
+  private boolean canPathThroughFire;
+  private java.util.function.Predicate<net.minecraft.world.level.pathfinder.PathType> nodeFilter;
+  public static final float MAX_HITBOX_SIZE_FOR_WALKING;
+  public static final float MAX_HITBOX_FOR_VERTICAL_NEIGHBOURS;
+  public com.cobblemon.mod.common.pokemon.ai.OmniPathNodeMaker();
+  public final boolean getCanPathThroughFire();
+  public final void setCanPathThroughFire(boolean);
+  public final java.util.function.Predicate<net.minecraft.world.level.pathfinder.PathType> getNodeFilter();
+  public final void setNodeFilter(java.util.function.Predicate<net.minecraft.world.level.pathfinder.PathType>);
+  public void prepare(net.minecraft.world.level.PathNavigationRegion, net.minecraft.world.entity.Mob);
+  public void done();
+  public final net.minecraft.world.level.block.state.BlockState getCachedBlockState(net.minecraft.world.level.pathfinder.PathfindingContext, net.minecraft.core.BlockPos);
+  public net.minecraft.world.level.pathfinder.Target getTarget(double, double, double);
+  public net.minecraft.world.level.pathfinder.Node getStart();
+  public final net.minecraft.world.level.pathfinder.PathType getNodeType(net.minecraft.world.entity.Mob, net.minecraft.core.BlockPos);
+  public final net.minecraft.world.level.pathfinder.PathType getNodeType(net.minecraft.world.entity.Mob, int, int, int);
+  public final boolean doesBlockHavePartialCollision(net.minecraft.world.level.pathfinder.PathType);
+  private final double getMobJumpHeight();
+  protected final net.minecraft.world.level.pathfinder.Node findAcceptedNodeWalk(int, int, int, int, double, net.minecraft.core.Direction, net.minecraft.world.level.pathfinder.PathType);
+  private final net.minecraft.world.level.pathfinder.Node getBlockedNode(int, int, int);
+  private final boolean canReachWithoutCollision(net.minecraft.world.level.pathfinder.Node);
+  private final net.minecraft.world.level.pathfinder.Node tryFindFirstGroundNodeBelow(int, int, int);
+  private final net.minecraft.world.level.pathfinder.Node tryFindFirstNonWaterBelow(int, int, int, net.minecraft.world.level.pathfinder.Node);
+  private final net.minecraft.world.level.pathfinder.Node getNodeAndUpdateCostToMax(int, int, int, net.minecraft.world.level.pathfinder.PathType, float);
+  private final net.minecraft.world.level.pathfinder.Node tryJumpOn(int, int, int, int, double, net.minecraft.core.Direction, net.minecraft.world.level.pathfinder.PathType, net.minecraft.core.BlockPos$MutableBlockPos);
+  private final net.minecraft.world.level.pathfinder.Node getClosedNode(int, int, int, net.minecraft.world.level.pathfinder.PathType);
+  private final boolean hasCollisions(net.minecraft.world.phys.AABB);
+  private final boolean isDiagonalValidForNonPokemon(net.minecraft.world.level.pathfinder.Node, net.minecraft.world.level.pathfinder.Node, net.minecraft.world.level.pathfinder.Node);
+  protected final double getFloorLevel(net.minecraft.core.BlockPos);
+  public int getNeighbors(net.minecraft.world.level.pathfinder.Node[], net.minecraft.world.level.pathfinder.Node);
+  public final boolean hasNotVisited(net.minecraft.world.level.pathfinder.Node, net.minecraft.world.level.pathfinder.Node);
+  public final boolean isAccessibleDiagonal(net.minecraft.world.level.pathfinder.Node, net.minecraft.world.level.pathfinder.Node...);
+  public final boolean isValidPathType(net.minecraft.world.level.pathfinder.PathType);
+  protected net.minecraft.world.level.pathfinder.Node getNode(int, int, int);
+  public final net.minecraft.world.level.pathfinder.PathType addNodePos(int, int, int);
+  public net.minecraft.world.level.pathfinder.PathType getPathType(net.minecraft.world.level.pathfinder.PathfindingContext, int, int, int);
+  public net.minecraft.world.level.pathfinder.PathType getPathTypeOfMob(net.minecraft.world.level.pathfinder.PathfindingContext, int, int, int, net.minecraft.world.entity.Mob);
+  public final net.minecraft.world.level.pathfinder.PathType findNearbyNodeTypes(net.minecraft.world.level.pathfinder.PathfindingContext, int, int, int, int, int, int, boolean, boolean, java.util.EnumSet<net.minecraft.world.level.pathfinder.PathType>, net.minecraft.world.level.pathfinder.PathType, net.minecraft.core.BlockPos, java.util.List<net.minecraft.world.level.pathfinder.PathType>);
+  protected final net.minecraft.world.level.pathfinder.PathType adjustNodeType(net.minecraft.world.level.pathfinder.PathfindingContext, boolean, boolean, net.minecraft.core.BlockPos, net.minecraft.world.level.pathfinder.PathType);
+  public final boolean canWalk();
+  public final boolean canSwimInLava();
+  public final boolean canSwimInWater();
+  public final boolean canSwimUnderFluid(net.minecraft.world.level.material.FluidState);
+  public final boolean canPathThroughLeaves();
+  public final boolean canWalkOnWater();
+  public final boolean canFly();
+  public final boolean isOnGround();
+  private static final boolean nodeFilter$lambda$0(net.minecraft.world.level.pathfinder.PathType);
+  private static final net.minecraft.world.level.block.state.BlockState getCachedBlockState$lambda$0(net.minecraft.world.level.pathfinder.PathfindingContext, net.minecraft.core.BlockPos, long);
+  private static final net.minecraft.world.level.pathfinder.PathType getNodeType$lambda$0(com.cobblemon.mod.common.pokemon.ai.OmniPathNodeMaker, int, int, int, net.minecraft.world.entity.Mob, long);
+  private static final net.minecraft.world.level.pathfinder.PathType addNodePos$lambda$0(com.cobblemon.mod.common.pokemon.ai.OmniPathNodeMaker, int, int, int, long);
+  static {};
+}

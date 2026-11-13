@@ -1,0 +1,27 @@
+public final class com.cobblemon.mod.common.entity.ai.CircleAroundTask extends net.minecraft.world.entity.ai.behavior.Behavior<com.cobblemon.mod.common.entity.pokemon.PokemonEntity> {
+  private final java.util.Set<com.cobblemon.mod.common.entity.PoseType> poseTypes;
+  private final float minTurnAngleDegrees;
+  private final float maxTurnAngleDegrees;
+  private final float verticalSpeed;
+  private final float speed;
+  private float chosenTurnAngle;
+  public com.cobblemon.mod.common.entity.ai.CircleAroundTask(java.util.Set<? extends com.cobblemon.mod.common.entity.PoseType>, float, float, float, float, int, int);
+  public com.cobblemon.mod.common.entity.ai.CircleAroundTask(java.util.Set, float, float, float, float, int, int, int, kotlin.jvm.internal.DefaultConstructorMarker);
+  public final java.util.Set<com.cobblemon.mod.common.entity.PoseType> getPoseTypes();
+  public final float getMinTurnAngleDegrees();
+  public final float getMaxTurnAngleDegrees();
+  public final float getVerticalSpeed();
+  public final float getSpeed();
+  public final float getChosenTurnAngle();
+  public final void setChosenTurnAngle(float);
+  protected boolean checkExtraStartConditions(net.minecraft.server.level.ServerLevel, com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+  protected boolean canStillUse(net.minecraft.server.level.ServerLevel, com.cobblemon.mod.common.entity.pokemon.PokemonEntity, long);
+  protected void stop(net.minecraft.server.level.ServerLevel, com.cobblemon.mod.common.entity.pokemon.PokemonEntity, long);
+  protected void start(net.minecraft.server.level.ServerLevel, com.cobblemon.mod.common.entity.pokemon.PokemonEntity, long);
+  protected void tick(net.minecraft.server.level.ServerLevel, com.cobblemon.mod.common.entity.pokemon.PokemonEntity, long);
+  public boolean checkExtraStartConditions(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity);
+  public boolean canStillUse(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity, long);
+  public void stop(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity, long);
+  public void start(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity, long);
+  public void tick(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity, long);
+}

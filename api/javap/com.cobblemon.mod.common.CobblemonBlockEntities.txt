@@ -1,0 +1,32 @@
+public final class com.cobblemon.mod.common.CobblemonBlockEntities extends com.cobblemon.mod.common.platform.PlatformRegistry<net.minecraft.core.Registry<net.minecraft.world.level.block.entity.BlockEntityType<?>>, net.minecraft.resources.ResourceKey<net.minecraft.core.Registry<net.minecraft.world.level.block.entity.BlockEntityType<?>>>, net.minecraft.world.level.block.entity.BlockEntityType<?>> {
+  public static final com.cobblemon.mod.common.CobblemonBlockEntities INSTANCE;
+  private static final net.minecraft.core.Registry<net.minecraft.world.level.block.entity.BlockEntityType<?>> registry;
+  private static final net.minecraft.resources.ResourceKey<net.minecraft.core.Registry<net.minecraft.world.level.block.entity.BlockEntityType<?>>> resourceKey;
+  public static final net.minecraft.world.level.block.entity.BlockEntityType<com.cobblemon.mod.common.block.entity.HealingMachineBlockEntity> HEALING_MACHINE;
+  public static final net.minecraft.world.level.block.entity.BlockEntityType<com.cobblemon.mod.common.block.entity.PCBlockEntity> PC;
+  public static final net.minecraft.world.level.block.entity.BlockEntityType<com.cobblemon.mod.common.block.entity.LecternBlockEntity> LECTERN;
+  public static final net.minecraft.world.level.block.entity.BlockEntityType<com.cobblemon.mod.common.block.entity.DiscShelfBlockEntity> DISC_SHELF;
+  public static final net.minecraft.world.level.block.entity.BlockEntityType<com.cobblemon.mod.common.block.entity.BerryBlockEntity> BERRY;
+  public static final net.minecraft.world.level.block.entity.BlockEntityType<com.cobblemon.mod.common.block.entity.PokemonPastureBlockEntity> PASTURE;
+  public static final net.minecraft.world.level.block.entity.BlockEntityType<com.cobblemon.mod.common.block.entity.CobblemonSignBlockEntity> SIGN;
+  public static final net.minecraft.world.level.block.entity.BlockEntityType<com.cobblemon.mod.common.block.entity.CobblemonHangingSignBlockEntity> HANGING_SIGN;
+  public static final net.minecraft.world.level.block.entity.BlockEntityType<com.cobblemon.mod.common.block.entity.TMMachineBlockEntity> TM_MACHINE;
+  public static final net.minecraft.world.level.block.entity.BlockEntityType<com.cobblemon.mod.common.block.habitat.HabitatBlockEntity> HABITAT_BLOCK;
+  public static final net.minecraft.world.level.block.entity.BlockEntityType<com.cobblemon.mod.common.block.entity.GildedChestBlockEntity> GILDED_CHEST;
+  public static final net.minecraft.world.level.block.entity.BlockEntityType<com.cobblemon.mod.common.block.entity.FossilMultiblockEntity> FOSSIL_MULTIBLOCK;
+  public static final net.minecraft.world.level.block.entity.BlockEntityType<com.cobblemon.mod.common.block.entity.RestorationTankBlockEntity> RESTORATION_TANK;
+  public static final net.minecraft.world.level.block.entity.BlockEntityType<com.cobblemon.mod.common.block.entity.FossilAnalyzerBlockEntity> FOSSIL_ANALYZER;
+  public static final net.minecraft.world.level.block.entity.BlockEntityType<com.cobblemon.mod.common.block.entity.DisplayCaseBlockEntity> DISPLAY_CASE;
+  public static final net.minecraft.world.level.block.entity.BlockEntityType<com.cobblemon.mod.common.block.entity.CampfireBlockEntity> CAMPFIRE;
+  public static final net.minecraft.world.level.block.entity.BlockEntityType<com.cobblemon.mod.common.block.entity.PokeSnackBlockEntity> POKE_SNACK;
+  public static final net.minecraft.world.level.block.entity.BlockEntityType<com.cobblemon.mod.common.block.entity.TerrainPlantBlockEntity> TERRAIN_PLANT;
+  public static final net.minecraft.world.level.block.entity.BlockEntityType<com.cobblemon.mod.common.block.entity.MistleafFlowerBlockEntity> MISTLEAF_FLOWER;
+  private com.cobblemon.mod.common.CobblemonBlockEntities();
+  public net.minecraft.core.Registry<net.minecraft.world.level.block.entity.BlockEntityType<?>> getRegistry();
+  public net.minecraft.resources.ResourceKey<net.minecraft.core.Registry<net.minecraft.world.level.block.entity.BlockEntityType<?>>> getResourceKey();
+  private static final com.cobblemon.mod.common.block.entity.GildedChestBlockEntity GILDED_CHEST$lambda$0(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);
+  private static final com.cobblemon.mod.common.block.entity.FossilMultiblockEntity FOSSIL_MULTIBLOCK$lambda$0(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);
+  private static final com.cobblemon.mod.common.block.entity.RestorationTankBlockEntity RESTORATION_TANK$lambda$0(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);
+  private static final com.cobblemon.mod.common.block.entity.FossilAnalyzerBlockEntity FOSSIL_ANALYZER$lambda$0(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);
+  static {};
+}

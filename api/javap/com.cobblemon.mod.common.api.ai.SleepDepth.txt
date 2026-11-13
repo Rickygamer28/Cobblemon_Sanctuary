@@ -1,0 +1,30 @@
+public final class com.cobblemon.mod.common.api.ai.SleepDepth$Companion$comatose$1 implements com.cobblemon.mod.common.api.ai.SleepDepth {
+  com.cobblemon.mod.common.api.ai.SleepDepth$Companion$comatose$1();
+  public boolean canSleep(com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+  public boolean shouldWake(com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+}
+public final class com.cobblemon.mod.common.api.ai.SleepDepth$Companion$normal$1 implements com.cobblemon.mod.common.api.ai.SleepDepth {
+  com.cobblemon.mod.common.api.ai.SleepDepth$Companion$normal$1();
+  public boolean canSleep(com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+  public boolean shouldWake(com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+}
+public final class com.cobblemon.mod.common.api.ai.SleepDepth$Companion {
+  static final com.cobblemon.mod.common.api.ai.SleepDepth$Companion $$INSTANCE;
+  private static final com.cobblemon.mod.common.api.ai.SleepDepth comatose;
+  private static final com.cobblemon.mod.common.api.ai.SleepDepth normal;
+  private static final java.util.Map<java.lang.String, com.cobblemon.mod.common.api.ai.SleepDepth> depths;
+  private static final com.cobblemon.mod.common.api.serialization.StringIdentifiedObjectAdapter<com.cobblemon.mod.common.api.ai.SleepDepth> adapter;
+  private com.cobblemon.mod.common.api.ai.SleepDepth$Companion();
+  public final com.cobblemon.mod.common.api.ai.SleepDepth getComatose();
+  public final com.cobblemon.mod.common.api.ai.SleepDepth getNormal();
+  public final java.util.Map<java.lang.String, com.cobblemon.mod.common.api.ai.SleepDepth> getDepths();
+  public final com.cobblemon.mod.common.api.serialization.StringIdentifiedObjectAdapter<com.cobblemon.mod.common.api.ai.SleepDepth> getAdapter();
+  private static final com.cobblemon.mod.common.api.ai.SleepDepth adapter$lambda$0(java.lang.String);
+  static {};
+}
+public interface com.cobblemon.mod.common.api.ai.SleepDepth {
+  public static final com.cobblemon.mod.common.api.ai.SleepDepth$Companion Companion;
+  public abstract boolean canSleep(com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+  public abstract boolean shouldWake(com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+  static {};
+}

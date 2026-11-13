@@ -1,0 +1,1 @@
+{"configurations":[{"activity":"idle","tasksByPriority":{"2":["eat_grass"]},"type":"add_tasks_to_activity"},{"activity":"cobblemon:pokemon_herd","tasksByPriority":{"2":["eat_grass"]},"type":"add_tasks_to_activity"}],"description":"cobblemon.behaviour.pokemon_eats_grass.desc","entityType":"cobblemon:pokemon","name":"cobblemon.behaviour.pokemon_eats_grass.name"}

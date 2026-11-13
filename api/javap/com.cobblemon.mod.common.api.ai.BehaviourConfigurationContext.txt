@@ -1,0 +1,38 @@
+public final class com.cobblemon.mod.common.api.ai.BehaviourConfigurationContext {
+  private final com.bedrockk.molang.runtime.MoLangRuntime runtime;
+  private java.util.Set<net.minecraft.resources.ResourceLocation> appliedBehaviours;
+  private net.minecraft.world.entity.schedule.Activity defaultActivity;
+  private java.util.Set<? extends net.minecraft.world.entity.schedule.Activity> coreActivities;
+  private final java.util.List<com.cobblemon.mod.common.api.ai.ActivityConfigurationContext> activities;
+  private final net.minecraft.world.entity.schedule.Schedule schedule;
+  private final java.util.Set<net.minecraft.world.entity.ai.memory.MemoryModuleType<?>> memories;
+  private final java.util.Set<net.minecraft.world.entity.ai.sensing.SensorType<?>> sensors;
+  private final java.util.List<com.cobblemon.mod.common.api.molang.ExpressionLike> onAdd;
+  public com.cobblemon.mod.common.api.ai.BehaviourConfigurationContext();
+  public final com.bedrockk.molang.runtime.MoLangRuntime getRuntime();
+  public final java.util.Set<net.minecraft.resources.ResourceLocation> getAppliedBehaviours();
+  public final void setAppliedBehaviours(java.util.Set<net.minecraft.resources.ResourceLocation>);
+  public final net.minecraft.world.entity.schedule.Activity getDefaultActivity();
+  public final void setDefaultActivity(net.minecraft.world.entity.schedule.Activity);
+  public final java.util.Set<net.minecraft.world.entity.schedule.Activity> getCoreActivities();
+  public final void setCoreActivities(java.util.Set<? extends net.minecraft.world.entity.schedule.Activity>);
+  public final java.util.List<com.cobblemon.mod.common.api.ai.ActivityConfigurationContext> getActivities();
+  public final net.minecraft.world.entity.schedule.Schedule getSchedule();
+  public final java.util.Set<net.minecraft.world.entity.ai.memory.MemoryModuleType<?>> getMemories();
+  public final java.util.Set<net.minecraft.world.entity.ai.sensing.SensorType<?>> getSensors();
+  public final java.util.List<com.cobblemon.mod.common.api.molang.ExpressionLike> getOnAdd();
+  public final com.cobblemon.mod.common.api.ai.ActivityConfigurationContext getOrCreateActivity(net.minecraft.world.entity.schedule.Activity);
+  public final void addMemories(net.minecraft.world.entity.ai.memory.MemoryModuleType<?>...);
+  public final void addMemories(java.util.Collection<? extends net.minecraft.world.entity.ai.memory.MemoryModuleType<?>>);
+  public final void addSensors(net.minecraft.world.entity.ai.sensing.SensorType<?>...);
+  public final void addSensors(java.util.Collection<? extends net.minecraft.world.entity.ai.sensing.SensorType<?>>);
+  public final void addOnAddScript(com.cobblemon.mod.common.api.molang.ExpressionLike);
+  public final void apply(net.minecraft.world.entity.LivingEntity, java.util.List<? extends com.cobblemon.mod.common.api.ai.config.BehaviourConfig>, com.mojang.serialization.Dynamic<?>);
+  public final com.bedrockk.molang.runtime.struct.QueryStruct createBrainStruct(net.minecraft.world.entity.LivingEntity, com.cobblemon.mod.common.api.ai.BehaviourConfigurationContext);
+  public final com.cobblemon.mod.common.api.molang.ObjectValue<com.cobblemon.mod.common.api.ai.ActivityConfigurationContext> createActivityStruct(com.cobblemon.mod.common.api.ai.ActivityConfigurationContext);
+  private static final java.lang.Object createBrainStruct$lambda$0(net.minecraft.world.entity.LivingEntity, com.bedrockk.molang.runtime.MoParams);
+  private static final java.lang.Object createBrainStruct$lambda$1(net.minecraft.world.entity.LivingEntity, com.cobblemon.mod.common.api.ai.BehaviourConfigurationContext, com.cobblemon.mod.common.api.ai.BehaviourConfigurationContext, com.bedrockk.molang.runtime.MoParams);
+  private static final java.lang.Object createBrainStruct$lambda$2(com.cobblemon.mod.common.api.ai.BehaviourConfigurationContext, com.bedrockk.molang.runtime.MoParams);
+  private static final java.lang.Object createBrainStruct$lambda$3(com.cobblemon.mod.common.api.ai.BehaviourConfigurationContext, com.bedrockk.molang.runtime.MoParams);
+  private static final java.lang.Object createActivityStruct$lambda$0(com.cobblemon.mod.common.api.ai.ActivityConfigurationContext, com.bedrockk.molang.runtime.MoParams);
+}

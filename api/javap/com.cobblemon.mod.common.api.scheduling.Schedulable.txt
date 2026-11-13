@@ -1,0 +1,27 @@
+public final class com.cobblemon.mod.common.api.scheduling.Schedulable$DefaultImpls {
+  public static com.cobblemon.mod.common.api.scheduling.ScheduledTask momentarily(com.cobblemon.mod.common.api.scheduling.Schedulable, kotlin.jvm.functions.Function0<kotlin.Unit>);
+  public static com.cobblemon.mod.common.api.scheduling.ScheduledTask after(com.cobblemon.mod.common.api.scheduling.Schedulable, float, kotlin.jvm.functions.Function0<kotlin.Unit>);
+  public static com.cobblemon.mod.common.api.scheduling.ScheduledTask after$default(com.cobblemon.mod.common.api.scheduling.Schedulable, float, kotlin.jvm.functions.Function0, int, java.lang.Object);
+  public static com.cobblemon.mod.common.api.scheduling.ScheduledTask lerp(com.cobblemon.mod.common.api.scheduling.Schedulable, float, kotlin.jvm.functions.Function1<? super java.lang.Float, kotlin.Unit>);
+  public static com.cobblemon.mod.common.api.scheduling.ScheduledTask lerp$default(com.cobblemon.mod.common.api.scheduling.Schedulable, float, kotlin.jvm.functions.Function1, int, java.lang.Object);
+  public static java.util.concurrent.CompletableFuture<kotlin.Unit> delayedFuture(com.cobblemon.mod.common.api.scheduling.Schedulable, float);
+  public static com.cobblemon.mod.common.api.scheduling.ScheduledTask$Builder taskBuilder(com.cobblemon.mod.common.api.scheduling.Schedulable);
+}
+public interface com.cobblemon.mod.common.api.scheduling.Schedulable {
+  public abstract com.cobblemon.mod.common.api.scheduling.SchedulingTracker getSchedulingTracker();
+  public default com.cobblemon.mod.common.api.scheduling.ScheduledTask momentarily(kotlin.jvm.functions.Function0<kotlin.Unit>);
+  public default com.cobblemon.mod.common.api.scheduling.ScheduledTask after(float, kotlin.jvm.functions.Function0<kotlin.Unit>);
+  public static com.cobblemon.mod.common.api.scheduling.ScheduledTask after$default(com.cobblemon.mod.common.api.scheduling.Schedulable, float, kotlin.jvm.functions.Function0, int, java.lang.Object);
+  public default com.cobblemon.mod.common.api.scheduling.ScheduledTask lerp(float, kotlin.jvm.functions.Function1<? super java.lang.Float, kotlin.Unit>);
+  public static com.cobblemon.mod.common.api.scheduling.ScheduledTask lerp$default(com.cobblemon.mod.common.api.scheduling.Schedulable, float, kotlin.jvm.functions.Function1, int, java.lang.Object);
+  public default java.util.concurrent.CompletableFuture<kotlin.Unit> delayedFuture(float);
+  public default com.cobblemon.mod.common.api.scheduling.ScheduledTask$Builder taskBuilder();
+  private static kotlin.Unit after$lambda$0(kotlin.jvm.functions.Function0, com.cobblemon.mod.common.api.scheduling.ScheduledTask);
+  private static kotlin.Unit lerp$lambda$0(kotlin.jvm.internal.Ref$FloatRef, float, kotlin.jvm.functions.Function1, com.cobblemon.mod.common.api.scheduling.ScheduledTask);
+  private static kotlin.Unit delayedFuture$lambda$0(java.util.concurrent.CompletableFuture);
+  public static com.cobblemon.mod.common.api.scheduling.ScheduledTask access$momentarily$jd(com.cobblemon.mod.common.api.scheduling.Schedulable, kotlin.jvm.functions.Function0);
+  public static com.cobblemon.mod.common.api.scheduling.ScheduledTask access$after$jd(com.cobblemon.mod.common.api.scheduling.Schedulable, float, kotlin.jvm.functions.Function0);
+  public static com.cobblemon.mod.common.api.scheduling.ScheduledTask access$lerp$jd(com.cobblemon.mod.common.api.scheduling.Schedulable, float, kotlin.jvm.functions.Function1);
+  public static java.util.concurrent.CompletableFuture access$delayedFuture$jd(com.cobblemon.mod.common.api.scheduling.Schedulable, float);
+  public static com.cobblemon.mod.common.api.scheduling.ScheduledTask$Builder access$taskBuilder$jd(com.cobblemon.mod.common.api.scheduling.Schedulable);
+}

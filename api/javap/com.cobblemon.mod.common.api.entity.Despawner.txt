@@ -1,0 +1,4 @@
+public interface com.cobblemon.mod.common.api.entity.Despawner<T extends net.minecraft.world.entity.Entity> {
+  public abstract void beginTracking(T);
+  public abstract boolean shouldDespawn(T);
+}

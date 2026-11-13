@@ -1,0 +1,34 @@
+public final class com.cobblemon.mod.common.api.pokemon.aspect.SingleConditionalAspectProvider$Companion$getForFeature$1 implements com.cobblemon.mod.common.api.pokemon.aspect.SingleConditionalAspectProvider {
+  private final java.lang.String aspect;
+  final java.lang.String $name;
+  com.cobblemon.mod.common.api.pokemon.aspect.SingleConditionalAspectProvider$Companion$getForFeature$1(java.lang.String);
+  public java.lang.String getAspect();
+  public boolean meetsCondition(com.cobblemon.mod.common.pokemon.Pokemon);
+  public boolean meetsCondition(com.cobblemon.mod.common.api.pokemon.PokemonProperties);
+  public java.util.Set<java.lang.String> provide(com.cobblemon.mod.common.api.pokemon.PokemonProperties);
+  public java.util.Set<java.lang.String> provide(com.cobblemon.mod.common.pokemon.Pokemon);
+  public com.cobblemon.mod.common.api.pokemon.aspect.AspectProvider register();
+}
+public final class com.cobblemon.mod.common.api.pokemon.aspect.SingleConditionalAspectProvider$Companion {
+  static final com.cobblemon.mod.common.api.pokemon.aspect.SingleConditionalAspectProvider$Companion $$INSTANCE;
+  private com.cobblemon.mod.common.api.pokemon.aspect.SingleConditionalAspectProvider$Companion();
+  public final com.cobblemon.mod.common.api.pokemon.aspect.SingleConditionalAspectProvider getForFeature(java.lang.String);
+  static {};
+}
+public final class com.cobblemon.mod.common.api.pokemon.aspect.SingleConditionalAspectProvider$DefaultImpls {
+  public static java.util.Set<java.lang.String> provide(com.cobblemon.mod.common.api.pokemon.aspect.SingleConditionalAspectProvider, com.cobblemon.mod.common.api.pokemon.PokemonProperties);
+  public static java.util.Set<java.lang.String> provide(com.cobblemon.mod.common.api.pokemon.aspect.SingleConditionalAspectProvider, com.cobblemon.mod.common.pokemon.Pokemon);
+  public static com.cobblemon.mod.common.api.pokemon.aspect.AspectProvider register(com.cobblemon.mod.common.api.pokemon.aspect.SingleConditionalAspectProvider);
+}
+public interface com.cobblemon.mod.common.api.pokemon.aspect.SingleConditionalAspectProvider extends com.cobblemon.mod.common.api.pokemon.aspect.AspectProvider {
+  public static final com.cobblemon.mod.common.api.pokemon.aspect.SingleConditionalAspectProvider$Companion Companion;
+  public abstract java.lang.String getAspect();
+  public abstract boolean meetsCondition(com.cobblemon.mod.common.pokemon.Pokemon);
+  public abstract boolean meetsCondition(com.cobblemon.mod.common.api.pokemon.PokemonProperties);
+  public default java.util.Set<java.lang.String> provide(com.cobblemon.mod.common.api.pokemon.PokemonProperties);
+  public default java.util.Set<java.lang.String> provide(com.cobblemon.mod.common.pokemon.Pokemon);
+  public static java.util.Set access$provide$jd(com.cobblemon.mod.common.api.pokemon.aspect.SingleConditionalAspectProvider, com.cobblemon.mod.common.api.pokemon.PokemonProperties);
+  public static java.util.Set access$provide$jd(com.cobblemon.mod.common.api.pokemon.aspect.SingleConditionalAspectProvider, com.cobblemon.mod.common.pokemon.Pokemon);
+  public static com.cobblemon.mod.common.api.pokemon.aspect.AspectProvider access$register$jd(com.cobblemon.mod.common.api.pokemon.aspect.SingleConditionalAspectProvider);
+  static {};
+}

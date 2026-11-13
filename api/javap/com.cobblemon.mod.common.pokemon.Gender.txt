@@ -1,0 +1,20 @@
+public final class com.cobblemon.mod.common.pokemon.Gender extends java.lang.Enum<com.cobblemon.mod.common.pokemon.Gender> implements net.minecraft.util.StringRepresentable {
+  public static final com.cobblemon.mod.common.pokemon.Gender$Companion Companion;
+  private final java.lang.String showdownName;
+  private static final com.mojang.serialization.Codec<com.cobblemon.mod.common.pokemon.Gender> CODEC;
+  public static final com.cobblemon.mod.common.pokemon.Gender MALE;
+  public static final com.cobblemon.mod.common.pokemon.Gender FEMALE;
+  public static final com.cobblemon.mod.common.pokemon.Gender GENDERLESS;
+  private static final com.cobblemon.mod.common.pokemon.Gender[] $VALUES;
+  private static final kotlin.enums.EnumEntries $ENTRIES;
+  private com.cobblemon.mod.common.pokemon.Gender(java.lang.String);
+  public final java.lang.String getShowdownName();
+  public java.lang.String getSerializedName();
+  public static com.cobblemon.mod.common.pokemon.Gender[] values();
+  public static com.cobblemon.mod.common.pokemon.Gender valueOf(java.lang.String);
+  public static kotlin.enums.EnumEntries<com.cobblemon.mod.common.pokemon.Gender> getEntries();
+  private static final com.cobblemon.mod.common.pokemon.Gender[] $values();
+  public static final com.mojang.serialization.Codec<com.cobblemon.mod.common.pokemon.Gender> getCODEC();
+  public static final com.mojang.serialization.Codec access$getCODEC$cp();
+  static {};
+}

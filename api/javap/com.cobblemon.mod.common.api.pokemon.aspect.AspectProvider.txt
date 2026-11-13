@@ -1,0 +1,20 @@
+public final class com.cobblemon.mod.common.api.pokemon.aspect.AspectProvider$Companion {
+  static final com.cobblemon.mod.common.api.pokemon.aspect.AspectProvider$Companion $$INSTANCE;
+  private static final java.util.List<com.cobblemon.mod.common.api.pokemon.aspect.AspectProvider> providers;
+  private com.cobblemon.mod.common.api.pokemon.aspect.AspectProvider$Companion();
+  public final java.util.List<com.cobblemon.mod.common.api.pokemon.aspect.AspectProvider> getProviders();
+  public final com.cobblemon.mod.common.api.pokemon.aspect.AspectProvider register(com.cobblemon.mod.common.api.pokemon.aspect.AspectProvider);
+  public final void unregister(com.cobblemon.mod.common.api.pokemon.aspect.AspectProvider);
+  static {};
+}
+public final class com.cobblemon.mod.common.api.pokemon.aspect.AspectProvider$DefaultImpls {
+  public static com.cobblemon.mod.common.api.pokemon.aspect.AspectProvider register(com.cobblemon.mod.common.api.pokemon.aspect.AspectProvider);
+}
+public interface com.cobblemon.mod.common.api.pokemon.aspect.AspectProvider {
+  public static final com.cobblemon.mod.common.api.pokemon.aspect.AspectProvider$Companion Companion;
+  public abstract java.util.Set<java.lang.String> provide(com.cobblemon.mod.common.pokemon.Pokemon);
+  public abstract java.util.Set<java.lang.String> provide(com.cobblemon.mod.common.api.pokemon.PokemonProperties);
+  public default com.cobblemon.mod.common.api.pokemon.aspect.AspectProvider register();
+  public static com.cobblemon.mod.common.api.pokemon.aspect.AspectProvider access$register$jd(com.cobblemon.mod.common.api.pokemon.aspect.AspectProvider);
+  static {};
+}

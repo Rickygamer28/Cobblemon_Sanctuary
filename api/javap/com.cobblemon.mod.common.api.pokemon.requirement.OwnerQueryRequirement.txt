@@ -1,0 +1,13 @@
+public final class com.cobblemon.mod.common.api.pokemon.requirement.OwnerQueryRequirement$DefaultImpls {
+  public static boolean check(com.cobblemon.mod.common.api.pokemon.requirement.OwnerQueryRequirement, com.cobblemon.mod.common.pokemon.Pokemon);
+  public static net.minecraft.resources.ResourceLocation getPokedexIcon(com.cobblemon.mod.common.api.pokemon.requirement.OwnerQueryRequirement);
+  public static java.lang.String getPokedexTooltip(com.cobblemon.mod.common.api.pokemon.requirement.OwnerQueryRequirement);
+}
+public interface com.cobblemon.mod.common.api.pokemon.requirement.OwnerQueryRequirement extends com.cobblemon.mod.common.api.pokemon.requirement.Requirement {
+  public default boolean check(com.cobblemon.mod.common.pokemon.Pokemon);
+  public abstract boolean checkPlayer(com.cobblemon.mod.common.pokemon.Pokemon, net.minecraft.world.entity.player.Player);
+  public abstract boolean checkNPC(com.cobblemon.mod.common.pokemon.Pokemon, com.cobblemon.mod.common.entity.npc.NPCEntity);
+  public static boolean access$check$jd(com.cobblemon.mod.common.api.pokemon.requirement.OwnerQueryRequirement, com.cobblemon.mod.common.pokemon.Pokemon);
+  public static net.minecraft.resources.ResourceLocation access$getPokedexIcon$jd(com.cobblemon.mod.common.api.pokemon.requirement.OwnerQueryRequirement);
+  public static java.lang.String access$getPokedexTooltip$jd(com.cobblemon.mod.common.api.pokemon.requirement.OwnerQueryRequirement);
+}

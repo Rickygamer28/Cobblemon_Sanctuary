@@ -1,0 +1,10 @@
+public final class com.cobblemon.mod.common.api.reactive.pipes.StopAfterTransform<I> implements com.cobblemon.mod.common.api.reactive.Transform<I, I> {
+  private final kotlin.jvm.functions.Function1<I, java.lang.Boolean> predicate;
+  private boolean finished;
+  public com.cobblemon.mod.common.api.reactive.pipes.StopAfterTransform(kotlin.jvm.functions.Function1<? super I, java.lang.Boolean>);
+  public final kotlin.jvm.functions.Function1<I, java.lang.Boolean> getPredicate();
+  public final boolean getFinished();
+  public final void setFinished(boolean);
+  public I invoke(I);
+  public java.lang.Void noTransform(boolean);
+}

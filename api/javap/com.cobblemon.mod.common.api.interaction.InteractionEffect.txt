@@ -1,0 +1,3 @@
+public interface com.cobblemon.mod.common.api.interaction.InteractionEffect {
+  public abstract void applyEffect(com.cobblemon.mod.common.entity.pokemon.PokemonEntity, net.minecraft.server.level.ServerPlayer);
+}

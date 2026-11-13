@@ -1,0 +1,13 @@
+public final class com.cobblemon.mod.common.api.ai.config.AddMemoriesAndSensorsConfig implements com.cobblemon.mod.common.api.ai.config.BehaviourConfig {
+  private final com.mojang.datafixers.util.Either<com.bedrockk.molang.Expression, com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable> condition;
+  private final java.util.Set<net.minecraft.world.entity.ai.memory.MemoryModuleType<?>> memories;
+  private final java.util.Set<net.minecraft.world.entity.ai.sensing.SensorType<?>> sensors;
+  public com.cobblemon.mod.common.api.ai.config.AddMemoriesAndSensorsConfig();
+  public final com.mojang.datafixers.util.Either<com.bedrockk.molang.Expression, com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable> getCondition();
+  public final java.util.Set<net.minecraft.world.entity.ai.memory.MemoryModuleType<?>> getMemories();
+  public final java.util.Set<net.minecraft.world.entity.ai.sensing.SensorType<?>> getSensors();
+  public java.util.List<com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable> getVariables(net.minecraft.world.entity.LivingEntity, com.cobblemon.mod.common.api.ai.BehaviourConfigurationContext);
+  public void configure(net.minecraft.world.entity.LivingEntity, com.cobblemon.mod.common.api.ai.BehaviourConfigurationContext);
+  public boolean checkCondition(com.cobblemon.mod.common.api.ai.BehaviourConfigurationContext, com.mojang.datafixers.util.Either<com.bedrockk.molang.Expression, com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable>);
+  public void preconfigure(net.minecraft.world.entity.LivingEntity, com.cobblemon.mod.common.api.ai.BehaviourConfigurationContext);
+}

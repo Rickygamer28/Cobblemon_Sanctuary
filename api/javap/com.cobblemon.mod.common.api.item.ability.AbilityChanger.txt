@@ -1,0 +1,23 @@
+public final class com.cobblemon.mod.common.api.item.ability.AbilityChanger$Companion {
+  static final com.cobblemon.mod.common.api.item.ability.AbilityChanger$Companion $$INSTANCE;
+  private static final com.cobblemon.mod.common.api.item.ability.AbilityChanger<com.cobblemon.mod.common.api.abilities.CommonAbility> COMMON_ABILITY;
+  private static final com.cobblemon.mod.common.api.item.ability.AbilityChanger<com.cobblemon.mod.common.pokemon.abilities.HiddenAbility> HIDDEN_ABILITY;
+  private com.cobblemon.mod.common.api.item.ability.AbilityChanger$Companion();
+  public final com.cobblemon.mod.common.api.item.ability.AbilityChanger<com.cobblemon.mod.common.api.abilities.CommonAbility> getCOMMON_ABILITY();
+  public static void getCOMMON_ABILITY$annotations();
+  public final com.cobblemon.mod.common.api.item.ability.AbilityChanger<com.cobblemon.mod.common.pokemon.abilities.HiddenAbility> getHIDDEN_ABILITY();
+  public static void getHIDDEN_ABILITY$annotations();
+  private static final boolean COMMON_ABILITY$lambda$0(com.cobblemon.mod.common.api.abilities.PotentialAbilityType);
+  private static final boolean HIDDEN_ABILITY$lambda$0(com.cobblemon.mod.common.api.abilities.PotentialAbilityType);
+  static {};
+}
+public interface com.cobblemon.mod.common.api.item.ability.AbilityChanger<T extends com.cobblemon.mod.common.api.abilities.PotentialAbility> {
+  public static final com.cobblemon.mod.common.api.item.ability.AbilityChanger$Companion Companion;
+  public abstract com.cobblemon.mod.common.api.abilities.PotentialAbilityType<T> getType();
+  public abstract java.util.Set<kotlin.Pair<com.cobblemon.mod.common.api.abilities.AbilityTemplate, com.cobblemon.mod.common.api.Priority>> queryPossible(com.cobblemon.mod.common.pokemon.Pokemon);
+  public abstract boolean performChange(com.cobblemon.mod.common.pokemon.Pokemon);
+  public abstract boolean canChangeFrom(com.cobblemon.mod.common.api.abilities.PotentialAbilityType<?>);
+  public static com.cobblemon.mod.common.api.item.ability.AbilityChanger<com.cobblemon.mod.common.api.abilities.CommonAbility> getCOMMON_ABILITY();
+  public static com.cobblemon.mod.common.api.item.ability.AbilityChanger<com.cobblemon.mod.common.pokemon.abilities.HiddenAbility> getHIDDEN_ABILITY();
+  static {};
+}

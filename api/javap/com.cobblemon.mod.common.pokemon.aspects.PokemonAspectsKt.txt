@@ -1,0 +1,63 @@
+public final class com.cobblemon.mod.common.pokemon.aspects.PokemonAspectsKt$ALPHA_ASPECT$1 implements com.cobblemon.mod.common.api.pokemon.aspect.AspectProvider {
+  private final java.lang.String ASPECT;
+  com.cobblemon.mod.common.pokemon.aspects.PokemonAspectsKt$ALPHA_ASPECT$1();
+  public final java.lang.String getASPECT();
+  public java.util.Set<java.lang.String> provide(com.cobblemon.mod.common.pokemon.Pokemon);
+  public java.util.Set<java.lang.String> provide(com.cobblemon.mod.common.api.pokemon.PokemonProperties);
+  public com.cobblemon.mod.common.api.pokemon.aspect.AspectProvider register();
+}
+public final class com.cobblemon.mod.common.pokemon.aspects.PokemonAspectsKt$CHARACTERISTIC_RAINBOW_ASPECT$1 implements com.cobblemon.mod.common.api.pokemon.aspect.AspectProvider {
+  com.cobblemon.mod.common.pokemon.aspects.PokemonAspectsKt$CHARACTERISTIC_RAINBOW_ASPECT$1();
+  public final java.lang.String calculateColourAspect(com.cobblemon.mod.common.pokemon.Nature, com.cobblemon.mod.common.pokemon.Characteristic);
+  public java.util.Set<java.lang.String> provide(com.cobblemon.mod.common.pokemon.Pokemon);
+  public java.util.Set<java.lang.String> provide(com.cobblemon.mod.common.api.pokemon.PokemonProperties);
+  public com.cobblemon.mod.common.api.pokemon.aspect.AspectProvider register();
+}
+public final class com.cobblemon.mod.common.pokemon.aspects.PokemonAspectsKt$COSMETIC_SLOT_ASPECT$1 implements com.cobblemon.mod.common.api.pokemon.aspect.AspectProvider {
+  com.cobblemon.mod.common.pokemon.aspects.PokemonAspectsKt$COSMETIC_SLOT_ASPECT$1();
+  public java.util.Set<java.lang.String> provide(com.cobblemon.mod.common.pokemon.Pokemon);
+  public java.util.Set<java.lang.String> provide(com.cobblemon.mod.common.api.pokemon.PokemonProperties);
+  public com.cobblemon.mod.common.api.pokemon.aspect.AspectProvider register();
+}
+public final class com.cobblemon.mod.common.pokemon.aspects.PokemonAspectsKt$GENDER_ASPECT$1$WhenMappings {
+  public static final int[] $EnumSwitchMapping$0;
+  static {};
+}
+public final class com.cobblemon.mod.common.pokemon.aspects.PokemonAspectsKt$GENDER_ASPECT$1 implements com.cobblemon.mod.common.api.pokemon.aspect.AspectProvider {
+  com.cobblemon.mod.common.pokemon.aspects.PokemonAspectsKt$GENDER_ASPECT$1();
+  public final java.util.Set<java.lang.String> getAspectsForGender(com.cobblemon.mod.common.pokemon.Gender);
+  public java.util.Set<java.lang.String> provide(com.cobblemon.mod.common.pokemon.Pokemon);
+  public java.util.Set<java.lang.String> provide(com.cobblemon.mod.common.api.pokemon.PokemonProperties);
+  public com.cobblemon.mod.common.api.pokemon.aspect.AspectProvider register();
+}
+public final class com.cobblemon.mod.common.pokemon.aspects.PokemonAspectsKt$MARK_ASPECT$1 implements com.cobblemon.mod.common.api.pokemon.aspect.AspectProvider {
+  com.cobblemon.mod.common.pokemon.aspects.PokemonAspectsKt$MARK_ASPECT$1();
+  public java.util.Set<java.lang.String> provide(com.cobblemon.mod.common.pokemon.Pokemon);
+  public java.util.Set<java.lang.String> provide(com.cobblemon.mod.common.api.pokemon.PokemonProperties);
+  public com.cobblemon.mod.common.api.pokemon.aspect.AspectProvider register();
+}
+public final class com.cobblemon.mod.common.pokemon.aspects.PokemonAspectsKt$SHINY_ASPECT$1 implements com.cobblemon.mod.common.api.pokemon.aspect.SingleConditionalAspectProvider {
+  private final java.lang.String aspect;
+  com.cobblemon.mod.common.pokemon.aspects.PokemonAspectsKt$SHINY_ASPECT$1();
+  public java.lang.String getAspect();
+  public boolean meetsCondition(com.cobblemon.mod.common.pokemon.Pokemon);
+  public boolean meetsCondition(com.cobblemon.mod.common.api.pokemon.PokemonProperties);
+  public java.util.Set<java.lang.String> provide(com.cobblemon.mod.common.api.pokemon.PokemonProperties);
+  public java.util.Set<java.lang.String> provide(com.cobblemon.mod.common.pokemon.Pokemon);
+  public com.cobblemon.mod.common.api.pokemon.aspect.AspectProvider register();
+}
+public final class com.cobblemon.mod.common.pokemon.aspects.PokemonAspectsKt {
+  private static final com.cobblemon.mod.common.api.pokemon.aspect.SingleConditionalAspectProvider SHINY_ASPECT;
+  private static final com.cobblemon.mod.common.api.pokemon.aspect.AspectProvider GENDER_ASPECT;
+  private static final com.cobblemon.mod.common.api.pokemon.aspect.AspectProvider COSMETIC_SLOT_ASPECT;
+  private static final com.cobblemon.mod.common.api.pokemon.aspect.AspectProvider MARK_ASPECT;
+  private static final com.cobblemon.mod.common.api.pokemon.aspect.AspectProvider ALPHA_ASPECT;
+  private static final com.cobblemon.mod.common.api.pokemon.aspect.AspectProvider CHARACTERISTIC_RAINBOW_ASPECT;
+  public static final com.cobblemon.mod.common.api.pokemon.aspect.SingleConditionalAspectProvider getSHINY_ASPECT();
+  public static final com.cobblemon.mod.common.api.pokemon.aspect.AspectProvider getGENDER_ASPECT();
+  public static final com.cobblemon.mod.common.api.pokemon.aspect.AspectProvider getCOSMETIC_SLOT_ASPECT();
+  public static final com.cobblemon.mod.common.api.pokemon.aspect.AspectProvider getMARK_ASPECT();
+  public static final com.cobblemon.mod.common.api.pokemon.aspect.AspectProvider getALPHA_ASPECT();
+  public static final com.cobblemon.mod.common.api.pokemon.aspect.AspectProvider getCHARACTERISTIC_RAINBOW_ASPECT();
+  static {};
+}

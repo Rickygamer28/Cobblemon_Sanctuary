@@ -1,0 +1,3 @@
+public final class com.cobblemon.mod.common.util.BlockPosExtensionsKt {
+  public static final net.minecraft.world.phys.Vec3 toVec3d(net.minecraft.core.BlockPos);
+}

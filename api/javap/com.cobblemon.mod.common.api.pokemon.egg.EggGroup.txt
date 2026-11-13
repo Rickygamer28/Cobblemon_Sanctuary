@@ -1,0 +1,35 @@
+public final class com.cobblemon.mod.common.api.pokemon.egg.EggGroup$Companion {
+  private com.cobblemon.mod.common.api.pokemon.egg.EggGroup$Companion();
+  public final com.cobblemon.mod.common.api.pokemon.egg.EggGroup fromIdentifier(java.lang.String);
+  public com.cobblemon.mod.common.api.pokemon.egg.EggGroup$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.api.pokemon.egg.EggGroup extends java.lang.Enum<com.cobblemon.mod.common.api.pokemon.egg.EggGroup> {
+  public static final com.cobblemon.mod.common.api.pokemon.egg.EggGroup$Companion Companion;
+  private final java.lang.String showdownID;
+  private static final java.util.Map<java.lang.String, com.cobblemon.mod.common.api.pokemon.egg.EggGroup> identifierMap;
+  public static final com.cobblemon.mod.common.api.pokemon.egg.EggGroup MONSTER;
+  public static final com.cobblemon.mod.common.api.pokemon.egg.EggGroup WATER_1;
+  public static final com.cobblemon.mod.common.api.pokemon.egg.EggGroup BUG;
+  public static final com.cobblemon.mod.common.api.pokemon.egg.EggGroup FLYING;
+  public static final com.cobblemon.mod.common.api.pokemon.egg.EggGroup FIELD;
+  public static final com.cobblemon.mod.common.api.pokemon.egg.EggGroup FAIRY;
+  public static final com.cobblemon.mod.common.api.pokemon.egg.EggGroup GRASS;
+  public static final com.cobblemon.mod.common.api.pokemon.egg.EggGroup HUMAN_LIKE;
+  public static final com.cobblemon.mod.common.api.pokemon.egg.EggGroup WATER_3;
+  public static final com.cobblemon.mod.common.api.pokemon.egg.EggGroup MINERAL;
+  public static final com.cobblemon.mod.common.api.pokemon.egg.EggGroup AMORPHOUS;
+  public static final com.cobblemon.mod.common.api.pokemon.egg.EggGroup WATER_2;
+  public static final com.cobblemon.mod.common.api.pokemon.egg.EggGroup DITTO;
+  public static final com.cobblemon.mod.common.api.pokemon.egg.EggGroup DRAGON;
+  public static final com.cobblemon.mod.common.api.pokemon.egg.EggGroup UNDISCOVERED;
+  private static final com.cobblemon.mod.common.api.pokemon.egg.EggGroup[] $VALUES;
+  private static final kotlin.enums.EnumEntries $ENTRIES;
+  private com.cobblemon.mod.common.api.pokemon.egg.EggGroup(java.lang.String);
+  public final java.lang.String getShowdownID();
+  public static com.cobblemon.mod.common.api.pokemon.egg.EggGroup[] values();
+  public static com.cobblemon.mod.common.api.pokemon.egg.EggGroup valueOf(java.lang.String);
+  public static kotlin.enums.EnumEntries<com.cobblemon.mod.common.api.pokemon.egg.EggGroup> getEntries();
+  private static final com.cobblemon.mod.common.api.pokemon.egg.EggGroup[] $values();
+  public static final java.util.Map access$getIdentifierMap$cp();
+  static {};
+}

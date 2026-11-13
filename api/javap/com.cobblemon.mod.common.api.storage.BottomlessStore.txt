@@ -1,0 +1,35 @@
+public class com.cobblemon.mod.common.api.storage.BottomlessStore extends com.cobblemon.mod.common.api.storage.PokemonStore<com.cobblemon.mod.common.api.storage.BottomlessPosition> {
+  private final java.util.UUID uuid;
+  private final java.util.List<com.cobblemon.mod.common.pokemon.Pokemon> pokemon;
+  private final com.cobblemon.mod.common.api.reactive.SimpleObservable<kotlin.Unit> storeChangeObservable;
+  public com.cobblemon.mod.common.api.storage.BottomlessStore(java.util.UUID);
+  public java.util.UUID getUuid();
+  public final java.util.List<com.cobblemon.mod.common.pokemon.Pokemon> getPokemon();
+  public final com.cobblemon.mod.common.api.reactive.SimpleObservable<kotlin.Unit> getStoreChangeObservable();
+  public java.util.Iterator<com.cobblemon.mod.common.pokemon.Pokemon> iterator();
+  public com.cobblemon.mod.common.pokemon.Pokemon get(com.cobblemon.mod.common.api.storage.BottomlessPosition);
+  public com.cobblemon.mod.common.api.storage.BottomlessPosition getFirstAvailablePosition();
+  public boolean isValidPosition(com.cobblemon.mod.common.api.storage.BottomlessPosition);
+  public final com.cobblemon.mod.common.pokemon.Pokemon get(int);
+  public java.util.Set<net.minecraft.server.level.ServerPlayer> getObservingPlayers();
+  public void sendTo(net.minecraft.server.level.ServerPlayer);
+  public void initialize();
+  public net.minecraft.nbt.CompoundTag saveToNBT(net.minecraft.nbt.CompoundTag, net.minecraft.core.RegistryAccess);
+  public com.cobblemon.mod.common.api.storage.BottomlessStore loadFromNBT(net.minecraft.nbt.CompoundTag, net.minecraft.core.RegistryAccess);
+  public com.google.gson.JsonObject saveToJSON(com.google.gson.JsonObject, net.minecraft.core.RegistryAccess);
+  public com.cobblemon.mod.common.api.storage.BottomlessStore loadFromJSON(com.google.gson.JsonObject, net.minecraft.core.RegistryAccess);
+  public com.cobblemon.mod.common.api.storage.StoreCoordinates<com.cobblemon.mod.common.api.storage.BottomlessPosition> loadPositionFromNBT(net.minecraft.nbt.CompoundTag);
+  public void savePositionToNBT(com.cobblemon.mod.common.api.storage.BottomlessPosition, net.minecraft.nbt.CompoundTag);
+  public com.cobblemon.mod.common.api.reactive.SimpleObservable<kotlin.Unit> getAnyChangeObservable();
+  protected void setAtPosition(com.cobblemon.mod.common.api.storage.BottomlessPosition, com.cobblemon.mod.common.pokemon.Pokemon);
+  public void onPokemonChanged(com.cobblemon.mod.common.pokemon.Pokemon);
+  public com.cobblemon.mod.common.pokemon.Pokemon get(com.cobblemon.mod.common.api.storage.StorePosition);
+  public com.cobblemon.mod.common.api.storage.StorePosition getFirstAvailablePosition();
+  public boolean isValidPosition(com.cobblemon.mod.common.api.storage.StorePosition);
+  public java.lang.Iterable getObservingPlayers();
+  public com.cobblemon.mod.common.api.storage.PokemonStore loadFromNBT(net.minecraft.nbt.CompoundTag, net.minecraft.core.RegistryAccess);
+  public com.cobblemon.mod.common.api.storage.PokemonStore loadFromJSON(com.google.gson.JsonObject, net.minecraft.core.RegistryAccess);
+  public void savePositionToNBT(com.cobblemon.mod.common.api.storage.StorePosition, net.minecraft.nbt.CompoundTag);
+  public com.cobblemon.mod.common.api.reactive.Observable getAnyChangeObservable();
+  public void setAtPosition(com.cobblemon.mod.common.api.storage.StorePosition, com.cobblemon.mod.common.pokemon.Pokemon);
+}

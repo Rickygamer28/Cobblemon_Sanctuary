@@ -1,0 +1,75 @@
+public final class com.cobblemon.mod.common.block.PastureBlock$Companion {
+  private com.cobblemon.mod.common.block.PastureBlock$Companion();
+  public final com.mojang.serialization.MapCodec<com.cobblemon.mod.common.block.PastureBlock> getCODEC();
+  public final net.minecraft.world.level.block.state.properties.EnumProperty<com.cobblemon.mod.common.block.PastureBlock$PasturePart> getPART();
+  public final net.minecraft.world.level.block.state.properties.BooleanProperty getON();
+  private final net.minecraft.world.phys.shapes.VoxelShape buildCollider(boolean, net.minecraft.core.Direction);
+  public com.cobblemon.mod.common.block.PastureBlock$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+  public static final net.minecraft.world.phys.shapes.VoxelShape access$buildCollider(com.cobblemon.mod.common.block.PastureBlock$Companion, boolean, net.minecraft.core.Direction);
+}
+public final class com.cobblemon.mod.common.block.PastureBlock$PasturePart extends java.lang.Enum<com.cobblemon.mod.common.block.PastureBlock$PasturePart> implements net.minecraft.util.StringRepresentable {
+  private final java.lang.String label;
+  public static final com.cobblemon.mod.common.block.PastureBlock$PasturePart TOP;
+  public static final com.cobblemon.mod.common.block.PastureBlock$PasturePart BOTTOM;
+  private static final com.cobblemon.mod.common.block.PastureBlock$PasturePart[] $VALUES;
+  private static final kotlin.enums.EnumEntries $ENTRIES;
+  private com.cobblemon.mod.common.block.PastureBlock$PasturePart(java.lang.String);
+  public java.lang.String getSerializedName();
+  public static com.cobblemon.mod.common.block.PastureBlock$PasturePart[] values();
+  public static com.cobblemon.mod.common.block.PastureBlock$PasturePart valueOf(java.lang.String);
+  public static kotlin.enums.EnumEntries<com.cobblemon.mod.common.block.PastureBlock$PasturePart> getEntries();
+  private static final com.cobblemon.mod.common.block.PastureBlock$PasturePart[] $values();
+  static {};
+}
+public final class com.cobblemon.mod.common.block.PastureBlock$WhenMappings {
+  public static final int[] $EnumSwitchMapping$0;
+  static {};
+}
+final class com.cobblemon.mod.common.block.PastureBlock$getTicker$1 implements net.minecraft.world.level.block.entity.BlockEntityTicker {
+  final net.minecraft.world.level.block.entity.BlockEntityTicker<com.cobblemon.mod.common.block.entity.PokemonPastureBlockEntity> $tmp0;
+  com.cobblemon.mod.common.block.PastureBlock$getTicker$1(net.minecraft.world.level.block.entity.BlockEntityTicker<com.cobblemon.mod.common.block.entity.PokemonPastureBlockEntity>);
+  public final void tick(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, com.cobblemon.mod.common.block.entity.PokemonPastureBlockEntity);
+  public void tick(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.block.entity.BlockEntity);
+}
+public final class com.cobblemon.mod.common.block.PastureBlock extends net.minecraft.world.level.block.BaseEntityBlock implements net.minecraft.world.level.block.SimpleWaterloggedBlock {
+  public static final com.cobblemon.mod.common.block.PastureBlock$Companion Companion;
+  private static final com.mojang.serialization.MapCodec<com.cobblemon.mod.common.block.PastureBlock> CODEC;
+  private static final net.minecraft.world.level.block.state.properties.EnumProperty<com.cobblemon.mod.common.block.PastureBlock$PasturePart> PART;
+  private static final net.minecraft.world.level.block.state.properties.BooleanProperty ON;
+  private static final net.minecraft.world.phys.shapes.VoxelShape SOUTH_AABB_TOP;
+  private static final net.minecraft.world.phys.shapes.VoxelShape NORTH_AABB_TOP;
+  private static final net.minecraft.world.phys.shapes.VoxelShape WEST_AABB_TOP;
+  private static final net.minecraft.world.phys.shapes.VoxelShape EAST_AABB_TOP;
+  private static final net.minecraft.world.phys.shapes.VoxelShape EAST_AABB_BOTTOM;
+  private static final net.minecraft.world.phys.shapes.VoxelShape SOUTH_AABB_BOTTOM;
+  private static final net.minecraft.world.phys.shapes.VoxelShape NORTH_AABB_BOTTOM;
+  private static final net.minecraft.world.phys.shapes.VoxelShape WEST_AABB_BOTTOM;
+  public com.cobblemon.mod.common.block.PastureBlock(net.minecraft.world.level.block.state.BlockBehaviour$Properties);
+  public com.cobblemon.mod.common.block.entity.PokemonPastureBlockEntity newBlockEntity(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);
+  protected net.minecraft.world.level.block.RenderShape getRenderShape(net.minecraft.world.level.block.state.BlockState);
+  public net.minecraft.world.level.block.state.BlockState getStateForPlacement(net.minecraft.world.item.context.BlockPlaceContext);
+  protected boolean canSurvive(net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.LevelReader, net.minecraft.core.BlockPos);
+  public final net.minecraft.core.BlockPos getPositionOfOtherPart(net.minecraft.world.level.block.state.BlockState, net.minecraft.core.BlockPos);
+  public final net.minecraft.core.BlockPos getBasePosition(net.minecraft.world.level.block.state.BlockState, net.minecraft.core.BlockPos);
+  private final boolean isBase(net.minecraft.world.level.block.state.BlockState);
+  protected com.mojang.serialization.MapCodec<? extends net.minecraft.world.level.block.BaseEntityBlock> codec();
+  protected boolean isPathfindable(net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.pathfinder.PathComputationType);
+  protected void createBlockStateDefinition(net.minecraft.world.level.block.state.StateDefinition$Builder<net.minecraft.world.level.block.Block, net.minecraft.world.level.block.state.BlockState>);
+  public final void checkBreakEntity(net.minecraft.world.level.LevelAccessor, net.minecraft.world.level.block.state.BlockState, net.minecraft.core.BlockPos);
+  public net.minecraft.world.level.block.state.BlockState playerWillDestroy(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, net.minecraft.world.entity.player.Player);
+  protected void onExplosionHit(net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.Explosion, java.util.function.BiConsumer<net.minecraft.world.item.ItemStack, net.minecraft.core.BlockPos>);
+  public <T extends net.minecraft.world.level.block.entity.BlockEntity> net.minecraft.world.level.block.entity.BlockEntityTicker<T> getTicker(net.minecraft.world.level.Level, net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.block.entity.BlockEntityType<T>);
+  public void setPlacedBy(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, net.minecraft.world.entity.LivingEntity, net.minecraft.world.item.ItemStack);
+  protected net.minecraft.world.InteractionResult useWithoutItem(net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.entity.player.Player, net.minecraft.world.phys.BlockHitResult);
+  protected net.minecraft.world.phys.shapes.VoxelShape getShape(net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.BlockGetter, net.minecraft.core.BlockPos, net.minecraft.world.phys.shapes.CollisionContext);
+  protected net.minecraft.world.level.block.state.BlockState rotate(net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.block.Rotation);
+  protected net.minecraft.world.level.block.state.BlockState mirror(net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.block.Mirror);
+  protected void onRemove(net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, boolean);
+  protected net.minecraft.world.level.material.FluidState getFluidState(net.minecraft.world.level.block.state.BlockState);
+  protected net.minecraft.world.level.block.state.BlockState updateShape(net.minecraft.world.level.block.state.BlockState, net.minecraft.core.Direction, net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.LevelAccessor, net.minecraft.core.BlockPos, net.minecraft.core.BlockPos);
+  public net.minecraft.world.level.block.entity.BlockEntity newBlockEntity(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);
+  public static final com.mojang.serialization.MapCodec access$getCODEC$cp();
+  public static final net.minecraft.world.level.block.state.properties.EnumProperty access$getPART$cp();
+  public static final net.minecraft.world.level.block.state.properties.BooleanProperty access$getON$cp();
+  static {};
+}

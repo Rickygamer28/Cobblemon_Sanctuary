@@ -1,0 +1,5 @@
+public final class com.cobblemon.mod.common.api.reactive.NoTransformThrowable extends java.lang.Throwable {
+  private final boolean terminate;
+  public com.cobblemon.mod.common.api.reactive.NoTransformThrowable(boolean);
+  public final boolean getTerminate();
+}

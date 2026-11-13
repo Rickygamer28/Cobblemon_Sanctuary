@@ -1,0 +1,6 @@
+public final class com.cobblemon.mod.common.api.pokemon.experience.StandardExperienceCalculator implements com.cobblemon.mod.common.api.pokemon.experience.ExperienceCalculator {
+  public static final com.cobblemon.mod.common.api.pokemon.experience.StandardExperienceCalculator INSTANCE;
+  private com.cobblemon.mod.common.api.pokemon.experience.StandardExperienceCalculator();
+  public int calculate(com.cobblemon.mod.common.battles.pokemon.BattlePokemon, com.cobblemon.mod.common.battles.pokemon.BattlePokemon, double);
+  static {};
+}

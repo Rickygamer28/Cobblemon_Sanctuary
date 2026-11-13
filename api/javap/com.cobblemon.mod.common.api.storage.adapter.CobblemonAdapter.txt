@@ -1,0 +1,3 @@
+public interface com.cobblemon.mod.common.api.storage.adapter.CobblemonAdapter<S> {
+  public abstract <E extends com.cobblemon.mod.common.api.storage.StorePosition, T extends com.cobblemon.mod.common.api.storage.PokemonStore<E>> T load(java.lang.Class<T>, java.util.UUID, net.minecraft.core.RegistryAccess);
+}

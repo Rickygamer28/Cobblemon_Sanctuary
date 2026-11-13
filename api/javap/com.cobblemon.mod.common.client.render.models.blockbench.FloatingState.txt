@@ -1,0 +1,9 @@
+public final class com.cobblemon.mod.common.client.render.models.blockbench.FloatingState extends com.cobblemon.mod.common.client.render.models.blockbench.PosableState {
+  private final com.cobblemon.mod.common.api.scheduling.ClientTaskTracker schedulingTracker;
+  public com.cobblemon.mod.common.client.render.models.blockbench.FloatingState();
+  public java.lang.Void getEntity();
+  public com.cobblemon.mod.common.api.scheduling.ClientTaskTracker getSchedulingTracker();
+  public void updatePartialTicks(float);
+  public net.minecraft.world.entity.Entity getEntity();
+  public com.cobblemon.mod.common.api.scheduling.SchedulingTracker getSchedulingTracker();
+}

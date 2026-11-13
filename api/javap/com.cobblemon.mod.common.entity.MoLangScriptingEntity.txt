@@ -1,0 +1,40 @@
+public final class com.cobblemon.mod.common.entity.MoLangScriptingEntity$DefaultImpls {
+  public static java.util.List<com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable> getExtraVariables(com.cobblemon.mod.common.entity.MoLangScriptingEntity);
+  public static void registerVariables(com.cobblemon.mod.common.entity.MoLangScriptingEntity, java.util.Collection<com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable>);
+  public static void initializeScripting(com.cobblemon.mod.common.entity.MoLangScriptingEntity);
+  public static void saveScriptingToNBT(com.cobblemon.mod.common.entity.MoLangScriptingEntity, net.minecraft.nbt.CompoundTag);
+  public static void loadScriptingFromNBT(com.cobblemon.mod.common.entity.MoLangScriptingEntity, net.minecraft.nbt.CompoundTag);
+  public static void registerFunctionsForScripting(com.cobblemon.mod.common.entity.MoLangScriptingEntity, com.bedrockk.molang.runtime.struct.QueryStruct);
+  public static void updateBehaviours(com.cobblemon.mod.common.entity.MoLangScriptingEntity, java.util.Collection<net.minecraft.resources.ResourceLocation>);
+}
+public interface com.cobblemon.mod.common.entity.MoLangScriptingEntity {
+  public abstract boolean getBehavioursAreCustom();
+  public abstract void setBehavioursAreCustom(boolean);
+  public abstract java.util.List<net.minecraft.resources.ResourceLocation> getBehaviours();
+  public abstract java.util.List<com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable> getRegisteredVariables();
+  public abstract com.bedrockk.molang.runtime.struct.VariableStruct getConfig();
+  public abstract void setConfig(com.bedrockk.molang.runtime.struct.VariableStruct);
+  public abstract com.bedrockk.molang.runtime.struct.VariableStruct getData();
+  public abstract void setData(com.bedrockk.molang.runtime.struct.VariableStruct);
+  public abstract com.cobblemon.mod.common.entity.EntityCallbacks getCallbacks();
+  public abstract void setCallbacks(com.cobblemon.mod.common.entity.EntityCallbacks);
+  public default java.util.List<com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable> getExtraVariables();
+  public abstract void remakeBrain();
+  public abstract net.minecraft.world.entity.ai.Brain<? extends net.minecraft.world.entity.LivingEntity> assignNewBrainWithMemoriesAndSensors(com.mojang.serialization.Dynamic<?>, java.util.Set<? extends net.minecraft.world.entity.ai.memory.MemoryModuleType<?>>, java.util.Set<? extends net.minecraft.world.entity.ai.sensing.SensorType<?>>);
+  public default void registerVariables(java.util.Collection<com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable>);
+  public default void initializeScripting();
+  public default void saveScriptingToNBT(net.minecraft.nbt.CompoundTag);
+  public default void loadScriptingFromNBT(net.minecraft.nbt.CompoundTag);
+  public default void registerFunctionsForScripting(com.bedrockk.molang.runtime.struct.QueryStruct);
+  public default void updateBehaviours(java.util.Collection<net.minecraft.resources.ResourceLocation>);
+  private static java.lang.Object registerFunctionsForScripting$lambda$0(com.cobblemon.mod.common.entity.MoLangScriptingEntity, com.bedrockk.molang.runtime.MoParams);
+  private static java.lang.Object registerFunctionsForScripting$lambda$1(com.cobblemon.mod.common.entity.MoLangScriptingEntity, com.bedrockk.molang.runtime.MoParams);
+  private static java.lang.Object registerFunctionsForScripting$lambda$2(com.cobblemon.mod.common.entity.MoLangScriptingEntity, com.bedrockk.molang.runtime.MoParams);
+  public static java.util.List access$getExtraVariables$jd(com.cobblemon.mod.common.entity.MoLangScriptingEntity);
+  public static void access$registerVariables$jd(com.cobblemon.mod.common.entity.MoLangScriptingEntity, java.util.Collection);
+  public static void access$initializeScripting$jd(com.cobblemon.mod.common.entity.MoLangScriptingEntity);
+  public static void access$saveScriptingToNBT$jd(com.cobblemon.mod.common.entity.MoLangScriptingEntity, net.minecraft.nbt.CompoundTag);
+  public static void access$loadScriptingFromNBT$jd(com.cobblemon.mod.common.entity.MoLangScriptingEntity, net.minecraft.nbt.CompoundTag);
+  public static void access$registerFunctionsForScripting$jd(com.cobblemon.mod.common.entity.MoLangScriptingEntity, com.bedrockk.molang.runtime.struct.QueryStruct);
+  public static void access$updateBehaviours$jd(com.cobblemon.mod.common.entity.MoLangScriptingEntity, java.util.Collection);
+}

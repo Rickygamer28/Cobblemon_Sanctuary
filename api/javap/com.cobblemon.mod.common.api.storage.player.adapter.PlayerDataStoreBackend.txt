@@ -1,0 +1,9 @@
+public abstract class com.cobblemon.mod.common.api.storage.player.adapter.PlayerDataStoreBackend<T extends com.cobblemon.mod.common.api.storage.player.InstancedPlayerData> {
+  private final com.cobblemon.mod.common.api.storage.player.PlayerInstancedDataStoreType dataType;
+  public com.cobblemon.mod.common.api.storage.player.adapter.PlayerDataStoreBackend(com.cobblemon.mod.common.api.storage.player.PlayerInstancedDataStoreType);
+  public final com.cobblemon.mod.common.api.storage.player.PlayerInstancedDataStoreType getDataType();
+  public abstract T load(java.util.UUID);
+  public abstract void save(T);
+  public void initialize(T);
+  public abstract void setup(net.minecraft.server.MinecraftServer);
+}

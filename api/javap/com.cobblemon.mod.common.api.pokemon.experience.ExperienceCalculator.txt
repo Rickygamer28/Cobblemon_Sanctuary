@@ -1,0 +1,3 @@
+public interface com.cobblemon.mod.common.api.pokemon.experience.ExperienceCalculator {
+  public abstract int calculate(com.cobblemon.mod.common.battles.pokemon.BattlePokemon, com.cobblemon.mod.common.battles.pokemon.BattlePokemon, double);
+}

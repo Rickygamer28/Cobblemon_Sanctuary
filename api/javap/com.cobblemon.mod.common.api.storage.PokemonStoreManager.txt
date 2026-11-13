@@ -1,0 +1,18 @@
+public class com.cobblemon.mod.common.api.storage.PokemonStoreManager {
+  private final com.cobblemon.mod.common.api.PrioritizedList<com.cobblemon.mod.common.api.storage.factory.PokemonStoreFactory> factories;
+  public com.cobblemon.mod.common.api.storage.PokemonStoreManager();
+  public void registerFactory(com.cobblemon.mod.common.api.Priority, com.cobblemon.mod.common.api.storage.factory.PokemonStoreFactory);
+  public void unregisterFactory(com.cobblemon.mod.common.api.storage.factory.PokemonStoreFactory, net.minecraft.core.RegistryAccess);
+  public void unregisterAll(net.minecraft.core.RegistryAccess);
+  public com.cobblemon.mod.common.api.storage.party.PlayerPartyStore getParty(net.minecraft.server.level.ServerPlayer);
+  public com.cobblemon.mod.common.api.storage.party.PlayerPartyStore getParty(java.util.UUID, net.minecraft.core.RegistryAccess);
+  public com.cobblemon.mod.common.api.storage.pc.PCStore getPC(net.minecraft.server.level.ServerPlayer);
+  public com.cobblemon.mod.common.api.storage.pc.PCStore getPC(java.util.UUID, net.minecraft.core.RegistryAccess);
+  public com.cobblemon.mod.common.api.storage.pc.PCStore getPCForPlayer(net.minecraft.server.level.ServerPlayer, com.cobblemon.mod.common.block.entity.PCBlockEntity);
+  public java.lang.Iterable<com.cobblemon.mod.common.api.storage.party.PartyStore> getParties(java.util.UUID, net.minecraft.core.RegistryAccess);
+  public java.lang.Iterable<com.cobblemon.mod.common.api.storage.pc.PCStore> getPCs(java.util.UUID, net.minecraft.core.RegistryAccess);
+  public final <E extends com.cobblemon.mod.common.api.storage.StorePosition, T extends com.cobblemon.mod.common.api.storage.PokemonStore<E>> T getCustomStore(java.util.UUID, net.minecraft.core.RegistryAccess);
+  public <E extends com.cobblemon.mod.common.api.storage.StorePosition, T extends com.cobblemon.mod.common.api.storage.PokemonStore<E>> T getCustomStore(java.lang.Class<T>, java.util.UUID, net.minecraft.core.RegistryAccess);
+  public void onPlayerDataSync(net.minecraft.server.level.ServerPlayer);
+  public void onPlayerDisconnect(net.minecraft.server.level.ServerPlayer);
+}

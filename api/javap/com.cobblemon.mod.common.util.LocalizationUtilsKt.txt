@@ -1,0 +1,7 @@
+public final class com.cobblemon.mod.common.util.LocalizationUtilsKt {
+  public static final net.minecraft.network.chat.MutableComponent lang(java.lang.String, java.lang.Object...);
+  public static final net.minecraft.network.chat.MutableComponent commandLang(java.lang.String, java.lang.Object...);
+  public static final net.minecraft.network.chat.MutableComponent battleLang(java.lang.String, java.lang.Object...);
+  public static final net.minecraft.network.chat.MutableComponent tooltipLang(java.lang.String, java.lang.String, java.lang.Object...);
+  public static net.minecraft.network.chat.MutableComponent tooltipLang$default(java.lang.String, java.lang.String, java.lang.Object[], int, java.lang.Object);
+}

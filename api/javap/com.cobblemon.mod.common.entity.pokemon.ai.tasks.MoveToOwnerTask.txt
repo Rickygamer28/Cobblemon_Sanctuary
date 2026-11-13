@@ -1,0 +1,13 @@
+public final class com.cobblemon.mod.common.entity.pokemon.ai.tasks.MoveToOwnerTask {
+  public static final com.cobblemon.mod.common.entity.pokemon.ai.tasks.MoveToOwnerTask INSTANCE;
+  private com.cobblemon.mod.common.entity.pokemon.ai.tasks.MoveToOwnerTask();
+  public final net.minecraft.world.entity.ai.behavior.OneShot<com.cobblemon.mod.common.entity.pokemon.PokemonEntity> create(com.bedrockk.molang.Expression, com.bedrockk.molang.Expression, com.bedrockk.molang.Expression, com.bedrockk.molang.Expression, com.bedrockk.molang.Expression);
+  private final boolean tryTeleport(com.cobblemon.mod.common.entity.pokemon.PokemonEntity, net.minecraft.world.entity.Entity);
+  private final boolean tryTeleportTo(com.cobblemon.mod.common.entity.pokemon.PokemonEntity, net.minecraft.world.entity.Entity, int, int, int);
+  private final boolean canTeleportTo(com.cobblemon.mod.common.entity.pokemon.PokemonEntity, net.minecraft.core.BlockPos);
+  private final int getRandomInt(net.minecraft.util.RandomSource, int, int);
+  private static final com.mojang.datafixers.kinds.App create$lambda$0(com.bedrockk.molang.Expression, com.bedrockk.molang.Expression, com.bedrockk.molang.Expression, com.bedrockk.molang.Expression, com.bedrockk.molang.Expression, net.minecraft.world.entity.ai.behavior.declarative.BehaviorBuilder$Instance);
+  private static final net.minecraft.world.entity.ai.behavior.declarative.Trigger create$lambda$0$0(com.bedrockk.molang.Expression, com.bedrockk.molang.Expression, com.bedrockk.molang.Expression, com.bedrockk.molang.Expression, com.bedrockk.molang.Expression, net.minecraft.world.entity.ai.behavior.declarative.BehaviorBuilder$Instance, net.minecraft.world.entity.ai.behavior.declarative.MemoryAccessor);
+  private static final boolean create$lambda$0$0$0(com.bedrockk.molang.Expression, com.bedrockk.molang.Expression, com.bedrockk.molang.Expression, com.bedrockk.molang.Expression, com.bedrockk.molang.Expression, net.minecraft.world.entity.ai.behavior.declarative.BehaviorBuilder$Instance, net.minecraft.world.entity.ai.behavior.declarative.MemoryAccessor, net.minecraft.server.level.ServerLevel, com.cobblemon.mod.common.entity.pokemon.PokemonEntity, long);
+  static {};
+}

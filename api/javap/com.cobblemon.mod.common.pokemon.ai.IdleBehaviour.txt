@@ -1,0 +1,5 @@
+public final class com.cobblemon.mod.common.pokemon.ai.IdleBehaviour {
+  private final transient com.cobblemon.mod.common.api.molang.ObjectValue<com.cobblemon.mod.common.pokemon.ai.IdleBehaviour> struct;
+  public com.cobblemon.mod.common.pokemon.ai.IdleBehaviour();
+  public final com.cobblemon.mod.common.api.molang.ObjectValue<com.cobblemon.mod.common.pokemon.ai.IdleBehaviour> getStruct();
+}
