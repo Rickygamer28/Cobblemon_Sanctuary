@@ -1,6 +1,6 @@
 # Downloads
 
-Newest: [cobblemon_sanctuary-0.2.2.jar](cobblemon_sanctuary-0.2.2.jar)
+Newest: [cobblemon_sanctuary-0.3.0.jar](cobblemon_sanctuary-0.3.0.jar)
 
 For Cobblemon 1.8.4, NeoForge 1.21.1. Also needs Kotlin for Forge.
 
