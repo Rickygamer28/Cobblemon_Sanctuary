@@ -72,3 +72,8 @@ for n, t, l, fly, sw in rows:
     if l or fly:
         print(f"{n} | {t} | {l} | {fly} | {sw} | {l} | {l and sw and not fly}")
 PY
+
+# how Cobblemon's tumblestone and gem clusters are set up (blockstates, models, classes)
+mkdir -p "$OUT/raw/clusters"
+unzip -o -q "$JAR" 'assets/cobblemon/blockstates/*tumblestone*' 'assets/cobblemon/blockstates/*gem_cluster*' -d "$OUT/raw/clusters" 2>/dev/null || true
+grep -E 'block/[A-Za-z]*(Tumblestone|Cluster|Gem)' "$OUT/jar-classes.txt" > "$OUT/raw/clusters/classes.txt" || true
