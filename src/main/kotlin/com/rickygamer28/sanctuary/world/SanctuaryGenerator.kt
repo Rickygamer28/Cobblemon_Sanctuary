@@ -89,6 +89,8 @@ object SanctuaryGenerator {
 
     private val repairCursor = HashMap<UUID, Int>()
     private val repaired = HashMap<UUID, Int>()
+    private val repairMissed = HashSet<UUID>()
+    private val repairAgainAt = HashMap<UUID, Long>()
 
     /** Check the valley once after loading (and after each rebuild). */
     fun scheduleCheck(id: UUID) { repairCursor[id] = 0; repaired[id] = 0 }
@@ -111,7 +113,8 @@ object SanctuaryGenerator {
             if (!s.dressed.get(idx) || s.meadow.get(idx)) continue
             val x = s.center.x + ColumnOrder.dx[idx]
             val z = s.center.z + ColumnOrder.dz[idx]
-            if (!level.hasChunk(x shr 4, z shr 4) || Landmarks.near(s, x, z)) continue
+            if (!level.hasChunk(x shr 4, z shr 4)) { repairMissed += s.id; continue }
+            if (Landmarks.near(s, x, z)) continue
             val top = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1
             // Cobblemon crystal clusters placed by 1.0.0 were upside down: stand them up
             val topPos = BlockPos(x, top, z)
@@ -142,6 +145,8 @@ object SanctuaryGenerator {
         repaired[s.id] = found
         if (i >= total) {
             repairCursor.remove(s.id)
+            // parts of the valley weren't loaded: look again later, while someone is there to load them
+            if (repairMissed.remove(s.id)) repairAgainAt[s.id] = level.gameTime + 2400L else repairAgainAt.remove(s.id)
             if (found > 0) CobblemonSanctuary.LOGGER.info("Sanctuary: repaired {} columns", found)
             return false
         }
@@ -166,6 +171,9 @@ object SanctuaryGenerator {
         if (!s.generationDirty && !cursors.containsKey(s.id)) {
             // the valley is built: check for leftovers, then put up the landmarks of awake biomes
             if (repair(level, s)) return
+            repairAgainAt[s.id]?.let { at ->
+                if (now >= at && level.players().isNotEmpty()) { repairAgainAt.remove(s.id); scheduleCheck(s.id) }
+            }
             if (now % 40L == 0L) Landmarks.tick(level, s)
             val retry = retryAt[s.id] ?: return
             if (now < retry) return
