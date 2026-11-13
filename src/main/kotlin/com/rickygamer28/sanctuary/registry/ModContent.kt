@@ -35,11 +35,11 @@ object ModContent {
     val SANCTUARY_CORE: DeferredBlock<SanctuaryCoreBlock> = BLOCKS.register("sanctuary_core") { ->
         SanctuaryCoreBlock(
             BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_LIGHT_GREEN).strength(3.5f, 1200f)
-                .sound(SoundType.AMETHYST).lightLevel { 10 },
+                .sound(SoundType.AMETHYST).lightLevel { 10 }.noOcclusion(),
         )
     }
     val HUB_BELL: DeferredBlock<HubBellBlock> = BLOCKS.register("hub_bell") { ->
-        HubBellBlock(BlockBehaviour.Properties.of().mapColor(MapColor.GOLD).strength(2.5f).sound(SoundType.ANVIL))
+        HubBellBlock(BlockBehaviour.Properties.of().mapColor(MapColor.GOLD).strength(2.5f).sound(SoundType.ANVIL).noOcclusion())
     }
 
     val EGG_NEST: DeferredBlock<EggNestBlock> = BLOCKS.register("egg_nest") { ->

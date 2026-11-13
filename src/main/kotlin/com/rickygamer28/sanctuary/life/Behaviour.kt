@@ -166,7 +166,10 @@ object Behaviour {
     /** Flying types sometimes take off together and fly out over other biomes, then come home. */
     private fun flocks(level: ServerLevel, s: Sanctuary, rt: SanctuaryRuntime, now: Long) {
         val random = level.random
-        val byZone = rt.live.values.filter { it.flyer && !it.migrating && now >= it.busyUntil && it.home != null }.groupBy { it.home!! }
+        if (Routines.isNight(level)) return // flocks rest at night
+        val byZone = rt.live.values.filter {
+            it.flyer && !it.migrating && !it.swimmer && !it.napping && it.napSpot == null && it.snackSpot == null && now >= it.busyUntil && it.home != null
+        }.groupBy { it.home!! }
         for ((zone, flock) in byZone) {
             if (random.nextInt(if (flock.size >= 2) 400 else 1200) != 0) continue
             val destinations = s.unlocked.filter { it != zone }
@@ -196,7 +199,7 @@ object Behaviour {
 
     /** Pokémon that really dislike each other keep their distance. */
     private fun avoidRivals(s: Sanctuary, rt: SanctuaryRuntime, now: Long) {
-        val list = rt.live.values.filter { now >= it.busyUntil }
+        val list = rt.live.values.filter { now >= it.busyUntil && !it.napping && !it.swimmer }
         for (i in list.indices) for (j in i + 1 until list.size) {
             val a = list[i]
             val b = list[j]

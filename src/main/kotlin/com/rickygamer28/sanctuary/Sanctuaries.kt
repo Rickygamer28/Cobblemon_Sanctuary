@@ -94,6 +94,7 @@ object Sanctuaries {
         s.portalDim = level.dimension().location().toString()
         s.portalPos = pos
         data.sanctuaries[s.id] = s
+        s.basket.addListener { data.setDirty() }
         data.setDirty()
         SanctuaryDimension.level(level.server)?.let { Residents.refreshRoster(it, s, Residents.runtime(s), it.gameTime) }
         giveJournalOnce(player)

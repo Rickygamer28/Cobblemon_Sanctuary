@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " S ",
+    "B B",
+    "BAB"
+  ],
+  "key": {
+    "S": {
+      "item": "minecraft:stick"
+    },
+    "B": {
+      "item": "minecraft:bamboo"
+    },
+    "A": {
+      "tag": "cobblemon:apricorns"
+    }
+  },
+  "result": {
+    "id": "cobblemon_sanctuary:gathering_basket",
+    "count": 1
+  }
+}

@@ -51,7 +51,10 @@ class SanctuaryData : SavedData() {
         private fun load(tag: CompoundTag, registries: HolderLookup.Provider): SanctuaryData {
             val data = SanctuaryData()
             tag.getList("Sanctuaries", Tag.TAG_COMPOUND.toInt()).forEach {
-                runCatching { Sanctuary.load(it as CompoundTag, registries) }.onSuccess { s -> data.sanctuaries[s.id] = s }
+                runCatching { Sanctuary.load(it as CompoundTag, registries) }.onSuccess { s ->
+                    data.sanctuaries[s.id] = s
+                    s.basket.addListener { data.setDirty() } // save what players take out of or put in the basket
+                }
             }
             data.nextSlot = tag.getInt("NextSlot").coerceAtLeast(1)
             return data
