@@ -73,7 +73,7 @@ abstract class DecorationBlock(properties: Properties, private val kind: String,
  */
 open class PokemonBedBlock(properties: Properties, val size: Int) :
     DecorationBlock(properties, kindFor(size), box(0.0, 0.0, 0.0, 16.0, 5.0, 16.0)) {
-    override fun codec() = simpleCodec { PokemonBedBlock(it, 1) }
+    override fun codec(): com.mojang.serialization.MapCodec<out HorizontalDirectionalBlock> = simpleCodec { PokemonBedBlock(it, 1) }
 
     override fun getStateForPlacement(context: BlockPlaceContext): BlockState? {
         val state = super.getStateForPlacement(context) ?: return null
@@ -127,11 +127,11 @@ open class PokemonBedBlock(properties: Properties, val size: Int) :
 }
 
 class LargePokemonBedBlock(properties: Properties) : PokemonBedBlock(properties, 2) {
-    override fun codec() = simpleCodec(::LargePokemonBedBlock)
+    override fun codec(): com.mojang.serialization.MapCodec<out HorizontalDirectionalBlock> = simpleCodec(::LargePokemonBedBlock)
 }
 
 class HugePokemonBedBlock(properties: Properties) : PokemonBedBlock(properties, 3) {
-    override fun codec() = simpleCodec(::HugePokemonBedBlock)
+    override fun codec(): com.mojang.serialization.MapCodec<out HorizontalDirectionalBlock> = simpleCodec(::HugePokemonBedBlock)
 }
 
 /** An invisible part of a big bed; breaking it breaks the bed. */
