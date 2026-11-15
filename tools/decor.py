@@ -130,7 +130,8 @@ def bed(n):
     el+=box([x0+t+1,hc,z0+t+1],[x1-t-1,hc+0.5,z1-t-1],'#paw',faces=['up','north','south','east','west'])  # puffy middle
     def bolster(f,t_,h):
         out=[]
-        out+=box([f[0],0,f[2]],[t_[0],h-1,t_[2]],'#rim',top='#rimtop')
+        out+=box([f[0],0,f[2]],[t_[0],0.75,t_[2]],'#trim',faces=['north','south','east','west','down'])   # piping
+        out+=box([f[0],0.75,f[2]],[t_[0],h-1,t_[2]],'#rim',top='#rimtop')
         out+=box([f[0]+0.5,h-1,f[2]+0.5],[t_[0]-0.5,h,t_[2]-0.5],'#rimtop')          # rolled top
         return out
     el+=bolster([x0+c,0,z1-t],[x1-c,0,z1],hr)                                          # back (south)
@@ -141,9 +142,6 @@ def bed(n):
         h=hr-1 if az>z0+W/2 else hr-drop
         el+=box([ax,0,az],[ax+c,h-1,az+c],'#rim',top='#rimtop')
         el+=box([ax+0.5,h-1,az+0.5],[ax+c-0.5,h-0.5,az+c-0.5],'#rimtop')
-    # piping: a cream band round the bottom of the bolsters
-    for f,t_ in [([x0+c,0,z0-0.05],[x1-c,0.75,z0]),([x0+c,0,z1],[x1-c,0.75,z1+0.05]),([x0-0.05,0,z0+c],[x0,0.75,z1-c]),([x1,0,z0+c],[x1+0.05,0.75,z1-c])]:
-        el+=box(f,t_,'#trim',faces=['north','south','east','west'])
     # a little pillow against the back
     pw=[3,5,7][n-1]; mid=x0+W/2
     el+=box([mid-pw,hc,z1-t-[3,4,5][n-1]],[mid+pw,hc+[2,2.5,3][n-1],z1-t],'#pillow')
