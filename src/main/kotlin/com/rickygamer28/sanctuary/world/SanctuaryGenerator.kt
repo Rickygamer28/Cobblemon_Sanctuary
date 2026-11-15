@@ -68,7 +68,65 @@ object SanctuaryGenerator {
     private val missedUnloaded = HashMap<UUID, Boolean>()
     private val recheckMeadow = HashSet<UUID>()
 
-    fun forget(id: UUID) { recheckMeadow.remove(id); cursors.remove(id); retryAt.remove(id); missedUnloaded.remove(id); BiomePainter.forget(id) }
+    fun forget(id: UUID) { recheckMeadow.remove(id); cursors.remove(id); retryAt.remove(id); missedUnloaded.remove(id); requested.remove(id); waiting.remove(id); BiomePainter.forget(id) }
+
+    // ------------------------------------------------------------------ loading the chunks it builds in
+    // Building only where players happen to have chunks loaded (their render distance) split the valley into
+    // separate passes, and things that cross from one part into another (trees, boulders, dens) came out cut or
+    // half-built. Now the builder loads the chunks it's about to build in, a little ahead of itself, and keeps
+    // them loaded for a short while, so the whole valley is built in one go whatever the render distance.
+
+    private val BUILD_TICKET: net.minecraft.server.level.TicketType<net.minecraft.world.level.ChunkPos> =
+        net.minecraft.server.level.TicketType.create("cobblemon_sanctuary_build", Comparator.comparingLong<net.minecraft.world.level.ChunkPos> { it.toLong() }, 20 * 45)
+    private val requested = HashMap<UUID, HashMap<Long, Long>>()
+    /** The column the builder is waiting on to load, and since when. */
+    private val waiting = HashMap<UUID, Pair<Int, Long>>()
+
+    private fun loadChunks() = runCatching { SanctuaryConfig.loadChunksToBuild.get() }.getOrDefault(true)
+
+    /** Keeps the chunk (and the ones around it) loaded for a while. */
+    private fun request(level: ServerLevel, s: Sanctuary, cx: Int, cz: Int, now: Long) {
+        val m = requested.getOrPut(s.id) { HashMap() }
+        val k = net.minecraft.world.level.ChunkPos.asLong(cx, cz)
+        val t = m[k]
+        if (t != null && now - t < 20L * 30) return
+        m[k] = now
+        val pos = net.minecraft.world.level.ChunkPos(cx, cz)
+        level.chunkSource.addRegionTicket(BUILD_TICKET, pos, 1, pos)
+    }
+
+    /** Asks for the chunks of the next columns to be loaded. */
+    private fun prefetch(level: ServerLevel, s: Sanctuary, from: Int, total: Int, now: Long) {
+        if (!loadChunks() || now % 5L != 0L) return
+        var last = Long.MIN_VALUE
+        for (idx in from until minOf(total, from + 6000)) {
+            val x = s.center.x + ColumnOrder.dx[idx]
+            val z = s.center.z + ColumnOrder.dz[idx]
+            val k = net.minecraft.world.level.ChunkPos.asLong(x shr 4, z shr 4)
+            if (k == last) continue
+            last = k
+            request(level, s, x shr 4, z shr 4, now)
+        }
+    }
+
+    /**
+     * The column's chunk (and its neighbours) are loaded and ready to build in. If not, they're asked for and
+     * this returns false; after waiting too long it gives up on the column for this pass.
+     */
+    private fun ready(level: ServerLevel, s: Sanctuary, idx: Int, x: Int, z: Int, now: Long): Boolean? {
+        val cx = x shr 4
+        val cz = z shr 4
+        var all = true
+        for (dx in -1..1) for (dz in -1..1) if (!level.hasChunk(cx + dx, cz + dz)) { all = false; break }
+        if (all) { waiting.remove(s.id); return true }
+        if (!loadChunks()) return if (level.hasChunk(cx, cz)) true else null
+        request(level, s, cx, cz, now)
+        val w = waiting[s.id]
+        if (w == null || w.first != idx) { waiting[s.id] = idx to now; return false }
+        // waited ten seconds: build it anyway if its own chunk is there, otherwise skip it for now
+        if (now - w.second > 200) { waiting.remove(s.id); return if (level.hasChunk(cx, cz)) true else null }
+        return false
+    }
 
     fun isGrowing(s: Sanctuary) = s.generationDirty || cursors.containsKey(s.id)
 
@@ -108,13 +166,19 @@ object SanctuaryGenerator {
         val deadline = System.nanoTime() + SanctuaryConfig.generationMillis.get() * 1_000_000L
         var scanned = 0
         var found = repaired[s.id] ?: 0
+        val now = level.gameTime
+        prefetch(level, s, i, total, now)
         while (i < total) {
             if ((++scanned and 31) == 0 && System.nanoTime() > deadline) break
             val idx = i++
             if (!s.dressed.get(idx)) continue
             val x = s.center.x + ColumnOrder.dx[idx]
             val z = s.center.z + ColumnOrder.dz[idx]
-            if (!level.hasChunk(x shr 4, z shr 4)) { repairMissed += s.id; continue }
+            when (ready(level, s, idx, x, z, now)) {
+                false -> { i = idx; break }
+                null -> { repairMissed += s.id; continue }
+                true -> {}
+            }
             if (Landmarks.near(s, x, z)) continue
             looseBlocks(level, x, z)
             if (s.meadow.get(idx)) continue
@@ -224,6 +288,7 @@ object SanctuaryGenerator {
         var budget = SanctuaryConfig.generationSpeed.get()
         val deadline = System.nanoTime() + SanctuaryConfig.generationMillis.get() * 1_000_000L
         var scanned = 0
+        prefetch(level, s, i, total, now)
         while (budget > 0 && i < total) {
             scanned++
             if ((scanned and 31) == 0 && System.nanoTime() > deadline) break
@@ -251,7 +316,11 @@ object SanctuaryGenerator {
                 if (asleep) continue // still asleep: stays a meadow
                 s.dressed.clear(idx); s.meadow.clear(idx) // it woke up: build the real biome here
             }
-            if (!level.hasChunk(x shr 4, z shr 4)) { missedUnloaded[s.id] = true; continue }
+            when (ready(level, s, idx, x, z, now)) {
+                false -> { i = idx; break }                              // wait for it to load
+                null -> { missedUnloaded[s.id] = true; continue }        // couldn't load it: later
+                true -> {}
+            }
             val ok = try {
                 when {
                     !inside -> BiomeDresser.dressRim(level, s, x, z, dist, ring)
@@ -271,6 +340,7 @@ object SanctuaryGenerator {
         }
         if (i >= total) {
             cursors.remove(s.id)
+            requested.remove(s.id)
             BiomeDresser.endPass(s)
             s.rebuildZones.clear()
             recheckMeadow -= s.id

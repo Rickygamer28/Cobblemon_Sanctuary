@@ -175,6 +175,9 @@ object SanctuaryConfig {
     val playFightXpMaxLevel: ModConfigSpec.IntValue = builder
         .comment("Residents stop gaining experience from play-fights at this level.")
         .defineInRange("playFightXpMaxLevel", 100, 1, 100)
+    val loadChunksToBuild: ModConfigSpec.BooleanValue = builder
+        .comment("The valley builder loads the chunks it's building in (so the whole valley is built in one go, whatever players' render distance).")
+        .define("loadChunksToBuild", true)
     val customTypeBiomes: ModConfigSpec.BooleanValue = builder
         .comment("Give types added by other mods a biome of their own in the ring (off: their Pokémon live in the biome of their other type, or the Normal hub).")
         .define("customTypeBiomes", false)
