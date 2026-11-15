@@ -48,9 +48,9 @@ object SanctuaryConfig {
         .comment("Milliseconds per tick the sanctuary may spend building biomes (higher = faster building, more server load).")
         .defineInRange("generationMillis", 12, 1, 40)
 
-    val hubPercent: ModConfigSpec.IntValue = builder
-        .comment("Size of the Normal hub, as a percentage of the sanctuary's radius. Use Rebuild biomes after changing it.")
-        .defineInRange("hubPercent", 33, 15, 60)
+    val townPercent: ModConfigSpec.IntValue = builder
+        .comment("Size of the town in the middle of the valley, as a percentage of its radius (the rest is habitats, meadows and routes). Reshape after changing it.")
+        .defineInRange("townPercent", 14, 8, 40)
 
     val blockWildSpawns: ModConfigSpec.BooleanValue = builder
         .comment("Stop wild Pokémon from spawning inside sanctuaries, so only residents live there.")

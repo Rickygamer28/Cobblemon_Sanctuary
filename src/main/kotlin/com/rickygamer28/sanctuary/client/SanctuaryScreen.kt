@@ -67,7 +67,7 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
         val ivs: IntArray, val moves: List<String>,
     )
 
-    private class Biome(val zone: String, val name: String, val color: Int, val awake: Boolean, val count: Int, val pct: Int)
+    private class Biome(val zone: String, val name: String, val color: Int, val awake: Boolean, val count: Int, val pct: Int, val placed: Boolean, val types: String)
 
     private class Hit(val x: Int, val y: Int, val w: Int, val h: Int, val action: (Int) -> Unit)
 
@@ -135,7 +135,7 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
         val bl = tag.getList("biomes", Tag.TAG_COMPOUND.toInt())
         biomes = (0 until bl.size).map { i ->
             val b = bl.getCompound(i)
-            Biome(b.getString("zone"), b.getString("name"), b.getInt("color"), b.getBoolean("awake"), b.getInt("count"), b.getInt("pct"))
+            Biome(b.getString("zone"), b.getString("name"), b.getInt("color"), b.getBoolean("awake"), b.getInt("count"), b.getInt("pct"), b.getBoolean("placed"), b.getString("types"))
         }
         if (tag.contains("eggs")) {
             val el = tag.getList("eggs", Tag.TAG_COMPOUND.toInt())
@@ -466,7 +466,7 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
         val tabs = listOf(
             Triple("home", "Overview", ItemStack(ModContent.SANCTUARY_CORE_ITEM.get())),
             Triple("residents", "Residents", itemOf("cobblemon:poke_ball", Items.ENDER_PEARL)),
-            Triple("biomes", "Biomes", itemOf("cobblemon:grass_gem", Items.OAK_SAPLING)),
+            Triple("biomes", "Region", itemOf("minecraft:filled_map", Items.MAP)),
             Triple("nest", "Nest", ItemStack(ModContent.POKEMON_EGG.get())),
             Triple("events", "Journal", ItemStack(ModContent.JOURNAL.get())),
             Triple("goals", "Goals", itemOf("cobblemon:rare_candy", Items.NETHER_STAR)),
@@ -952,41 +952,83 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
 
     // ------------------------------------------------------------------ biomes
 
+    /** The region: a little map of the valley and its habitats, and who lives in each. */
     private fun biomesPage(g: GuiGraphics, x: Int, y: Int, w: Int, h: Int, mx: Int, my: Int) {
-        text(g, "Tap an awake biome to see who lives there.", x, y, SUB)
-        val cols = 3
-        val gap = 5
-        val tw = (w - gap * (cols - 1)) / cols
-        val th = 34
+        // the map
+        val map = data.getByteArray("map")
+        val n = 48
+        val size = min(h - 6, w / 2 - 6).coerceAtLeast(96)
+        val cell = size.toDouble() / n
+        val mx0 = x
+        val my0 = y + 2
+        box(g, mx0 - 2, my0 - 2, size + 4, size + 4, 0xFF5E5A50.toInt())
+        val colorOf = HashMap<Int, Int>()
+        biomes.forEach { b -> val k = if (b.zone == "normal") 1 else (listOf("water", "ice", "rock", "ground", "fire", "dragon", "ghost", "poison", "grass", "fairy", "electric").indexOf(b.zone) + 2); colorOf[k] = opaque(b.color) }
+        var hovered: Int = -1
+        if (map.size == n * n) for (j in 0 until n) for (i in 0 until n) {
+            val v = map[j * n + i].toInt()
+            if (v == 0) continue
+            val c = if (v == 1) 0xFFA9C98A.toInt() else mix(colorOf[v] ?: 0xFFAAAAAA.toInt(), 0x2A3A20, 0.12f)
+            val x0 = mx0 + (i * cell).toInt()
+            val y0 = my0 + (j * cell).toInt()
+            val x1 = mx0 + ((i + 1) * cell).toInt()
+            val y1 = my0 + ((j + 1) * cell).toInt()
+            g.fill(x0, y0, x1, y1, c)
+            if (mx in x0 until x1 && my in y0 until y1) hovered = v
+        }
+        // the town, and where you are
+        val cx = mx0 + size / 2
+        val cy = my0 + size / 2
+        box(g, cx - 3, cy - 3, 6, 6, 0xFFF4EEDC.toInt())
+        if (data.contains("mapX")) {
+            val ux = cx + (data.getFloat("mapX") * size / 2).toInt()
+            val uz = cy + (data.getFloat("mapZ") * size / 2).toInt()
+            box(g, ux - 2, uz - 2, 5, 5, 0xFFFFFFFF.toInt())
+            box(g, ux - 1, uz - 1, 3, 3, 0xFFE24B4A.toInt())
+            if (over(mx, my, ux - 3, uz - 3, 7, 7)) tooltip = listOf(Component.literal("You are here"))
+        }
+        if (hovered >= 1 && tooltip == null) {
+            val b = if (hovered == 1) biomes.firstOrNull { it.zone == "normal" } else biomes.firstOrNull { it.zone == listOf("water", "ice", "rock", "ground", "fire", "dragon", "ghost", "poison", "grass", "fairy", "electric").getOrNull(hovered - 2) }
+            if (b != null) tooltip = listOf(Component.literal(b.name).withColor(opaque(b.color)), Component.literal("${b.count} Pokémon").withColor(SUB))
+        }
+        // the habitats
+        val lx = mx0 + size + 12
+        val lw = x + w - lx
+        text(g, "Habitats", lx, y, SUB)
+        val th = 30
+        val gap = 4
         val gy = y + 14
         val gh = h - 16
-        val rows = (biomes.size + cols - 1) / cols
-        maxScroll = max(0.0, rows * (th + gap) - gap - gh.toDouble())
+        maxScroll = max(0.0, biomes.size * (th + gap) - gap - gh.toDouble())
         scroll = scroll.coerceIn(0.0, maxScroll)
-        g.enableScissor(x - 2, gy, x + w + 2, gy + gh)
+        g.enableScissor(lx - 2, gy, lx + lw + 2, gy + gh)
         biomes.forEachIndexed { i, b ->
-            val bx = x + (i % cols) * (tw + gap)
-            val by = gy + (i / cols) * (th + gap) - scroll.toInt()
+            val by = gy + i * (th + gap) - scroll.toInt()
             if (by > gy + gh || by + th < gy) return@forEachIndexed
             val c = opaque(b.color)
-            val hover = b.awake && over(mx, my, bx, by, tw, th) && my in gy until gy + gh
-            box(g, bx, by, tw, th, if (!b.awake) 0xFF1A222B.toInt() else if (hover) CARD_HOVER else CARD)
-            g.fill(bx + 1, by + 1, bx + 4, by + th - 1, if (b.awake) c else mix(c, 0x1A222B, 0.7f))
-            item(g, itemOf("cobblemon:${b.zone}_gem", Items.PAPER), bx + 8, by + 9)
-            text(g, fit(b.name, tw - 34), bx + 28, by + 6, if (b.awake) TEXT else DIM)
-            if (b.awake) {
-                text(g, "${b.count} Pokémon", bx + 28, by + 17, SUB)
-                bar(g, bx + 28, by + 27, tw - 36, 3, b.pct / 100.0, c)
-                if (hover) {
-                    tooltip = listOf(Component.literal(b.name).withColor(c), Component.literal("${b.count} Pokémon live here").withColor(SUB), Component.literal(if (b.pct >= 100) "The liveliest biome" else "${b.pct}% as lively as the busiest biome").withColor(SUB))
-                    hit(bx, by, tw, th) { filterZone = b.zone; goTab("residents") }
-                }
-            } else {
-                text(g, fit("Needs a ${typeLabel(b.zone)} type", tw - 34), bx + 28, by + 18, DIM)
+            val live = b.awake && b.placed
+            val hover = b.awake && over(mx, my, lx, by, lw, th) && my in gy until gy + gh
+            box(g, lx, by, lw, th, if (!b.awake) 0xFF1A222B.toInt() else if (hover) CARD_HOVER else CARD)
+            g.fill(lx + 1, by + 1, lx + 4, by + th - 1, if (b.awake) c else mix(c, 0x1A222B, 0.7f))
+            text(g, fit(b.name, lw - 70), lx + 9, by + 5, if (b.awake) TEXT else DIM)
+            val right = when {
+                !b.awake -> ""
+                else -> "${b.count} Pokémon"
+            }
+            if (right.isNotEmpty()) text(g, right, lx + lw - 6 - font.width(right), by + 5, SUB)
+            val sub = when {
+                !b.awake -> "Asleep: needs a ${b.types.ifEmpty { "Normal" }} type"
+                !live -> "No room yet: Reshape to add it to the map"
+                else -> b.types.ifEmpty { "Normal" }
+            }
+            text(g, fit(sub, lw - 14), lx + 9, by + 17, if (!live && b.awake) GOLD else DIM)
+            if (hover) {
+                tooltip = listOf(Component.literal(b.name).withColor(c), Component.literal("${b.count} Pokémon live here").withColor(SUB), Component.literal("Click to see them").withColor(SUB))
+                hit(lx, by, lw, th) { filterZone = b.zone; goTab("residents") }
             }
         }
         g.disableScissor()
-        scrollbar(g, x + w + 4, gy, gh)
+        scrollbar(g, lx + lw + 4, gy, gh)
     }
 
     // ------------------------------------------------------------------ journal (events)

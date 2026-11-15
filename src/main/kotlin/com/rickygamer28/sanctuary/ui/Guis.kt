@@ -133,12 +133,14 @@ object SanctuaryGuis {
             })
         }
         t.put("biomes", ListTag().also { list ->
-            for (zone in listOf(ZoneLayout.HUB) + ring) list.add(CompoundTag().also {
+            for (zone in listOf(ZoneLayout.HUB) + ZoneLayout.HABITATS) list.add(CompoundTag().also {
                 val count = s.typeCounts[zone] ?: 0
                 it.putString("zone", zone)
                 it.putString("name", Residents.zoneName(zone))
                 it.putInt("color", typeColor(zone))
                 it.putBoolean("awake", zone in s.unlocked)
+                it.putBoolean("placed", zone == ZoneLayout.HUB || zone in s.habitats)
+                it.putString("types", ZoneLayout.typesOf(zone).joinToString(" · ") { ty -> ty.replaceFirstChar { c -> c.uppercase() } })
                 it.putInt("count", if (zone == ZoneLayout.HUB) rosterHomes(s).count { h -> h == ZoneLayout.HUB } else count)
                 // how lively the biome is: its share of the residents, compared with the busiest biome
                 val busiest = (s.typeCounts.values.maxOrNull() ?: 1).coerceAtLeast(1)
@@ -146,6 +148,24 @@ object SanctuaryGuis {
                 it.putInt("pct", pct)
             })
         })
+        // a small map of the region (each cell: 0 outside, 1 town and meadows, 2+ a habitat)
+        run {
+            val n = 48
+            val cells = ByteArray(n * n)
+            val r = s.size.radius
+            for (i in 0 until n) for (j in 0 until n) {
+                val x = s.center.x - r + ((i + 0.5) * 2 * r / n).toInt()
+                val z = s.center.z - r + ((j + 0.5) * 2 * r / n).toInt()
+                val hit = ZoneLayout.locate(s, x, z) ?: continue
+                val k = ZoneLayout.HABITATS.indexOf(hit.zone)
+                cells[j * n + i] = (if (k >= 0 && hit.zone in s.unlocked) k + 2 else 1).toByte()
+            }
+            t.putByteArray("map", cells)
+            if (SanctuaryDimension.isSanctuary(player.level())) {
+                t.putFloat("mapX", ((player.x - s.center.x) / r).toFloat())
+                t.putFloat("mapZ", ((player.z - s.center.z) / r).toFloat())
+            }
+        }
         t.put("events", ListTag().also { list -> s.events.toList().reversed().forEach { list.add(StringTag.valueOf(it)) } })
         t.putBoolean("hasWhistle", player.inventory.contains(ItemStack(ModContent.WHISTLE.get())))
         t.putBoolean("hasBasket", s.basketPos != null)

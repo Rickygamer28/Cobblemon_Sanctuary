@@ -17,8 +17,8 @@ enum class SanctuarySize(val radius: Int, val label: String) {
     LARGE(320, "Large"),
     HUGE(448, "Huge");
 
-    /** The Normal hub in the middle (a third of the radius by default; see hubPercent in the config). */
-    val hubRadius: Int get() = radius * runCatching { com.rickygamer28.sanctuary.SanctuaryConfig.hubPercent.get() }.getOrDefault(33) / 100
+    /** The town in the middle (see townPercent in the config); never so small that its plaza and paths don't fit. */
+    val hubRadius: Int get() = maxOf(24, radius * runCatching { com.rickygamer28.sanctuary.SanctuaryConfig.townPercent.get() }.getOrDefault(14) / 100)
 
     companion object {
         val MAX_RADIUS = HUGE.radius
