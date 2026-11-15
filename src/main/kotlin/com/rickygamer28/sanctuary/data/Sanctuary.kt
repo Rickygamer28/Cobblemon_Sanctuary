@@ -310,6 +310,7 @@ class Sanctuary(
         t.putIntArray("Away", intArrayOf(awayMeetings, awayFriends, awayRivals, awayEggs))
         t.putBoolean("LegacyTethers", legacyTethersFixed)
         t.putInt("Version", DATA_VERSION)
+        t.putInt("RingSize", com.rickygamer28.sanctuary.world.ZoneLayout.ring().size)
         t.putInt("OldWall", oldWallRadius)
         val packed = IntArray((originY.size + 1) / 2) { i ->
             val a = originY[i * 2].toInt() and 0xFFFF
@@ -407,6 +408,21 @@ class Sanctuary(
                 s.props.values.removeIf { !it.startsWith("player_") }
                 s.dens.clear()
                 // the terrain is being rebuilt: landmarks get rebuilt on the new ground too
+                s.landmarks.forEach { (k, v) -> if (v != Long.MIN_VALUE) s.staleLandmarks[k] = v }
+                s.landmarks.clear()
+            }
+            // the ring of biomes changed (custom types no longer get a biome, or the config changed): lay the
+            // valley out again and rebuild it
+            val savedRing = if (t.contains("RingSize")) t.getInt("RingSize")
+                else com.rickygamer28.sanctuary.world.ZoneLayout.BASE_RING.size + com.rickygamer28.sanctuary.world.ZoneLayout.customTypes().size
+            if (savedRing != com.rickygamer28.sanctuary.world.ZoneLayout.ring().size && s.state == SanctuaryState.ACTIVE && version > 0) {
+                s.dressed = BitSet()
+                s.meadow = BitSet()
+                s.generationDirty = true
+                s.needsCheck = true
+                s.berrySpots.clear()
+                s.props.values.removeIf { !it.startsWith("player_") }
+                s.dens.clear()
                 s.landmarks.forEach { (k, v) -> if (v != Long.MIN_VALUE) s.staleLandmarks[k] = v }
                 s.landmarks.clear()
             }

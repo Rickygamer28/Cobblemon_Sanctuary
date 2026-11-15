@@ -175,6 +175,9 @@ object SanctuaryConfig {
     val playFightXpMaxLevel: ModConfigSpec.IntValue = builder
         .comment("Residents stop gaining experience from play-fights at this level.")
         .defineInRange("playFightXpMaxLevel", 100, 1, 100)
+    val customTypeBiomes: ModConfigSpec.BooleanValue = builder
+        .comment("Give types added by other mods a biome of their own in the ring (off: their Pokémon live in the biome of their other type, or the Normal hub).")
+        .define("customTypeBiomes", false)
     val dens: ModConfigSpec.BooleanValue = builder
         .comment("Build dens in every biome that residents walk into to rest and come out of.")
         .define("dens", true)

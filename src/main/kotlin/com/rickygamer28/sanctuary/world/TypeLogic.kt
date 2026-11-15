@@ -34,7 +34,16 @@ object TypeLogic {
     }
 
     /** Types that have a biome (everything except Flying). Empty = a pure Flying "traveler". */
-    fun zoneTypes(pokemon: Pokemon): List<String> = finalTypes(pokemon).filter { it != FLYING }
+    /**
+     * The biomes a Pokémon belongs to, from its types. Types without a biome (ones other mods add) are skipped; a
+     * Pokémon with only such types lives in the Normal hub.
+     */
+    fun zoneTypes(pokemon: Pokemon): List<String> {
+        val types = finalTypes(pokemon).filter { it != FLYING }
+        val ring = ZoneLayout.ring()
+        val known = types.filter { it == ZoneLayout.HUB || it in ring }
+        return if (known.isEmpty() && types.isNotEmpty()) listOf(ZoneLayout.HUB) else known
+    }
 
     fun isTraveler(pokemon: Pokemon) = zoneTypes(pokemon).isEmpty()
 

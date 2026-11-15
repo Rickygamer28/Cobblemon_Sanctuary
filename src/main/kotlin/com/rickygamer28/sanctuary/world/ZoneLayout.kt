@@ -25,19 +25,27 @@ object ZoneLayout {
         "poison", "bug", "grass", "fairy", "psychic", "steel", "electric", "ice",
     )
 
-    /** The ring, plus any custom types added by other mods (appended at the end). */
+    /** Types other mods added (not one of the 18). */
+    fun customTypes(): List<String> = runCatching {
+        ElementalTypes.all().map { it.name.lowercase() }.filter { it !in BASE_RING && it != HUB && it != TypeLogic.FLYING }
+    }.getOrDefault(emptyList())
+
+    private fun customBiomes(): Boolean = runCatching { com.rickygamer28.sanctuary.SanctuaryConfig.customTypeBiomes.get() }.getOrDefault(false)
+
+    /**
+     * The ring of type biomes. Types other mods add have no biome of their own (unless the config turns that on):
+     * their Pokémon live in the biome of their other type, or in the Normal hub.
+     */
     @Volatile private var cachedRing: List<String> = BASE_RING
-    @Volatile private var cachedTypeCount = -1
+    @Volatile private var cachedKey = ""
 
     fun ring(): List<String> {
+        val custom = customBiomes()
         val count = runCatching { ElementalTypes.count() }.getOrDefault(-1)
-        if (count == cachedTypeCount) return cachedRing
-        val extra = runCatching {
-            ElementalTypes.all().map { it.name.lowercase() }
-                .filter { it !in BASE_RING && it != HUB && it != TypeLogic.FLYING }
-        }.getOrDefault(emptyList())
-        cachedRing = BASE_RING + extra
-        cachedTypeCount = count
+        val key = "$count:$custom"
+        if (key == cachedKey) return cachedRing
+        cachedRing = if (custom) BASE_RING + customTypes() else BASE_RING
+        cachedKey = key
         return cachedRing
     }
 
