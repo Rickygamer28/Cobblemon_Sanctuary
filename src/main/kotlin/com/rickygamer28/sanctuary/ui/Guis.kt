@@ -104,9 +104,9 @@ object SanctuaryGuis {
         }
         t.putInt("progress", SanctuaryGenerator.progress(s) ?: -1)
         t.putBoolean("inside", SanctuaryDimension.isSanctuary(player.level()))
-        val ring = ZoneLayout.ring()
+        val ring = ZoneLayout.ring(s)
         t.putInt("awake", s.unlocked.size)
-        t.putInt("zones", ring.size + 1)
+        t.putInt("zones", ZoneLayout.HABITATS.size + 1)
         Sizes.nextSize(s.size)?.let { next ->
             t.putString("nextLabel", next.label)
             t.putInt("nextNeeded", Sizes.residentsNeeded(next))
@@ -223,7 +223,7 @@ object SanctuaryGuis {
     }
 
     private fun rosterHomes(s: Sanctuary): List<String?> {
-        val ring = ZoneLayout.ring()
+        val ring = ZoneLayout.ring(s)
         return Residents.runtime(s).roster.map { TypeLogic.homeZone(it.pokemon, s.residents[it.pokemon.uuid], ring) }
     }
 
@@ -349,7 +349,7 @@ object ScreenActions {
             }
             "reshape" -> {
                 if (ownerOnly()) {
-                    s.rebuild()
+                    s.reshape()
                     Sanctuaries.data(level).setDirty()
                     say(player, "Reshaping the valley. Stay inside so it stays loaded.", ChatFormatting.GREEN)
                 }

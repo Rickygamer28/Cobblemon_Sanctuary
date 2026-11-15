@@ -206,23 +206,39 @@ object Residents {
         val newTypes = unlocked - s.unlocked
         val grew = counts.any { (t, c) -> c > (s.typeCounts[t] ?: 0) }
         if (s.state == SanctuaryState.ACTIVE) {
-            newTypes.filter { it != ZoneLayout.HUB && s.unlocked.size > 1 }.forEach { s.logEvent("The ${zoneName(it)} woke up!") }
+            newTypes.filter { it != ZoneLayout.HUB && s.unlocked.size > 1 && it in s.habitats }.forEach { s.logEvent("The ${zoneName(it)} woke up!") }
         }
         s.typeCounts = counts
         s.residentCount = list.size
         s.unlocked = unlocked
         if (newTypes.isNotEmpty()) s.unlockedChanged = true
         if (newTypes.isNotEmpty() || grew) s.generationDirty = true
-        rt.anchors = unlocked.associateWith { zoneAnchor(s, it, ring) }
+        planRegion(s, counts)
+        rt.anchors = unlocked.associateWith { ZoneLayout.anchor(s, it) }
     }
 
-    private fun zoneAnchor(s: Sanctuary, zone: String, ring: List<String>): Pair<Int, Int> {
-        if (zone == ZoneLayout.HUB) return s.center.x to s.center.z
-        val i = ring.indexOf(zone)
-        val w = 2 * Math.PI / ring.size
-        val a = (i + 0.5) * w
-        val d = (s.size.hubRadius + ZoneLayout.extent(s, zone)) * 0.55
-        return (s.center.x + sin(a) * d).toInt() to (s.center.z - cos(a) * d).toInt()
+    /**
+     * The region map: laid out the first time (and after a Reshape) from how many residents live in each habitat;
+     * a habitat that wakes up later is fitted into a free meadow without moving the others.
+     */
+    private fun planRegion(s: Sanctuary, counts: Map<String, Int>) {
+        if (s.state != SanctuaryState.ACTIVE) return
+        if (!s.planned) {
+            s.habitats.clear()
+            s.habitats.putAll(ZoneLayout.plan(s, counts))
+            s.planned = true
+            s.generationDirty = true
+            return
+        }
+        for (zone in ZoneLayout.HABITATS) {
+            val n = counts[zone] ?: 0
+            if (n <= 0 || zone in s.habitats) continue
+            val hb = ZoneLayout.fitIn(s, zone, n) ?: continue
+            s.habitats[zone] = hb
+            s.rebuildZones += zone
+            s.generationDirty = true
+            s.logEvent("A new habitat appeared in the valley: the ${zoneName(zone)}!")
+        }
     }
 
     // ------------------------------------------------------------------ spawning
@@ -271,7 +287,7 @@ object Residents {
             rt.shuffleSeed = level.random.nextLong()
             rt.shuffleAt = now
         }
-        val ring = ZoneLayout.ring()
+        val ring = ZoneLayout.ring(s)
 
         fun distToPlayers(zone: String?): Double {
             val (ax, az) = rt.anchors[zone ?: ZoneLayout.HUB] ?: (s.center.x to s.center.z)
@@ -338,7 +354,7 @@ object Residents {
     fun spawn(level: ServerLevel, s: Sanctuary, rt: SanctuaryRuntime, e: RosterEntry, at: BlockPos?, players: List<ServerPlayer> = emptyList()): LiveResident? {
         val pokemon = e.pokemon
         if (pokemon.tetheringId != null || pokemon.entity != null) return null
-        val ring = ZoneLayout.ring()
+        val ring = ZoneLayout.ring(s)
         val home = TypeLogic.homeZone(pokemon, s.residents[pokemon.uuid], ring)
         val swimmer = TypeLogic.waterOnly(pokemon)
         val spawnZone = if (swimmer) "water" else home ?: s.unlocked.random()
@@ -387,7 +403,7 @@ object Residents {
         }
         val live = LiveResident(pokemon.uuid, e.owner, entity, tethering)
         live.home = home
-        live.second = TypeLogic.secondZone(pokemon, home)
+        live.second = TypeLogic.secondZone(pokemon, home, ring)
         live.flyer = TypeLogic.canFlyInFlocks(pokemon)
         live.swimmer = swimmer
         live.personality = Personality.of(pokemon)
@@ -472,8 +488,7 @@ object Residents {
 
     fun zoneName(zone: String?): String = when (zone) {
         null -> "skies"
-        ZoneLayout.HUB -> "Normal hub"
-        else -> zone.replaceFirstChar { it.uppercase() } + " biome"
+        else -> ZoneLayout.NAMES[zone] ?: (zone.replaceFirstChar { it.uppercase() } + " biome")
     }
 
     fun findRoster(rt: SanctuaryRuntime, pokemonId: UUID): RosterEntry? = rt.roster.firstOrNull { it.pokemon.uuid == pokemonId }

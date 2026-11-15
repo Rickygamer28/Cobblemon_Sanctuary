@@ -57,11 +57,11 @@ object Landmarks {
     /** Cleans up old landmark spots. Runs even while the valley is being built, so old spots never block it. */
     fun maintain(level: ServerLevel, s: Sanctuary) {
         fixVolcano(s)
-        relocate(level, s, ZoneLayout.ring())
+        relocate(level, s, ZoneLayout.ring(s))
     }
 
     fun tick(level: ServerLevel, s: Sanctuary) {
-        val ring = ZoneLayout.ring()
+        val ring = ZoneLayout.ring(s)
         if (s.staleLandmarks.isNotEmpty()) return
         for (zone in ring) {
             if (zone !in s.unlocked || s.landmarks.containsKey(zone) || s.staleLandmarks.containsKey(zone)) continue
@@ -73,7 +73,7 @@ object Landmarks {
             if (zone == "fire" && variant == 0) { s.landmarks[zone] = NONE; continue } // the volcano is the landmark
             runCatching { build(level, s, zone, variant, base, random) }
             s.landmarks[zone] = base.asLong()
-            NAMES[zone]?.let { s.logEvent("${it.replaceFirstChar { c -> c.uppercase() }} rose in the ${zone.replaceFirstChar { c -> c.uppercase() }} biome.") }
+            NAMES[zone]?.let { s.logEvent("${it.replaceFirstChar { c -> c.uppercase() }} rose in the ${com.rickygamer28.sanctuary.life.Residents.zoneName(zone)}.") }
             return
         }
     }

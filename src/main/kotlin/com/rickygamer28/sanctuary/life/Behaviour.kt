@@ -107,7 +107,7 @@ object Behaviour {
             // dual types whose biomes don't touch commute through the hub
             val home = r.home
             val second = r.second
-            if (home != null && second != null && second in s.unlocked && !ZoneLayout.areNeighbours(home, second) && random.nextInt(900) == 0) {
+            if (home != null && second != null && second in s.unlocked && !ZoneLayout.areNeighbours(s, home, second) && random.nextInt(900) == 0) {
                 r.visitZone = second
                 r.visitUntil = now + 20L * (60 + random.nextInt(60))
                 commute(level, s, r, second)

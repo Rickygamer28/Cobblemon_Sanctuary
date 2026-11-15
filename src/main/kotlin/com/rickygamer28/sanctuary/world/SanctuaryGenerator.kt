@@ -255,6 +255,8 @@ object SanctuaryGenerator {
 
     fun tick(level: ServerLevel, data: SanctuaryData, s: Sanctuary) {
         if (s.state != SanctuaryState.ACTIVE) return
+        // the region map is laid out once the residents are counted: wait for it
+        if (!s.planned) return
         val now = level.gameTime
         if (now % 10L == 0L) BiomePainter.tick(level, s)
         if (now % 40L == 0L) Landmarks.maintain(level, s)

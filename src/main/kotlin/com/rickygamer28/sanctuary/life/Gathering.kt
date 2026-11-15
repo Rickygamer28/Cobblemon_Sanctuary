@@ -37,7 +37,7 @@ object Gathering {
         val roster = rt.roster
         if (roster.isEmpty()) return
         val random = level.random
-        val ring = ZoneLayout.ring()
+        val ring = ZoneLayout.ring(s)
         val finds = (roster.size / 40).coerceIn(1, 4)
         var reported = false
         repeat(finds) {

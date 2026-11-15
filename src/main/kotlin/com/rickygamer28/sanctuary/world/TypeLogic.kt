@@ -35,14 +35,14 @@ object TypeLogic {
 
     /** Types that have a biome (everything except Flying). Empty = a pure Flying "traveler". */
     /**
-     * The biomes a Pokémon belongs to, from its types. Types without a biome (ones other mods add) are skipped; a
-     * Pokémon with only such types lives in the Normal hub.
+     * The habitats a Pokémon belongs to, from its types (a Bug type lives in the forest, a Steel type in the cave
+     * and mountain…). Types without a habitat (ones other mods add) are skipped; a Pokémon with only such types,
+     * or a Normal type, lives in the town and meadows.
      */
     fun zoneTypes(pokemon: Pokemon): List<String> {
         val types = finalTypes(pokemon).filter { it != FLYING }
-        val ring = ZoneLayout.ring()
-        val known = types.filter { it == ZoneLayout.HUB || it in ring }
-        return if (known.isEmpty() && types.isNotEmpty()) listOf(ZoneLayout.HUB) else known
+        val homes = types.mapNotNull { ZoneLayout.habitatOf(it) }.distinct()
+        return if (homes.isEmpty() && types.isNotEmpty()) listOf(ZoneLayout.HUB) else homes
     }
 
     fun isTraveler(pokemon: Pokemon) = zoneTypes(pokemon).isEmpty()
@@ -60,9 +60,11 @@ object TypeLogic {
     }.getOrDefault(false)
 
     /** The zone this Pokémon calls home, or null for a traveler that hasn't settled anywhere. */
+    /** The habitat a Pokémon lives in; [ring] is the habitats on the map (a habitat that isn't there yet → meadows). */
     fun homeZone(pokemon: Pokemon, data: ResidentData?, ring: List<String>): String? {
         if ("water" in ring && waterOnly(pokemon)) return "water"
-        val options = zoneTypes(pokemon)
+        val all = zoneTypes(pokemon)
+        val options = all.filter { it == ZoneLayout.HUB || it in ring }.ifEmpty { if (all.isEmpty()) all else listOf(ZoneLayout.HUB) }
         val choice = data?.homeChoice
         if (choice != null) {
             if (choice in options) return choice
@@ -72,7 +74,8 @@ object TypeLogic {
     }
 
     /** The other biome a dual-type Pokémon belongs to, if any. */
-    fun secondZone(pokemon: Pokemon, home: String?): String? = if (waterOnly(pokemon)) null else zoneTypes(pokemon).firstOrNull { it != home }
+    fun secondZone(pokemon: Pokemon, home: String?, ring: List<String> = ZoneLayout.HABITATS): String? =
+        if (waterOnly(pokemon)) null else zoneTypes(pokemon).firstOrNull { it != home && (it == ZoneLayout.HUB || it in ring) }
 
     private fun typesOf(form: FormData): List<String> = form.types.map { it.name.lowercase() }
 

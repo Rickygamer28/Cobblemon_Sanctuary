@@ -431,7 +431,12 @@ object BiomeDresser {
         val xd = x.toDouble()
         val zd = z.toDouble()
         return when (zone) {
-            ZoneLayout.HUB -> f(s, xd, zd, 60.0, 1, 2) * 1.6
+            ZoneLayout.HUB -> {
+                // the town is nearly flat; the meadows out between the habitats roll gently
+                val d = sqrt(((x - s.center.x) * (x - s.center.x) + (z - s.center.z) * (z - s.center.z)).toDouble())
+                val wild = smooth((d - s.size.hubRadius - 4) / 30.0)
+                f(s, xd, zd, 60.0, 1, 2) * 1.6 + wild * (f(s, wx, wz, 70.0, 2, 3) * 3.2 + 1.2)
+            }
             "water" -> when (variant) {
                 2 -> { // mangrove delta: winding channels between low banks
                     val ch = ridge(s, wx, wz, 30.0, 7, 3)
@@ -552,6 +557,11 @@ object BiomeDresser {
         var off: Double
         if (hit.zone == ZoneLayout.HUB) {
             off = hubOff
+            val nb = hit.neighbour
+            if (nb != null && hit.edgeDistance < BLEND) {
+                val w = 0.5 + 0.5 * smooth(hit.edgeDistance / BLEND)
+                off = off * w + shape(s, nb, x, z, ring) * smooth((dist - ZoneLayout.hubRadiusAt(s, x, z)) / 20.0) * (1 - w)
+            }
         } else {
             off = shape(s, hit.zone, x, z, ring)
             val nb = hit.neighbour
@@ -621,9 +631,9 @@ object BiomeDresser {
         val target = targetHeight(s, x, z, ring)
         val surface = reshape(level, found, target, placed[s.id])
         val ctx = Ctx(level, s, surface, randomFor(s, x, z), variantOf(s, zone), hit, exposure(s, x, z, target, ring))
-        // a winding route from the hub to the biome's landmark
-        if (target >= WATER_Y + 1 && onRoute(s, hit, x, z, ring)) {
-            val (top, fill) = routeBlocks(hit.zone, variantOf(s, hit.zone))
+        // a winding route from the town out to the habitat's landmark
+        if (target >= WATER_Y + 1 && hit.dist > s.size.hubRadius - 4 && onRoute(s, hit, x, z, ring)) {
+            val (top, fill) = routeBlocks(zone, variantOf(s, zone))
             ctx.ground(if (ctx.noise(2.5, 91) > 0.82) fill else top, fill)
             if (Math.floorMod(x * 7 + z * 13, 37) == 0 && hit.dist > s.size.hubRadius + 10) {
                 // a little lamp along the way, just off the path
@@ -676,9 +686,9 @@ object BiomeDresser {
             val dx = x - s.center.x
             val dz = z - s.center.z
             val hubR = s.size.hubRadius
-            return hit.dist in (hubR - 9.0)..(hubR - 2.0) || ((abs(dx) <= 2 || abs(dz) <= 2) && hit.dist > 5)
+            if (hit.dist < hubR) return hit.dist in (hubR - 9.0)..(hubR - 2.0) || ((abs(dx) <= 2 || abs(dz) <= 2) && hit.dist > 5)
         }
-        return onRoute(s, hit, x, z, ring)
+        return routeDistance(s, x, z) < 3.0
     }
 
     /**
@@ -688,15 +698,6 @@ object BiomeDresser {
     private fun surfaceZone(s: Sanctuary, hit: ZoneLayout.Hit, x: Int, z: Int, ring: List<String>): String {
         val xd = x.toDouble()
         val zd = z.toDouble()
-        // the hub edge
-        val hubEdge = hit.dist - ZoneLayout.hubRadiusAt(s, x, z) // > 0 outside the hub
-        if (abs(hubEdge) < 9) {
-            val n = f01(s, xd, zd, 11.0, 70, 3)
-            val ringZone = if (hit.zone == ZoneLayout.HUB) ZoneLayout.ringZoneAt(s, x, z, ring) else hit.zone
-            val pickRing = n + hubEdge / 18.0 > 0.5
-            if (hit.zone == ZoneLayout.HUB) return if (pickRing && ringZone != null && ringZone in s.unlocked) ringZone else ZoneLayout.HUB
-            if (!pickRing) return ZoneLayout.HUB
-        }
         val nb = hit.neighbour ?: return hit.zone
         if (nb !in s.unlocked || hit.edgeDistance >= 14) return hit.zone
         // a field shared by both sides of the border, so the patches line up
@@ -706,29 +707,36 @@ object BiomeDresser {
         return if (n + signed / 28.0 > 0.5) first else if (first == hit.zone) nb else hit.zone
     }
 
-    /** Is (x, z) on the route that winds from the hub out to [hit]'s landmark? */
-    private fun onRoute(s: Sanctuary, hit: ZoneLayout.Hit, x: Int, z: Int, ring: List<String>): Boolean {
-        val zone = hit.zone
-        if (zone == ZoneLayout.HUB || hit.edgeDistance < 4) return false
-        val i = ring.indexOf(zone)
-        if (i < 0) return false
-        // the route ends at the landmark (which stays where it was built, even after the valley grows)
-        val mark = s.landmarks[zone]?.takeIf { it != Landmarks.NONE && !(zone == "fire" && variantOf(s, zone) == 0) }?.let { BlockPos.of(it) }
-        val (ax, az) = mark?.let { it.x to it.z } ?: ZoneLayout.anchor(s, zone, ring)
-        val adx = (ax - s.center.x).toDouble()
-        val adz = (az - s.center.z).toDouble()
-        val anchorDist = sqrt(adx * adx + adz * adz)
-        if (hit.dist < s.size.hubRadius - 5 || hit.dist > anchorDist - 3) return false
-        // distance from the straight line hub → landmark, bent by noise so the route winds
-        val len = anchorDist.coerceAtLeast(1.0)
-        val ux = adx / len
-        val uz = adz / len
-        val px = (x - s.center.x).toDouble()
-        val pz = (z - s.center.z).toDouble()
-        val along = px * ux + pz * uz
-        val side = px * uz - pz * ux
-        val bend = (Noise.value(s.seed + 909 + i, along / 26.0, 0.5) - 0.5) * 16 * smooth((along - s.size.hubRadius) / 20.0) * smooth((anchorDist - along) / 14.0)
-        return abs(side - bend) < 1.3
+    /** Is (x, z) on a route? Routes wind from the town out through the meadows to every habitat's landmark. */
+    private fun onRoute(s: Sanctuary, hit: ZoneLayout.Hit, x: Int, z: Int, ring: List<String>): Boolean =
+        routeDistance(s, x, z) < 1.3
+
+    /** How far (x, z) is from the nearest route (a large number when there's none nearby). */
+    fun routeDistance(s: Sanctuary, x: Int, z: Int): Double {
+        var best = 99.0
+        for ((zone, hb) in s.habitats) {
+            if (zone !in s.unlocked) continue
+            // the route ends at the landmark (which stays where it was built)
+            val mark = s.landmarks[zone]?.takeIf { it != Landmarks.NONE && !(zone == "fire" && variantOf(s, zone) == 0) }?.let { BlockPos.of(it) }
+            val ax = mark?.x ?: hb.x
+            val az = mark?.z ?: hb.z
+            val adx = (ax - s.center.x).toDouble()
+            val adz = (az - s.center.z).toDouble()
+            val anchorDist = sqrt(adx * adx + adz * adz)
+            val len = anchorDist.coerceAtLeast(1.0)
+            val ux = adx / len
+            val uz = adz / len
+            val px = (x - s.center.x).toDouble()
+            val pz = (z - s.center.z).toDouble()
+            val along = px * ux + pz * uz
+            if (along < s.size.hubRadius - 5 || along > anchorDist - 3) continue
+            val side = px * uz - pz * ux
+            // bent by noise so the route winds
+            val i = ZoneLayout.HABITATS.indexOf(zone)
+            val bend = (Noise.value(s.seed + 909 + i, along / 26.0, 0.5) - 0.5) * 22 * smooth((along - s.size.hubRadius) / 20.0) * smooth((anchorDist - along) / 14.0)
+            best = min(best, abs(side - bend))
+        }
+        return best
     }
 
     private fun routeBlocks(zone: String, variant: Int): Pair<BlockState, BlockState> = when (zone) {
@@ -950,7 +958,7 @@ object BiomeDresser {
         val hubR = s.size.hubRadius
         val d = c.hit.dist
         val ringPath = d in (hubR - 7.0)..(hubR - 4.0)
-        val spoke = (abs(dx) <= 1 || abs(dz) <= 1) && d > 6
+        val spoke = (abs(dx) <= 1 || abs(dz) <= 1) && d > 6 && d < hubR - 3
         when {
             d <= 6.5 -> { // plaza
                 c.ground(
@@ -964,6 +972,7 @@ object BiomeDresser {
                 if (dx == 0 && dz == 0) c.level.setBlock(c.above, ModContent.SANCTUARY_CORE.get().defaultBlockState(), 3)
                 else if (d in 5.5..6.5 && Math.floorMod(dx * 3 + dz * 5, 7) == 0) c.lampPost(b(Blocks.OAK_FENCE), b(Blocks.LANTERN), 3)
             }
+            d > hubR + 1 -> meadow(c)
             ringPath || spoke -> {
                 val rim = (spoke && (abs(dx) == 1 || abs(dz) == 1)) || (ringPath && (d < hubR - 6.5 || d > hubR - 4.5))
                 c.ground(if (rim && c.noise(3.0, 1) > 0.55) b(Blocks.COARSE_DIRT) else b(Blocks.DIRT_PATH), b(Blocks.DIRT))
@@ -979,6 +988,25 @@ object BiomeDresser {
                     c.chance(0.25) -> c.place(b(Blocks.SHORT_GRASS))
                 }
             }
+        }
+    }
+
+    /**
+     * The meadows between the habitats: open grassland with tall grass along the routes (where wild Pokémon would
+     * hide in the games), clumps of trees, flowers and the odd boulder.
+     */
+    private fun meadow(c: Ctx) {
+        val route = routeDistance(c.s, c.x, c.z)
+        c.ground(b(Blocks.GRASS_BLOCK), b(Blocks.DIRT))
+        val clump = c.noise(26.0, 31)
+        when {
+            route < 5.5 && c.noise(4.0, 32) > 0.38 -> if (c.chance(0.55)) c.tallPlant(b(Blocks.TALL_GRASS)) else c.place(b(Blocks.SHORT_GRASS))
+            route > 7 && clump > 0.66 && c.grid(9, 33) && c.roomy() -> c.feature(if (c.noise(40.0, 34) > 0.5) TreeFeatures.OAK else TreeFeatures.BIRCH)
+            route > 7 && c.grid(41, 35) && c.roomy(6) -> c.feature(TreeFeatures.FANCY_OAK)
+            route > 4 && c.grid(37, 36) && c.roomy() -> c.boulder(b(Blocks.MOSSY_COBBLESTONE), b(Blocks.COBBLESTONE), 1)
+            c.noise(9.0, 37) > 0.74 && c.chance(0.5) -> c.place(c.patch(4.0, 38, b(Blocks.POPPY), b(Blocks.DANDELION), b(Blocks.CORNFLOWER), b(Blocks.OXEYE_DAISY), b(Blocks.AZURE_BLUET)))
+            c.noise(14.0, 39) > 0.55 && c.chance(0.35) -> if (c.chance(0.3)) c.tallPlant(b(Blocks.TALL_GRASS)) else c.place(b(Blocks.SHORT_GRASS))
+            c.chance(0.12) -> c.place(b(Blocks.SHORT_GRASS))
         }
     }
 

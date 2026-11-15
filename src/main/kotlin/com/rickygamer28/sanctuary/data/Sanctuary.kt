@@ -167,6 +167,15 @@ class Sanctuary(
     /** Dens residents go into to rest and come out of (centre → "zone:direction"). */
     val dens: MutableMap<Long, String> = linkedMapOf()
 
+    /** The region map: where each habitat sits and how big it is (made from the residents, changed on Reshape). */
+    val habitats: MutableMap<String, com.rickygamer28.sanctuary.world.ZoneLayout.Habitat> = linkedMapOf()
+
+    /** False until the region map has been laid out (it's made once the residents are counted). */
+    var planned: Boolean = false
+
+    /** Bumped on every Reshape, so the habitats are arranged differently. */
+    var layoutSalt: Int = 0
+
     /** How many residents are out at once: 0 normal, 1 more, 2 everyone. */
     var crowd: Int = 0
 
@@ -198,6 +207,14 @@ class Sanctuary(
     var generationDirty: Boolean = true
 
     /** Go over the whole area again (e.g. after trees were left in the way). */
+    /** Reshape: a new region map from today's residents, and the whole valley rebuilt to match it. */
+    fun reshape() {
+        layoutSalt++
+        planned = false
+        habitats.clear()
+        rebuild()
+    }
+
     fun rebuild() {
         dressed = BitSet()
         meadow = BitSet()
@@ -310,7 +327,14 @@ class Sanctuary(
         t.putIntArray("Away", intArrayOf(awayMeetings, awayFriends, awayRivals, awayEggs))
         t.putBoolean("LegacyTethers", legacyTethersFixed)
         t.putInt("Version", DATA_VERSION)
-        t.putInt("RingSize", com.rickygamer28.sanctuary.world.ZoneLayout.ring().size)
+        t.putInt("Layout", LAYOUT_VERSION)
+        t.putBoolean("Planned", planned)
+        t.putInt("LayoutSalt", layoutSalt)
+        t.put("Habitats", CompoundTag().also { c ->
+            habitats.forEach { (k, h) -> c.put(k, CompoundTag().also { e ->
+                e.putInt("X", h.x); e.putInt("Z", h.z); e.putDouble("R", h.radial); e.putDouble("A", h.along); e.putDouble("T", h.angle)
+            }) }
+        })
         t.putInt("OldWall", oldWallRadius)
         val packed = IntArray((originY.size + 1) / 2) { i ->
             val a = originY[i * 2].toInt() and 0xFFFF
@@ -324,6 +348,9 @@ class Sanctuary(
     companion object {
         /** Bump to make existing sanctuaries rebuild their biomes after a generator change. */
         const val DATA_VERSION = 12
+
+        /** 2: the region map (town, habitats, meadows and routes) instead of a ring of type biomes. */
+        const val LAYOUT_VERSION = 2
 
         fun key(a: UUID, b: UUID): String = if (a < b) "$a|$b" else "$b|$a"
 
@@ -411,11 +438,19 @@ class Sanctuary(
                 s.landmarks.forEach { (k, v) -> if (v != Long.MIN_VALUE) s.staleLandmarks[k] = v }
                 s.landmarks.clear()
             }
-            // the ring of biomes changed (custom types no longer get a biome, or the config changed): lay the
-            // valley out again and rebuild it
-            val savedRing = if (t.contains("RingSize")) t.getInt("RingSize")
-                else com.rickygamer28.sanctuary.world.ZoneLayout.BASE_RING.size + com.rickygamer28.sanctuary.world.ZoneLayout.customTypes().size
-            if (savedRing != com.rickygamer28.sanctuary.world.ZoneLayout.ring().size && s.state == SanctuaryState.ACTIVE && version > 0) {
+            s.layoutSalt = t.getInt("LayoutSalt")
+            if (t.getInt("Layout") >= LAYOUT_VERSION) {
+                s.planned = t.getBoolean("Planned")
+                val hc = t.getCompound("Habitats")
+                hc.allKeys.forEach { k ->
+                    val e = hc.getCompound(k)
+                    s.habitats[k] = com.rickygamer28.sanctuary.world.ZoneLayout.Habitat(e.getInt("X"), e.getInt("Z"), e.getDouble("R"), e.getDouble("A"), e.getDouble("T"))
+                }
+            }
+            // made before the region map existed (a ring of type biomes): lay it out as a region and rebuild
+            if (t.getInt("Layout") < LAYOUT_VERSION && s.state == SanctuaryState.ACTIVE && version > 0) {
+                s.planned = false
+                s.habitats.clear()
                 s.dressed = BitSet()
                 s.meadow = BitSet()
                 s.generationDirty = true
