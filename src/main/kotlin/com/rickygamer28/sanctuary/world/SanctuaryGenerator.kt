@@ -68,7 +68,7 @@ object SanctuaryGenerator {
     private val missedUnloaded = HashMap<UUID, Boolean>()
     private val recheckMeadow = HashSet<UUID>()
 
-    fun forget(id: UUID) { recheckMeadow.remove(id); cursors.remove(id); retryAt.remove(id); missedUnloaded.remove(id); requested.remove(id); waiting.remove(id); BiomePainter.forget(id) }
+    fun forget(id: UUID) { grounded.remove(id); recheckMeadow.remove(id); cursors.remove(id); retryAt.remove(id); missedUnloaded.remove(id); requested.remove(id); waiting.remove(id); BiomePainter.forget(id) }
 
     // ------------------------------------------------------------------ loading the chunks it builds in
     // Building only where players happen to have chunks loaded (their render distance) split the valley into
@@ -181,7 +181,7 @@ object SanctuaryGenerator {
             }
             if (Landmarks.near(s, x, z)) continue
             looseBlocks(level, x, z)
-            floatingBits(level, x, z)
+            floatingBits(level, s, x, z)
             strayWater(level, x, z)
             if (s.meadow.get(idx)) continue
             Dens.maybeBuild(level, s, x, z, ring)
@@ -208,6 +208,7 @@ object SanctuaryGenerator {
         repaired[s.id] = found
         if (i >= total) {
             repairCursor.remove(s.id)
+            grounded.remove(s.id)
             // parts of the valley weren't loaded: look again later, while someone is there to load them
             if (repairMissed.remove(s.id)) repairAgainAt[s.id] = level.gameTime + 2400L else repairAgainAt.remove(s.id)
             if (found > 0) CobblemonSanctuary.LOGGER.info("Sanctuary: repaired {} columns", found)
@@ -253,23 +254,28 @@ object SanctuaryGenerator {
      * Big things (anything joined to the ground, or a player's sky base) are left alone, and so is anything holding
      * items (chests, the basket…).
      */
-    private fun floatingBits(level: ServerLevel, x: Int, z: Int) {
+    /** Blocks this repair pass already found joined to the ground (a tree's canopy is traced once, not per column). */
+    private val grounded = HashMap<UUID, HashSet<Long>>()
+
+    private fun floatingBits(level: ServerLevel, s: Sanctuary, x: Int, z: Int) {
         val top = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z) - 1
         var y = top
         val bottom = maxOf(level.minBuildHeight + 1, top - 100)
         var checked = 0
-        while (y > bottom && checked < 4) {
+        val known = grounded.getOrPut(s.id) { HashSet() }
+        while (y > bottom && checked < 6) {
             val p = BlockPos(x, y, z)
             y--
             val st = level.getBlockState(p)
-            if (st.isAir || !st.fluidState.isEmpty || st.`is`(BlockTags.LEAVES)) continue
+            if (st.isAir || !st.fluidState.isEmpty) continue
             val below = level.getBlockState(p.below())
             if (!below.isAir) {
-                if (!below.`is`(BlockTags.LEAVES) && below.fluidState.isEmpty) return // reached solid ground under it
+                if (!below.`is`(BlockTags.LEAVES) && !below.`is`(BlockTags.LOGS) && below.fluidState.isEmpty) return // reached solid ground under it
                 continue
             }
+            if (p.asLong() in known) continue
             checked++
-            val lump = lumpAround(level, p, 400) ?: continue
+            val lump = lumpAround(level, p, 400, known) ?: continue
             val air = net.minecraft.world.level.block.Blocks.AIR.defaultBlockState()
             // top down, so nothing drops or pops off as items
             for (q in lump.sortedByDescending { it.y }) level.setBlock(q, air, net.minecraft.world.level.block.Block.UPDATE_CLIENTS)
@@ -305,25 +311,30 @@ object SanctuaryGenerator {
     }
 
     /** The lump of blocks joined to [start], or null if it's bigger than [max], holds items, or rests on anything. */
-    private fun lumpAround(level: ServerLevel, start: BlockPos, max: Int): List<BlockPos>? {
+    private fun lumpAround(level: ServerLevel, start: BlockPos, max: Int, known: HashSet<Long>): List<BlockPos>? {
         val seen = HashSet<Long>()
         val queue = ArrayDeque<BlockPos>()
         val out = ArrayList<BlockPos>()
+        fun joined(): List<BlockPos>? {
+            // it's held up by something: remember all of it so the next columns don't trace it again
+            if (known.size < 2_000_000) for (q in out) known += q.asLong()
+            return null
+        }
         seen += start.asLong(); queue += start
         while (queue.isNotEmpty()) {
             val p = queue.removeFirst()
             if (!level.hasChunk(p.x shr 4, p.z shr 4)) return null
-            val st = level.getBlockState(p)
-            if (level.getBlockEntity(p) != null) return null
+            if (p.asLong() in known) return joined()
+            if (level.getBlockEntity(p) != null) return joined()
             out += p
-            if (out.size > max) return null
+            if (out.size > max) return joined()
             for (d in net.minecraft.core.Direction.entries) {
                 val n = p.relative(d)
                 if (n.asLong() in seen) continue
                 val ns = level.getBlockState(n)
                 if (ns.isAir) continue
                 // resting in water (a lily pad, a boat dock) isn't floating
-                if (!ns.fluidState.isEmpty) return null
+                if (!ns.fluidState.isEmpty) return joined()
                 seen += n.asLong(); queue += n
             }
         }
@@ -358,6 +369,11 @@ object SanctuaryGenerator {
             if (now < retry) return
             retryAt.remove(s.id)
             s.generationDirty = true
+        }
+        // once per server start: sweep the finished valley for leftovers (floating bits, stray water…)
+        if (s.needsCheck && !s.generationDirty && s.id !in cursors) {
+            s.needsCheck = false
+            scheduleCheck(s.id)
         }
         if (s.generationDirty) {
             s.generationDirty = false
