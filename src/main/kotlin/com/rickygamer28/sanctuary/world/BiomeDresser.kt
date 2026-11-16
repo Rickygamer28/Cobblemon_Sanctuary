@@ -482,13 +482,15 @@ object BiomeDresser {
             }
             "ice" -> {
                 // one big snowy mountain with spurs running down from a small summit plateau (where the spire stands)
-                val top = clamp(big * 0.95, 22.0, 50.0) * (if (variant == 2) 0.75 else 1.0)
+                val cone = min(big, 90.0)
+                val top = clamp(cone * 0.85, 22.0, 70.0) * (if (variant == 2) 0.75 else 1.0)
                 val rr = rB * (1 + f(s, xd, zd, 26.0, 58, 2) * 0.12)
-                val t = clamp((rr - 8) / (big * 1.2 - 8), 0.0, 1.0)
+                val t = clamp((rr - 8) / (cone * 1.2 - 8), 0.0, 1.0)
                 val p = 0.55 * Math.pow(1 - t, 2.2) + 0.45 * smooth(1 - t)
                 val aw = a + f(s, xd, zd, 30.0, 57, 2) * 0.6
                 val spur = Noise.fbm(s.seed + 59 * 7919L, cos(aw) * 1.8 + rr / 45, sin(aw) * 1.8, 3)
-                var hh = top * p * (1 + spur * 0.5 * smooth(t / 0.25)) + f(s, wx, wz, 18.0, 60, 3) * 2.5 * smooth(t / 0.3) + 1
+                var hh = top * p * (1 + spur * 0.5 * smooth(t / 0.25)) + f(s, wx, wz, 18.0, 60, 3) * 2.5 * smooth(t / 0.3) + 1 +
+                    (f01(s, wx, wz, 50.0, 63, 3) * 9) * smooth((t - 0.6) / 0.4) // foothills
                 if (variant == 2) { // frozen tarns at its foot
                     val pond = smooth((f01(s, wx, wz, 22.0, 61, 2) - 0.64) / 0.08) * smooth((t - 0.6) / 0.12)
                     hh = mix(hh, -3.0, pond)
@@ -497,20 +499,22 @@ object BiomeDresser {
             }
             "fire" -> {
                 // a volcano: concave slopes cut by gullies, up to a crater rim
-                val top = clamp(big, 24.0, 48.0)
+                val cone = min(big, 80.0)
+                val top = clamp(cone * 0.9, 24.0, 64.0)
                 val rr = rB * (1 + f(s, xd, zd, 18.0, 47, 2) * 0.08)
-                val crater = clamp(big * 0.14, 5.0, 9.0)
+                val crater = clamp(cone * 0.14, 5.0, 10.0)
                 if (rr < crater) max(top - 9, top - 1.5 - (crater - rr) * 1.6)
                 else {
-                    val t = clamp((rr - crater) / (big * 1.25 - crater), 0.0, 1.0)
+                    val t = clamp((rr - crater) / (cone * 1.25 - crater), 0.0, 1.0)
                     val p = 0.6 * Math.pow(1 - t, 2.4) + 0.4 * smooth(1 - t)
                     val gully = Noise.ridged(s.seed + 48 * 7919L, cos(a) * 4.5 + rr / 70, sin(a) * 4.5, 2)
-                    top * p + (gully * gully - 0.4) * 3.0 * sin(Math.PI * t) + f(s, xd, zd, 14.0, 49, 2) * smooth(t / 0.2) + 1
+                    top * p + (gully * gully - 0.4) * 3.0 * sin(Math.PI * t) + f(s, xd, zd, 14.0, 49, 2) * smooth(t / 0.2) + 1 +
+                        f01(s, wx, wz, 36.0, 46, 3) * 6 * smooth((t - 0.7) / 0.3) // rough old lava fields around it
                 }
             }
             "rock" -> {
                 // a range of rugged mountains around a sheltered valley (where the arch stands), stony hills elsewhere
-                val top = clamp(size * 0.62, 18.0, 40.0) * (if (variant == 2) 0.7 else 1.0)
+                val top = clamp(size * 0.5, 18.0, 56.0) * (if (variant == 2) 0.7 else 1.0)
                 val massif = smooth((f01(s, wx, wz, size * 0.8, 35, 2) - 0.3) / 0.36)
                 val m = Noise.ridged(s.seed + 36 * 7919L, wx / (size * 0.5), wz / (size * 0.5), 3)
                 val tors = smooth((f01(s, wx, wz, 14.0, 37, 2) - 0.8) / 0.08) * 3 * (1 - massif)
@@ -540,7 +544,7 @@ object BiomeDresser {
             }
             "dragon" -> {
                 // highlands: steep-sided plateaus cut by canyons, around a hollow where the spire stands
-                val top = clamp(size * 0.55, 16.0, 34.0) * (if (variant == 1) 1.25 else 1.0)
+                val top = clamp(size * 0.4, 16.0, 40.0) * (if (variant == 1) 1.25 else 1.0)
                 val n = f01(s, wx, wz, size * 0.55, 52, 2)
                 val plateau = smooth((n - 0.42) / 0.1)
                 val canyon = smooth((Noise.ridged(s.seed + 53 * 7919L, wx / (size * 0.9), wz / (size * 0.9), 2) - 0.8) / 0.08)
@@ -833,7 +837,7 @@ object BiomeDresser {
             val adx = (ax - s.center.x).toDouble()
             val adz = (az - s.center.z).toDouble()
             // up a volcano, the route ends at its foot
-            val anchorDist = sqrt(adx * adx + adz * adz) - (if (zone == "fire") min(hb.radial, hb.along) * 0.55 else 0.0)
+            val anchorDist = sqrt(adx * adx + adz * adz) - (if (zone == "fire") min(min(hb.radial, hb.along), 80.0) * 0.55 else 0.0)
             val len = anchorDist.coerceAtLeast(1.0)
             val ux = adx / len
             val uz = adz / len
@@ -1296,11 +1300,11 @@ object BiomeDresser {
     /** Volcano: a black (or red, or old grey) cone with lava running down its gullies and a glowing crater. */
     private fun fire(c: Ctx) {
         val hb = c.s.habitats["fire"]
-        val big = if (hb != null) min(hb.radial, hb.along) else 30.0
+        val big = min(if (hb != null) min(hb.radial, hb.along) else 30.0, 80.0)
         val dx = (c.x - (hb?.x ?: c.x)).toDouble()
         val dz = (c.z - (hb?.z ?: c.z)).toDouble()
         val d = sqrt(dx * dx + dz * dz)
-        val crater = (big * 0.14).coerceIn(5.0, 9.0)
+        val crater = (big * 0.14).coerceIn(5.0, 10.0)
         val t = ((d - crater) / (big * 1.25 - crater)).coerceIn(0.0, 1.0)
         val dormant = c.variant == 2
         if (d < crater + 0.5) { // the crater

@@ -178,7 +178,7 @@ object Sanctuaries {
         }
         s.oldWallRadius = s.size.radius
         s.size = next
-        s.rebuild()
+        s.replanForSize()
         s.logEvent("The sanctuary grew to ${next.label}!")
         data(player.server).setDirty()
         say(player, "The valley is growing to ${next.label}.", ChatFormatting.GREEN)

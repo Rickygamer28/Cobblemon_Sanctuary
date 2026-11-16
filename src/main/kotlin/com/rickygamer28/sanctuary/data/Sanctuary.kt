@@ -175,6 +175,8 @@ class Sanctuary(
 
     /** Bumped on every Reshape, so the habitats are arranged differently. */
     var layoutSalt: Int = 0
+    /** The valley radius the region map was planned for (it's planned again when the valley grows). */
+    var planRadius: Int = 0
 
     /** How many residents are out at once: 0 normal, 1 more, 2 everyone. */
     var crowd: Int = 0
@@ -208,6 +210,13 @@ class Sanctuary(
 
     /** Go over the whole area again (e.g. after trees were left in the way). */
     /** Reshape: a new region map from today's residents, and the whole valley rebuilt to match it. */
+    /** The valley grew: the region is planned again to fill it. */
+    fun replanForSize() {
+        planned = false
+        habitats.clear()
+        rebuild()
+    }
+
     fun reshape() {
         layoutSalt++
         planned = false
@@ -330,6 +339,7 @@ class Sanctuary(
         t.putInt("Layout", LAYOUT_VERSION)
         t.putBoolean("Planned", planned)
         t.putInt("LayoutSalt", layoutSalt)
+        t.putInt("PlanRadius", planRadius)
         t.put("Habitats", CompoundTag().also { c ->
             habitats.forEach { (k, h) -> c.put(k, CompoundTag().also { e ->
                 e.putInt("X", h.x); e.putInt("Z", h.z); e.putDouble("R", h.radial); e.putDouble("A", h.along); e.putDouble("T", h.angle)
@@ -439,6 +449,7 @@ class Sanctuary(
                 s.landmarks.clear()
             }
             s.layoutSalt = t.getInt("LayoutSalt")
+            s.planRadius = t.getInt("PlanRadius")
             if (t.getInt("Layout") >= LAYOUT_VERSION) {
                 s.planned = t.getBoolean("Planned")
                 val hc = t.getCompound("Habitats")
@@ -446,6 +457,14 @@ class Sanctuary(
                     val e = hc.getCompound(k)
                     s.habitats[k] = com.rickygamer28.sanctuary.world.ZoneLayout.Habitat(e.getInt("X"), e.getInt("Z"), e.getDouble("R"), e.getDouble("A"), e.getDouble("T"))
                 }
+            }
+            // planned for a smaller valley (or before habitats filled the whole valley): plan it again and rebuild
+            if (s.planned && s.state == SanctuaryState.ACTIVE && s.planRadius != s.size.radius) {
+                s.planned = false
+                s.habitats.clear()
+                s.rebuild()
+                s.landmarks.forEach { (k, v) -> if (v != Long.MIN_VALUE) s.staleLandmarks[k] = v }
+                s.landmarks.clear()
             }
             // made before the region map existed (a ring of type biomes): lay it out as a region and rebuild
             if (t.getInt("Layout") < LAYOUT_VERSION && s.state == SanctuaryState.ACTIVE && version > 0) {

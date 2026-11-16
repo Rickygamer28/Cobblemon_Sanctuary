@@ -80,8 +80,8 @@ object ZoneLayout {
         fun size(): Double = sqrt(radial * along)
     }
 
-    private fun inner(s: Sanctuary) = s.size.hubRadius + 8.0
-    private fun outer(s: Sanctuary) = s.size.radius - 12.0
+    private fun inner(s: Sanctuary) = s.size.hubRadius + 4.0
+    private fun outer(s: Sanctuary) = s.size.radius - 8.0
 
     /** Lays out the habitats for [counts] (residents per habitat): busier habitats get more room. */
     fun plan(s: Sanctuary, counts: Map<String, Int>): Map<String, Habitat> {
@@ -91,23 +91,23 @@ object ZoneLayout {
         val h = inner(s)
         val r = outer(s)
         val band = r - h
-        // most of the land goes to habitats, the rest stays meadow (with routes) between them
-        val area = PI * (r * r - h * h) * 0.74
+        // the habitats fill the land from the town out to the wall, each in its own slice (busier ones get wider
+        // slices), leaving meadows with the routes between them
         val weights = zones.map { Math.pow((counts[it] ?: 1).toDouble(), 0.55) }
         val total = weights.sum()
         val minShare = min(0.06, 1.0 / zones.size)
         val shares = weights.map { max(it / total, minShare) }.let { sh -> val t = sh.sum(); sh.map { it / t } }
         var angle = random.nextDouble() * 2 * PI
         val out = LinkedHashMap<String, Habitat>()
+        val most = shares.max()
         for ((i, zone) in zones.withIndex()) {
             val slice = shares[i] * 2 * PI
-            val theta = angle + slice / 2 + (random.nextDouble() - 0.5) * slice * 0.2
+            val theta = angle + slice / 2 + (random.nextDouble() - 0.5) * slice * 0.15
             angle += slice
-            val a = area * shares[i]
-            val radial = min(band / 2 - 2, sqrt(a / PI)).coerceAtLeast(22.0)
-            val d = h + radial + (band - 2 * radial) * (0.35 + random.nextDouble() * 0.3)
-            val chord = d * sin(min(slice / 2, PI / 2)) * 1.08 + 8
-            val along = (a / (PI * radial)).coerceAtMost(chord).coerceAtLeast(radial * 0.75)
+            val radial = (band / 2 * (0.84 + 0.1 * shares[i] / most)).coerceAtLeast(22.0)
+            val d = h + band / 2 + (random.nextDouble() - 0.5) * max(0.0, band - 2 * radial)
+            val chord = d * sin(min(slice / 2, PI / 2)) * 1.1 + 6
+            val along = chord.coerceIn(radial * 0.6, radial * 1.6)
             out[zone] = Habitat((s.center.x + sin(theta) * d).toInt(), (s.center.z - cos(theta) * d).toInt(), radial, along, theta)
         }
         return out

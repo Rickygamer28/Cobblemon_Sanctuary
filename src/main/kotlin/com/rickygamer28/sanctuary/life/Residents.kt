@@ -231,6 +231,7 @@ object Residents {
             s.habitats.clear()
             s.habitats.putAll(ZoneLayout.plan(s, counts))
             s.planned = true
+            s.planRadius = s.size.radius
             s.generationDirty = true
             return
         }
