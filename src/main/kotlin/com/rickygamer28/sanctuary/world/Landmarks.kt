@@ -116,7 +116,8 @@ object Landmarks {
             // take down everything built above the landmark's floor, and turn the floor back into plain ground
             for (ox in -r..r) for (oz in -r..r) {
                 if (ox * ox + oz * oz > r * r) continue
-                for (y in p.y + 1..p.y + 28) {
+                // all the way up: spires and towers can be tall (their tops used to be left floating)
+                for (y in p.y + 1..minOf(level.maxBuildHeight - 1, p.y + 120)) {
                     val pos = BlockPos(p.x + ox, y, p.z + oz)
                     val st = level.getBlockState(pos)
                     if (!st.isAir && !st.`is`(com.rickygamer28.sanctuary.registry.ModContent.EGG_NEST.get()) &&

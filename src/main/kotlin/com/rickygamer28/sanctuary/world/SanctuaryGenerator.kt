@@ -181,6 +181,7 @@ object SanctuaryGenerator {
             }
             if (Landmarks.near(s, x, z)) continue
             looseBlocks(level, x, z)
+            floatingBits(level, x, z)
             if (s.meadow.get(idx)) continue
             Dens.maybeBuild(level, s, x, z, ring)
             val top = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1
@@ -242,6 +243,64 @@ object SanctuaryGenerator {
             val upright = BiomeDresser.pointUp(st)
             if (upright != st) level.setBlock(p, upright, net.minecraft.world.level.block.Block.UPDATE_CLIENTS)
         }
+    }
+
+    /**
+     * Pieces left hanging in the air after the ground under them was lowered or a landmark was taken down: the top
+     * of an old spire, a lamp post, a boulder, a bit of an old tree. Anything solid with nothing under it is followed
+     * through everything it touches; if that's a small lump touching nothing else, it's floating and goes.
+     * Big things (anything joined to the ground, or a player's sky base) are left alone, and so is anything holding
+     * items (chests, the basket…).
+     */
+    private fun floatingBits(level: ServerLevel, x: Int, z: Int) {
+        val top = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z) - 1
+        var y = top
+        val bottom = maxOf(level.minBuildHeight + 1, top - 100)
+        var checked = 0
+        while (y > bottom && checked < 4) {
+            val p = BlockPos(x, y, z)
+            y--
+            val st = level.getBlockState(p)
+            if (st.isAir || !st.fluidState.isEmpty || st.`is`(BlockTags.LEAVES)) continue
+            val below = level.getBlockState(p.below())
+            if (!below.isAir) {
+                if (!below.`is`(BlockTags.LEAVES) && below.fluidState.isEmpty) return // reached solid ground under it
+                continue
+            }
+            checked++
+            val lump = lumpAround(level, p, 400) ?: continue
+            val air = net.minecraft.world.level.block.Blocks.AIR.defaultBlockState()
+            // top down, so nothing drops or pops off as items
+            for (q in lump.sortedByDescending { it.y }) level.setBlock(q, air, net.minecraft.world.level.block.Block.UPDATE_CLIENTS)
+            CobblemonSanctuary.LOGGER.debug("Sanctuary: removed a floating lump of {} blocks at {}", lump.size, p)
+            return
+        }
+    }
+
+    /** The lump of blocks joined to [start], or null if it's bigger than [max], holds items, or rests on anything. */
+    private fun lumpAround(level: ServerLevel, start: BlockPos, max: Int): List<BlockPos>? {
+        val seen = HashSet<Long>()
+        val queue = ArrayDeque<BlockPos>()
+        val out = ArrayList<BlockPos>()
+        seen += start.asLong(); queue += start
+        while (queue.isNotEmpty()) {
+            val p = queue.removeFirst()
+            if (!level.hasChunk(p.x shr 4, p.z shr 4)) return null
+            val st = level.getBlockState(p)
+            if (level.getBlockEntity(p) != null) return null
+            out += p
+            if (out.size > max) return null
+            for (d in net.minecraft.core.Direction.entries) {
+                val n = p.relative(d)
+                if (n.asLong() in seen) continue
+                val ns = level.getBlockState(n)
+                if (ns.isAir) continue
+                // resting in water (a lily pad, a boat dock) isn't floating
+                if (!ns.fluidState.isEmpty) return null
+                seen += n.asLong(); queue += n
+            }
+        }
+        return out
     }
 
     /** Solid natural ground standing more than 10 blocks above where the terrain should be (not a floating island). */
