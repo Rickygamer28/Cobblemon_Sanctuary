@@ -7,8 +7,8 @@
     "sky_color": 10139352,
     "water_color": 4501224,
     "water_fog_color": 797248,
-    "grass_color": 14207564,
-    "foliage_color": 13283378,
+    "grass_color": 12564309,
+    "foliage_color": 11445290,
     "particle": {
       "options": {
         "type": "minecraft:electric_spark"

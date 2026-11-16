@@ -70,7 +70,7 @@ object Landmarks {
             val variant = BiomeDresser.variantOf(s, zone)
             val base = BlockPos(ax, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, ax, az) - 1, az)
             val random = RandomSource.create(s.seed xor zone.hashCode().toLong())
-            if (zone == "fire" && variant == 0) { s.landmarks[zone] = NONE; continue } // the volcano is the landmark
+            if (zone == "fire") { s.landmarks[zone] = NONE; continue } // the volcano is the landmark
             runCatching { build(level, s, zone, variant, base, random) }
             s.landmarks[zone] = base.asLong()
             NAMES[zone]?.let { s.logEvent("${it.replaceFirstChar { c -> c.uppercase() }} rose in the ${com.rickygamer28.sanctuary.life.Residents.zoneName(zone)}.") }
@@ -84,7 +84,7 @@ object Landmarks {
      */
     private fun fixVolcano(s: Sanctuary) {
         val pos = s.landmarks["fire"] ?: return
-        if (pos == NONE || BiomeDresser.variantOf(s, "fire") != 0) return
+        if (pos == NONE) return
         s.landmarks["fire"] = NONE
         val p = BlockPos.of(pos)
         for (dx in -RADIUS - 2..RADIUS + 2) for (dz in -RADIUS - 2..RADIUS + 2) {
@@ -200,7 +200,7 @@ object Landmarks {
             "grass" -> greatTree(c)
             "bug" -> hollowStump(c)
             "fairy" -> fairyFountain(c)
-            "fire" -> if (variant != 0) eternalFlame(c) // the volcano already is the landmark
+            "fire" -> {} // the volcano itself is the landmark
             "ground" -> pyramid(c)
             "rock" -> stoneArch(c)
             "fighting" -> dojoArena(c)

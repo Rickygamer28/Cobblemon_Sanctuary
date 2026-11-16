@@ -3,12 +3,12 @@
   "temperature": 0.5,
   "downfall": 0.4,
   "effects": {
-    "fog_color": 3814738,
-    "sky_color": 4999014,
-    "water_color": 4869752,
+    "fog_color": 10133670,
+    "sky_color": 7831694,
+    "water_color": 4873578,
     "water_fog_color": 723484,
-    "grass_color": 7236230,
-    "foliage_color": 5788794,
+    "grass_color": 7832178,
+    "foliage_color": 8883574,
     "particle": {
       "options": {
         "type": "minecraft:white_ash"

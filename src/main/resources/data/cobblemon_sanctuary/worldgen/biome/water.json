@@ -5,10 +5,10 @@
   "effects": {
     "fog_color": 13168383,
     "sky_color": 8375295,
-    "water_color": 3130600,
-    "water_fog_color": 739939,
-    "grass_color": 7131000,
-    "foliage_color": 5092704,
+    "water_color": 4169696,
+    "water_fog_color": 866908,
+    "grass_color": 8831322,
+    "foliage_color": 6991416,
     "particle": {
       "options": {
         "type": "minecraft:dripping_water"

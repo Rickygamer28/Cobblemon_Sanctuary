@@ -7,8 +7,8 @@
     "sky_color": 8374015,
     "water_color": 3052246,
     "water_fog_color": 667210,
-    "grass_color": 5227066,
-    "foliage_color": 3582246,
+    "grass_color": 7126858,
+    "foliage_color": 5220396,
     "particle": {
       "options": {
         "type": "minecraft:spore_blossom_air"

@@ -29,7 +29,12 @@ object Behaviour {
         if (now < rt.gatherUntil) return hit.zone == ZoneLayout.HUB || hit.zone == home
         if (home == null || r.migrating) return true
         if (r.visitZone != null && now < r.visitUntil) return hit.zone == home || hit.zone == ZoneLayout.HUB || hit.zone == r.visitZone
+        // living in a pocket: around the pocket
+        val pocket = r.pocket
+        if (pocket != null) return ZoneLayout.distance(pos.x, pos.z, pocket.x, pocket.z) <= pocket.r + 9
         if (hit.zone == home) return true
+        // a little way over the border, so Pokémon from both sides mix there
+        if (hit.neighbour == home && hit.edgeDistance < SanctuaryConfig.borderReach.get()) return true
         val second = r.second
         // dual types like to hang around the shared border with their second biome
         if (second != null && hit.zone == second && hit.neighbour == home && hit.edgeDistance < 12) return true
@@ -75,8 +80,9 @@ object Behaviour {
 
             // visits end
             if (r.visitZone != null && now >= r.visitUntil) {
+                val was = r.visitZone!!
                 r.visitZone = null
-                goHome(level, s, r, viaHub = true)
+                goHome(level, s, r, viaHub = r.pocket == null && r.home != null && !ZoneLayout.areNeighbours(s, r.home!!, was))
                 continue
             }
             if (r.migrating && now >= r.migrateUntil) {
@@ -97,10 +103,19 @@ object Behaviour {
             if (Residents.isSleeping(e)) continue
             if (PropVisits.shyness(level, s, rt, r, now)) continue
 
-            // explore the whole biome now and then, not just the area around the spawn point
+            // wander off for a while: into a neighbouring habitat or out over the meadows and routes
+            if (wander(level, s, r, now)) continue
+
+            // explore the whole biome now and then, not just the area around the spawn point (often towards its edges)
             if (random.nextInt((45 / r.personality.explore).toInt().coerceAtLeast(12)) == 0 && !e.brain.hasMemoryValue(MemoryModuleType.WALK_TARGET)) {
-                val zone = r.visitZone ?: r.home ?: ZoneLayout.HUB
-                walkToZone(level, s, r, zone)
+                val visit = r.visitZone
+                when {
+                    visit != null -> walkToZone(level, s, r, visit)
+                    r.pocket != null -> walkInPocket(level, r)
+                    SanctuaryConfig.borderReach.get() > 0 && random.nextInt(3) == 0 ->
+                        ZoneLayout.borderPoint(s, r.home ?: ZoneLayout.HUB, random)?.let { Residents.walkTo(e, Residents.surface(level, it.first, it.second), 0.4f, 2) }
+                    else -> walkToZone(level, s, r, r.home ?: ZoneLayout.HUB)
+                }
                 continue
             }
 
@@ -141,15 +156,55 @@ object Behaviour {
     private fun swimSomewhere(level: ServerLevel, s: Sanctuary, r: LiveResident, near: Boolean = false) {
         val random = level.random
         repeat(12) {
-            val pt = if (near) (r.entity.blockX + random.nextInt(25) - 12) to (r.entity.blockZ + random.nextInt(25) - 12)
-                else ZoneLayout.randomPoint(s, "water", random) ?: return@repeat
+            val p = r.pocket
+            val pt = when {
+                near -> (r.entity.blockX + random.nextInt(25) - 12) to (r.entity.blockZ + random.nextInt(25) - 12)
+                p != null -> (p.x + random.nextInt(p.r * 2 + 1) - p.r) to (p.z + random.nextInt(p.r * 2 + 1) - p.r)
+                else -> ZoneLayout.randomPoint(s, "water", random) ?: return@repeat
+            }
             if (!level.hasChunk(pt.first shr 4, pt.second shr 4) || !isWater(level, pt.first, pt.second)) return@repeat
             Residents.walkTo(r.entity, Residents.surface(level, pt.first, pt.second).below(), 0.5f, 2)
             return
         }
     }
 
+    /**
+     * Now and then a resident wanders off: over into a neighbouring habitat, or out along the meadows and routes,
+     * and comes home after a minute or two. About [SanctuaryConfig.wanderShare] of them are out at any time.
+     */
+    private fun wander(level: ServerLevel, s: Sanctuary, r: LiveResident, now: Long): Boolean {
+        val share = SanctuaryConfig.wanderShare.get()
+        val home = r.home ?: return false
+        if (share <= 0 || r.visitZone != null || r.migrating || r.followParents != null || Routines.isNight(level)) return false
+        // out for ~90 s on average; leave often enough that about `share` of them are out
+        val perSecond = share / (1 - share) / 90.0 * r.personality.explore
+        if (level.random.nextDouble() >= perSecond) return false
+        val neighbours = s.unlocked.filter { it != home && it != ZoneLayout.HUB && it in s.habitats && ZoneLayout.areNeighbours(s, home, it) }
+        val dest = if (neighbours.isNotEmpty() && (home == ZoneLayout.HUB || level.random.nextInt(100) < 55)) neighbours.random() else ZoneLayout.HUB
+        if (dest == home) return false
+        // somewhere in it close to where the resident is now, so it walks over rather than across the whole region
+        val here = r.entity.blockX to r.entity.blockZ
+        val pt = (0 until 6).mapNotNull { ZoneLayout.randomPoint(s, dest, level.random) }
+            .minByOrNull { ZoneLayout.distance(it.first, it.second, here.first, here.second) } ?: return false
+        r.visitZone = dest
+        r.visitUntil = now + 20L * (60 + level.random.nextInt(60))
+        Residents.walkTo(r.entity, Residents.surface(level, pt.first, pt.second), 0.4f, 2)
+        return true
+    }
+
+    /** Somewhere in the resident's pocket. */
+    private fun walkInPocket(level: ServerLevel, r: LiveResident) {
+        val p = r.pocket ?: return
+        val ang = level.random.nextDouble() * 2 * Math.PI
+        val d = Math.sqrt(level.random.nextDouble()) * (p.r + 4)
+        val x = (p.x + Math.cos(ang) * d).toInt()
+        val z = (p.z + Math.sin(ang) * d).toInt()
+        if (!level.hasChunk(x shr 4, z shr 4)) return
+        Residents.walkTo(r.entity, Residents.surface(level, x, z), 0.4f, 2)
+    }
+
     fun goHome(level: ServerLevel, s: Sanctuary, r: LiveResident, viaHub: Boolean) {
+        if (r.pocket != null) { walkInPocket(level, r); return }
         val home = r.home ?: return
         if (viaHub) commute(level, s, r, home) else walkToZone(level, s, r, home)
     }

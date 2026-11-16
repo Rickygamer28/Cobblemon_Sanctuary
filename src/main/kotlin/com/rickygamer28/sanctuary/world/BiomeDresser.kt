@@ -74,6 +74,8 @@ object BiomeDresser {
         val variant: Int,
         val hit: ZoneLayout.Hit,
         val exposure: Int,
+        /** The biggest height step to a neighbouring column (0 on flat ground, 3+ on cliffs). */
+        val slope: Int = 0,
     ) {
         val above: BlockPos get() = surface.above()
         val x get() = surface.x
@@ -107,6 +109,28 @@ object BiomeDresser {
             }
         }
         fun ground(top: BlockState, filler: BlockState = top) { top(top); filler(filler) }
+        /** Height above the valley floor. */
+        val rise get() = y - G
+        /** Steep enough that only bare rock would hold. */
+        val cliff get() = slope >= 3
+        /**
+         * Natural ground: [soil] on level ground, bare [rock] on cliffs, and on the rough bits in between, soil with
+         * a few broad patches of rock showing through. [rockAlt] streaks the rock now and then.
+         */
+        fun natural(soil: BlockState, under: BlockState, rock: BlockState, rockAlt: BlockState = rock) {
+            fun stone() = if (noise(13.0, 81) > 0.66) rockAlt else rock
+            when {
+                cliff -> ground(stone(), rock)
+                slope == 2 && noise(9.0, 82) > 0.55 -> ground(stone(), rock)
+                else -> ground(soil, under)
+            }
+        }
+        /** Broad, soft patches: [rare] where a large-scale noise is above [above], [common] elsewhere. */
+        fun broad(common: BlockState, rare: BlockState, above: Double, scale: Double = 24.0, salt: Int = 83): BlockState =
+            if (noise(scale, salt) > above) rare else common
+        /** Trees grow in clumps with clearings between them: [dense] cells where the woods are, [sparse] elsewhere. */
+        fun tree(dense: Int, sparse: Int, salt: Int, woods: Double = 0.45): Boolean =
+            if (noise(34.0, salt + 500) > woods) grid(dense, salt) else grid(sparse, salt + 1)
         /** Layered ground, e.g. the coloured bands of a mesa. */
         fun bands(bands: List<BlockState>, topOverride: BlockState? = null) {
             top(topOverride ?: bands[Math.floorMod(y, bands.size)])
@@ -408,123 +432,161 @@ object BiomeDresser {
     private fun f01(s: Sanctuary, x: Double, z: Double, scale: Double, salt: Int, oct: Int = 3) = f(s, x, z, scale, salt, oct) * 0.5 + 0.5
     private fun ridge(s: Sanctuary, x: Double, z: Double, scale: Double, salt: Int, oct: Int = 3) = Noise.ridged(s.seed + salt * 7919L, x / scale, z / scale, oct)
 
-    private fun anchorDist(s: Sanctuary, zone: String, x: Int, z: Int, ring: List<String>): Double {
-        val (ax, az) = ZoneLayout.anchor(s, zone, ring)
-        return sqrt(((x - ax) * (x - ax) + (z - az) * (z - az)).toDouble())
-    }
+    private fun clamp(v: Double, lo: Double, hi: Double) = v.coerceIn(lo, hi)
+    private fun mix(a: Double, b: Double, t: Double) = a + (b - a) * t
 
-    /** A lake mask in [0, 1]: one big lake around the biome's middle, plus a few ponds. */
-    private fun lake(s: Sanctuary, zone: String, x: Int, z: Int, wx: Double, wz: Double, ring: List<String>, size: Double): Double {
-        val d = anchorDist(s, zone, x, z, ring)
-        val main = 1 - d / (s.size.radius * size)
-        val ponds = f01(s, wx, wz, 26.0, 4, 3)
-        return smooth((main * 0.9 + ponds * 0.55 - 0.42) / 0.22)
-    }
+    /** Height the habitats settle to at their edges, close to the meadows' own height, so borders stay soft. */
+    private const val EDGE_LEVEL = 1.0
 
     /**
-     * Height of a biome above the flat ground at (x, z), before blending. Coordinates are warped by noise
-     * so nothing lines up with the block grid.
+     * Height of a zone above the flat ground at (x, z), before blending. Each habitat is one natural landform shaped
+     * around its own middle: a lake in a basin, a snowy peak, a volcano, a mountain range, dunes, canyon highlands, a
+     * hill with the haunted tower, a swamp full of pools, wooded hills, a garden with ponds, open plains.
+     * All of them settle down towards their edges, so neighbours flow into each other.
      */
-    private fun rawOffset(s: Sanctuary, zone: String, variant: Int, x: Int, z: Int, ring: List<String>): Double {
-        val wx = x + f(s, x.toDouble(), z.toDouble(), 48.0, 901, 2) * 14
-        val wz = z + f(s, x.toDouble(), z.toDouble(), 48.0, 902, 2) * 14
+    private fun rawOffset(s: Sanctuary, zone: String, variant: Int, x: Int, z: Int, @Suppress("UNUSED_PARAMETER") ring: List<String>): Double {
         val xd = x.toDouble()
         val zd = z.toDouble()
-        return when (zone) {
-            ZoneLayout.HUB -> {
-                // the town is nearly flat; the meadows out between the habitats roll gently
-                val d = sqrt(((x - s.center.x) * (x - s.center.x) + (z - s.center.z) * (z - s.center.z)).toDouble())
-                val wild = smooth((d - s.size.hubRadius - 4) / 30.0)
-                f(s, xd, zd, 60.0, 1, 2) * 1.6 + wild * (f(s, wx, wz, 70.0, 2, 3) * 3.2 + 1.2)
+        val wx = x + f(s, xd, zd, 48.0, 901, 2) * 14
+        val wz = z + f(s, xd, zd, 48.0, 902, 2) * 14
+        if (zone == ZoneLayout.HUB) {
+            // the town is nearly flat; the meadows out between the habitats roll gently
+            val d = sqrt(((x - s.center.x) * (x - s.center.x) + (z - s.center.z) * (z - s.center.z)).toDouble())
+            val wild = smooth((d - s.size.hubRadius - 4) / 30.0)
+            return f(s, xd, zd, 60.0, 1, 2) * 1.6 + wild * (f(s, wx, wz, 70.0, 2, 3) * 3.2 + 1.2)
+        }
+        val l = ZoneLayout.local(s, zone, x, z) ?: return 0.0
+        val q = l.q
+        val rB = l.dist
+        val big = l.minR
+        val size = l.size
+        val a = l.angle
+        val e = smooth((1.12 - q) / 0.45)
+        // a clearing in the middle of some habitats, for their landmark, with a natural, uneven edge
+        fun clearing(radius: Double) = smooth((rB * (1 + f(s, xd, zd, 20.0, 77, 2) * 0.45) - radius) / 26.0)
+        val h: Double = when (zone) {
+            "water" -> if (variant == 2) {
+                // a mangrove delta: winding channels between low banks
+                val ch = ridge(s, wx, wz, 30.0, 7, 3)
+                -3.2 * smooth((ch - 0.66) / 0.2) + f01(s, xd, zd, 30.0, 8, 2) * 1.4
+            } else {
+                // a lake in a shallow basin, with beaches, grassy banks rising behind them, and a few islands
+                val qn = q + f(s, wx, wz, 36.0, 5, 2) * 0.2
+                val m = smooth((0.62 - qn) / 0.16)
+                val deep = (if (variant == 1) 4.0 else 7.0) * smooth((0.5 - qn) / 0.35)
+                val land = 1.0 + smooth((qn - 0.62) / 0.4) * 2.0 + f(s, wx, wz, 54.0, 9, 2) * 1.6
+                val base = land * (1 - m) + (-2.0 - deep) * m
+                val island = smooth((f01(s, wx, wz, 26.0, 6, 2) - (if (variant == 1) 0.62 else 0.67)) / 0.1) *
+                    smooth((0.48 - qn) / 0.15) * smooth((rB - 12) / 6.0)
+                mix(base, 1.5 + f01(s, xd, zd, 8.0, 66, 2), island)
             }
-            "water" -> when (variant) {
-                2 -> { // mangrove delta: winding channels between low banks
-                    val ch = ridge(s, wx, wz, 30.0, 7, 3)
-                    -2.6 * smooth((ch - 0.66) / 0.22) + f01(s, xd, zd, 30.0, 8, 2) * 1.2
+            "ice" -> {
+                // one big snowy mountain with spurs running down from a small summit plateau (where the spire stands)
+                val top = clamp(big * 0.95, 22.0, 50.0) * (if (variant == 2) 0.75 else 1.0)
+                val rr = rB * (1 + f(s, xd, zd, 26.0, 58, 2) * 0.12)
+                val t = clamp((rr - 8) / (big * 1.2 - 8), 0.0, 1.0)
+                val p = 0.55 * Math.pow(1 - t, 2.2) + 0.45 * smooth(1 - t)
+                val aw = a + f(s, xd, zd, 30.0, 57, 2) * 0.6
+                val spur = Noise.fbm(s.seed + 59 * 7919L, cos(aw) * 1.8 + rr / 45, sin(aw) * 1.8, 3)
+                var hh = top * p * (1 + spur * 0.5 * smooth(t / 0.25)) + f(s, wx, wz, 18.0, 60, 3) * 2.5 * smooth(t / 0.3) + 1
+                if (variant == 2) { // frozen tarns at its foot
+                    val pond = smooth((f01(s, wx, wz, 22.0, 61, 2) - 0.64) / 0.08) * smooth((t - 0.6) / 0.12)
+                    hh = mix(hh, -3.0, pond)
                 }
-                else -> {
-                    // a smaller lake in the middle, with real land around it: grassy banks and beaches
-                    val m = lake(s, zone, x, z, wx, wz, ring, if (variant == 1) 0.32 else 0.27)
-                    val depth = if (variant == 1) 5.0 else 8.0
-                    val land = 1.6 + f(s, wx, wz, 54.0, 9, 2) * 2.2
-                    val base = land * (1 - m) + (-1.0 - depth * m) * m
-                    // a few proper islands in the deep part
-                    val island = smooth((f01(s, wx, wz, 32.0, 6, 2) - (if (variant == 1) 0.6 else 0.66)) / 0.14) * smooth((m - 0.55) / 0.25)
-                    base + island * (2.5 - base)
+                hh
+            }
+            "fire" -> {
+                // a volcano: concave slopes cut by gullies, up to a crater rim
+                val top = clamp(big, 24.0, 48.0)
+                val rr = rB * (1 + f(s, xd, zd, 18.0, 47, 2) * 0.08)
+                val crater = clamp(big * 0.14, 5.0, 9.0)
+                if (rr < crater) max(top - 9, top - 1.5 - (crater - rr) * 1.6)
+                else {
+                    val t = clamp((rr - crater) / (big * 1.25 - crater), 0.0, 1.0)
+                    val p = 0.6 * Math.pow(1 - t, 2.4) + 0.4 * smooth(1 - t)
+                    val gully = Noise.ridged(s.seed + 48 * 7919L, cos(a) * 4.5 + rr / 70, sin(a) * 4.5, 2)
+                    top * p + (gully * gully - 0.4) * 3.0 * sin(Math.PI * t) + f(s, xd, zd, 14.0, 49, 2) * smooth(t / 0.2) + 1
                 }
-            }
-            "grass" -> when (variant) {
-                0 -> f(s, wx, wz, 38.0, 10) * 7 + 3 + ridge(s, wx, wz, 60.0, 11, 2) * 4
-                1 -> f(s, wx, wz, 46.0, 12) * 7 + 2
-                else -> f(s, wx, wz, 70.0, 13, 3) * 4 + 1
-            }
-            "bug" -> f(s, wx, wz, 40.0, 14) * 5 + f(s, xd, zd, 12.0, 15, 2) * 1.2 + 1
-            "fairy" -> if (variant == 2) f(s, wx, wz, 50.0, 16) * 3 - smooth((f01(s, wx, wz, 16.0, 17, 2) - 0.66) / 0.08) * 2
-                else f(s, wx, wz, 52.0, 16) * 6 + 2
-            "dark" -> when (variant) {
-                1 -> f(s, wx, wz, 44.0, 18) * 5 + 3 - smooth((ridge(s, wx, wz, 70.0, 19, 3) - 0.78) / 0.12) * 16
-                else -> f(s, wx, wz, 40.0, 20) * 5 + 2
-            }
-            "ghost" -> {
-                val d = anchorDist(s, zone, x, z, ring) * (1 + f(s, xd, zd, 24.0, 21, 2) * 0.25)
-                max(0.0, 15 - d * 0.13) + f(s, wx, wz, 20.0, 22, 3) * 2.2
-            }
-            "poison" -> if (variant == 2) f(s, wx, wz, 36.0, 23) * 2.5 + 0.5 else f(s, wx, wz, 26.0, 24, 3) * 1.8 - 0.6
-            "psychic" -> when (variant) {
-                2 -> softTerrace(smooth(f01(s, wx, wz, 60.0, 25, 2)) * 12, 4) + 1
-                1 -> f(s, wx, wz, 44.0, 26) * 5 + 2
-                else -> f(s, wx, wz, 34.0, 27) * 3.5 + 1
-            }
-            "steel" -> if (variant == 1) ridge(s, wx, wz, 70.0, 28, 2) * 4 else Math.pow(ridge(s, wx, wz, 64.0, 29, 2), 1.5) * 16 + f(s, xd, zd, 26.0, 30, 2) * 1.5 - 2
-            "electric" -> when (variant) {
-                2 -> Math.pow(ridge(s, wx, wz, 60.0, 31, 2), 1.5) * 14 - 1
-                else -> smooth((f01(s, wx, wz, 56.0, 32, 2) - 0.45) / 0.16) * 8 + f(s, xd, zd, 24.0, 33, 2) * 1.0
             }
             "rock" -> {
-                // rolling stony hills; real crags only rise in a few parts, with rocky knolls (tors) dotted around
-                val hills = f(s, wx, wz, 56.0, 34, 3) * 3.6 + 2.4
-                val cragField = smooth((f01(s, xd, zd, 110.0, 35, 2) - (if (variant == 1) 0.54 else 0.48)) / 0.2)
-                val crag = Math.pow(ridge(s, wx, wz, 46.0, 36, 2), 1.5) * (if (variant == 2) 11.0 else 17.0) * cragField
-                val tors = smooth((f01(s, wx, wz, 14.0, 37, 2) - 0.78) / 0.1) * 3.0 * (1 - cragField)
-                hills + crag + tors
+                // a range of rugged mountains around a sheltered valley (where the arch stands), stony hills elsewhere
+                val top = clamp(size * 0.62, 18.0, 40.0) * (if (variant == 2) 0.7 else 1.0)
+                val massif = smooth((f01(s, wx, wz, size * 0.8, 35, 2) - 0.3) / 0.36)
+                val m = Noise.ridged(s.seed + 36 * 7919L, wx / (size * 0.5), wz / (size * 0.5), 3)
+                val tors = smooth((f01(s, wx, wz, 14.0, 37, 2) - 0.8) / 0.08) * 3 * (1 - massif)
+                2 + f(s, wx, wz, 40.0, 34, 3) * 2 + smooth((rB - 10) / (size * 0.35)) * smooth((1.0 - q) / 0.4) * massif * (top * m * m + 4) + tors
             }
-            "fighting" -> if (variant == 2) softTerrace(smooth((f01(s, wx, wz, 70.0, 38, 2) - 0.35) / 0.35) * 12, 6)
-                else f(s, wx, wz, 50.0, 40, 3) * 2.2 + 0.5
-            "ground" -> when (variant) {
-                0 -> { // dunes: long crests whose direction slowly turns
-                    val dir = f(s, xd, zd, 160.0, 41, 2) * 1.4
-                    val u = wx * kotlin.math.cos(dir) + wz * kotlin.math.sin(dir)
-                    val crest = 1 - abs(sin(u / 30.0 + f(s, xd, zd, 90.0, 42, 2) * 2.0))
-                    val field = smooth((f01(s, xd, zd, 110.0, 44, 2) - 0.4) / 0.25) // dunes only in some parts
-                    Math.pow(crest, 4.0) * 5 * field + f(s, wx, wz, 120.0, 43, 2) * 1.5
+            "ground" -> {
+                val c = clearing(12.0)
+                when (variant) {
+                    1 -> { // badlands: flat-topped buttes rising from the sand
+                        val n = f01(s, wx, wz, 46.0, 44, 2)
+                        (smooth((n - 0.58) / 0.06) * 13 + smooth((n - 0.5) / 0.08) * 3) * c + f(s, wx, wz, 60.0, 45, 2) * 1.2 + 1
+                    }
+                    else -> { // dunes: long crests whose direction slowly turns
+                        val dir = f(s, xd, zd, 160.0, 41, 2) * 1.4
+                        val u = wx * cos(dir) + wz * sin(dir)
+                        val crest = 1 - abs(sin(u / 30.0 + f(s, xd, zd, 90.0, 42, 2) * 2.0))
+                        val field = smooth((f01(s, xd, zd, 110.0, 44, 2) - 0.35) / 0.25)
+                        var hh = (if (variant == 0) Math.pow(crest, 4.0) * 6 else Math.pow(crest, 3.0) * 3) * field * c + f(s, wx, wz, 120.0, 43, 2) * 1.5 + 1
+                        if (variant == 2) { // an oasis
+                            val (ox, oz) = oasis(s)
+                            val od = sqrt((x - ox) * (x - ox) + (z - oz) * (z - oz).toDouble())
+                            hh = mix(hh, -3.0, smooth((10 - od + f(s, xd, zd, 8.0, 45, 2) * 4) / 5.0))
+                        }
+                        hh
+                    }
                 }
-                1 -> softTerrace(smooth((f01(s, wx, wz, 56.0, 44, 2) - 0.48) / 0.14) * 20, 4, 3.2)
-                else -> f(s, wx, wz, 36.0, 46, 3) * 1.2
             }
-            "fire" -> when (variant) {
-                0 -> { // volcano with a crater
-                    val d = anchorDist(s, zone, x, z, ring) * (1 + f(s, xd, zd, 18.0, 47, 2) * 0.12)
-                    val h = max(0.0, 40 - d * 0.82)
-                    if (d < 7) h - (7 - d) * 1.7 else h + f(s, xd, zd, 16.0, 48, 2) * 1.2 * smooth(h / 8)
+            "dragon" -> {
+                // highlands: steep-sided plateaus cut by canyons, around a hollow where the spire stands
+                val top = clamp(size * 0.55, 16.0, 34.0) * (if (variant == 1) 1.25 else 1.0)
+                val n = f01(s, wx, wz, size * 0.55, 52, 2)
+                val plateau = smooth((n - 0.42) / 0.1)
+                val canyon = smooth((Noise.ridged(s.seed + 53 * 7919L, wx / (size * 0.9), wz / (size * 0.9), 2) - 0.8) / 0.08)
+                2 + (top * plateau + 3 * smooth((n - 0.3) / 0.1)) * (1 - 0.9 * canyon) * clearing(10.0) * smooth((1.0 - q) / 0.35) + f(s, xd, zd, 16.0, 54, 2) * 1.2
+            }
+            "ghost" -> {
+                // a lonely hill with the tower on top, in rolling gloomy land
+                val qn = q * (1 + f(s, xd, zd, 24.0, 21, 2) * 0.15)
+                val hill = smooth((0.6 - qn) / 0.45)
+                11 * hill + f(s, wx, wz, 36.0, 22, 3) * 2.5 * (1 - hill * 0.6) + 1
+            }
+            "poison" -> {
+                // low, wet ground full of pools
+                val pool = smooth((f01(s, wx, wz, if (variant == 2) 22.0 else 16.0, 23, 3) - 0.58) / 0.1)
+                1.0 + f(s, wx, wz, 40.0, 24, 2) - 3.6 * pool
+            }
+            "grass" -> when (variant) {
+                0 -> f(s, wx, wz, 40.0, 10) * 6 + 4
+                1 -> f(s, wx, wz, 46.0, 12) * 5 + 2.5
+                else -> f(s, wx, wz, 70.0, 13) * 4 + 2
+            }
+            "fairy" -> {
+                // soft hills with little ponds
+                val pond = smooth((f01(s, wx, wz, 20.0, 17, 2) - 0.7) / 0.07) * smooth((rB - 14) / 4.0)
+                f(s, wx, wz, 48.0, 16, 3) * (if (variant == 0) 5.0 else 3.0) + 2.2 - pond * 4.2
+            }
+            "electric" -> {
+                // open plains with the odd rocky knoll (or rocky hills)
+                val tors = smooth((f01(s, wx, wz, 13.0, 33, 2) - 0.8) / 0.07) * 3
+                tors + when (variant) {
+                    0 -> f(s, wx, wz, 60.0, 32, 2) * 2.2 + 1.2
+                    1 -> f(s, wx, wz, 50.0, 26, 2) * 1.5 + 1
+                    else -> Math.pow(ridge(s, wx, wz, 60.0, 31, 2), 1.6) * 10 + f(s, wx, wz, 30.0, 30, 2) * 1.5
                 }
-                1 -> softTerrace(smooth((f01(s, wx, wz, 56.0, 49, 2) - 0.38) / 0.24) * 16, 5) - smooth((ridge(s, wx, wz, 80.0, 50, 2) - 0.84) / 0.1) * 9
-                else -> softTerrace(f01(s, wx, wz, 40.0, 51, 2) * 6, 2)
-            }
-            "dragon" -> when (variant) {
-                0 -> softTerrace(smooth((f01(s, wx, wz, 56.0, 52, 2) - 0.46) / 0.16) * 24, 6, 3.4)
-                1 -> {
-                    val d = anchorDist(s, zone, x, z, ring) * (1 + f(s, xd, zd, 26.0, 54, 2) * 0.2)
-                    max(0.0, 54 - d * 0.52) * (0.72 + 0.28 * ridge(s, wx, wz, 22.0, 55, 3)) + ridge(s, wx, wz, 40.0, 56, 2) * 6
-                }
-                else -> f(s, wx, wz, 40.0, 57) * 6 + 2
-            }
-            "ice" -> when (variant) {
-                2 -> -4.5 * lake(s, zone, x, z, wx, wz, ring, 0.38) + f(s, xd, zd, 20.0, 58, 2)
-                0 -> f(s, wx, wz, 40.0, 59) * 8 + ridge(s, wx, wz, 22.0, 60, 3) * 5 + 2
-                else -> f(s, wx, wz, 44.0, 61) * 6 + 2
             }
             else -> f(s, wx, wz, 34.0, 62) * 4 + 1
         }
+        return h * e + EDGE_LEVEL * (1 - e)
+    }
+
+    /** Where the desert's oasis lies: halfway out from its middle, in a direction picked by the world. */
+    private fun oasis(s: Sanctuary): Pair<Int, Int> {
+        val hb = s.habitats["ground"] ?: return s.center.x to s.center.z
+        val a = Noise.hash(s.seed, 3, 17) * 2 * Math.PI
+        val d = min(hb.radial, hb.along) * 0.5
+        return (hb.x + cos(a) * d).toInt() to (hb.z + sin(a) * d).toInt()
     }
 
     /** A biome's own shape, or flat for a biome that's still asleep. */
@@ -547,6 +609,35 @@ object BiomeDresser {
      * so hills and lakes flow from one biome into the next instead of stopping at a flat strip.
      */
     fun targetHeight(s: Sanctuary, x: Int, z: Int, ring: List<String>): Int {
+        val base = baseHeight(s, x, z, ring)
+        val (p, d) = ZoneLayout.pocketAt(s, x, z) ?: return base
+        if (!p.live(s)) return base
+        val level = p.level(s)
+        val w = smooth((p.r + 4 - d) / 4.0)
+        val flat = mix(base.toDouble(), level.toDouble(), w)
+        val h = when (p.zone) {
+            // ponds and bogs: a level hollow with a pool dug in its middle, the water flush with the ground
+            "water", "poison" -> if (d < p.r * 0.72) level - 1 - 2 * smooth((p.r * 0.72 - d) / 3.0) else flat
+            // outcrops, crags and snowy rocks: a rough knoll
+            "rock", "dragon", "ice", "fire" -> {
+                val tall = when (p.zone) { "dragon" -> 7.0; "rock" -> 4.5; "fire" -> 3.0; else -> 3.5 }
+                val n = 0.7 + 0.6 * Noise.value(s.seed + 5050 + p.salt, x / 4.0, z / 4.0)
+                flat + tall * Math.pow(smooth((p.r - d) / p.r), 1.3) * n
+            }
+            else -> mix(base.toDouble(), level.toDouble(), w * 0.6)
+        }
+        return h.roundToInt()
+    }
+
+    /** The water level of a pond pocket at (x, z), or null when the column isn't in one. */
+    fun pondLevel(s: Sanctuary, x: Int, z: Int): Int? {
+        val (p, d) = ZoneLayout.pocketAt(s, x, z) ?: return null
+        if (!p.live(s) || (p.zone != "water" && p.zone != "poison") || d >= p.r * 0.72) return null
+        return p.level(s)
+    }
+
+    /** Target height without pockets (a pocket is built at the height its surroundings have here). */
+    fun baseHeight(s: Sanctuary, x: Int, z: Int, ring: List<String> = ZoneLayout.HABITATS): Int {
         val dx = (x - s.center.x).toDouble()
         val dz = (z - s.center.z).toDouble()
         val dist = sqrt(dx * dx + dz * dz)
@@ -592,11 +683,19 @@ object BiomeDresser {
     val RIM_BIOME: ResourceKey<Biome> = key("rim")
     val MEADOW_BIOME: ResourceKey<Biome> = key("meadow")
 
-    private fun exposure(s: Sanctuary, x: Int, z: Int, y: Int, ring: List<String>): Int {
+    /** How exposed the column is (how deep its side shows) and how steep the ground around it is. */
+    private fun around(s: Sanctuary, x: Int, z: Int, y: Int, ring: List<String>): Pair<Int, Int> {
         var low = y
-        for ((ox, oz) in listOf(1 to 0, -1 to 0, 0 to 1, 0 to -1)) low = min(low, targetHeight(s, x + ox, z + oz, ring))
-        return (y - low + 1).coerceIn(3, 48)
+        var step = 0
+        for ((ox, oz) in listOf(1 to 0, -1 to 0, 0 to 1, 0 to -1)) {
+            val h = targetHeight(s, x + ox, z + oz, ring)
+            low = min(low, h)
+            step = max(step, abs(h - y))
+        }
+        return (y - low + 1).coerceIn(3, 48) to step
     }
+
+    private fun exposure(s: Sanctuary, x: Int, z: Int, y: Int, ring: List<String>): Int = around(s, x, z, y, ring).first
 
     /** Moves the column's top to [target]: builds it up with stone or cuts natural blocks away. */
     private fun reshape(level: ServerLevel, ground: BlockPos, target: Int, keep: Set<Long>? = null): BlockPos {
@@ -630,7 +729,8 @@ object BiomeDresser {
         val zone = surfaceZone(s, hit, x, z, ring)
         val target = targetHeight(s, x, z, ring)
         val surface = reshape(level, found, target, placed[s.id])
-        val ctx = Ctx(level, s, surface, randomFor(s, x, z), variantOf(s, zone), hit, exposure(s, x, z, target, ring))
+        val (exp, slope) = around(s, x, z, target, ring)
+        val ctx = Ctx(level, s, surface, randomFor(s, x, z), variantOf(s, zone), hit, exp, slope)
         // a winding route from the town out to the habitat's landmark
         if (target >= WATER_Y + 1 && hit.dist > s.size.hubRadius - 4 && onRoute(s, hit, x, z, ring)) {
             val (top, fill) = routeBlocks(zone, variantOf(s, zone))
@@ -646,12 +746,22 @@ object BiomeDresser {
             }
             return true
         }
+        // a pocket of another habitat: a pond, an outcrop, a patch of flowers…
+        val pocket = ZoneLayout.pocketAt(s, x, z)?.takeIf { it.first.live(s) && it.second <= it.first.r + 1.5 }
+        if (pocket != null) {
+            val (p, d) = pocket
+            val pc = Ctx(level, s, surface, ctx.random, variantOf(s, p.zone), hit, exp, slope)
+            cobblemonDecor(pc, p.zone, target)
+            pocket(pc, p, d)
+            Props.place(pc, p.zone, ring) { px, pz -> pathAt(s, px, pz, ring) }
+            return true
+        }
         cobblemonDecor(ctx, zone, target)
         // berry trees in the lusher biomes, where residents meet for meals
         if (zone in BERRY_ZONES && ctx.grid(27, 400 + BERRY_ZONES.indexOf(zone)) && ctx.roomy(6) && target >= WATER_Y + 1) ctx.berryTree()
         // a lake that reaches over the border keeps its water, whichever biome it spills into
-        if (zone != "water" && target < WATER_Y && (zone == "water" || hit.neighbour == "water" || hit.zone == "water") && "water" in s.unlocked) {
-            water(Ctx(level, s, surface, ctx.random, variantOf(s, "water").let { if (it == 2) 0 else it }, hit, ctx.exposure))
+        if (zone != "water" && target < WATER_Y && (hit.neighbour == "water" || hit.zone == "water") && "water" in s.unlocked) {
+            water(Ctx(level, s, surface, ctx.random, variantOf(s, "water").let { if (it == 2) 0 else it }, hit, exp, slope))
             return true
         }
         when (zone) {
@@ -717,12 +827,13 @@ object BiomeDresser {
         for ((zone, hb) in s.habitats) {
             if (zone !in s.unlocked) continue
             // the route ends at the landmark (which stays where it was built)
-            val mark = s.landmarks[zone]?.takeIf { it != Landmarks.NONE && !(zone == "fire" && variantOf(s, zone) == 0) }?.let { BlockPos.of(it) }
+            val mark = s.landmarks[zone]?.takeIf { it != Landmarks.NONE && zone != "fire" }?.let { BlockPos.of(it) }
             val ax = mark?.x ?: hb.x
             val az = mark?.z ?: hb.z
             val adx = (ax - s.center.x).toDouble()
             val adz = (az - s.center.z).toDouble()
-            val anchorDist = sqrt(adx * adx + adz * adz)
+            // up a volcano, the route ends at its foot
+            val anchorDist = sqrt(adx * adx + adz * adz) - (if (zone == "fire") min(hb.radial, hb.along) * 0.55 else 0.0)
             val len = anchorDist.coerceAtLeast(1.0)
             val ux = adx / len
             val uz = adz / len
@@ -739,17 +850,15 @@ object BiomeDresser {
         return best
     }
 
+    /** Routes are trodden earth: a dirt path, or whatever the ground there wears down to. */
     private fun routeBlocks(zone: String, variant: Int): Pair<BlockState, BlockState> = when (zone) {
         "water" -> b(Blocks.SAND) to b(Blocks.SANDSTONE)
-        "ground" -> if (variant == 2) b(Blocks.MUD_BRICKS) to b(Blocks.PACKED_MUD) else b(Blocks.SMOOTH_SANDSTONE) to b(Blocks.SANDSTONE)
-        "rock", "dragon" -> b(Blocks.GRAVEL) to b(Blocks.COBBLESTONE)
-        "steel" -> b(Blocks.POLISHED_ANDESITE) to b(Blocks.GRAVEL)
-        "fire" -> b(Blocks.POLISHED_BLACKSTONE_BRICKS) to b(Blocks.BLACKSTONE)
-        "ghost" -> b(Blocks.SOUL_SOIL) to b(Blocks.COBBLED_DEEPSLATE)
-        "psychic" -> b(Blocks.CALCITE) to b(Blocks.SMOOTH_BASALT)
-        "ice" -> b(Blocks.PACKED_ICE) to b(Blocks.SNOW_BLOCK)
-        "poison" -> b(Blocks.MUD_BRICKS) to b(Blocks.PACKED_MUD)
-        "dark" -> b(Blocks.COARSE_DIRT) to b(Blocks.PODZOL)
+        "ground" -> if (variant == 1) b(Blocks.RED_SAND) to b(Blocks.TERRACOTTA) else b(Blocks.SMOOTH_SANDSTONE) to b(Blocks.SANDSTONE)
+        "rock", "dragon", "steel" -> b(Blocks.GRAVEL) to b(Blocks.COARSE_DIRT)
+        "fire" -> b(Blocks.GRAVEL) to b(Blocks.TUFF)
+        "ice" -> b(Blocks.GRAVEL) to b(Blocks.COARSE_DIRT)
+        "ghost", "dark" -> b(Blocks.COARSE_DIRT) to b(Blocks.PODZOL)
+        "poison" -> b(Blocks.PACKED_MUD) to b(Blocks.MUD)
         else -> b(Blocks.DIRT_PATH) to b(Blocks.COARSE_DIRT)
     }
 
@@ -1010,20 +1119,23 @@ object BiomeDresser {
         }
     }
 
-    /** Water: a clear lake with beaches and islands, a turquoise coral lagoon, or a mangrove delta. */
+    /** Lake & coast: a clear lake with beaches and islands, a turquoise lagoon, or a mangrove delta. */
     private fun water(c: Ctx) {
         val depth = WATER_Y - c.y
         if (c.variant == 2) { // mangrove delta
             if (depth >= 1) {
                 c.flood()
-                c.ground(b(Blocks.MUD), b(Blocks.MUD))
-                if (c.chance(0.06)) c.waterTop(b(Blocks.LILY_PAD))
-            } else {
-                c.ground(c.patch(6.0, 1, b(Blocks.GRASS_BLOCK), b(Blocks.MUD), b(Blocks.GRASS_BLOCK)), b(Blocks.MUD))
+                c.ground(c.broad(b(Blocks.MUD), b(Blocks.CLAY), 0.7, 18.0, 1), b(Blocks.MUD))
                 when {
-                    c.grid(8, 2) && c.roomy() -> c.feature(TreeFeatures.MANGROVE)
-                    c.chance(0.05) -> c.column(b(Blocks.SUGAR_CANE), 2 + c.random.nextInt(2))
-                    c.chance(0.15) -> c.place(b(Blocks.SHORT_GRASS))
+                    c.chance(0.06) -> c.waterTop(b(Blocks.LILY_PAD))
+                    c.chance(0.12) -> c.underwater(b(Blocks.SEAGRASS))
+                }
+            } else {
+                c.ground(if (c.y <= WATER_Y + 1 && c.noise(10.0, 1) > 0.4) b(Blocks.MUD) else b(Blocks.GRASS_BLOCK), b(Blocks.MUD))
+                when {
+                    c.tree(6, 13, 2) && c.roomy() -> c.feature(TreeFeatures.MANGROVE)
+                    c.y <= WATER_Y + 1 && c.chance(0.06) -> c.column(b(Blocks.SUGAR_CANE), 2 + c.random.nextInt(2))
+                    c.chance(0.2) -> c.place(b(Blocks.SHORT_GRASS))
                 }
             }
             return
@@ -1033,102 +1145,109 @@ object BiomeDresser {
             c.flood()
             val bed = when {
                 lagoon || depth <= 2 -> b(Blocks.SAND)
-                depth <= 4 -> if (c.noise(14.0, 3) > 0.6) b(Blocks.CLAY) else b(Blocks.SAND)
-                else -> if (c.noise(16.0, 4) > 0.55) b(Blocks.CLAY) else b(Blocks.GRAVEL)
+                else -> c.broad(c.broad(b(Blocks.SAND), b(Blocks.GRAVEL), 0.6, 20.0, 4), b(Blocks.CLAY), 0.72, 16.0, 3)
             }
             c.ground(bed, b(Blocks.SAND))
             when {
-                lagoon && depth >= 2 && c.chance(0.2) -> c.underwater(c.pick(b(Blocks.BRAIN_CORAL_BLOCK), b(Blocks.TUBE_CORAL_BLOCK), b(Blocks.FIRE_CORAL_BLOCK), b(Blocks.HORN_CORAL_BLOCK), b(Blocks.BUBBLE_CORAL_BLOCK)))
-                lagoon && depth >= 2 && c.chance(0.15) -> c.underwater(c.pick(b(Blocks.BRAIN_CORAL), b(Blocks.TUBE_CORAL), b(Blocks.HORN_CORAL), b(Blocks.FIRE_CORAL_FAN)))
-                lagoon && c.chance(0.06) -> c.underwater(b(Blocks.SEA_PICKLE))
-                depth >= 3 && c.chance(0.1) -> { val h = 1 + c.random.nextInt(depth - 1); for (i in 1 until h) c.level.setBlock(c.surface.above(i), b(Blocks.KELP_PLANT), FLAGS); c.level.setBlock(c.surface.above(h), b(Blocks.KELP), FLAGS) }
-                depth >= 2 && c.chance(0.14) -> c.underwater(b(Blocks.SEAGRASS))
-                depth == 1 && c.chance(0.05) -> c.waterTop(b(Blocks.LILY_PAD))
+                lagoon && depth >= 2 && c.chance(0.12) -> c.underwater(c.pick(b(Blocks.BRAIN_CORAL_BLOCK), b(Blocks.TUBE_CORAL_BLOCK), b(Blocks.HORN_CORAL_BLOCK)))
+                lagoon && depth >= 2 && c.chance(0.12) -> c.underwater(c.pick(b(Blocks.BRAIN_CORAL), b(Blocks.TUBE_CORAL), b(Blocks.HORN_CORAL), b(Blocks.FIRE_CORAL_FAN)))
+                lagoon && c.chance(0.05) -> c.underwater(b(Blocks.SEA_PICKLE))
+                depth >= 3 && c.noise(12.0, 8) > 0.55 && c.chance(0.25) -> { val h = 1 + c.random.nextInt(depth - 1); for (i in 1 until h) c.level.setBlock(c.surface.above(i), b(Blocks.KELP_PLANT), FLAGS); c.level.setBlock(c.surface.above(h), b(Blocks.KELP), FLAGS) }
+                depth >= 2 && c.chance(0.16) -> c.underwater(b(Blocks.SEAGRASS))
+                depth == 1 && c.noise(10.0, 9) > 0.6 && c.chance(0.2) -> c.waterTop(b(Blocks.LILY_PAD))
             }
             return
         }
-        val beach = c.y <= WATER_Y + 1 && c.noise(5.0, 5) > 0.2
+        // a beach all along the water, a little wider here and there
+        val beach = c.y <= WATER_Y + 1 || (c.y == WATER_Y + 2 && c.noise(14.0, 5) > 0.5 && c.slope <= 1)
         if (beach) {
             c.ground(b(Blocks.SAND), b(Blocks.SANDSTONE))
             when {
-                c.chance(0.05) -> c.column(b(Blocks.SUGAR_CANE), 2 + c.random.nextInt(2))
+                c.chance(0.04) && c.y <= WATER_Y + 1 -> c.column(b(Blocks.SUGAR_CANE), 2 + c.random.nextInt(2))
                 lagoon && c.grid(11, 6) && c.roomy() -> c.feature(TreeFeatures.JUNGLE_BUSH)
-            }
-        } else {
-            c.ground(b(Blocks.GRASS_BLOCK), b(Blocks.DIRT))
-            when {
-                c.grid(13, 7) && c.roomy() -> c.feature(if (lagoon) TreeFeatures.JUNGLE_BUSH else TreeFeatures.BIRCH)
-                c.chance(0.2) -> c.place(b(Blocks.SHORT_GRASS))
-                c.chance(0.02) -> c.place(b(Blocks.BLUE_ORCHID))
-            }
-        }
-    }
-
-    /** Ground: golden dunes with fossils, banded mesas, or cracked mud flats. */
-    private fun ground(c: Ctx) {
-        when (c.variant) {
-            0 -> {
-                c.ground(b(Blocks.SAND), b(Blocks.SANDSTONE))
-                when {
-                    c.grid(23, 1) && c.roomy(8) -> { // fossil ribs
-                        for (i in 0..4) {
-                            c.at(c.above.east(i), b(Blocks.BONE_BLOCK).setValue(RotatedPillarBlock.AXIS, Direction.Axis.X))
-                            if (i % 2 == 0) { c.at(c.above.east(i).north(), b(Blocks.BONE_BLOCK)); c.at(c.above.east(i).north().above(), b(Blocks.BONE_BLOCK)) }
-                        }
-                    }
-                    c.grid(15, 2) && c.roomy() -> c.boulder(b(Blocks.SANDSTONE), b(Blocks.SMOOTH_SANDSTONE), 1)
-                    c.chance(0.006) -> c.column(b(Blocks.CACTUS), 1 + c.random.nextInt(3))
-                    c.chance(0.008) -> c.place(b(Blocks.DEAD_BUSH))
-                }
-            }
-            1 -> {
-                val bands = listOf(b(Blocks.TERRACOTTA), b(Blocks.ORANGE_TERRACOTTA), b(Blocks.YELLOW_TERRACOTTA), b(Blocks.BROWN_TERRACOTTA), b(Blocks.RED_TERRACOTTA), b(Blocks.WHITE_TERRACOTTA))
-                c.bands(bands, if (c.y <= G + 1) b(Blocks.RED_SAND) else null)
-                when {
-                    c.chance(0.006) -> c.place(b(Blocks.DEAD_BUSH))
-                    c.y <= G + 1 && c.chance(0.004) -> c.column(b(Blocks.CACTUS), 2)
-                }
-            }
-            else -> {
-                val crack = Math.floorMod(c.x + (c.noise(6.0, 4) * 4).toInt(), 5) == 0 || Math.floorMod(c.z + (c.noise(6.0, 5) * 4).toInt(), 5) == 0
-                c.ground(if (crack) b(Blocks.MUD) else c.patch(14.0, 6, b(Blocks.PACKED_MUD), b(Blocks.COARSE_DIRT), b(Blocks.PACKED_MUD)), b(Blocks.MUD))
-                when {
-                    c.chance(0.005) -> c.place(b(Blocks.DEAD_BUSH))
-                    c.grid(17, 7) && c.roomy() -> c.boulder(b(Blocks.PACKED_MUD), b(Blocks.MUD_BRICKS))
-                }
-            }
-        }
-    }
-
-    /** Rock: rugged grey hills with spires, mossy boulder fields, or tuff and dripstone badlands. */
-    private fun rock(c: Ctx) {
-        val steep = c.exposure > 4
-        if (c.variant == 2) {
-            c.ground(if (steep) b(Blocks.TUFF) else c.patch(10.0, 1, b(Blocks.TUFF), b(Blocks.STONE), b(Blocks.DRIPSTONE_BLOCK), b(Blocks.GRAVEL)), b(Blocks.TUFF))
-            when {
-                c.grid(10, 2) && c.roomy() -> c.crystalCluster(b(Blocks.DRIPSTONE_BLOCK), b(Blocks.POINTED_DRIPSTONE), 2 + c.random.nextInt(3))
-                !steep && c.chance(0.02) -> c.place(b(Blocks.POINTED_DRIPSTONE))
             }
             return
         }
-        val soft = if (c.variant == 1) b(Blocks.MOSS_BLOCK) else b(Blocks.COBBLESTONE)
-        // stony ground with patches of tough grass in the low parts; bare rock on the crags
-        val grassy = !steep && c.y <= G + 4
-        val top = when {
-            steep -> c.patch(5.0, 3, b(Blocks.STONE), b(Blocks.ANDESITE))
-            grassy -> c.patch(13.0, 4, b(Blocks.GRASS_BLOCK), b(Blocks.STONE), b(Blocks.GRASS_BLOCK), b(Blocks.GRAVEL), b(Blocks.GRASS_BLOCK), soft, b(Blocks.ANDESITE))
-            else -> c.patch(11.0, 4, b(Blocks.STONE), b(Blocks.ANDESITE), b(Blocks.GRAVEL), b(Blocks.STONE), soft)
-        }
-        c.ground(top, if (top.`is`(Blocks.GRASS_BLOCK)) b(Blocks.DIRT) else b(Blocks.STONE))
-        val onGrass = top.`is`(Blocks.GRASS_BLOCK)
+        c.natural(b(Blocks.GRASS_BLOCK), b(Blocks.DIRT), b(Blocks.STONE), b(Blocks.GRAVEL))
+        if (c.cliff) return
         when {
-            c.grid(13, 5) && c.roomy() -> c.feature(MiscOverworldFeatures.FOREST_ROCK, 3, 5)
-            c.variant == 0 && c.grid(29, 6) && c.roomy(8) && !grassy -> c.crystalCluster(b(Blocks.STONE), null, 3 + c.random.nextInt(4))
-            c.variant == 1 && c.grid(9, 7) && c.roomy() -> c.boulder(b(Blocks.COBBLESTONE), b(Blocks.MOSSY_COBBLESTONE), 1 + c.random.nextInt(2))
-            onGrass && c.grid(31, 8) && c.roomy(6) -> c.feature(TreeFeatures.SPRUCE)
-            onGrass && c.chance(0.18) -> c.place(b(Blocks.SHORT_GRASS))
-            onGrass && c.chance(0.015) -> c.place(c.pick(b(Blocks.DANDELION), b(Blocks.AZURE_BLUET)))
-            !steep && c.chance(0.04) -> c.place(b(Blocks.SHORT_GRASS))
+            c.tree(8, 21, 7) && c.roomy() -> c.feature(if (lagoon) TreeFeatures.JUNGLE_BUSH else if (c.noise(40.0, 10) > 0.5) TreeFeatures.BIRCH else TreeFeatures.OAK)
+            c.chance(0.25) -> c.place(b(Blocks.SHORT_GRASS))
+            c.noise(11.0, 11) > 0.7 && c.chance(0.2) -> c.place(c.pick(b(Blocks.BLUE_ORCHID), b(Blocks.AZURE_BLUET), b(Blocks.OXEYE_DAISY)))
+        }
+    }
+
+    /** Desert: golden dunes, red badlands with buttes, or dunes around an oasis. */
+    private fun ground(c: Ctx) {
+        if (c.variant == 2 && c.y < WATER_Y) { // the oasis
+            c.flood()
+            c.ground(b(Blocks.SAND), b(Blocks.SANDSTONE))
+            if (c.chance(0.15)) c.underwater(b(Blocks.SEAGRASS)) else if (WATER_Y - c.y == 1 && c.chance(0.08)) c.waterTop(b(Blocks.LILY_PAD))
+            return
+        }
+        if (c.variant == 1) {
+            val bands = listOf(b(Blocks.TERRACOTTA), b(Blocks.ORANGE_TERRACOTTA), b(Blocks.YELLOW_TERRACOTTA), b(Blocks.TERRACOTTA), b(Blocks.BROWN_TERRACOTTA), b(Blocks.RED_TERRACOTTA), b(Blocks.ORANGE_TERRACOTTA), b(Blocks.WHITE_TERRACOTTA))
+            if (c.slope >= 2) c.bands(bands)
+            else { c.top(if (c.rise > 8 && c.noise(18.0, 3) > 0.55) b(Blocks.COARSE_DIRT) else b(Blocks.RED_SAND)); c.filler(b(Blocks.RED_SANDSTONE)) }
+            when {
+                c.slope <= 1 && c.chance(0.006) -> c.place(b(Blocks.DEAD_BUSH))
+                c.slope <= 1 && c.rise <= 3 && c.chance(0.003) -> c.column(b(Blocks.CACTUS), 1 + c.random.nextInt(3))
+            }
+            return
+        }
+        // sand, with sandstone only where it's too steep for sand to stay
+        c.natural(b(Blocks.SAND), b(Blocks.SANDSTONE), b(Blocks.SANDSTONE), b(Blocks.SMOOTH_SANDSTONE))
+        val (ox, oz) = oasis(c.s)
+        val nearOasis = c.variant == 2 && ZoneLayout.distance(c.x, c.z, ox, oz) < 17
+        when {
+            nearOasis && c.y <= WATER_Y + 2 && c.noise(7.0, 4) > 0.35 -> {
+                c.ground(b(Blocks.GRASS_BLOCK), b(Blocks.DIRT))
+                when {
+                    c.grid(6, 5) && c.roomy(3) -> c.feature(TreeFeatures.JUNGLE_BUSH)
+                    c.chance(0.4) -> c.place(b(Blocks.SHORT_GRASS))
+                    c.chance(0.05) -> c.column(b(Blocks.SUGAR_CANE), 2)
+                }
+            }
+            c.cliff -> {}
+            c.grid(37, 1) && c.roomy(8) -> { // fossil ribs half buried in the sand
+                for (i in 0..4) {
+                    c.at(c.above.east(i), b(Blocks.BONE_BLOCK).setValue(RotatedPillarBlock.AXIS, Direction.Axis.X))
+                    if (i % 2 == 0) { c.at(c.above.east(i).north(), b(Blocks.BONE_BLOCK)); c.at(c.above.east(i).north().above(), b(Blocks.BONE_BLOCK)) }
+                }
+            }
+            c.chance(0.004) -> c.column(b(Blocks.CACTUS), 1 + c.random.nextInt(3))
+            c.chance(0.006) -> c.place(b(Blocks.DEAD_BUSH))
+        }
+    }
+
+    /** Cave & mountain: rugged peaks over grassy valleys, mossy (or tuff and dripstone) heights, snow on the tops. */
+    private fun rock(c: Ctx) {
+        val tuff = c.variant == 2
+        val rock = if (tuff) b(Blocks.TUFF) else b(Blocks.STONE)
+        val alt = if (tuff) b(Blocks.DRIPSTONE_BLOCK) else b(Blocks.ANDESITE)
+        val snowLine = 30 + (c.noise(20.0, 1) * 6).toInt()
+        when {
+            c.rise >= snowLine && !c.cliff -> { c.ground(b(Blocks.SNOW_BLOCK), rock); if (c.chance(0.5)) c.place(b(Blocks.SNOW)); return }
+            c.rise >= 14 -> {
+                // high up: bare rock, with tough grass on the gentler ledges
+                if (!c.cliff && c.slope <= 1 && c.noise(16.0, 2) > 0.45) c.ground(b(Blocks.GRASS_BLOCK), b(Blocks.DIRT))
+                else c.ground(if (c.noise(13.0, 3) > 0.66) alt else c.broad(rock, b(Blocks.GRAVEL), 0.8, 10.0, 4), rock)
+            }
+            else -> {
+                c.natural(b(Blocks.GRASS_BLOCK), b(Blocks.DIRT), rock, alt)
+                // a few broad stony patches in the valleys
+                if (!c.cliff && c.noise(26.0, 5) > 0.74) c.ground(c.broad(b(Blocks.GRAVEL), if (c.variant == 1) b(Blocks.MOSS_BLOCK) else rock, 0.5, 8.0, 6), rock)
+            }
+        }
+        if (c.cliff) return
+        val onGrass = c.level.getBlockState(c.surface).`is`(Blocks.GRASS_BLOCK)
+        when {
+            c.grid(17, 7) && c.roomy() -> c.feature(MiscOverworldFeatures.FOREST_ROCK, 3, 5)
+            tuff && c.grid(11, 8) && c.roomy() -> c.crystalCluster(b(Blocks.DRIPSTONE_BLOCK), b(Blocks.POINTED_DRIPSTONE), 2 + c.random.nextInt(3))
+            c.variant == 1 && c.grid(10, 9) && c.roomy() -> c.boulder(b(Blocks.MOSSY_COBBLESTONE), b(Blocks.COBBLESTONE), 1)
+            onGrass && c.rise < 24 && c.tree(9, 23, 10) && c.roomy(6) -> c.feature(TreeFeatures.SPRUCE)
+            onGrass && c.chance(0.22) -> c.place(b(Blocks.SHORT_GRASS))
+            onGrass && c.chance(0.012) -> c.place(c.pick(b(Blocks.DANDELION), b(Blocks.AZURE_BLUET)))
         }
     }
 
@@ -1174,80 +1293,75 @@ object BiomeDresser {
         }
     }
 
-    /** Fire: a volcano with a glowing crater, a red-rock canyon, or steaming hot springs. */
+    /** Volcano: a black (or red, or old grey) cone with lava running down its gullies and a glowing crater. */
     private fun fire(c: Ctx) {
-        when (c.variant) {
-            0 -> {
-                val (ax, az) = ZoneLayout.anchor(c.s, "fire")
-                val d = sqrt(((c.x - ax) * (c.x - ax) + (c.z - az) * (c.z - az)).toDouble())
-                when {
-                    d < 4 -> c.ground(b(Blocks.MAGMA_BLOCK), b(Blocks.OBSIDIAN))
-                    d < 6.5 -> c.ground(c.pick(b(Blocks.OBSIDIAN), b(Blocks.CRYING_OBSIDIAN), b(Blocks.BLACKSTONE), b(Blocks.MAGMA_BLOCK)), b(Blocks.BLACKSTONE))
-                    else -> {
-                        val vein = abs(Noise.value(c.s.seed + 9, c.x / 7.0, c.z / 7.0) - 0.5) < 0.035
-                        c.ground(if (vein) b(Blocks.MAGMA_BLOCK) else c.patch(9.0, 1, b(Blocks.BASALT), b(Blocks.BLACKSTONE), b(Blocks.SMOOTH_BASALT), b(Blocks.BLACKSTONE)), b(Blocks.BLACKSTONE))
-                        when {
-                            vein -> {}
-                            c.grid(9, 2) && c.roomy() -> c.crystalCluster(b(Blocks.BASALT), null, 2 + c.random.nextInt(4))
-                            c.chance(0.01) -> c.place(b(Blocks.DEAD_BUSH))
-                        }
-                    }
-                }
+        val hb = c.s.habitats["fire"]
+        val big = if (hb != null) min(hb.radial, hb.along) else 30.0
+        val dx = (c.x - (hb?.x ?: c.x)).toDouble()
+        val dz = (c.z - (hb?.z ?: c.z)).toDouble()
+        val d = sqrt(dx * dx + dz * dz)
+        val crater = (big * 0.14).coerceIn(5.0, 9.0)
+        val t = ((d - crater) / (big * 1.25 - crater)).coerceIn(0.0, 1.0)
+        val dormant = c.variant == 2
+        if (d < crater + 0.5) { // the crater
+            when {
+                dormant -> { if (c.noise(5.0, 1) > 0.55) c.pool(b(Blocks.SMOOTH_BASALT)) else c.ground(c.broad(b(Blocks.SMOOTH_BASALT), b(Blocks.CALCITE), 0.6, 6.0, 2), b(Blocks.STONE)) }
+                d < crater * 0.55 -> c.ground(b(Blocks.MAGMA_BLOCK), b(Blocks.MAGMA_BLOCK))
+                else -> c.ground(if (c.noise(4.0, 3) > 0.6) b(Blocks.MAGMA_BLOCK) else b(Blocks.OBSIDIAN), b(Blocks.BLACKSTONE))
             }
-            1 -> {
-                val bands = listOf(b(Blocks.RED_TERRACOTTA), b(Blocks.ORANGE_TERRACOTTA), b(Blocks.RED_SANDSTONE), b(Blocks.TERRACOTTA), b(Blocks.ORANGE_TERRACOTTA))
-                c.bands(bands, if (c.y <= G + 1) b(Blocks.RED_SAND) else null)
-                when {
-                    c.chance(0.01) -> c.place(b(Blocks.DEAD_BUSH))
-                    c.y <= G + 1 && c.grid(12, 3) && c.roomy() -> c.boulder(b(Blocks.RED_SANDSTONE), b(Blocks.MAGMA_BLOCK))
-                }
-            }
-            else -> {
-                if (c.noise(9.0, 5) > 0.62 && c.exposure <= 3) { c.pool(b(Blocks.SMOOTH_BASALT)); return }
-                c.ground(c.patch(8.0, 6, b(Blocks.SMOOTH_BASALT), b(Blocks.TUFF), b(Blocks.CALCITE), b(Blocks.SMOOTH_BASALT)), b(Blocks.STONE))
-                when {
-                    c.grid(10, 7) && c.roomy() -> c.boulder(b(Blocks.SMOOTH_BASALT), b(Blocks.BLACKSTONE))
-                    c.chance(0.006) -> c.place(b(Blocks.DEAD_BUSH))
-                }
-            }
+            return
+        }
+        // lava runs down a few of the gullies (cooled to magma)
+        val ang = kotlin.math.atan2(dz, dx)
+        val flow = abs(Noise.gradient(c.s.seed + 4411, cos(ang) * 6 + d / 30, sin(ang) * 6)) < 0.035 && t < 0.85 && !dormant
+        if (flow) { c.ground(b(Blocks.MAGMA_BLOCK), b(Blocks.BLACKSTONE)); return }
+        val rock = when (c.variant) { 1 -> b(Blocks.BASALT); 2 -> b(Blocks.TUFF); else -> b(Blocks.BLACKSTONE) }
+        val alt = when (c.variant) { 1 -> b(Blocks.BLACKSTONE); 2 -> b(Blocks.SMOOTH_BASALT); else -> b(Blocks.BASALT) }
+        when {
+            // the foot of the volcano: ash, gravel and dry, dying grass
+            t > 0.78 -> c.natural(c.broad(c.broad(b(Blocks.COARSE_DIRT), b(Blocks.GRASS_BLOCK), 0.58, 20.0, 4), if (c.variant == 1) b(Blocks.RED_SAND) else b(Blocks.GRAVEL), 0.7, 14.0, 5), b(Blocks.DIRT), rock, alt)
+            c.variant == 1 && t > 0.5 -> c.ground(if (c.slope >= 2) b(Blocks.RED_TERRACOTTA) else c.broad(b(Blocks.RED_SAND), b(Blocks.TERRACOTTA), 0.6, 16.0, 6), b(Blocks.RED_SANDSTONE))
+            else -> c.ground(c.broad(rock, alt, 0.62, 14.0, 7), rock)
+        }
+        when {
+            c.cliff -> {}
+            t > 0.3 && c.grid(15, 8) && c.roomy() -> c.crystalCluster(alt, null, 1 + c.random.nextInt(3))
+            t > 0.78 && c.chance(0.02) -> c.place(b(Blocks.DEAD_BUSH))
+            t > 0.78 && c.level.getBlockState(c.surface).`is`(Blocks.GRASS_BLOCK) && c.chance(0.1) -> c.place(b(Blocks.SHORT_GRASS))
         }
     }
 
-    /** Dragon: giant mesas with bone arches, a towering snowy peak, or ancient ruins. */
+    /** Dragon's den: banded canyon highlands, grey crags with snowy tops, or green plateaus with old ruins. */
     private fun dragon(c: Ctx) {
         when (c.variant) {
             0 -> {
-                val bands = listOf(b(Blocks.ORANGE_TERRACOTTA), b(Blocks.TERRACOTTA), b(Blocks.YELLOW_TERRACOTTA), b(Blocks.BROWN_TERRACOTTA), b(Blocks.LIGHT_GRAY_TERRACOTTA))
-                c.bands(bands, if (c.exposure <= 3 && c.noise(10.0, 1) > 0.5) b(Blocks.COARSE_DIRT) else null)
-                if (c.grid(26, 2) && c.roomy(10)) { // bone arch
-                    val h = 4 + c.random.nextInt(3)
-                    c.column(b(Blocks.BONE_BLOCK), h)
-                    for (i in 1..4) c.at(c.surface.above(h).east(i), b(Blocks.BONE_BLOCK).setValue(RotatedPillarBlock.AXIS, Direction.Axis.X))
-                    for (i in 1..h) c.at(c.surface.above(i).east(5), b(Blocks.BONE_BLOCK))
-                } else if (c.chance(0.006)) c.place(b(Blocks.DEAD_BUSH))
+                val bands = listOf(b(Blocks.ORANGE_TERRACOTTA), b(Blocks.TERRACOTTA), b(Blocks.YELLOW_TERRACOTTA), b(Blocks.BROWN_TERRACOTTA), b(Blocks.TERRACOTTA), b(Blocks.LIGHT_GRAY_TERRACOTTA), b(Blocks.RED_TERRACOTTA))
+                if (c.slope >= 2) c.bands(bands)
+                else { c.top(c.broad(c.broad(b(Blocks.GRASS_BLOCK), b(Blocks.COARSE_DIRT), 0.55, 22.0, 1), b(Blocks.RED_SAND), 0.75, 18.0, 2)); c.filler(b(Blocks.DIRT)) }
             }
             1 -> {
-                val rise = c.y - G
+                val snow = c.rise > 30 + c.noise(12.0, 3) * 6
                 when {
-                    rise > 30 + c.noise(12.0, 3) * 6 -> { c.ground(b(Blocks.SNOW_BLOCK), b(Blocks.STONE)); if (c.chance(0.4)) c.place(b(Blocks.SNOW)) }
-                    rise > 12 || c.exposure > 4 -> c.ground(c.patch(7.0, 4, b(Blocks.STONE), b(Blocks.CALCITE), b(Blocks.STONE), b(Blocks.ANDESITE)), b(Blocks.STONE))
-                    else -> {
-                        c.ground(b(Blocks.GRASS_BLOCK), b(Blocks.DIRT))
-                        when {
-                            c.grid(10, 5) && c.roomy() -> c.feature(TreeFeatures.SPRUCE)
-                            c.chance(0.15) -> c.place(b(Blocks.SHORT_GRASS))
-                        }
-                    }
+                    snow && !c.cliff -> { c.ground(b(Blocks.SNOW_BLOCK), b(Blocks.STONE)); if (c.chance(0.4)) c.place(b(Blocks.SNOW)) }
+                    else -> c.natural(b(Blocks.GRASS_BLOCK), b(Blocks.DIRT), b(Blocks.STONE), b(Blocks.CALCITE))
                 }
             }
-            else -> {
-                c.ground(if (c.noise(6.0, 6) > 0.84) b(Blocks.MOSSY_STONE_BRICKS) else c.patch(12.0, 6, b(Blocks.GRASS_BLOCK), b(Blocks.GRASS_BLOCK), b(Blocks.COARSE_DIRT)), b(Blocks.DIRT))
-                when {
-                    c.grid(18, 7) && c.roomy(8) -> c.ruinWall(b(Blocks.MOSSY_STONE_BRICKS), 5 + c.random.nextInt(5), 5)
-                    c.grid(14, 8) && c.roomy() -> { c.column(b(Blocks.CHISELED_STONE_BRICKS), 4); c.place(b(Blocks.BONE_BLOCK), 5) }
-                    c.chance(0.12) -> c.place(b(Blocks.SHORT_GRASS))
-                }
+            else -> c.natural(c.broad(b(Blocks.GRASS_BLOCK), b(Blocks.COARSE_DIRT), 0.68, 20.0, 4), b(Blocks.DIRT), b(Blocks.STONE), b(Blocks.MOSSY_COBBLESTONE))
+        }
+        if (c.cliff) return
+        val onGrass = c.level.getBlockState(c.surface).`is`(Blocks.GRASS_BLOCK)
+        when {
+            c.variant == 0 && c.grid(31, 5) && c.roomy(10) -> { // a bone arch, the remains of something huge
+                val h = 4 + c.random.nextInt(3)
+                c.column(b(Blocks.BONE_BLOCK), h)
+                for (i in 1..4) c.at(c.surface.above(h).east(i), b(Blocks.BONE_BLOCK).setValue(RotatedPillarBlock.AXIS, Direction.Axis.X))
+                for (i in 1..h) c.at(c.surface.above(i).east(5), b(Blocks.BONE_BLOCK))
             }
+            c.variant == 2 && c.grid(22, 6) && c.roomy(8) -> c.ruinWall(b(Blocks.MOSSY_STONE_BRICKS), 4 + c.random.nextInt(5), 4)
+            onGrass && c.variant == 1 && c.rise < 22 && c.tree(10, 26, 7) && c.roomy() -> c.feature(TreeFeatures.SPRUCE)
+            onGrass && c.variant != 1 && c.grid(29, 8) && c.roomy() -> c.feature(TreeFeatures.ACACIA)
+            onGrass && c.chance(0.15) -> c.place(b(Blocks.SHORT_GRASS))
+            c.chance(0.005) -> c.place(b(Blocks.DEAD_BUSH))
         }
     }
 
@@ -1272,71 +1386,55 @@ object BiomeDresser {
         }
     }
 
-    /** Ghost: a graveyard on a hill, a forest of dead trees, or haunted soul ruins. */
+    /** Haunted tower: a gloomy hill with the tower, gnarled woods and an old graveyard. */
     private fun ghost(c: Ctx) {
-        when (c.variant) {
-            0 -> {
-                val path = abs(Noise.value(c.s.seed + 11, c.x / 18.0, c.z / 18.0) - 0.5) < 0.04
-                c.ground(if (path) b(Blocks.SOUL_SOIL) else c.patch(9.0, 1, b(Blocks.PODZOL), b(Blocks.COARSE_DIRT), b(Blocks.GRASS_BLOCK)), b(Blocks.DIRT))
-                when {
-                    path -> {}
-                    Math.floorMod(c.x, 4) == 0 && Math.floorMod(c.z, 6) == 0 && c.roomy() && c.exposure <= 2 && c.noise(34.0, 2) > 0.68 -> c.gravestone()
-                    c.grid(12, 3) && c.roomy() -> c.deadTree(b(Blocks.STRIPPED_DARK_OAK_LOG), b(Blocks.DARK_OAK_FENCE))
-                    c.grid(10, 4) && c.roomy() -> c.lampPost(b(Blocks.SPRUCE_FENCE), b(Blocks.SOUL_LANTERN))
-                    c.chance(0.004) -> c.place(b(Blocks.COBWEB))
-                    c.chance(0.02) -> c.place(b(Blocks.DEAD_BUSH))
-                }
+        // pale grass with broad patches of podzol and bare earth; soul soil only in a few damp hollows
+        val soil = c.broad(c.broad(b(Blocks.GRASS_BLOCK), b(Blocks.PODZOL), 0.56, 22.0, 1), b(Blocks.COARSE_DIRT), 0.72, 16.0, 2)
+        val hollow = c.slope <= 1 && c.rise <= 2 && c.noise(18.0, 3) > 0.8
+        c.natural(if (hollow) b(Blocks.SOUL_SOIL) else soil, b(Blocks.DIRT), b(Blocks.STONE), b(Blocks.COBBLED_DEEPSLATE))
+        if (c.cliff) return
+        val graveyard = c.noise(34.0, 4) > 0.66 && c.slope <= 1
+        when {
+            graveyard && Math.floorMod(c.x, 4) == 0 && Math.floorMod(c.z, 5) == 0 && c.roomy() -> c.gravestone()
+            !graveyard && c.tree(9, 19, 5) && c.roomy() -> when {
+                c.variant == 1 || c.noise(30.0, 6) > 0.6 -> c.deadTree(b(Blocks.DARK_OAK_LOG), b(Blocks.DARK_OAK_FENCE))
+                else -> c.feature(TreeFeatures.DARK_OAK)
             }
-            1 -> {
-                c.ground(c.patch(9.0, 5, b(Blocks.PODZOL), b(Blocks.SOUL_SOIL), b(Blocks.PODZOL), b(Blocks.COARSE_DIRT)), b(Blocks.DIRT))
-                when {
-                    c.grid(6, 6) && c.roomy() -> c.deadTree(b(Blocks.STRIPPED_SPRUCE_LOG), b(Blocks.SPRUCE_FENCE))
-                    c.grid(23, 7) && c.roomy() -> c.place(b(Blocks.JACK_O_LANTERN))
-                    c.chance(0.005) -> c.place(b(Blocks.COBWEB))
-                    c.chance(0.03) -> c.place(b(Blocks.DEAD_BUSH))
-                }
-            }
-            else -> {
-                c.ground(c.patch(8.0, 8, b(Blocks.SOUL_SOIL), b(Blocks.SOUL_SAND), b(Blocks.COBBLED_DEEPSLATE), b(Blocks.SOUL_SOIL)), b(Blocks.SOUL_SOIL))
-                when {
-                    c.grid(16, 9) && c.roomy(8) -> c.ruinWall(b(Blocks.DEEPSLATE_TILES), 4 + c.random.nextInt(4), 4)
-                    c.grid(9, 10) && c.roomy() -> c.lampPost(b(Blocks.COBBLED_DEEPSLATE_WALL), b(Blocks.SOUL_LANTERN))
-                    c.chance(0.01) -> c.place(b(Blocks.WITHER_ROSE))
-                }
-            }
+            c.variant == 1 && c.grid(23, 7) && c.roomy() -> c.place(b(Blocks.CARVED_PUMPKIN))
+            c.chance(0.004) -> c.place(b(Blocks.COBWEB))
+            c.chance(0.02) -> c.place(c.pick(b(Blocks.BROWN_MUSHROOM), b(Blocks.DEAD_BUSH)))
+            c.level.getBlockState(c.surface).`is`(Blocks.GRASS_BLOCK) && c.chance(0.15) -> c.place(b(Blocks.SHORT_GRASS))
+            c.variant == 2 && c.chance(0.006) -> c.place(b(Blocks.WITHER_ROSE))
         }
     }
 
-    /** Poison: a murky swamp, a toxic purple bog, or a marsh of giant mushrooms. */
+    /** Swamp: pools of murky water among mud and grass, with swamp oaks (or a toxic bog, or giant mushrooms). */
     private fun poison(c: Ctx) {
-        val puddle = c.noise(9.0, 3) > 0.64 && c.exposure <= 3
-        when (c.variant) {
-            0 -> {
-                if (puddle) { c.pool(b(Blocks.MUD)); if (c.chance(0.15)) c.place(b(Blocks.LILY_PAD)); return }
-                c.ground(c.patch(7.0, 1, b(Blocks.GRASS_BLOCK), b(Blocks.MUD), b(Blocks.GRASS_BLOCK)), b(Blocks.MUD))
-                when {
-                    c.grid(9, 2) && c.roomy() -> c.feature(TreeFeatures.SWAMP_OAK)
-                    c.chance(0.02) -> c.place(b(Blocks.BLUE_ORCHID))
-                    c.chance(0.015) -> c.place(c.pick(b(Blocks.RED_MUSHROOM), b(Blocks.BROWN_MUSHROOM)))
-                    c.chance(0.12) -> c.place(b(Blocks.SHORT_GRASS))
-                }
+        if (c.y < WATER_Y) {
+            c.flood()
+            c.ground(if (c.variant == 1 && c.noise(10.0, 1) > 0.6) b(Blocks.PURPLE_TERRACOTTA) else b(Blocks.MUD), b(Blocks.MUD))
+            when {
+                c.chance(0.12) -> c.waterTop(b(Blocks.LILY_PAD))
+                c.chance(0.1) -> c.underwater(b(Blocks.SEAGRASS))
             }
-            1 -> {
-                if (puddle) { c.pool(b(Blocks.PURPLE_TERRACOTTA)); return }
-                c.ground(c.patch(8.0, 4, b(Blocks.MYCELIUM), b(Blocks.PURPLE_TERRACOTTA), b(Blocks.MUD), b(Blocks.MAGENTA_TERRACOTTA)), b(Blocks.MUD))
-                when {
-                    c.grid(10, 5) && c.roomy() -> c.crystalCluster(b(Blocks.PURPLE_TERRACOTTA), b(Blocks.AMETHYST_CLUSTER), 1 + c.random.nextInt(2))
-                    c.chance(0.02) -> c.place(b(Blocks.RED_MUSHROOM))
-                }
-            }
-            else -> {
-                if (puddle && c.chance(0.5)) { c.pool(b(Blocks.MUD)); return }
-                c.ground(b(Blocks.MYCELIUM), b(Blocks.DIRT))
-                when {
-                    c.grid(18, 6) && c.roomy(6) -> c.feature(if (c.random.nextBoolean()) TreeFeatures.HUGE_RED_MUSHROOM else TreeFeatures.HUGE_BROWN_MUSHROOM, 3, 15)
-                    c.chance(0.04) -> c.place(c.pick(b(Blocks.RED_MUSHROOM), b(Blocks.BROWN_MUSHROOM)))
-                }
-            }
+            return
+        }
+        val wet = c.y <= WATER_Y + 1
+        val soil = when {
+            wet && c.noise(8.0, 2) > 0.35 -> b(Blocks.MUD)
+            c.variant == 2 -> c.broad(b(Blocks.GRASS_BLOCK), b(Blocks.MYCELIUM), 0.5, 20.0, 3)
+            else -> c.broad(b(Blocks.GRASS_BLOCK), b(Blocks.MUD), 0.74, 14.0, 4)
+        }
+        c.natural(soil, b(Blocks.MUD), b(Blocks.PACKED_MUD), b(Blocks.STONE))
+        if (c.cliff) return
+        val onGrass = c.level.getBlockState(c.surface).`is`(Blocks.GRASS_BLOCK)
+        when {
+            c.variant == 2 && c.grid(16, 5) && c.roomy(6) -> c.feature(if (c.random.nextBoolean()) TreeFeatures.HUGE_RED_MUSHROOM else TreeFeatures.HUGE_BROWN_MUSHROOM, 3, 15)
+            c.variant != 2 && onGrass && c.tree(8, 18, 6) && c.roomy() -> c.feature(TreeFeatures.SWAMP_OAK)
+            wet && c.chance(0.05) -> c.column(b(Blocks.SUGAR_CANE), 2 + c.random.nextInt(2))
+            onGrass && c.chance(0.02) -> c.place(b(Blocks.BLUE_ORCHID))
+            c.chance(0.02) -> c.place(c.pick(b(Blocks.RED_MUSHROOM), b(Blocks.BROWN_MUSHROOM)))
+            onGrass && c.chance(0.2) -> c.place(b(Blocks.SHORT_GRASS))
         }
     }
 
@@ -1364,68 +1462,76 @@ object BiomeDresser {
         }
     }
 
-    /** Grass: a lush jungle, a leafy forest, or a meadow of tall grass. */
+    /** Forest: a jungle on the hills, a mixed oak and birch wood, or an open woodland of big oaks. */
     private fun grass(c: Ctx) {
-        c.ground(b(Blocks.GRASS_BLOCK), b(Blocks.DIRT))
+        // a forest floor: grass, with podzol and moss in the deep woods
+        val deep = c.noise(34.0, 510) > 0.45
+        val soil = if (deep && c.variant != 2) c.broad(b(Blocks.GRASS_BLOCK), if (c.variant == 0) b(Blocks.MOSS_BLOCK) else b(Blocks.PODZOL), 0.62, 14.0, 1) else b(Blocks.GRASS_BLOCK)
+        c.natural(soil, b(Blocks.DIRT), b(Blocks.STONE), b(Blocks.MOSSY_COBBLESTONE))
+        if (c.cliff) return
         when (c.variant) {
             0 -> when {
-                c.grid(11, 1) && c.roomy(7) -> c.feature(TreeFeatures.MEGA_JUNGLE_TREE)
-                c.grid(6, 2) && c.roomy() -> c.feature(TreeFeatures.JUNGLE_TREE_NO_VINE)
-                c.grid(5, 3) && c.roomy(3) -> c.feature(TreeFeatures.JUNGLE_BUSH)
-                c.noise(9.0, 4) > 0.75 && c.chance(0.5) -> c.column(b(Blocks.BAMBOO), 4 + c.random.nextInt(6))
-                c.chance(0.008) -> c.place(b(Blocks.MELON))
-                c.chance(0.3) -> c.place(c.pick(b(Blocks.FERN), b(Blocks.SHORT_GRASS)))
+                c.tree(11, 30, 1) && c.roomy(7) -> c.feature(TreeFeatures.MEGA_JUNGLE_TREE)
+                c.tree(5, 13, 2) && c.roomy() -> c.feature(TreeFeatures.JUNGLE_TREE_NO_VINE)
+                c.tree(5, 9, 3) && c.roomy(3) -> c.feature(TreeFeatures.JUNGLE_BUSH)
+                c.noise(9.0, 4) > 0.78 && c.chance(0.5) -> c.column(b(Blocks.BAMBOO), 4 + c.random.nextInt(6))
+                c.chance(0.006) -> c.place(b(Blocks.MELON))
+                c.chance(0.35) -> c.place(c.pick(b(Blocks.FERN), b(Blocks.SHORT_GRASS)))
             }
             1 -> when {
-                c.grid(6, 5) && c.roomy() -> c.feature(
-                    when (c.random.nextInt(3)) { 0 -> TreeFeatures.FANCY_OAK; 1 -> TreeFeatures.OAK; else -> TreeFeatures.BIRCH },
+                c.tree(5, 14, 5) && c.roomy() -> c.feature(
+                    when { c.noise(40.0, 6) > 0.62 -> TreeFeatures.BIRCH; c.random.nextInt(4) == 0 -> TreeFeatures.FANCY_OAK; else -> TreeFeatures.OAK },
                 )
-                c.chance(0.2) -> c.place(b(Blocks.SHORT_GRASS))
-                c.chance(0.02) -> c.place(c.pick(b(Blocks.POPPY), b(Blocks.DANDELION)))
+                deep && c.grid(13, 7) && c.roomy() -> c.fallenLog(b(Blocks.OAK_LOG))
+                c.chance(0.25) -> c.place(if (deep) c.pick(b(Blocks.FERN), b(Blocks.SHORT_GRASS)) else b(Blocks.SHORT_GRASS))
+                !deep && c.chance(0.03) -> c.place(c.pick(b(Blocks.POPPY), b(Blocks.DANDELION), b(Blocks.LILY_OF_THE_VALLEY)))
             }
             else -> when {
-                c.grid(21, 6) && c.roomy() -> c.feature(TreeFeatures.FANCY_OAK)
-                c.chance(0.3) -> c.tallPlant(b(Blocks.TALL_GRASS))
-                c.chance(0.06) -> c.place(c.patch(8.0, 7, b(Blocks.CORNFLOWER), b(Blocks.ALLIUM), b(Blocks.OXEYE_DAISY), b(Blocks.AZURE_BLUET)))
+                c.tree(12, 26, 8) && c.roomy() -> c.feature(TreeFeatures.FANCY_OAK)
+                c.chance(0.25) -> c.tallPlant(b(Blocks.TALL_GRASS))
+                c.noise(12.0, 9) > 0.66 && c.chance(0.3) -> c.place(c.patch(8.0, 10, b(Blocks.CORNFLOWER), b(Blocks.OXEYE_DAISY), b(Blocks.AZURE_BLUET)))
                 c.chance(0.3) -> c.place(b(Blocks.SHORT_GRASS))
             }
         }
     }
 
-    /** Fairy: a cherry blossom grove, a glowing mushroom glade, or flower ponds. */
+    /** Flower garden: cherry groves, mossy glades with glowing toadstools, or meadows of tall flowers, with ponds. */
     private fun fairy(c: Ctx) {
+        if (c.y < WATER_Y) { // a pond
+            c.flood()
+            c.ground(b(Blocks.CLAY), b(Blocks.DIRT))
+            if (c.chance(0.12)) c.waterTop(b(Blocks.LILY_PAD)) else if (c.chance(0.1)) c.underwater(b(Blocks.SEAGRASS))
+            return
+        }
+        val soil = if (c.variant == 1) c.broad(b(Blocks.GRASS_BLOCK), b(Blocks.MOSS_BLOCK), 0.5, 18.0, 1) else b(Blocks.GRASS_BLOCK)
+        c.natural(soil, b(Blocks.DIRT), b(Blocks.STONE), b(Blocks.CALCITE))
+        if (c.cliff) return
+        val bed = c.noise(10.0, 2) > 0.5 // flowers grow in drifts
         when (c.variant) {
-            0 -> {
-                c.ground(b(Blocks.GRASS_BLOCK), b(Blocks.DIRT))
-                when {
-                    c.grid(8, 1) && c.roomy(6) -> c.feature(TreeFeatures.CHERRY)
-                    c.noise(6.0, 2) > 0.45 && c.chance(0.6) -> c.place(b(Blocks.PINK_PETALS))
-                    c.chance(0.04) -> c.place(c.pick(b(Blocks.PINK_TULIP), b(Blocks.ALLIUM), b(Blocks.LILY_OF_THE_VALLEY)))
-                }
+            0 -> when {
+                c.tree(8, 19, 3) && c.roomy(6) -> c.feature(TreeFeatures.CHERRY)
+                c.noise(7.0, 4) > 0.45 && c.chance(0.6) -> c.place(b(Blocks.PINK_PETALS))
+                bed && c.chance(0.25) -> c.place(c.patch(6.0, 5, b(Blocks.PINK_TULIP), b(Blocks.ALLIUM), b(Blocks.LILY_OF_THE_VALLEY), b(Blocks.WHITE_TULIP)))
+                c.chance(0.15) -> c.place(b(Blocks.SHORT_GRASS))
             }
-            1 -> {
-                c.ground(c.patch(9.0, 3, b(Blocks.MOSS_BLOCK), b(Blocks.GRASS_BLOCK), b(Blocks.MOSS_BLOCK)), b(Blocks.DIRT))
-                when {
-                    c.grid(9, 4) && c.roomy() -> { // glowing toadstool
-                        val h = 3 + c.random.nextInt(3)
-                        c.column(b(Blocks.MUSHROOM_STEM), h)
-                        c.place(b(Blocks.SHROOMLIGHT), h + 1)
-                        for (dx in -1..1) for (dz in -1..1) if (dx != 0 || dz != 0) c.at(c.surface.offset(dx, h + 1, dz), b(Blocks.RED_MUSHROOM_BLOCK))
-                        c.place(b(Blocks.RED_MUSHROOM_BLOCK), h + 2)
-                    }
-                    c.grid(11, 5) && c.roomy() -> c.feature(TreeFeatures.AZALEA_TREE)
-                    c.chance(0.04) -> c.place(c.pick(b(Blocks.RED_MUSHROOM), b(Blocks.BROWN_MUSHROOM)))
-                    c.chance(0.1) -> c.place(b(Blocks.MOSS_CARPET))
+            1 -> when {
+                c.grid(11, 6) && c.roomy() -> { // a glowing toadstool
+                    val h = 3 + c.random.nextInt(3)
+                    c.column(b(Blocks.MUSHROOM_STEM), h)
+                    c.place(b(Blocks.SHROOMLIGHT), h + 1)
+                    for (dx in -1..1) for (dz in -1..1) if (dx != 0 || dz != 0) c.at(c.surface.offset(dx, h + 1, dz), b(Blocks.RED_MUSHROOM_BLOCK))
+                    c.place(b(Blocks.RED_MUSHROOM_BLOCK), h + 2)
                 }
+                c.tree(9, 20, 7) && c.roomy() -> c.feature(TreeFeatures.AZALEA_TREE)
+                bed && c.chance(0.2) -> c.place(c.patch(6.0, 8, b(Blocks.ALLIUM), b(Blocks.LILY_OF_THE_VALLEY), b(Blocks.AZURE_BLUET)))
+                c.chance(0.04) -> c.place(c.pick(b(Blocks.RED_MUSHROOM), b(Blocks.BROWN_MUSHROOM)))
+                c.chance(0.1) -> c.place(b(Blocks.MOSS_CARPET))
             }
-            else -> {
-                if (c.noise(10.0, 9) > 0.64 && c.exposure <= 3) { c.pool(b(Blocks.CLAY)); if (c.chance(0.15)) c.place(b(Blocks.LILY_PAD)); return }
-                c.ground(b(Blocks.GRASS_BLOCK), b(Blocks.DIRT))
-                when {
-                    c.grid(15, 6) && c.roomy() -> c.feature(TreeFeatures.CHERRY)
-                    c.chance(0.2) -> c.place(c.patch(6.0, 7, b(Blocks.ALLIUM), b(Blocks.PINK_TULIP), b(Blocks.LILY_OF_THE_VALLEY), b(Blocks.AZURE_BLUET), b(Blocks.WHITE_TULIP)))
-                    c.chance(0.05) -> c.tallPlant(c.pick(b(Blocks.LILAC), b(Blocks.PEONY)))
-                }
+            else -> when {
+                c.grid(17, 9) && c.roomy() -> c.feature(TreeFeatures.CHERRY)
+                bed && c.chance(0.12) -> c.tallPlant(c.patch(9.0, 10, b(Blocks.LILAC), b(Blocks.PEONY), b(Blocks.ROSE_BUSH)))
+                bed && c.chance(0.4) -> c.place(c.patch(6.0, 11, b(Blocks.ALLIUM), b(Blocks.PINK_TULIP), b(Blocks.LILY_OF_THE_VALLEY), b(Blocks.AZURE_BLUET), b(Blocks.WHITE_TULIP)))
+                c.chance(0.2) -> c.place(b(Blocks.SHORT_GRASS))
             }
         }
     }
@@ -1493,68 +1599,177 @@ object BiomeDresser {
         }
     }
 
-    /** Electric: stormy plains with lightning rods, power station ruins, or a copper ridge. */
+    /** Power plant: open grassy plains with lightning rods, a paved works yard, or rocky hills with copper veins. */
     private fun electric(c: Ctx) {
         when (c.variant) {
-            0 -> {
-                c.ground(c.patch(13.0, 1, b(Blocks.GRASS_BLOCK), b(Blocks.GRASS_BLOCK), b(Blocks.YELLOW_TERRACOTTA)), b(Blocks.DIRT))
+            1 -> {
+                // the works: grass with a few broad paved yards and gravel lots
+                val yard = c.noise(30.0, 1) > 0.66 && c.slope <= 1
+                if (yard) c.ground(c.broad(b(Blocks.SMOOTH_STONE), b(Blocks.GRAVEL), 0.55, 9.0, 2), b(Blocks.STONE))
+                else c.natural(b(Blocks.GRASS_BLOCK), b(Blocks.DIRT), b(Blocks.STONE), b(Blocks.ANDESITE))
+                if (c.cliff) return
                 when {
-                    c.grid(13, 2) && c.roomy() -> { c.column(b(Blocks.POLISHED_ANDESITE), 3); c.place(b(Blocks.LIGHTNING_ROD), 4) }
-                    c.chance(0.25) -> c.place(b(Blocks.SHORT_GRASS))
-                    c.chance(0.02) -> c.place(b(Blocks.DANDELION))
+                    yard && c.grid(11, 3) && c.roomy() -> { c.column(b(Blocks.IRON_BARS), 4); c.place(b(Blocks.END_ROD), 5) }
+                    yard && c.grid(9, 4) && c.roomy() -> c.place(b(Blocks.REDSTONE_LAMP))
+                    !yard && c.chance(0.22) -> c.place(b(Blocks.SHORT_GRASS))
                 }
             }
-            1 -> {
-                c.ground(c.patch(9.0, 3, b(Blocks.SMOOTH_STONE), b(Blocks.STONE_BRICKS), b(Blocks.GRAVEL)), b(Blocks.STONE))
+            2 -> {
+                val vein = abs(c.noise(22.0, 5) - 0.5) < 0.025
+                if (vein && c.rise > 3) c.ground(b(Blocks.WEATHERED_COPPER), b(Blocks.STONE))
+                else c.natural(b(Blocks.GRASS_BLOCK), b(Blocks.DIRT), b(Blocks.STONE), b(Blocks.TUFF))
+                if (c.cliff) return
                 when {
-                    c.grid(11, 4) && c.roomy() -> { c.column(b(Blocks.IRON_BARS), 4); c.place(b(Blocks.END_ROD), 5) }
-                    c.grid(9, 5) && c.roomy() -> c.place(b(Blocks.REDSTONE_LAMP))
-                    c.grid(17, 6) && c.roomy(8) -> c.ruinWall(b(Blocks.STONE_BRICKS), 3 + c.random.nextInt(4), 3)
+                    c.grid(12, 6) && c.roomy() -> c.crystalCluster(b(Blocks.EXPOSED_COPPER), b(Blocks.LIGHTNING_ROD), 2 + c.random.nextInt(3))
+                    c.chance(0.15) -> c.place(b(Blocks.SHORT_GRASS))
                 }
             }
             else -> {
-                val vein = abs(c.noise(22.0, 13) - 0.5) < 0.03
-                c.ground(when {
-                    vein -> b(Blocks.EXPOSED_COPPER)
-                    c.exposure > 4 -> c.patch(16.0, 6, b(Blocks.STONE), b(Blocks.TUFF))
-                    else -> c.patch(18.0, 6, b(Blocks.STONE), b(Blocks.TUFF), b(Blocks.STONE), b(Blocks.CALCITE))
-                }, b(Blocks.STONE))
-                if (c.grid(10, 7) && c.roomy()) c.crystalCluster(b(Blocks.EXPOSED_COPPER), b(Blocks.LIGHTNING_ROD), 2 + c.random.nextInt(3))
+                c.natural(b(Blocks.GRASS_BLOCK), b(Blocks.DIRT), b(Blocks.STONE), b(Blocks.ANDESITE))
+                if (c.cliff) return
+                when {
+                    c.grid(17, 7) && c.roomy() -> { c.column(b(Blocks.POLISHED_ANDESITE), 3); c.place(b(Blocks.LIGHTNING_ROD), 4) }
+                    c.grid(23, 8) && c.roomy() -> c.boulder(b(Blocks.STONE), b(Blocks.WEATHERED_COPPER), 1)
+                    c.chance(0.3) -> c.place(b(Blocks.SHORT_GRASS))
+                    c.noise(12.0, 9) > 0.72 && c.chance(0.3) -> c.place(b(Blocks.DANDELION))
+                }
             }
         }
     }
 
-    /** Ice: a glacier with ice spikes, a snowy spruce forest, or a frozen lake. */
+    /** Snowy peak: a mountain under snow, spruce forest on its lower slopes, ice spikes or frozen tarns. */
     private fun ice(c: Ctx) {
-        when (c.variant) {
-            0 -> {
-                c.ground(c.patch(9.0, 1, b(Blocks.SNOW_BLOCK), b(Blocks.SNOW_BLOCK), b(Blocks.PACKED_ICE), b(Blocks.BLUE_ICE)), b(Blocks.PACKED_ICE))
+        if (c.y < WATER_Y) { // a frozen tarn: ice on top, water under it
+            c.ground(b(Blocks.GRAVEL), b(Blocks.STONE))
+            for (yy in c.y + 1 until WATER_Y) c.level.setBlock(BlockPos(c.x, yy, c.z), b(Blocks.WATER), FLAGS)
+            c.level.setBlock(BlockPos(c.x, WATER_Y, c.z), b(Blocks.ICE), FLAGS)
+            return
+        }
+        if (c.cliff) {
+            // cliffs show their rock, with ice in the cracks
+            c.ground(if (c.noise(9.0, 1) > 0.7) b(Blocks.PACKED_ICE) else b(Blocks.STONE), b(Blocks.STONE))
+            return
+        }
+        c.ground(if (c.slope == 2 && c.noise(9.0, 2) > 0.62) b(Blocks.STONE) else b(Blocks.SNOW_BLOCK), if (c.rise > 6) b(Blocks.STONE) else b(Blocks.DIRT))
+        val forest = c.rise < (if (c.variant == 1) 22 else 14) + c.noise(16.0, 3) * 5
+        when {
+            c.variant == 0 && c.rise > 10 && c.grid(19, 4) && c.roomy(8) -> c.feature(MiscOverworldFeatures.ICE_SPIKE, 4, 34)
+            forest && c.tree(if (c.variant == 1) 6 else 9, 22, 5) && c.roomy() -> c.feature(TreeFeatures.SPRUCE)
+            c.grid(21, 6) && c.roomy() -> c.boulder(b(Blocks.PACKED_ICE), b(Blocks.STONE), 1)
+            c.chance(0.55) -> c.place(b(Blocks.SNOW))
+        }
+    }
+
+    /**
+     * A pocket of another habitat: a pond, a rocky outcrop, a snowy crag, a patch of flowers, a little grove, a bog,
+     * a dry sandy patch, a hot vent, a few old graves, a lightning rod or two. [d] is how far in the column is.
+     */
+    private fun pocket(c: Ctx, p: ZoneLayout.Pocket, d: Double) {
+        val inner = d < p.r * 0.72
+        val core = d < p.r * 0.4
+        val host = p.host
+        fun hostSoil() = when (host) {
+            "ground" -> b(Blocks.SAND)
+            "ice" -> b(Blocks.SNOW_BLOCK)
+            "fire" -> b(Blocks.COARSE_DIRT)
+            "rock", "dragon" -> if (c.rise > 14) b(Blocks.STONE) else b(Blocks.GRASS_BLOCK)
+            else -> b(Blocks.GRASS_BLOCK)
+        }
+        when (p.zone) {
+            "water", "poison" -> {
+                val bog = p.zone == "poison"
+                val level = p.level(c.s)
+                if (inner && c.y < level) {
+                    for (yy in c.y + 1..level) c.level.setBlock(BlockPos(c.x, yy, c.z), b(Blocks.WATER), FLAGS)
+                    c.ground(if (bog) b(Blocks.MUD) else if (host == "ground") b(Blocks.SAND) else b(Blocks.CLAY), b(Blocks.DIRT))
+                    val top = BlockPos(c.x, level + 1, c.z)
+                    when {
+                        c.chance(0.1) -> if (c.level.getBlockState(top).isAir) c.level.setBlock(top, b(Blocks.LILY_PAD), FLAGS)
+                        c.chance(0.15) -> c.underwater(b(Blocks.SEAGRASS))
+                    }
+                    return
+                }
+                // the banks
+                val bank = when {
+                    host == "ground" -> b(Blocks.GRASS_BLOCK) // an oasis
+                    bog -> if (c.noise(6.0, 1) > 0.45) b(Blocks.MUD) else b(Blocks.GRASS_BLOCK)
+                    host == "ice" -> b(Blocks.SNOW_BLOCK)
+                    else -> if (d < p.r * 0.9 && c.noise(5.0, 2) > 0.6) b(Blocks.SAND) else hostSoil()
+                }
+                c.ground(bank, b(Blocks.DIRT))
+                val onGrass = bank.`is`(Blocks.GRASS_BLOCK)
                 when {
-                    c.grid(16, 2) && c.roomy(8) -> c.feature(MiscOverworldFeatures.ICE_SPIKE, 4, 34)
-                    c.grid(8, 3) && c.roomy() -> c.crystalCluster(b(Blocks.PACKED_ICE), null, 2 + c.random.nextInt(4))
-                    c.chance(0.5) -> c.place(b(Blocks.SNOW))
+                    d < p.r * 0.95 && c.chance(0.07) && onGrass -> c.column(b(Blocks.SUGAR_CANE), 1 + c.random.nextInt(2))
+                    bog && onGrass && c.grid(9, 3) && c.roomy() -> c.feature(TreeFeatures.SWAMP_OAK)
+                    host == "ground" && c.grid(7, 4) && c.roomy(3) -> c.feature(TreeFeatures.JUNGLE_BUSH)
+                    onGrass && c.chance(0.3) -> c.place(if (bog) b(Blocks.BLUE_ORCHID).takeIf { c.chance(0.15) } ?: b(Blocks.SHORT_GRASS) else b(Blocks.SHORT_GRASS))
                 }
             }
-            1 -> {
-                c.ground(b(Blocks.SNOW_BLOCK), b(Blocks.DIRT))
+            "rock", "dragon" -> {
+                val rock = if (p.zone == "dragon") b(Blocks.TERRACOTTA) else b(Blocks.STONE)
+                val alt = if (p.zone == "dragon") b(Blocks.STONE) else b(Blocks.ANDESITE)
+                if (inner || c.slope >= 2) c.ground(c.broad(rock, if (host == "grass" || host == "ghost") b(Blocks.MOSSY_COBBLESTONE) else alt, 0.6, 5.0, 5), rock)
+                else c.ground(c.broad(hostSoil(), b(Blocks.GRAVEL), 0.65, 6.0, 6), b(Blocks.DIRT))
                 when {
-                    c.grid(6, 4) && c.roomy() -> c.feature(TreeFeatures.SPRUCE)
+                    core && c.grid(5, 7) -> c.crystalCluster(rock, null, if (p.zone == "dragon") 3 + c.random.nextInt(4) else 1 + c.random.nextInt(2))
+                    !inner && c.chance(0.15) && c.level.getBlockState(c.surface).`is`(Blocks.GRASS_BLOCK) -> c.place(b(Blocks.SHORT_GRASS))
+                }
+            }
+            "ice" -> {
+                c.ground(if (inner && c.slope >= 2) b(Blocks.PACKED_ICE) else b(Blocks.SNOW_BLOCK), b(Blocks.STONE))
+                when {
+                    core && c.grid(6, 8) -> c.crystalCluster(b(Blocks.PACKED_ICE), null, 2 + c.random.nextInt(3))
+                    c.grid(7, 9) && c.roomy() && !core -> c.feature(TreeFeatures.SPRUCE)
                     c.chance(0.6) -> c.place(b(Blocks.SNOW))
                 }
             }
-            else -> {
-                if (c.y < WATER_Y) { // frozen lake: ice on top, water under it
-                    c.ground(b(Blocks.PACKED_ICE), b(Blocks.PACKED_ICE))
-                    for (yy in c.y + 1 until WATER_Y) c.level.setBlock(BlockPos(c.x, yy, c.z), b(Blocks.WATER), FLAGS)
-                    c.level.setBlock(BlockPos(c.x, WATER_Y, c.z), b(Blocks.ICE), FLAGS)
-                    return
-                }
-                c.ground(c.patch(10.0, 5, b(Blocks.SNOW_BLOCK), b(Blocks.SNOW_BLOCK), b(Blocks.PACKED_ICE)), b(Blocks.PACKED_ICE))
+            "fire" -> {
+                c.ground(when {
+                    core && c.noise(3.0, 10) > 0.55 -> b(Blocks.MAGMA_BLOCK)
+                    inner -> c.broad(b(Blocks.BLACKSTONE), b(Blocks.BASALT), 0.5, 4.0, 11)
+                    else -> c.broad(b(Blocks.COARSE_DIRT), b(Blocks.GRAVEL), 0.5, 5.0, 12)
+                }, b(Blocks.BLACKSTONE))
+                if (inner && !core && c.grid(5, 13)) c.crystalCluster(b(Blocks.BASALT), null, 1 + c.random.nextInt(2))
+            }
+            "ground" -> {
+                c.ground(if (inner) c.broad(b(Blocks.SAND), b(Blocks.COARSE_DIRT), 0.62, 6.0, 14) else c.broad(hostSoil(), b(Blocks.COARSE_DIRT), 0.5, 5.0, 15), b(Blocks.SANDSTONE))
                 when {
-                    c.grid(12, 6) && c.roomy() -> c.feature(TreeFeatures.SPRUCE)
-                    c.chance(0.4) -> c.place(b(Blocks.SNOW))
+                    inner && c.chance(0.02) -> c.place(b(Blocks.DEAD_BUSH))
+                    inner && c.chance(0.006) -> c.column(b(Blocks.CACTUS), 1 + c.random.nextInt(2))
                 }
             }
+            "grass" -> {
+                c.ground(if (host == "ground") b(Blocks.GRASS_BLOCK) else c.broad(b(Blocks.GRASS_BLOCK), b(Blocks.PODZOL), 0.6, 6.0, 16), b(Blocks.DIRT))
+                when {
+                    c.grid(5, 17) && c.roomy(3) -> c.feature(if (c.noise(20.0, 18) > 0.5) TreeFeatures.OAK else TreeFeatures.BIRCH)
+                    c.chance(0.35) -> c.place(c.pick(b(Blocks.FERN), b(Blocks.SHORT_GRASS)))
+                }
+            }
+            "fairy" -> {
+                c.ground(b(Blocks.GRASS_BLOCK), b(Blocks.DIRT))
+                when {
+                    core && c.grid(9, 19) && c.roomy(4) -> c.feature(TreeFeatures.CHERRY)
+                    inner && c.chance(0.5) -> c.place(c.patch(4.0, 20, b(Blocks.ALLIUM), b(Blocks.PINK_TULIP), b(Blocks.LILY_OF_THE_VALLEY), b(Blocks.AZURE_BLUET), b(Blocks.PEONY).let { b(Blocks.WHITE_TULIP) }))
+                    c.chance(0.25) -> c.place(b(Blocks.PINK_PETALS))
+                }
+            }
+            "ghost" -> {
+                c.ground(c.broad(b(Blocks.PODZOL), b(Blocks.COARSE_DIRT), 0.55, 5.0, 21), b(Blocks.DIRT))
+                when {
+                    inner && Math.floorMod(c.x, 3) == 0 && Math.floorMod(c.z, 4) == 0 -> c.gravestone()
+                    core && c.grid(8, 22) -> c.deadTree(b(Blocks.DARK_OAK_LOG), b(Blocks.DARK_OAK_FENCE))
+                    c.chance(0.03) -> c.place(b(Blocks.BROWN_MUSHROOM))
+                }
+            }
+            "electric" -> {
+                c.ground(if (inner) c.broad(b(Blocks.GRASS_BLOCK), b(Blocks.GRAVEL), 0.55, 4.0, 23) else hostSoil(), b(Blocks.DIRT))
+                when {
+                    core && c.grid(6, 24) -> { c.column(b(Blocks.POLISHED_ANDESITE), 2); c.place(b(Blocks.LIGHTNING_ROD), 3) }
+                    inner && c.grid(5, 25) -> c.boulder(b(Blocks.WEATHERED_COPPER), b(Blocks.STONE), 1)
+                    c.chance(0.2) -> c.place(b(Blocks.SHORT_GRASS))
+                }
+            }
+            else -> c.ground(hostSoil(), b(Blocks.DIRT))
         }
     }
 

@@ -3,12 +3,12 @@
   "temperature": 0.8,
   "downfall": 0.4,
   "effects": {
-    "fog_color": 16769778,
-    "sky_color": 16762602,
-    "water_color": 15180518,
-    "water_fog_color": 4857936,
-    "grass_color": 10936992,
-    "foliage_color": 15902426,
+    "fog_color": 15918830,
+    "sky_color": 10405119,
+    "water_color": 6141935,
+    "water_fog_color": 1719644,
+    "grass_color": 11983713,
+    "foliage_color": 11983713,
     "particle": {
       "options": {
         "type": "minecraft:cherry_leaves"

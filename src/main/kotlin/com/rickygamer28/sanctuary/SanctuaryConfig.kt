@@ -122,6 +122,16 @@ object SanctuaryConfig {
         .comment("Friendship a resident needs to come and greet its trainer.")
         .defineInRange("greetFriendship", 120, 0, 255)
 
+    val pocketShare: ModConfigSpec.DoubleValue = builder
+        .comment("Share of residents that live in a little pocket of their habitat out in another area (a pond in the forest, an outcrop in the meadow…).")
+        .defineInRange("pocketShare", 0.3, 0.0, 1.0)
+    val wanderShare: ModConfigSpec.DoubleValue = builder
+        .comment("Roughly how many residents are out wandering a neighbouring habitat or the meadows at any time (they go home after a while).")
+        .defineInRange("wanderShare", 0.25, 0.0, 0.9)
+    val borderReach: ModConfigSpec.IntValue = builder
+        .comment("How many blocks residents may roam across their habitat's border, so Pokémon from both sides mix there (0 = stay inside).")
+        .defineInRange("borderReach", 14, 0, 64)
+
     val awayLife: ModConfigSpec.BooleanValue = builder
         .comment("Residents keep meeting, making friends and rivals and laying eggs while nobody is in the sanctuary.")
         .define("awayLife", true)

@@ -307,7 +307,9 @@ object SanctuaryGenerator {
             val hit = if (inside) ZoneLayout.locate(s, x, z, ring) else null
             if (redo && s.dressed.get(idx) && !(meadowDone && recheck)) {
                 // only the biomes being rebuilt (and the strip next to them, whose shape blends with them)
-                val touched = hit != null && (hit.zone in s.rebuildZones || (hit.neighbour in s.rebuildZones && hit.edgeDistance < 26))
+                val pocket = if (hit != null) ZoneLayout.pocketAt(s, x, z)?.first else null
+                val touched = hit != null && (hit.zone in s.rebuildZones || (hit.neighbour in s.rebuildZones && hit.edgeDistance < 26) ||
+                    (pocket != null && (pocket.zone in s.rebuildZones || pocket.host in s.rebuildZones)))
                 if (!touched || meadowDone) continue
                 s.dressed.clear(idx)
             }

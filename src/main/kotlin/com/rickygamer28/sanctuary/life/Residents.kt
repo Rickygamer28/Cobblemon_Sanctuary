@@ -78,6 +78,8 @@ class LiveResident(
     var greeted = false
     /** Going back to rest: walking into a den (or out of sight, or diving), then gone. */
     var leaving = false
+    /** Lives in a little pocket of its habitat out in another area instead of in the habitat itself. */
+    var pocket: ZoneLayout.Pocket? = null
     var leaveTarget: BlockPos? = null
     var leaveSince = 0L
     val pokemon: Pokemon get() = entity.pokemon
@@ -212,6 +214,8 @@ object Residents {
         s.residentCount = list.size
         s.unlocked = unlocked
         if (newTypes.isNotEmpty()) s.unlockedChanged = true
+        // the pockets of a habitat that just woke up get built too
+        if (s.planned && s.state == SanctuaryState.ACTIVE) s.rebuildZones += newTypes.filter { it != ZoneLayout.HUB && ZoneLayout.pockets(s).any { p -> p.zone == it } }
         if (newTypes.isNotEmpty() || grew) s.generationDirty = true
         planRegion(s, counts)
         rt.anchors = unlocked.associateWith { ZoneLayout.anchor(s, it) }
@@ -360,9 +364,22 @@ object Residents {
         val spawnZone = if (swimmer) "water" else home ?: s.unlocked.random()
         if (swimmer && "water" !in s.unlocked) return null
         var fromDen: com.rickygamer28.sanctuary.world.Dens.Den? = null
+        var inPocket: ZoneLayout.Pocket? = null
         val pos = at ?: run {
             val range = SanctuaryConfig.spawnRange.get().toDouble()
             fun nearPlayer(x: Int, z: Int) = players.isEmpty() || players.any { val dx = it.x - x; val dz = it.z - z; dx * dx + dz * dz < range * range }
+            // some live out in a pocket of their habitat (a pond in the forest, an outcrop in the meadow…)
+            if (home != null && home != ZoneLayout.HUB && level.random.nextDouble() < SanctuaryConfig.pocketShare.get()) {
+                val near = players.randomOrNull()?.let { it.blockX to it.blockZ }
+                repeat(4) {
+                    val (p, pt) = ZoneLayout.pocketPoint(s, spawnZone, level.random, near) ?: return@repeat
+                    if (!level.hasChunk(pt.first shr 4, pt.second shr 4)) return@repeat
+                    if (swimmer && !Behaviour.isWater(level, pt.first, pt.second)) return@repeat
+                    if (!unseen(players, pt.first, pt.second)) return@repeat
+                    inPocket = p
+                    return@run BlockPos(pt.first, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, pt.first, pt.second), pt.second)
+                }
+            }
             // out of a den of its biome (it walks out), preferably one near a player
             if (!swimmer) {
                 // a den nobody came out of in the last few seconds, so they don't pile up at one entrance
@@ -406,6 +423,7 @@ object Residents {
         live.second = TypeLogic.secondZone(pokemon, home, ring)
         live.flyer = TypeLogic.canFlyInFlocks(pokemon)
         live.swimmer = swimmer
+        live.pocket = inPocket
         live.personality = Personality.of(pokemon)
         live.nextMeetAt = level.gameTime + 200 + level.random.nextInt(400)
         tethering.roamCheck = { p -> Behaviour.canRoam(s, rt, live, p) }

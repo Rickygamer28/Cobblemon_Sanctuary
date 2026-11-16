@@ -182,8 +182,8 @@ object ZoneLayout {
         if (dist > s.size.radius) return null
         if (s.habitats.isEmpty() || dist <= hubRadiusAt(s, x, z) - 2) return Hit(HUB, dist, 99.0, null)
         // natural, wobbly borders: bend the point with smooth noise before measuring
-        val wx = x + (Noise.value(s.seed + 101, x / 44.0, z / 44.0) - 0.5) * 30.0 + (Noise.value(s.seed + 202, x / 13.0, z / 13.0) - 0.5) * 7.0
-        val wz = z + (Noise.value(s.seed + 111, x / 44.0, z / 44.0) - 0.5) * 30.0 + (Noise.value(s.seed + 212, x / 13.0, z / 13.0) - 0.5) * 7.0
+        val wx = warpX(s, x, z)
+        val wz = warpZ(s, x, z)
         var bestZone: String? = null
         var bestQ = Double.MAX_VALUE
         var bestScale = 1.0
@@ -214,6 +214,171 @@ object ZoneLayout {
         }
         // the meadows: the nearest habitat is the neighbour
         return Hit(HUB, dist, max(0.0, (bestQ - 1.0) * bestScale), zone)
+    }
+
+    private fun warpX(s: Sanctuary, x: Int, z: Int) =
+        x + (Noise.value(s.seed + 101, x / 44.0, z / 44.0) - 0.5) * 30.0 + (Noise.value(s.seed + 202, x / 13.0, z / 13.0) - 0.5) * 7.0
+    private fun warpZ(s: Sanctuary, x: Int, z: Int) =
+        z + (Noise.value(s.seed + 111, x / 44.0, z / 44.0) - 0.5) * 30.0 + (Noise.value(s.seed + 212, x / 13.0, z / 13.0) - 0.5) * 7.0
+
+    /**
+     * Where (x, z) sits in a habitat's own shape, for its terrain: [q] is 0 in the middle and 1 on its (wobbly) border,
+     * [dist] the straight distance from its middle, [minR] its smaller radius, [size] its overall size and [angle] the
+     * direction from its middle.
+     */
+    class Local(val q: Double, val dist: Double, val minR: Double, val size: Double, val angle: Double)
+
+    fun local(s: Sanctuary, zone: String, x: Int, z: Int): Local? {
+        val hb = s.habitats[zone] ?: return null
+        val (q, _) = measure(s, hb, warpX(s, x, z), warpZ(s, x, z))
+        val dx = (x - hb.x).toDouble()
+        val dz = (z - hb.z).toDouble()
+        return Local(q, sqrt(dx * dx + dz * dz), min(hb.radial, hb.along), hb.size(), kotlin.math.atan2(dz, dx))
+    }
+
+    // ------------------------------------------------------------------ pockets
+
+    /**
+     * A little spot of one habitat inside another area: a pond in the forest, a rocky outcrop out in the meadow, a
+     * patch of flowers, a snowy crag on the mountain… Pokémon of the pocket's habitat can live there, so walking
+     * through the region you meet more kinds of Pokémon than just the ones of the habitat you're in.
+     */
+    class Pocket(val x: Int, val z: Int, val r: Int, val zone: String, val host: String, val salt: Int) {
+        private var levelKey = Int.MIN_VALUE
+        private var cached = 0
+        /** The ground level the pocket is built at (where the host's ground is at its middle). */
+        fun level(s: Sanctuary): Int {
+            val key = s.unlocked.hashCode()
+            if (key != levelKey) { cached = BiomeDresser.baseHeight(s, x, z); levelKey = key }
+            return cached
+        }
+        /** Built only while both its habitat and the ground around it are awake. */
+        fun live(s: Sanctuary) = zone in s.unlocked && (host == HUB || host in s.unlocked)
+    }
+
+    /** Which pockets each area can have. */
+    private val POCKETS_IN: Map<String, List<String>> = mapOf(
+        HUB to listOf("water", "rock", "fairy", "grass", "electric", "ghost", "poison", "ground", "water", "grass"),
+        "grass" to listOf("water", "fairy", "poison", "ghost", "rock", "electric"),
+        "fairy" to listOf("water", "grass", "electric", "poison"),
+        "water" to listOf("grass", "rock", "fairy", "electric"),
+        "rock" to listOf("ice", "ground", "fire", "water", "dragon", "electric"),
+        "ground" to listOf("water", "rock", "fire", "dragon"),
+        "fire" to listOf("rock", "ground", "dragon"),
+        "ice" to listOf("rock", "dragon", "water"),
+        "dragon" to listOf("rock", "fire", "ice", "water"),
+        "ghost" to listOf("poison", "grass", "rock", "water"),
+        "poison" to listOf("water", "ghost", "grass", "fairy"),
+        "electric" to listOf("rock", "ground", "water", "grass"),
+    )
+
+    /** Mountains only get pockets on their lower slopes. */
+    private val STEEP = setOf("ice", "fire", "rock", "dragon")
+
+    private class PocketCache(val key: Long, val all: List<Pocket>, val grid: Map<Long, List<Pocket>>)
+    private val pocketCache = HashMap<java.util.UUID, PocketCache>()
+    private const val POCKET_CELL = 32
+
+    private fun pocketKey(s: Sanctuary): Long {
+        var k = s.layoutSalt.toLong() * 1_000_003L + s.size.radius
+        for ((zone, hb) in s.habitats) k = k * 31 + zone.hashCode() * 7L + hb.x * 131L + hb.z
+        return k
+    }
+
+    /** All the pockets of the region (worked out from the map, so the same every time). */
+    fun pockets(s: Sanctuary): List<Pocket> = pocketCache(s).all
+
+    private fun pocketCache(s: Sanctuary): PocketCache {
+        val key = pocketKey(s)
+        pocketCache[s.id]?.takeIf { it.key == key }?.let { return it }
+        val list = ArrayList<Pocket>()
+        if (s.planned && s.habitats.isNotEmpty()) {
+            val random = java.util.Random(s.seed xor (s.layoutSalt * 0x2545F4914F6CDD1DL) xor 0x9067L)
+            val cell = 44
+            val n = s.size.radius / cell + 1
+            for (gx in -n..n) for (gz in -n..n) {
+                val x = s.center.x + gx * cell + random.nextInt(cell * 3 / 4) - cell * 3 / 8
+                val z = s.center.z + gz * cell + random.nextInt(cell * 3 / 4) - cell * 3 / 8
+                val pick = random.nextInt(1000)
+                val r = 6 + random.nextInt(5)
+                val dist = distance(x, z, s.center.x, s.center.z)
+                if (dist < s.size.hubRadius + 16 || dist > s.size.radius - 18 - r) continue
+                val hit = locate(s, x, z) ?: continue
+                if (hit.edgeDistance < r + 6) continue
+                val host = hit.zone
+                if (host != HUB) {
+                    val l = local(s, host, x, z) ?: continue
+                    if (l.dist < 22 || (host in STEEP && l.q < 0.55)) continue
+                }
+                // keep the routes clear (they run roughly from the town to each habitat's middle)
+                if (nearRouteLine(s, x, z, 24.0 + r)) continue
+                val options = POCKETS_IN[host] ?: continue
+                val zone = options[pick % options.size]
+                list += Pocket(x, z, r, zone, host, pick)
+            }
+        }
+        val grid = HashMap<Long, MutableList<Pocket>>()
+        for (p in list) {
+            val reach = p.r + 6
+            for (cx in Math.floorDiv(p.x - reach, POCKET_CELL)..Math.floorDiv(p.x + reach, POCKET_CELL))
+                for (cz in Math.floorDiv(p.z - reach, POCKET_CELL)..Math.floorDiv(p.z + reach, POCKET_CELL))
+                    grid.getOrPut(cx.toLong() * 1_000_003L + cz) { ArrayList() } += p
+        }
+        return PocketCache(key, list, grid).also { pocketCache[s.id] = it }
+    }
+
+    private fun nearRouteLine(s: Sanctuary, x: Int, z: Int, within: Double): Boolean {
+        val px = (x - s.center.x).toDouble()
+        val pz = (z - s.center.z).toDouble()
+        for (hb in s.habitats.values) {
+            val ax = (hb.x - s.center.x).toDouble()
+            val az = (hb.z - s.center.z).toDouble()
+            val len2 = ax * ax + az * az
+            if (len2 < 1) continue
+            val t = ((px * ax + pz * az) / len2).coerceIn(0.0, 1.0)
+            val dx = px - ax * t
+            val dz = pz - az * t
+            if (dx * dx + dz * dz < within * within) return true
+        }
+        return false
+    }
+
+    /**
+     * The pocket at (x, z), if any, and how far into it the point is (with a wobbly edge): below [Pocket.r] inside,
+     * up to r + 5 in the band where it melts into the ground around it.
+     */
+    fun pocketAt(s: Sanctuary, x: Int, z: Int): Pair<Pocket, Double>? {
+        val list = pocketCache(s).grid[Math.floorDiv(x, POCKET_CELL).toLong() * 1_000_003L + Math.floorDiv(z, POCKET_CELL)] ?: return null
+        for (p in list) {
+            val d = distance(x, z, p.x, p.z)
+            if (d > p.r + 7) continue
+            val wobble = 1 + (Noise.value(s.seed + 4040 + p.salt, x / 5.0, z / 5.0) - 0.5) * 0.4
+            val dn = d * wobble
+            if (dn <= p.r + 5) return p to dn
+        }
+        return null
+    }
+
+    /** A random spot in one of the living pockets of [zone] (null if it has none). */
+    fun pocketPoint(s: Sanctuary, zone: String, random: RandomSource, near: Pair<Int, Int>? = null): Pair<Pocket, Pair<Int, Int>>? {
+        val live = pockets(s).filter { it.zone == zone && it.live(s) }
+        if (live.isEmpty()) return null
+        val p = if (near != null) live.minBy { distance(it.x, it.z, near.first, near.second) + random.nextInt(60) } else live[random.nextInt(live.size)]
+        val ang = random.nextDouble() * 2 * PI
+        val d = sqrt(random.nextDouble()) * (p.r - 1)
+        return p to ((p.x + cos(ang) * d).toInt() to (p.z + sin(ang) * d).toInt())
+    }
+
+    /** A random spot near the edge of [zone] where it meets another habitat or the meadows (null if none was found). */
+    fun borderPoint(s: Sanctuary, zone: String, random: RandomSource): Pair<Int, Int>? {
+        var best: Pair<Int, Int>? = null
+        var bestEdge = Double.MAX_VALUE
+        repeat(8) {
+            val pt = randomPoint(s, zone, random) ?: return@repeat
+            val hit = locate(s, pt.first, pt.second) ?: return@repeat
+            if (hit.zone == zone && hit.edgeDistance < bestEdge) { best = pt; bestEdge = hit.edgeDistance }
+        }
+        return best
     }
 
     /** Do two habitats touch? */
