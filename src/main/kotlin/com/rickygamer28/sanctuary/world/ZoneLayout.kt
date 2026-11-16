@@ -308,7 +308,7 @@ object ZoneLayout {
                 val host = hit.zone
                 if (host != HUB) {
                     val l = local(s, host, x, z) ?: continue
-                    if (l.dist < 22 || (host in STEEP && l.q < 0.55)) continue
+                    if (l.dist < 22) continue
                 }
                 // keep the routes clear (they run roughly from the town to each habitat's middle)
                 if (nearRouteLine(s, x, z, 24.0 + r)) continue
@@ -414,7 +414,7 @@ object ZoneLayout {
     }
 
     /** A random spot inside a zone, spread evenly over its area, or null if none was found. */
-    fun randomPoint(s: Sanctuary, zone: String, random: RandomSource, ring: List<String> = HABITATS): Pair<Int, Int>? {
+    fun randomPoint(s: Sanctuary, zone: String, random: RandomSource, ring: List<String> = HABITATS, front: Boolean = true): Pair<Int, Int>? {
         if (zone == HUB) {
             // half in the town, half out in the meadows along the routes
             if (s.habitats.isEmpty() || random.nextBoolean()) {
@@ -435,6 +435,13 @@ object ZoneLayout {
             return null
         }
         val hb = s.habitats[zone] ?: return null
+        // in mountain habitats residents mostly keep to the low ground at the front, where you can see them
+        if (front && zone in STEEP && random.nextInt(10) < 7) {
+            val a = randomPoint(s, zone, random, ring, front = false) ?: return null
+            val b = randomPoint(s, zone, random, ring, front = false) ?: return a
+            fun backOf(p: Pair<Int, Int>) = (p.first - hb.x) * sin(hb.angle) - (p.second - hb.z) * cos(hb.angle)
+            return if (backOf(a) < backOf(b)) a else b
+        }
         repeat(12) {
             val ang = random.nextDouble() * 2 * PI
             val k = sqrt(random.nextDouble()) * 0.95

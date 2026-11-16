@@ -481,7 +481,10 @@ object BiomeDresser {
                 mix(base, 1.5 + f01(s, xd, zd, 8.0, 66, 2), island)
             }
             "ice" -> {
-                // one big snowy mountain with spurs running down from a small summit plateau (where the spire stands)
+                // one big snowy mountain at the back, with spurs running down from its summit, and snowy foothills in front
+                val (px, pz) = peakOf(s, zone)!!
+                val rB = sqrt((xd - px) * (xd - px) + (zd - pz) * (zd - pz))
+                val a = kotlin.math.atan2(zd - pz, xd - px)
                 val cone = min(big, 90.0)
                 val top = clamp(cone * 0.85, 22.0, 70.0) * (if (variant == 2) 0.75 else 1.0)
                 val rr = rB * (1 + f(s, xd, zd, 26.0, 58, 2) * 0.12)
@@ -498,7 +501,10 @@ object BiomeDresser {
                 hh
             }
             "fire" -> {
-                // a volcano: concave slopes cut by gullies, up to a crater rim
+                // a volcano at the back of the habitat: concave slopes cut by gullies, up to a crater rim
+                val (px, pz) = peakOf(s, zone)!!
+                val rB = sqrt((xd - px) * (xd - px) + (zd - pz) * (zd - pz))
+                val a = kotlin.math.atan2(zd - pz, xd - px)
                 val cone = min(big, 80.0)
                 val top = clamp(cone * 0.9, 24.0, 64.0)
                 val rr = rB * (1 + f(s, xd, zd, 18.0, 47, 2) * 0.08)
@@ -518,7 +524,9 @@ object BiomeDresser {
                 val massif = smooth((f01(s, wx, wz, size * 0.8, 35, 2) - 0.3) / 0.36)
                 val m = Noise.ridged(s.seed + 36 * 7919L, wx / (size * 0.5), wz / (size * 0.5), 3)
                 val tors = smooth((f01(s, wx, wz, 14.0, 37, 2) - 0.8) / 0.08) * 3 * (1 - massif)
-                2 + f(s, wx, wz, 40.0, 34, 3) * 2 + smooth((rB - 10) / (size * 0.35)) * smooth((1.0 - q) / 0.4) * massif * (top * m * m + 4) + tors
+                // the range rises behind the valley at the front
+                val back = smooth((backness(s, zone, x, z) + 0.15) / 0.55)
+                2 + f(s, wx, wz, 40.0, 34, 3) * 2 + smooth((rB - 10) / (size * 0.35)) * smooth((1.0 - q) / 0.4) * massif * back * (top * m * m + 4) + tors
             }
             "ground" -> {
                 val c = clearing(12.0)
@@ -548,7 +556,8 @@ object BiomeDresser {
                 val n = f01(s, wx, wz, size * 0.55, 52, 2)
                 val plateau = smooth((n - 0.42) / 0.1)
                 val canyon = smooth((Noise.ridged(s.seed + 53 * 7919L, wx / (size * 0.9), wz / (size * 0.9), 2) - 0.8) / 0.08)
-                2 + (top * plateau + 3 * smooth((n - 0.3) / 0.1)) * (1 - 0.9 * canyon) * clearing(10.0) * smooth((1.0 - q) / 0.35) + f(s, xd, zd, 16.0, 54, 2) * 1.2
+                val back = 0.25 + 0.75 * smooth((backness(s, zone, x, z) + 0.15) / 0.55)
+                2 + (top * plateau * back + 3 * smooth((n - 0.3) / 0.1)) * (1 - 0.9 * canyon) * clearing(10.0) * smooth((1.0 - q) / 0.35) + f(s, xd, zd, 16.0, 54, 2) * 1.2
             }
             "ghost" -> {
                 // a lonely hill with the tower on top, in rolling gloomy land
@@ -583,6 +592,22 @@ object BiomeDresser {
             else -> f(s, wx, wz, 34.0, 62) * 4 + 1
         }
         return h * e + EDGE_LEVEL * (1 - e)
+    }
+
+    /**
+     * Where a mountain habitat's peak stands: pushed to the back of the habitat (towards the valley wall), so the
+     * front facing the town stays low and easy to walk, with the high ground behind it.
+     */
+    fun peakOf(s: Sanctuary, zone: String): Pair<Double, Double>? {
+        val hb = s.habitats[zone] ?: return null
+        val shift = hb.radial * 0.5
+        return hb.x + sin(hb.angle) * shift to hb.z - cos(hb.angle) * shift
+    }
+
+    /** How far towards the back of a habitat (x, z) is: -1 at its front (towards the town), 0 in the middle, 1 at the back. */
+    private fun backness(s: Sanctuary, zone: String, x: Int, z: Int): Double {
+        val hb = s.habitats[zone] ?: return 0.0
+        return (((x - hb.x) * sin(hb.angle) - (z - hb.z) * cos(hb.angle)) / hb.radial).coerceIn(-1.5, 1.5)
     }
 
     /** Where the desert's oasis lies: halfway out from its middle, in a direction picked by the world. */
@@ -839,7 +864,7 @@ object BiomeDresser {
             val adx = (ax - s.center.x).toDouble()
             val adz = (az - s.center.z).toDouble()
             // up a volcano, the route ends at its foot
-            val anchorDist = sqrt(adx * adx + adz * adz) - (if (zone == "fire") min(min(hb.radial, hb.along), 80.0) * 0.55 else 0.0)
+            val anchorDist = sqrt(adx * adx + adz * adz)
             val len = anchorDist.coerceAtLeast(1.0)
             val ux = adx / len
             val uz = adz / len
@@ -1303,8 +1328,9 @@ object BiomeDresser {
     private fun fire(c: Ctx) {
         val hb = c.s.habitats["fire"]
         val big = min(if (hb != null) min(hb.radial, hb.along) else 30.0, 80.0)
-        val dx = (c.x - (hb?.x ?: c.x)).toDouble()
-        val dz = (c.z - (hb?.z ?: c.z)).toDouble()
+        val peak = peakOf(c.s, "fire")
+        val dx = c.x - (peak?.first ?: c.x.toDouble())
+        val dz = c.z - (peak?.second ?: c.z.toDouble())
         val d = sqrt(dx * dx + dz * dz)
         val crater = (big * 0.14).coerceIn(5.0, 10.0)
         val t = ((d - crater) / (big * 1.25 - crater)).coerceIn(0.0, 1.0)
