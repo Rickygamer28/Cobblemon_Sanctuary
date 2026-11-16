@@ -114,13 +114,15 @@ object Landmarks {
             val r = RADIUS + 2
             if (!loadedAround(level, p.x, p.z, r)) continue
             // take down everything built above the landmark's floor, and turn the floor back into plain ground
+            // (trees as a whole; the leaves of trees standing outside stay, so they aren't cut in half)
+            BiomeDresser.removeTreesIn(level, p, r, p.y + 1, minOf(level.maxBuildHeight - 1, p.y + 120))
             for (ox in -r..r) for (oz in -r..r) {
                 if (ox * ox + oz * oz > r * r) continue
                 // all the way up: spires and towers can be tall (their tops used to be left floating)
                 for (y in p.y + 1..minOf(level.maxBuildHeight - 1, p.y + 120)) {
                     val pos = BlockPos(p.x + ox, y, p.z + oz)
                     val st = level.getBlockState(pos)
-                    if (!st.isAir && !st.`is`(com.rickygamer28.sanctuary.registry.ModContent.EGG_NEST.get()) &&
+                    if (!st.isAir && !st.`is`(net.minecraft.tags.BlockTags.LEAVES) && !st.`is`(com.rickygamer28.sanctuary.registry.ModContent.EGG_NEST.get()) &&
                         !st.`is`(com.rickygamer28.sanctuary.registry.ModContent.SANCTUARY_CORE.get())) level.setBlock(pos, b(Blocks.AIR), FLAGS)
                 }
                 val floor = BlockPos(p.x + ox, p.y, p.z + oz)
@@ -147,11 +149,13 @@ object Landmarks {
             if (cur.isAir || cur.canBeReplaced()) level.setBlock(p, st, FLAGS)
         }
         fun clear(r: Int, h: Int) {
+            // trees in the way go as a whole (not sliced); trees outside just reaching in with their leaves stay
+            BiomeDresser.removeTreesIn(level, base, r, base.y + 1, base.y + h)
             for (dx in -r..r) for (dz in -r..r) for (dy in 1..h) {
                 if (dx * dx + dz * dz > r * r) continue
                 val p = base.offset(dx, dy, dz)
                 val st = level.getBlockState(p)
-                if (!st.isAir && (st.canBeReplaced() || st.`is`(net.minecraft.tags.BlockTags.LEAVES) || st.`is`(net.minecraft.tags.BlockTags.LOGS) || st.`is`(net.minecraft.tags.BlockTags.FLOWERS)))
+                if (!st.isAir && !st.`is`(net.minecraft.tags.BlockTags.LEAVES) && (st.canBeReplaced() || st.`is`(net.minecraft.tags.BlockTags.FLOWERS)))
                     level.setBlock(p, b(Blocks.AIR), FLAGS)
             }
         }

@@ -769,7 +769,8 @@ object BiomeDresser {
             if (Math.floorMod(x * 7 + z * 13, 37) == 0 && hit.dist > s.size.hubRadius + 10) {
                 // a little lamp along the way, just off the path
                 val side = BlockPos(x + 2, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x + 2, z), z)
-                if (level.getBlockState(side).isAir && isNatural(level.getBlockState(side.below()))) {
+                // only on ground that's already at its final height (or it would be left floating when that column is lowered)
+                if (side.y - 1 == targetHeight(s, x + 2, z, ring) && level.getBlockState(side).isAir && isNatural(level.getBlockState(side.below()))) {
                     level.setBlock(side, b(Blocks.SPRUCE_FENCE), FLAGS)
                     protect(s, side); protect(s, side.above())
                     level.setBlock(side.above(), b(if (hit.zone == "ghost" || hit.zone == "dark") Blocks.SOUL_LANTERN else Blocks.LANTERN), FLAGS)
@@ -1031,6 +1032,41 @@ object BiomeDresser {
             }
         }
         return null
+    }
+
+    /**
+     * Takes down every tree with a log inside the cylinder (radius [r] around [center], from [y0] to [y1]) as a
+     * whole: its logs and the leaves around them. Trees standing outside only reaching in with their leaves stay
+     * as they are, so nothing is left sliced in half when an area is cleared.
+     */
+    fun removeTreesIn(level: ServerLevel, center: BlockPos, r: Int, y0: Int, y1: Int) {
+        val logs = LinkedHashSet<BlockPos>()
+        for (dx in -r..r) for (dz in -r..r) {
+            if (dx * dx + dz * dz > r * r) continue
+            for (y in y0..y1) {
+                val p = BlockPos(center.x + dx, y, center.z + dz)
+                if (p in logs || !level.getBlockState(p).`is`(BlockTags.LOGS)) continue
+                // the whole tree joined to this log
+                val queue = ArrayDeque<BlockPos>()
+                queue += p; logs += p
+                var n = 0
+                while (queue.isNotEmpty() && n++ < 1500) {
+                    val q = queue.removeFirst()
+                    for (ox in -1..1) for (oy in -1..1) for (oz in -1..1) {
+                        val m = q.offset(ox, oy, oz)
+                        if (m !in logs && level.getBlockState(m).`is`(BlockTags.LOGS)) { logs += m; queue += m }
+                    }
+                }
+            }
+        }
+        if (logs.isEmpty()) return
+        val air = b(Blocks.AIR)
+        val leaves = HashSet<BlockPos>()
+        for (l in logs) for (ox in -4..4) for (oy in -3..4) for (oz in -4..4) {
+            val m = l.offset(ox, oy, oz)
+            if (m !in leaves && level.getBlockState(m).`is`(BlockTags.LEAVES)) leaves += m
+        }
+        for (p in (logs + leaves).sortedByDescending { it.y }) level.setBlock(p, air, FLAGS)
     }
 
     private fun nearbyLog(level: ServerLevel, from: BlockPos): BlockPos? {
@@ -1711,7 +1747,13 @@ object BiomeDresser {
             "water", "poison" -> {
                 val bog = p.zone == "poison"
                 val level = p.level(c.s)
-                if (inner && c.y < level) {
+                // only where the ground (or more of the pond) holds the water in on every side
+                val held = inner && c.y < level && Direction.Plane.HORIZONTAL.all { d ->
+                    val nx = c.x + d.stepX
+                    val nz = c.z + d.stepZ
+                    pondLevel(c.s, nx, nz) == level || targetHeight(c.s, nx, nz, ZoneLayout.HABITATS) >= level
+                }
+                if (held) {
                     for (yy in c.y + 1..level) c.level.setBlock(BlockPos(c.x, yy, c.z), b(Blocks.WATER), FLAGS)
                     c.ground(if (bog) b(Blocks.MUD) else if (host == "ground") b(Blocks.SAND) else b(Blocks.CLAY), b(Blocks.DIRT))
                     val top = BlockPos(c.x, level + 1, c.z)
