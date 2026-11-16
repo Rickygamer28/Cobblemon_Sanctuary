@@ -230,7 +230,14 @@ object Landmarks {
             val top = G + if (d < 3.0) 1 else 0
             val x = c.base.x + dx
             val z = c.base.z + dz
-            for (y in G - 6..top) {
+            // down to the lake bed, however deep it is (so the island never floats)
+            var bed = G - 6
+            while (bed > c.level.minBuildHeight + 1) {
+                val st = c.level.getBlockState(BlockPos(x, bed - 1, z))
+                if (!st.isAir && st.fluidState.isEmpty && !st.canBeReplaced()) break
+                bed--
+            }
+            for (y in bed..top) {
                 val p = BlockPos(x, y, z)
                 val st = c.level.getBlockState(p)
                 if (st.isAir || !st.fluidState.isEmpty || st.canBeReplaced() || y == top) c.level.setBlock(p, if (y == top && d < 2.5) b(Blocks.GRASS_BLOCK) else b(Blocks.SAND), FLAGS)

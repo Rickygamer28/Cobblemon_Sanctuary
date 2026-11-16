@@ -468,12 +468,17 @@ object BiomeDresser {
             "water" -> if (variant == 2) {
                 // a mangrove delta: winding channels between low banks
                 val ch = ridge(s, wx, wz, 30.0, 7, 3)
-                -3.2 * smooth((ch - 0.66) / 0.2) + f01(s, xd, zd, 30.0, 8, 2) * 1.4
+                val delta = -3.2 * smooth((ch - 0.66) / 0.2) + f01(s, xd, zd, 30.0, 8, 2) * 1.4
+                // with a deep pool in its middle, for the big swimmers
+                val qn = q + f(s, wx, wz, 30.0, 5, 2) * 0.15
+                val pool = smooth((0.32 - qn) / 0.12) * smooth((rB - 10) / 5.0)
+                mix(delta, -3.0 - clamp(big * 0.1, 7.0, 14.0) * smooth((0.28 - qn) / 0.2), pool)
             } else {
                 // a lake in a shallow basin, with beaches, grassy banks rising behind them, and a few islands
                 val qn = q + f(s, wx, wz, 36.0, 5, 2) * 0.2
                 val m = smooth((0.62 - qn) / 0.16)
-                val deep = (if (variant == 1) 4.0 else 7.0) * smooth((0.5 - qn) / 0.35)
+                // deep enough in the middle for the biggest swimmers (Wailord!), shelving gently from the beaches
+                val deep = (if (variant == 1) clamp(big * 0.1, 7.0, 14.0) else clamp(big * 0.14, 9.0, 20.0)) * smooth((0.5 - qn) / 0.35)
                 val land = 1.0 + smooth((qn - 0.62) / 0.4) * 2.0 + f(s, wx, wz, 54.0, 9, 2) * 1.6
                 val base = land * (1 - m) + (-2.0 - deep) * m
                 val island = smooth((f01(s, wx, wz, 26.0, 6, 2) - (if (variant == 1) 0.62 else 0.67)) / 0.1) *
