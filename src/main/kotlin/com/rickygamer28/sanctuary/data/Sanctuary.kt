@@ -357,7 +357,7 @@ class Sanctuary(
 
     companion object {
         /** Bump to make existing sanctuaries rebuild their biomes after a generator change. */
-        const val DATA_VERSION = 13
+        const val DATA_VERSION = 14
 
         /** 2: the region map (town, habitats, meadows and routes) instead of a ring of type biomes. */
         const val LAYOUT_VERSION = 2
