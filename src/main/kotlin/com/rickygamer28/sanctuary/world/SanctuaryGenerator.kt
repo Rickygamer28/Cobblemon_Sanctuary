@@ -182,6 +182,7 @@ object SanctuaryGenerator {
             if (Landmarks.near(s, x, z)) continue
             looseBlocks(level, x, z)
             floatingBits(level, x, z)
+            strayWater(level, x, z)
             if (s.meadow.get(idx)) continue
             Dens.maybeBuild(level, s, x, z, ring)
             val top = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1
@@ -274,6 +275,32 @@ object SanctuaryGenerator {
             for (q in lump.sortedByDescending { it.y }) level.setBlock(q, air, net.minecraft.world.level.block.Block.UPDATE_CLIENTS)
             CobblemonSanctuary.LOGGER.debug("Sanctuary: removed a floating lump of {} blocks at {}", lump.size, p)
             return
+        }
+    }
+
+    /**
+     * Water standing above the lake level with open air beside it (a wall of water left by an older layout or a
+     * leaky pond): it would spill, so it's taken away, from the top down.
+     */
+    private fun strayWater(level: ServerLevel, x: Int, z: Int) {
+        val top = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z) - 1
+        var y = top
+        val air = net.minecraft.world.level.block.Blocks.AIR.defaultBlockState()
+        while (y > BiomeDresser.WATER_Y) {
+            val p = BlockPos(x, y, z)
+            val st = level.getBlockState(p)
+            if (!st.`is`(net.minecraft.world.level.block.Blocks.WATER)) {
+                if (st.isAir || st.`is`(net.minecraft.world.level.block.Blocks.LILY_PAD)) { y--; continue }
+                return
+            }
+            val open = net.minecraft.core.Direction.Plane.HORIZONTAL.any { d ->
+                val n = p.relative(d)
+                level.hasChunk(n.x shr 4, n.z shr 4) && level.getBlockState(n).isAir
+            }
+            if (!open) return
+            level.setBlock(p, air, net.minecraft.world.level.block.Block.UPDATE_CLIENTS)
+            if (level.getBlockState(p.above()).`is`(net.minecraft.world.level.block.Blocks.LILY_PAD)) level.setBlock(p.above(), air, net.minecraft.world.level.block.Block.UPDATE_CLIENTS)
+            y--
         }
     }
 

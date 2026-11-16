@@ -44,7 +44,7 @@ import kotlin.math.sqrt
 object BiomeDresser {
     private const val FLAGS = Block.UPDATE_CLIENTS
     private const val G = SanctuaryDimension.GROUND_Y
-    private const val WATER_Y = G - 1
+    const val WATER_Y = G - 1
 
     private fun b(block: Block): BlockState = block.defaultBlockState()
 
@@ -641,7 +641,9 @@ object BiomeDresser {
     }
 
     /** Target height without pockets (a pocket is built at the height its surroundings have here). */
-    fun baseHeight(s: Sanctuary, x: Int, z: Int, ring: List<String> = ZoneLayout.HABITATS): Int {
+    fun baseHeight(s: Sanctuary, x: Int, z: Int, ring: List<String> = ZoneLayout.HABITATS, asIfAwake: Boolean = false): Int {
+        fun shape(s: Sanctuary, zone: String, x: Int, z: Int, ring: List<String>): Double =
+            if (asIfAwake) rawOffset(s, zone, variantOf(s, zone), x, z, ring) else this@BiomeDresser.shape(s, zone, x, z, ring)
         val dx = (x - s.center.x).toDouble()
         val dz = (z - s.center.z).toDouble()
         val dist = sqrt(dx * dx + dz * dz)

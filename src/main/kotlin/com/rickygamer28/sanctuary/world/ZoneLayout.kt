@@ -312,6 +312,15 @@ object ZoneLayout {
                 }
                 // keep the routes clear (they run roughly from the town to each habitat's middle)
                 if (nearRouteLine(s, x, z, 24.0 + r)) continue
+                // never overlapping another pocket (each spot must belong to one pocket only)
+                if (list.any { distance(it.x, it.z, x, z) < it.r + r + 14 }) continue
+                // on fairly level dry land: not in a lake, not on a slope it would have to be cut into
+                // (measured as if every habitat were awake, so the pockets don't change when one wakes up)
+                val heights = (0 until 8).map { k ->
+                    val a = k * PI / 4
+                    BiomeDresser.baseHeight(s, (x + cos(a) * (r + 3)).toInt(), (z + sin(a) * (r + 3)).toInt(), asIfAwake = true)
+                } + BiomeDresser.baseHeight(s, x, z, asIfAwake = true)
+                if (heights.min() < BiomeDresser.WATER_Y + 1 || heights.max() - heights.min() > 4) continue
                 val options = POCKETS_IN[host] ?: continue
                 val zone = options[pick % options.size]
                 list += Pocket(x, z, r, zone, host, pick)
