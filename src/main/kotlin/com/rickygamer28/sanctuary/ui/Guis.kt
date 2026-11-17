@@ -103,6 +103,7 @@ object SanctuaryGuis {
             t.putIntArray("crowdCaps", intArrayOf(base, more, all))
         }
         t.putInt("progress", SanctuaryGenerator.progress(s) ?: -1)
+        t.putInt("minutesLeft", SanctuaryGenerator.minutesLeft(s) ?: -1)
         t.putBoolean("inside", SanctuaryDimension.isSanctuary(player.level()))
         val ring = ZoneLayout.ring(s)
         t.putInt("awake", s.unlocked.size)

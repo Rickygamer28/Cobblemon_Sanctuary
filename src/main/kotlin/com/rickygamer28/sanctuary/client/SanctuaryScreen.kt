@@ -504,7 +504,17 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
         g.fill(x + 10, by + 15, x + 14, by + 19, dot)
         text(g, "${data.getInt("live")} out now", x + 18, by + 13, SUB)
         val prog = data.getInt("progress")
-        text(g, if (prog >= 0) "Building $prog%" else "Valley ready", x + 10, by + 26, if (prog >= 0) GOLD else DIM)
+        val left = data.getInt("minutesLeft")
+        val label = when {
+            prog < 0 -> "Valley ready"
+            left > 0 -> "Building $prog% · ~$left min"
+            else -> "Building $prog%"
+        }
+        text(g, fit(label, SIDE_W - 20), x + 10, by + 26, if (prog >= 0) GOLD else DIM)
+        if (prog >= 0 && over(mx, my, x + 10, by + 24, SIDE_W - 20, 12)) tooltip = listOf(
+            Component.literal("Building the valley").withColor(GOLD),
+            Component.literal(if (left > 0) "About $left minute${if (left == 1) "" else "s"} left at the current speed" else "Working out how long it will take…").withColor(SUB),
+            Component.literal("Stay inside the valley so it keeps going").withColor(SUB))
     }
 
     // ------------------------------------------------------------------ create

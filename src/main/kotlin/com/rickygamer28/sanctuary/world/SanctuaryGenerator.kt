@@ -183,6 +183,27 @@ object SanctuaryGenerator {
         return (c * 100L / total(s).coerceAtLeast(1)).toInt()
     }
 
+    /** How fast the builder is getting through the valley: [cursor, time (ms), columns per second]. */
+    private val pace = HashMap<UUID, DoubleArray>()
+
+    private fun trackPace(s: Sanctuary) {
+        val c = (cursors[s.id] ?: return).toDouble()
+        val t = System.currentTimeMillis().toDouble()
+        val p = pace.getOrPut(s.id) { doubleArrayOf(c, t, 0.0) }
+        val dt = (t - p[1]) / 1000.0
+        if (dt < 2.0) return
+        val rate = ((c - p[0]) / dt).coerceAtLeast(0.0)
+        p[2] = if (p[2] == 0.0) rate else p[2] * 0.7 + rate * 0.3
+        p[0] = c; p[1] = t
+    }
+
+    /** Roughly how many minutes are left in this building pass (null when not building or not known yet). */
+    fun minutesLeft(s: Sanctuary): Int? {
+        val c = cursors[s.id] ?: return null
+        val rate = pace[s.id]?.get(2)?.takeIf { it > 1 } ?: return null
+        return Math.ceil((total(s) - c) / rate / 60.0).toInt().coerceAtLeast(1)
+    }
+
     private val repairCursor = HashMap<UUID, Int>()
     private val repaired = HashMap<UUID, Int>()
     private val repairMissed = HashSet<UUID>()
@@ -545,7 +566,9 @@ object SanctuaryGenerator {
             BiomeDresser.endHeights()
             usedMillis = usedMillis * 0.8 + (System.nanoTime() - started) / 1_000_000.0 * 0.2
         }
+        if (now % 20L == 0L) trackPace(s)
         if (i >= total && queue.isEmpty()) {
+            pace.remove(s.id)
             cursors.remove(s.id)
             deferred.remove(s.id)
             requested.remove(s.id)
