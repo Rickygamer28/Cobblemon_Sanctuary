@@ -108,7 +108,9 @@ object SanctuaryGenerator {
         if (max <= base) return base.toLong()
         val tick = runCatching { level.server.currentSmoothedTickTime.toDouble() }.getOrDefault(50.0)
         val others = (tick - usedMillis).coerceAtLeast(0.0)
-        return (40.0 - others).toLong().coerceIn(base.toLong(), max.toLong())
+        // a busy server (lots of Pokémon out) gets the room it needs: building slows down rather than the residents
+        val floor = if (others > 34) 3L else base.toLong()
+        return (40.0 - others).toLong().coerceIn(floor, maxOf(floor, max.toLong()))
     }
 
     /** Asks for the chunks of the next columns to be loaded. */

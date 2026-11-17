@@ -68,6 +68,9 @@ object Behaviour {
                 if (other != null && now >= other.busyUntil) { Scenes.start(level, s, rt, r, other, Scenes.Kind.PLAY_FIGHT, now); continue }
             }
 
+            // on a long walk: the next leg
+            if (Residents.continueLongWalk(e)) continue
+
             // follow waypoints (commutes go through the hub)
             if (r.waypoints.isNotEmpty()) {
                 val wp = r.waypoints.first()

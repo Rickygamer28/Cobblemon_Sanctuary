@@ -22,6 +22,7 @@ import net.minecraft.world.level.levelgen.Heightmap
 import java.util.UUID
 import kotlin.math.cos
 import kotlin.math.sin
+import kotlin.math.sqrt
 
 /** A Pokémon in a member's PC that lives in the sanctuary. */
 class RosterEntry(val pokemon: Pokemon, val owner: UUID, val ownerName: String, val pcId: UUID)
@@ -476,6 +477,7 @@ object Residents {
     }
 
     fun despawn(rt: SanctuaryRuntime, r: LiveResident, quiet: Boolean = false) {
+        longWalks.remove(r.entity.uuid)
         rt.live.remove(r.pokemonId)
         Routines.clearSleep(r)
         MegaCompat.onDespawn(r.entity)
@@ -504,11 +506,50 @@ object Residents {
 
     // ------------------------------------------------------------------ helpers
 
+    /** Where residents on a long walk are ultimately headed (they get there in legs). */
+    private class LongWalk(val pos: BlockPos, val speed: Float, val closeEnough: Int)
+    private val longWalks = HashMap<UUID, LongWalk>()
+
+    /** Longer than this, a walk is split into legs. */
+    private const val LEG = 30
+
+    /**
+     * Sends a resident walking to [pos]. Pathfinding can't plan very far ahead: a far target makes it plan, give up,
+     * stand still and try again, which looks like stuttering (and costs the server time). So far walks over open
+     * ground go in legs of about [LEG] blocks; [continueLongWalk] starts the next leg when one is done.
+     */
     fun walkTo(entity: PokemonEntity, pos: BlockPos, speed: Float = 0.4f, closeEnough: Int = 1) {
+        val level = entity.level() as? ServerLevel
+        val dx = pos.x - entity.x
+        val dz = pos.z - entity.z
+        val dist = sqrt(dx * dx + dz * dz)
+        val surfaceTarget = level != null &&
+            pos.y >= level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, pos.x, pos.z) - 2 && !entity.isInWater
+        if (level != null && surfaceTarget && dist > LEG + 10) {
+            val lx = (entity.x + dx / dist * LEG).toInt()
+            val lz = (entity.z + dz / dist * LEG).toInt()
+            if (level.hasChunk(lx shr 4, lz shr 4)) {
+                longWalks[entity.uuid] = LongWalk(pos, speed, closeEnough)
+                entity.brain.setMemory(MemoryModuleType.WALK_TARGET, WalkTarget(surface(level, lx, lz), speed, 3))
+                return
+            }
+        }
+        longWalks.remove(entity.uuid)
         entity.brain.setMemory(MemoryModuleType.WALK_TARGET, WalkTarget(pos, speed, closeEnough))
     }
 
+    /** A leg of a long walk is done: on to the next one. True while the resident is on a long walk. */
+    fun continueLongWalk(entity: PokemonEntity): Boolean {
+        val walk = longWalks[entity.uuid] ?: return false
+        if (entity.brain.hasMemoryValue(MemoryModuleType.WALK_TARGET)) return true
+        walkTo(entity, walk.pos, walk.speed, walk.closeEnough)
+        return true
+    }
+
+    fun forgetWalk(entity: PokemonEntity) { longWalks.remove(entity.uuid) }
+
     fun stop(entity: PokemonEntity) {
+        longWalks.remove(entity.uuid)
         entity.brain.eraseMemory(MemoryModuleType.WALK_TARGET)
         entity.navigation.stop()
     }
