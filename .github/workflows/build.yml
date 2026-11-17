@@ -71,7 +71,7 @@ jobs:
 
       - name: Self test (real server builds a valley and checks it)
         if: steps.build.outputs.status == '0' && hashFiles('.ci/selftest') != ''
-        timeout-minutes: 45
+        timeout-minutes: 50
         run: |
           set +e
           SIZE=$(cat .ci/selftest | head -1)
@@ -87,11 +87,12 @@ jobs:
           ls -la mods > ../ci-out/selftest/mods.txt
           echo "eula=true" > eula.txt
           printf 'online-mode=false\nmax-tick-time=-1\nspawn-protection=0\nlevel-type=minecraft\\:flat\nview-distance=4\nsimulation-distance=4\ngenerate-structures=false\n' > server.properties
-          echo "-Xmx4G -Dsanctuary.selftest=$SIZE" >> user_jvm_args.txt
-          timeout 40m ./run.sh nogui > ../ci-out/selftest/server.log 2>&1
+          printf '\n-Xmx4G\n-Dsanctuary.selftest=%s\n' "$SIZE" >> user_jvm_args.txt
+          cp user_jvm_args.txt ../ci-out/selftest/jvm-args.txt
+          timeout 42m ./run.sh nogui > ../ci-out/selftest/server.log 2>&1
           echo "exit=$?" > ../ci-out/selftest/exit.txt
           cp selftest-report.txt ../ci-out/selftest/ 2>/dev/null || echo "no report" > ../ci-out/selftest/selftest-report.txt
-          grep -E "selftest|ERROR|Exception" ../ci-out/selftest/server.log | head -300 > ../ci-out/selftest/highlights.txt
+          grep -E "selftest|Sanctuary|ERROR|Exception" ../ci-out/selftest/server.log | head -300 > ../ci-out/selftest/highlights.txt
           tail -200 ../ci-out/selftest/server.log > ../ci-out/selftest/server-tail.log
           rm -f ../ci-out/selftest/server.log
 

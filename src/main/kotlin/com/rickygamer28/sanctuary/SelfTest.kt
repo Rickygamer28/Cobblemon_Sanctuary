@@ -49,10 +49,14 @@ object SelfTest {
         CobblemonSanctuary.LOGGER.info("[selftest] {}", line)
     }
 
+    private var announced = false
+
     /** Called every server tick (while active). */
     fun tick(server: MinecraftServer) {
         if (!active) return
-        val level = SanctuaryDimension.level(server) ?: return
+        val level = SanctuaryDimension.level(server)
+        if (!announced) { announced = true; CobblemonSanctuary.LOGGER.info("[selftest] active, size {}, dimension {}", sizeArg, if (level == null) "MISSING" else "ok") }
+        if (level == null) return
         val data = SanctuaryData.get(server)
         val now = level.gameTime
         val sanctuary = s ?: create(server, level, data, now).also { s = it }
@@ -63,6 +67,8 @@ object SelfTest {
             CobblemonSanctuary.LOGGER.error("[selftest] generator failed", e)
         }
         val busy = SanctuaryGenerator.isGrowing(sanctuary) || SanctuaryGenerator.isRepairing(sanctuary)
+        if ((now - stageStart) % 600L == 0L) CobblemonSanctuary.LOGGER.info("[selftest] stage {} at {} s: building {}%, repairing {}, tick {} ms",
+            stage, (now - stageStart) / 20, SanctuaryGenerator.progress(sanctuary), SanctuaryGenerator.isRepairing(sanctuary), "%.1f".format(server.currentSmoothedTickTime))
         if (busy) idleSince = -1L else if (idleSince < 0) idleSince = now
         val timedOut = now - stageStart > MAX_STAGE_TICKS
         // finished: nothing building, cleaned up, and a minute for dens and landmarks to go up
@@ -224,12 +230,14 @@ object SelfTest {
             }
             if (blocked > 3) find("den entrance blocked").add(s, d.mouth.x, d.mouth.y, d.mouth.z, "$blocked blocks")
         }
+        try { File("selftest-report.txt").writeText(report.toString()) } catch (_: Exception) {}
         log("scanned $columns columns ($unloaded not loaded); ${s.landmarks.count { it.value != Landmarks.NONE }} landmarks, $dens dens, ${ZoneLayout.pockets(s).count { it.live(s) }} pockets")
         if (f.isEmpty()) log("  no problems found")
         for (finding in f.values) {
             log("  ${finding.name}: ${finding.count}")
             for (sample in finding.samples) log("      at $sample")
         }
+        try { File("selftest-report.txt").writeText(report.toString()) } catch (_: Exception) {}
     }
 
     private fun leavesHaveTrunk(level: ServerLevel, start: BlockPos, seen: HashSet<Long>): Boolean {
