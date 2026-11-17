@@ -222,14 +222,18 @@ object BiomeDresser {
                 if (random.nextInt(3) == 0) at(p.above(), b(Blocks.MOSS_CARPET))
             }
         }
-        fun deadTree(log: BlockState, branch: BlockState) {
-            val h = 4 + random.nextInt(4)
+        /** A bare, gnarled tree: a trunk with crooked wooden branches (logs, so they read as a tree and stay put). */
+        fun deadTree(log: BlockState, @Suppress("UNUSED_PARAMETER") branch: BlockState) {
+            val h = 4 + random.nextInt(3)
             column(log, h)
-            repeat(2 + random.nextInt(2)) {
-                val d = Direction.Plane.HORIZONTAL.getRandomDirection(random)
-                val yy = h - random.nextInt(2)
-                at(surface.above(yy).relative(d), branch)
-                if (random.nextBoolean()) at(surface.above(yy).relative(d, 2), branch)
+            val dirs = Direction.Plane.HORIZONTAL.toList().shuffled(java.util.Random(random.nextLong())).take(2 + random.nextInt(2))
+            for ((k, d) in dirs.withIndex()) {
+                val yy = h - 1 - k % 2
+                val axis = d.axis
+                val side = log.trySetValue(RotatedPillarBlock.AXIS, axis)
+                at(surface.above(yy).relative(d), side)
+                // the branch bends upwards at its end
+                if (random.nextBoolean()) at(surface.above(yy + 1).relative(d), log) else at(surface.above(yy).relative(d, 2), side)
             }
         }
         fun ruinWall(state: BlockState, length: Int, height: Int) {
@@ -1625,7 +1629,7 @@ object BiomeDresser {
     /** Haunted tower: a gloomy hill with the tower, gnarled woods and an old graveyard. */
     private fun ghost(c: Ctx) {
         // pale grass with broad patches of podzol and bare earth; soul soil only in a few damp hollows
-        val soil = c.broad(c.broad(b(Blocks.GRASS_BLOCK), b(Blocks.PODZOL), 0.56, 22.0, 1), b(Blocks.COARSE_DIRT), 0.72, 16.0, 2)
+        val soil = c.broad(c.broad(b(Blocks.GRASS_BLOCK), b(Blocks.PODZOL), 0.68, 18.0, 1), b(Blocks.COARSE_DIRT), 0.8, 14.0, 2)
         val hollow = c.slope <= 1 && c.rise <= 2 && c.noise(18.0, 3) > 0.8
         c.natural(if (hollow) b(Blocks.SOUL_SOIL) else soil, b(Blocks.DIRT), b(Blocks.STONE), b(Blocks.COBBLED_DEEPSLATE))
         if (c.cliff) return
@@ -1633,7 +1637,7 @@ object BiomeDresser {
         when {
             graveyard && Math.floorMod(c.x, 4) == 0 && Math.floorMod(c.z, 5) == 0 && c.roomy() -> c.gravestone()
             !graveyard && c.tree(9, 19, 5) && c.roomy() -> when {
-                c.variant == 1 || c.noise(30.0, 6) > 0.6 -> c.deadTree(b(Blocks.DARK_OAK_LOG), b(Blocks.DARK_OAK_FENCE))
+                (c.variant == 1 && c.random.nextInt(2) == 0) || c.random.nextInt(4) == 0 -> c.deadTree(b(Blocks.DARK_OAK_LOG), b(Blocks.DARK_OAK_FENCE))
                 else -> c.feature(TreeFeatures.DARK_OAK)
             }
             c.variant == 1 && c.grid(23, 7) && c.roomy() -> c.place(b(Blocks.CARVED_PUMPKIN))
@@ -1702,7 +1706,7 @@ object BiomeDresser {
     private fun grass(c: Ctx) {
         // a forest floor: grass, with podzol and moss in the deep woods
         val deep = c.noise(34.0, 510) > 0.45
-        val soil = if (deep && c.variant != 2) c.broad(b(Blocks.GRASS_BLOCK), if (c.variant == 0) b(Blocks.MOSS_BLOCK) else b(Blocks.PODZOL), 0.62, 14.0, 1) else b(Blocks.GRASS_BLOCK)
+        val soil = if (deep && c.variant != 2) c.broad(b(Blocks.GRASS_BLOCK), if (c.variant == 0) b(Blocks.MOSS_BLOCK) else b(Blocks.PODZOL), 0.72, 12.0, 1) else b(Blocks.GRASS_BLOCK)
         c.natural(soil, b(Blocks.DIRT), b(Blocks.STONE), b(Blocks.MOSSY_COBBLESTONE))
         if (c.cliff) return
         when (c.variant) {
@@ -1981,7 +1985,7 @@ object BiomeDresser {
                 }
             }
             "grass" -> {
-                c.ground(if (host == "ground") b(Blocks.GRASS_BLOCK) else c.broad(b(Blocks.GRASS_BLOCK), b(Blocks.PODZOL), 0.6, 6.0, 16), b(Blocks.DIRT))
+                c.ground(b(Blocks.GRASS_BLOCK), b(Blocks.DIRT))
                 when {
                     c.grid(5, 17) && c.roomy(3) -> c.feature(if (c.noise(20.0, 18) > 0.5) TreeFeatures.OAK else TreeFeatures.BIRCH)
                     c.chance(0.35) -> c.place(c.pick(b(Blocks.FERN), b(Blocks.SHORT_GRASS)))
@@ -1996,10 +2000,10 @@ object BiomeDresser {
                 }
             }
             "ghost" -> {
-                c.ground(c.broad(b(Blocks.PODZOL), b(Blocks.COARSE_DIRT), 0.55, 5.0, 21), b(Blocks.DIRT))
+                c.ground(c.broad(b(Blocks.GRASS_BLOCK), b(Blocks.PODZOL), 0.62, 5.0, 21), b(Blocks.DIRT))
                 when {
                     inner && Math.floorMod(c.x, 3) == 0 && Math.floorMod(c.z, 4) == 0 -> c.gravestone()
-                    core && c.grid(8, 22) -> c.deadTree(b(Blocks.DARK_OAK_LOG), b(Blocks.DARK_OAK_FENCE))
+                    core && c.grid(8, 22) && c.roomy() -> c.feature(TreeFeatures.DARK_OAK)
                     c.chance(0.03) -> c.place(b(Blocks.BROWN_MUSHROOM))
                 }
             }

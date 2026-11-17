@@ -322,7 +322,8 @@ object ZoneLayout {
                     val a = k * PI / 4
                     BiomeDresser.baseHeight(s, (x + cos(a) * (r + 3)).toInt(), (z + sin(a) * (r + 3)).toInt(), asIfAwake = true)
                 } + BiomeDresser.baseHeight(s, x, z, asIfAwake = true)
-                if (heights.min() < BiomeDresser.WATER_Y + 1 || heights.max() - heights.min() > 4) continue
+                // (not on a beach either: at least two above the water)
+                if (heights.min() < BiomeDresser.WATER_Y + 3 || heights.max() - heights.min() > 4) continue
                 val options = POCKETS_IN[host] ?: continue
                 val zone = options[pick % options.size]
                 list += Pocket(x, z, r, zone, host, pick)
