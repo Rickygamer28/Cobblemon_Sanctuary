@@ -992,7 +992,7 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
                 if (hh > 30 && v != 6) c = mix(c, 0xF4F6FA, ((hh - 30) / 14f).coerceIn(0f, 0.75f))
                 // light from the top left: slopes facing it are brighter, the others darker
                 val slope = (heightAt(i - 1, j - 1) - hh).coerceIn(-8, 8)
-                c = if (slope < 0) mix(c, 0xFFFFFF, (-slope * 0.045f).coerceAtMost(0.3f)) else mix(c, 0x10140C, (slope * 0.06f).coerceAtMost(0.45f))
+                c = if (slope < 0) mix(c, 0xFFFFFF, (-slope * 0.07f).coerceAtMost(0.35f)) else mix(c, 0x10140C, (slope * 0.09f).coerceAtMost(0.5f))
                 if (f and 1 != 0) c = mix(c, 0xD8B878, 0.75f) // a route
                 if (f and 4 != 0 && (i + j) % 2 == 0) c = mix(c, 0x1A1410, 0.35f) // a cave underneath
                 if (f and 16 != 0) c = 0xFF2A221C.toInt() // a cave mouth
