@@ -312,8 +312,12 @@ object SanctuaryGenerator {
                 null -> { repairMissed += s.id; continue }
                 true -> {}
             }
-            if (Landmarks.near(s, x, z)) continue
+            val atLandmark = Landmarks.near(s, x, z)
             val inDen = Dens.covers(s, x, z)
+            // anything a player built (they can't build here): taken away, top down; if that leaves a hole in the
+            // ground, the column is built again
+            if (playerBlocks(level, s, x, z) && !atLandmark && !inDen && mayCut(s, idx)) { s.dressed.clear(idx); Trace.rebuild("player blocks removed", x, z); s.generationDirty = true }
+            if (atLandmark) continue
             looseBlocks(level, x, z)
             floatingBits(level, s, x, z)
             orphanLeaves(level, x, z)
@@ -407,6 +411,24 @@ object SanctuaryGenerator {
         return true
     }
 
+    /** Removes what players built in this column. Returns true if the ground itself had some (a hole to fill). */
+    private fun playerBlocks(level: ServerLevel, s: Sanctuary, x: Int, z: Int): Boolean {
+        val top = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z) - 1
+        val target = BiomeDresser.targetHeight(s, x, z, ZoneLayout.ring())
+        val bottom = maxOf(level.minBuildHeight + 1, minOf(target, com.rickygamer28.sanctuary.SanctuaryDimension.GROUND_Y) - 30)
+        var hole = false
+        for (y in top downTo bottom) {
+            val p = BlockPos(x, y, z)
+            val st = level.getBlockState(p)
+            if (ValleyBlocks.belongs(st)) continue
+            Trace.removed(st)
+            Trace.note(x, z, "removed player block ${st.block} at $y")
+            ValleyBlocks.remove(level, p)
+            if (y <= target) hole = true
+        }
+        return hole
+    }
+
     /**
      * Plants and crystals left hanging in the air after the ground under them was lowered (they have no collision,
      * so older versions didn't see them) are removed, and Cobblemon crystal clusters on the ground stand upright.
@@ -464,11 +486,11 @@ object SanctuaryGenerator {
             }
             if (p.asLong() in known) continue
             checked++
-            val lump = lumpAround(level, p, 400, known) ?: continue
+            val lump = lumpAround(level, p, 3000, known) ?: continue
             val air = net.minecraft.world.level.block.Blocks.AIR.defaultBlockState()
             // top down, so nothing drops or pops off as items
             Trace.note(x, z, "floating lump of ${lump.size} removed at ${p.y}")
-            for (q in lump.sortedByDescending { it.y }) level.setBlock(q, air, net.minecraft.world.level.block.Block.UPDATE_CLIENTS)
+            for (q in lump.sortedByDescending { it.y }) { (level.getBlockEntity(q) as? net.minecraft.world.Container)?.let { net.minecraft.world.Containers.dropContents(level, q, it) }; level.setBlock(q, air, net.minecraft.world.level.block.Block.UPDATE_CLIENTS) }
             CobblemonSanctuary.LOGGER.debug("Sanctuary: removed a floating lump of {} blocks at {}", lump.size, p)
             return
         }
@@ -567,7 +589,7 @@ object SanctuaryGenerator {
             val p = queue.removeFirst()
             if (!level.hasChunk(p.x shr 4, p.z shr 4)) return null
             if (p.asLong() in known) return joined()
-            if (level.getBlockEntity(p) != null) return joined()
+            if (ValleyBlocks.isMods(level.getBlockState(p))) return joined()
             out += p
             if (out.size > max) return joined()
             for (d in net.minecraft.core.Direction.entries) {

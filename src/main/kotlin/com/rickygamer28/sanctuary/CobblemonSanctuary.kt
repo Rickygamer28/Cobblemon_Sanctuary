@@ -43,7 +43,12 @@ class CobblemonSanctuary(modBus: IEventBus, container: ModContainer) {
         bus.addListener(PlayerInteractEvent.EntityInteract::class.java) { onEntityInteract(it) }
         bus.addListener(EntityJoinLevelEvent::class.java) { onEntityJoin(it) }
         bus.addListener(net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent::class.java) { onDamage(it) }
-        bus.addListener(BlockEvent.BreakEvent::class.java) { onBlockBreak(it) }
+        bus.addListener(BlockEvent.BreakEvent::class.java) { if (!NoBuilding.onBreak(it)) onBlockBreak(it) }
+        // nobody builds in a sanctuary (the mod's own beds, balls, nests… still go down)
+        bus.addListener(BlockEvent.EntityPlaceEvent::class.java) { NoBuilding.onPlace(it) }
+        bus.addListener(PlayerInteractEvent.RightClickBlock::class.java) { NoBuilding.onUseOnBlock(it) }
+        bus.addListener(PlayerInteractEvent.RightClickItem::class.java) { NoBuilding.onUseItem(it) }
+        bus.addListener(BlockEvent.BlockToolModificationEvent::class.java) { NoBuilding.onToolUse(it) }
         // before Cobblemon saves the PCs, so no Pokémon is saved still linked to the sanctuary
         bus.addListener(net.neoforged.bus.api.EventPriority.HIGHEST, ServerStoppingEvent::class.java) { onServerStopping(it) }
         bus.addListener(ChunkEvent.Load::class.java) { onChunkLoad(it) }

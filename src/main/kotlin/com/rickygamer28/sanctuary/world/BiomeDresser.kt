@@ -460,11 +460,9 @@ object BiomeDresser {
     fun isModSolid(st: BlockState) = st.block in MOD_SOLID
 
     /** Is this block touching something that looks like a player's build (planks, glass, a door, a chest…)? */
+    /** Next to one of the mod's own blocks a player placed (a bed, a ball, a nest…)? Players build nothing else here. */
     private fun nextToBuild(level: ServerLevel, p: BlockPos): Boolean = Direction.entries.any { d ->
-        val n = p.relative(d)
-        val st = level.getBlockState(n)
-        !st.isAir && !isNatural(st) && !isClutter(st) && st.block !in MOD_SOLID && !isCobblemonDecor(st) &&
-            !st.`is`(BlockTags.LOGS) && !st.`is`(BlockTags.LEAVES) || level.getBlockEntity(n) != null
+        ValleyBlocks.isMods(level.getBlockState(p.relative(d)))
     }
 
     // ================================================================== Cobblemon's own plants and crystals
@@ -958,10 +956,11 @@ object BiomeDresser {
                 val st = level.getBlockState(p)
                 // natural ground, and whatever was growing or hanging inside it (glow lichen from an old cave's
                 // ceiling, dripstone, mushrooms…), or it would be left floating in the air
-                // (and lava: an old cave's lava pool would be left on the new ground, and run)
-                if (isNatural(st) || st.fluidState.`is`(net.minecraft.tags.FluidTags.LAVA) ||
-                    (!st.isAir && (isClutter(st) || isCobblemonDecor(st) || (st.block in MOD_SOLID && !nextToBuild(level, p)))))
-                    level.setBlock(p, b(Blocks.AIR), BULK)
+                // everything above the new ground goes (lava too: an old cave's pool would be left there and run),
+                // but the mod's own blocks (beds, nests…)
+                if (!st.isAir && !ValleyBlocks.isMods(st) && (keep == null || p.asLong() !in keep)) {
+                    if (!ValleyBlocks.belongs(st)) { Trace.removed(st); ValleyBlocks.remove(level, p) } else level.setBlock(p, b(Blocks.AIR), BULK)
+                }
             }
         }
         return BlockPos(ground.x, target, ground.z)
@@ -1518,6 +1517,8 @@ object BiomeDresser {
                 // the sanctuary's own decorations (not a player's build): taken away too, or the old ground under
                 // them would be left standing
                 st.block in MOD_SOLID && !nextToBuild(level, p) -> { level.setBlock(p, air, FLAGS); p = p.below() }
+                // anything a player built (players can't build in the sanctuary): it goes too
+                !ValleyBlocks.belongs(st) -> { Trace.removed(st); ValleyBlocks.remove(level, p); p = p.below() }
                 else -> return p
             }
         }

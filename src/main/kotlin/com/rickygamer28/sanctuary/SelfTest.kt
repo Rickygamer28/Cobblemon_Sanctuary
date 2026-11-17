@@ -351,6 +351,7 @@ object SelfTest {
             val (ax, az) = at.split(",").map { it.toInt() }
             if (ax != 0 || az != 0) log("last '$why' at (${ax - s.center.x}, ${az - s.center.z}): ${Trace.of(ax, az)}")
         }
+        log("removed as players' blocks so far: ${Trace.removedBlocks}")
         log("scanned $columns columns ($unloaded loaded from disk); ${s.landmarks.count { it.value != Landmarks.NONE }} landmarks, $dens dens, ${ZoneLayout.pockets(s).count { it.live(s) }} pockets")
         if (f.isEmpty()) log("  no problems found")
         for (finding in f.values) {

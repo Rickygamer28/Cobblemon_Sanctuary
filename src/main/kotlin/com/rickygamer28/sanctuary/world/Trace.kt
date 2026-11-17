@@ -20,6 +20,14 @@ object Trace {
 
     fun clear() = events.clear()
 
+    /** Blocks taken away as a player's (if the valley's own show up here, they're missing from the list). */
+    val removedBlocks = java.util.TreeMap<String, Int>()
+    fun removed(st: net.minecraft.world.level.block.state.BlockState) {
+        if (!on) return
+        val k = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(st.block).toString()
+        removedBlocks[k] = (removedBlocks[k] ?: 0) + 1
+    }
+
     /** Why the builder started another pass, and how often (with the last place it happened). */
     val reasons = java.util.TreeMap<String, Int>()
     val lastAt = HashMap<String, String>()
