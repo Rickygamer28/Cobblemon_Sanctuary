@@ -453,6 +453,8 @@ object BiomeDresser {
         Blocks.MUSHROOM_STEM, Blocks.RED_MUSHROOM_BLOCK, Blocks.BROWN_MUSHROOM_BLOCK, Blocks.SHROOMLIGHT, Blocks.OCHRE_FROGLIGHT,
         Blocks.AMETHYST_CLUSTER, Blocks.POINTED_DRIPSTONE, Blocks.BEE_NEST, Blocks.MELON, Blocks.CACTUS, Blocks.SUGAR_CANE, Blocks.BAMBOO,
         Blocks.COBWEB, Blocks.SPRUCE_FENCE_GATE, Blocks.STRIPPED_SPRUCE_LOG, Blocks.ICE, Blocks.PACKED_ICE, Blocks.BLUE_ICE, Blocks.SNOW,
+        // the caves' lights and crystals
+        Blocks.VERDANT_FROGLIGHT, Blocks.PEARLESCENT_FROGLIGHT, Blocks.LARGE_AMETHYST_BUD, Blocks.GLOW_LICHEN,
     )
 
     fun isModSolid(st: BlockState) = st.block in MOD_SOLID
@@ -1042,8 +1044,9 @@ object BiomeDresser {
                 seal(BlockPos(nx, y, nz))
             }
         }
-        // the floor: rock and gravel, mossy where daylight reaches in
-        c.ground(when {
+        // the floor: rock and gravel, mossy where daylight reaches in (not where the mouth opens onto lower ground:
+        // a floor laid above it would stand there as a step)
+        if (spot.floor - 1 <= target) c.ground(when {
             spot.mouth -> c.broad(b(Blocks.GRAVEL), b(Blocks.MOSS_BLOCK), 0.5, 6.0, 1)
             else -> c.broad(c.broad(rock, b(Blocks.GRAVEL), 0.62, 9.0, 2), if (tuff) b(Blocks.DRIPSTONE_BLOCK) else b(Blocks.ANDESITE), 0.72, 7.0, 3)
         }, rock)
@@ -1134,7 +1137,7 @@ object BiomeDresser {
             }
             else -> st(Blocks.STONE)
         }
-        c.ground(floorTop, under)
+        if (spot.floor - 1 <= target) c.ground(floorTop, under)
         if (!roofed && spot.mouth) {
             if (zone == "ice" && c.chance(0.4)) c.place(st(Blocks.SNOW))
             return
@@ -1228,6 +1231,8 @@ object BiomeDresser {
             surface = BlockPos(x, target, z)
             if (!isNatural(level.getBlockState(surface))) return true
         }
+        // a cave mouth's way in stays clear of the habitat's own decorations
+        if (!shaping && Caves.at(s, x, z)?.mouth == true) return true
         val nature = phase == Phase.ALL || phase == Phase.NATURE
         val extras = phase == Phase.ALL || phase == Phase.EXTRAS
         val (exp, slope) = around(s, x, z, target, ring)
