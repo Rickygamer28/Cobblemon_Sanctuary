@@ -9,6 +9,7 @@ import com.rickygamer28.sanctuary.world.Caves
 import com.rickygamer28.sanctuary.world.Dens
 import com.rickygamer28.sanctuary.world.Landmarks
 import com.rickygamer28.sanctuary.world.SanctuaryGenerator
+import com.rickygamer28.sanctuary.world.Trace
 import com.rickygamer28.sanctuary.world.ZoneLayout
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
