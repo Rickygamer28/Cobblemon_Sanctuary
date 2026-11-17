@@ -32,8 +32,23 @@ object ZoneLayout {
         "poison", "bug", "grass", "fairy", "psychic", "steel", "electric", "ice",
     )
 
-    /** The habitats, in the order they sit around the town (so natural neighbours end up side by side). */
+    /** The habitats (this order is their id: map colours and route shapes go by it, so it never changes). */
     val HABITATS = listOf("water", "ice", "rock", "ground", "fire", "dragon", "ghost", "poison", "grass", "fairy", "electric")
+
+    /**
+     * The order the habitats sit in around the town, so each one's neighbours make sense: the high, rugged side
+     * goes from the cold to the hot (the frozen shore, the snowy peak, the mountain and its caves, the dragons'
+     * crags, the volcano), then down into the desert, the power plant on the dry flats, the haunted tower beside
+     * it, the swamp, the forest, the flower garden, and back to the lake.
+     */
+    val AROUND = listOf("water", "ice", "rock", "dragon", "fire", "ground", "electric", "ghost", "poison", "grass", "fairy")
+
+    /** The habitats on either side of [zone] around the town. */
+    fun neighboursOf(zone: String): List<String> {
+        val i = AROUND.indexOf(zone)
+        if (i < 0) return emptyList()
+        return listOf(AROUND[(i + AROUND.size - 1) % AROUND.size], AROUND[(i + 1) % AROUND.size])
+    }
 
     /** Which habitat each type lives in. */
     private val HOME_OF = mapOf(
@@ -85,7 +100,7 @@ object ZoneLayout {
 
     /** Lays out the habitats for [counts] (residents per habitat): busier habitats get more room. */
     fun plan(s: Sanctuary, counts: Map<String, Int>): Map<String, Habitat> {
-        val zones = HABITATS.filter { (counts[it] ?: 0) > 0 }
+        val zones = AROUND.filter { (counts[it] ?: 0) > 0 }
         if (zones.isEmpty()) return emptyMap()
         val random = java.util.Random(s.seed xor (s.layoutSalt * 0x9E3779B97F4A7C15uL.toLong()) xor 0x5A17L)
         val h = inner(s)
@@ -122,6 +137,9 @@ object ZoneLayout {
         val r = outer(s)
         var best: Habitat? = null
         var bestRoom = 0.0
+        var bestScore = Double.NEGATIVE_INFINITY
+        // next to the habitats it belongs beside, when there's room there
+        val friends = neighboursOf(zone).mapNotNull { s.habitats[it] }
         for (step in 0 until 96) {
             val theta = 2 * PI * step / 96
             for (k in 1..4) {
@@ -133,7 +151,11 @@ object ZoneLayout {
                     val dist = sqrt((x - o.x) * (x - o.x) + (z - o.z) * (z - o.z))
                     room = min(room, dist - o.size() * 0.95)
                 }
-                if (room > bestRoom) {
+                if (room < 26) continue
+                val near = friends.minOfOrNull { o -> sqrt((x - o.x) * (x - o.x) + (z - o.z) * (z - o.z)) - o.size() } ?: 0.0
+                val score = room - 0.25 * near
+                if (score > bestScore) {
+                    bestScore = score
                     bestRoom = room
                     best = Habitat(x.toInt(), z.toInt(), room, room, theta)
                 }

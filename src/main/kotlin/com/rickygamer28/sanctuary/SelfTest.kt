@@ -118,6 +118,7 @@ object SelfTest {
         sanctuary.rebuild()
         startedAt = now
         stageStart = now
+        log("around the town: " + sanctuary.habitats.entries.sortedBy { Math.floorMod((it.value.angle * 1000).toLong(), (2 * Math.PI * 1000).toLong()) }.joinToString(" > ") { it.key })
         log("selftest: size $size (radius ${size.radius}), seed $seed, habitats ${sanctuary.habitats.keys}")
         return sanctuary
     }
@@ -158,7 +159,8 @@ object SelfTest {
             if (dx * dx + dz * dz > r * r) continue
             val x = s.center.x + dx
             val z = s.center.z + dz
-            if (!level.hasChunk(x shr 4, z shr 4)) { unloaded++; continue }
+            // load it (the builder's chunks have unloaded since; a test may wait for the disk)
+            if (!level.hasChunk(x shr 4, z shr 4)) { unloaded++; level.getChunk(x shr 4, z shr 4) }
             columns++
             val hit = ZoneLayout.locate(s, x, z) ?: continue
             if (Landmarks.near(s, x, z) || Dens.covers(s, x, z)) continue
@@ -220,7 +222,7 @@ object SelfTest {
         var dens = 0
         for (d in Dens.all(s)) {
             dens++
-            if (!level.isLoaded(d.mouth)) continue
+            level.getChunk(d.mouth)
             val side = d.dir.clockWise
             var blocked = 0
             for (i in 0..3) for (w in -1..1) for (dy in 0..2) {
@@ -231,7 +233,7 @@ object SelfTest {
             if (blocked > 3) find("den entrance blocked").add(s, d.mouth.x, d.mouth.y, d.mouth.z, "$blocked blocks")
         }
         try { File("selftest-report.txt").writeText(report.toString()) } catch (_: Exception) {}
-        log("scanned $columns columns ($unloaded not loaded); ${s.landmarks.count { it.value != Landmarks.NONE }} landmarks, $dens dens, ${ZoneLayout.pockets(s).count { it.live(s) }} pockets")
+        log("scanned $columns columns ($unloaded loaded from disk); ${s.landmarks.count { it.value != Landmarks.NONE }} landmarks, $dens dens, ${ZoneLayout.pockets(s).count { it.live(s) }} pockets")
         if (f.isEmpty()) log("  no problems found")
         for (finding in f.values) {
             log("  ${finding.name}: ${finding.count}")
