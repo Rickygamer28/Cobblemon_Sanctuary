@@ -64,13 +64,16 @@ object ColumnOrder {
  */
 object SanctuaryGenerator {
     private val cursors = HashMap<UUID, Int>()
+    /** Where the nature wave (trees, plants…) and the extras wave (resident spots) have got to. */
+    private val natureCursors = HashMap<UUID, Int>()
+    private val extrasCursors = HashMap<UUID, Int>()
     /** Columns set aside because their chunks weren't loaded yet (column index, and since when). */
     private val deferred = HashMap<UUID, ArrayDeque<Pair<Int, Long>>>()
     private val retryAt = HashMap<UUID, Long>()
     private val missedUnloaded = HashMap<UUID, Boolean>()
     private val recheckMeadow = HashSet<UUID>()
 
-    fun forget(id: UUID) { BiomeDresser.forgetPending(id); deferred.remove(id); com.rickygamer28.sanctuary.ui.RegionMap.forget(id); Caves.forget(id); grounded.remove(id); recheckMeadow.remove(id); cursors.remove(id); retryAt.remove(id); missedUnloaded.remove(id); requested.remove(id); waiting.remove(id); BiomePainter.forget(id) }
+    fun forget(id: UUID) { natureCursors.remove(id); extrasCursors.remove(id); BiomeDresser.forgetPending(id); deferred.remove(id); com.rickygamer28.sanctuary.ui.RegionMap.forget(id); Caves.forget(id); grounded.remove(id); recheckMeadow.remove(id); cursors.remove(id); retryAt.remove(id); missedUnloaded.remove(id); requested.remove(id); waiting.remove(id); BiomePainter.forget(id) }
 
     // ------------------------------------------------------------------ loading the chunks it builds in
     // Building only where players happen to have chunks loaded (their render distance) split the valley into
@@ -197,7 +200,8 @@ object SanctuaryGenerator {
     /** Progress of the current building sweep, 0..100, or null when not building. */
     fun progress(s: Sanctuary): Int? {
         val c = cursors[s.id] ?: return if (s.generationDirty) 0 else null
-        return (c * 100L / total(s).coerceAtLeast(1)).toInt()
+        val all = c.toLong() + (natureCursors[s.id] ?: 0) + (extrasCursors[s.id] ?: 0)
+        return (all * 100L / (3L * total(s).coerceAtLeast(1))).toInt().coerceAtMost(99)
     }
 
     /** How fast the builder is getting through the valley: [cursor, time (ms), columns per second]. */
@@ -586,6 +590,8 @@ object SanctuaryGenerator {
             s.needsCheck = false
             scheduleCheck(s.id)
             cursors[s.id] = 0
+            natureCursors[s.id] = 0
+            extrasCursors[s.id] = 0
             deferred.remove(s.id)
             missedUnloaded[s.id] = false
             if (s.unlockedChanged) { s.unlockedChanged = false; recheckMeadow += s.id }
@@ -614,9 +620,9 @@ object SanctuaryGenerator {
             val asleep = inside && hit!!.zone !in s.unlocked && dist <= radius - 1.6
             val ok = try {
                 when {
-                    !inside -> BiomeDresser.dressRim(level, s, x, z, dist, ring)
-                    asleep -> BiomeDresser.dressMeadow(level, s, x, z, hit!!, ring)
-                    else -> BiomeDresser.dress(level, s, x, z, hit!!, ring)
+                    !inside -> BiomeDresser.withPhase(BiomeDresser.Phase.ALL) { BiomeDresser.dressRim(level, s, x, z, dist, ring) }
+                    asleep -> BiomeDresser.withPhase(BiomeDresser.Phase.ALL) { BiomeDresser.dressMeadow(level, s, x, z, hit!!, ring) }
+                    else -> BiomeDresser.withPhase(BiomeDresser.Phase.LAND) { BiomeDresser.dress(level, s, x, z, hit!!, ring) }
                 }
             } catch (e: Exception) {
                 CobblemonSanctuary.LOGGER.warn("Couldn't build column $x,$z", e)
@@ -625,6 +631,9 @@ object SanctuaryGenerator {
             if (ok) {
                 s.dressed.set(idx)
                 if (asleep) s.meadow.set(idx) else s.meadow.clear(idx)
+                // the land is new here: its trees and plants (and resident spots) come in the next waves
+                // (the rim and sleeping meadows were done in one go)
+                if (!inside || asleep) { s.decorated.set(idx); s.furnished.set(idx) } else { s.decorated.clear(idx); s.furnished.clear(idx) }
                 BiomePainter.mark(s, x, z)
             } else missedUnloaded[s.id] = true
             budget--
@@ -649,9 +658,10 @@ object SanctuaryGenerator {
                 }
             }
         }
+        val landDeadline = if (i - (natureCursors[s.id] ?: 0) > 4000) started + (deadline - started) / 2 else deadline
         while (budget > 0 && i < total) {
             scanned++
-            if ((scanned and 31) == 0 && System.nanoTime() > deadline) break
+            if ((scanned and 31) == 0 && System.nanoTime() > landDeadline) break
             val idx = i++
             val meadowDone = s.meadow.get(idx)
             val redo = s.rebuildZones.isNotEmpty()
@@ -685,12 +695,67 @@ object SanctuaryGenerator {
                 true -> build(idx)
             }
         }
+        // ---- the waves that follow the land: nature, then the residents' spots
+        val landDone = i >= total && queue.isEmpty()
+        val waiting = queue.mapTo(HashSet()) { it.first }
+        /** The land of column [idx] is final (built, or passed and nothing left to do there). */
+        fun landFinal(idx: Int) = landDone || s.dressed.get(idx) || (idx < i && idx !in waiting)
+        /** All columns within [r] of [idx] pass [ok]. */
+        fun around(idx: Int, r: Int, ok: (Int) -> Boolean): Boolean {
+            val ox = ColumnOrder.dx[idx]
+            val oz = ColumnOrder.dz[idx]
+            for (dx in -r..r) for (dz in -r..r) {
+                val n = ColumnOrder.indexOf(ox + dx, oz + dz)
+                if (n < 0 || n >= total) continue
+                if (!ok(n)) return false
+            }
+            return true
+        }
+        /** Runs one wave over the next columns it may work on. Returns its new cursor. */
+        fun wave(start: Int, wavePhase: BiomeDresser.Phase, done: java.util.BitSet, before: (Int) -> Boolean, beforeAll: Boolean, gap: Int): Int {
+            var c = start
+            var n = 0
+            while (c < total) {
+                if ((++n and 15) == 0 && System.nanoTime() > deadline) break
+                if (done.get(c)) { c++; continue }
+                // wait until everything around has had the wave before
+                if (!beforeAll && !around(c, gap, before)) break
+                val ox = ColumnOrder.dx[c]
+                val oz = ColumnOrder.dz[c]
+                val x = s.center.x + ox
+                val z = s.center.z + oz
+                val dist = sqrt((ox * ox + oz * oz).toDouble())
+                val hit = if (dist <= radius) ZoneLayout.locate(s, x, z, ring) else null
+                // nothing to add on the rim, in sleeping meadows, outside the map, or where the land isn't built
+                if (hit == null || s.meadow.get(c) || !s.dressed.get(c)) { done.set(c); c++; continue }
+                when (chunksReady(level, s, x, z, now)) {
+                    false -> break
+                    null -> { done.set(c); c++; continue }
+                    true -> {}
+                }
+                try {
+                    BiomeDresser.withPhase(wavePhase) { BiomeDresser.dress(level, s, x, z, hit, ring) }
+                } catch (e: Exception) {
+                    CobblemonSanctuary.LOGGER.warn("Couldn't decorate column $x,$z", e)
+                }
+                done.set(c)
+                c++
+            }
+            return c
+        }
+        val j = wave(natureCursors[s.id] ?: 0, BiomeDresser.Phase.NATURE, s.decorated, ::landFinal, landDone, 5)
+        natureCursors[s.id] = j
+        val natureDone = landDone && j >= total
+        val k = wave(extrasCursors[s.id] ?: 0, BiomeDresser.Phase.EXTRAS, s.furnished, { idx -> s.decorated.get(idx) || idx < j }, natureDone, 4)
+        extrasCursors[s.id] = k
         } finally {
             BiomeDresser.endHeights()
             usedMillis = usedMillis * 0.8 + (System.nanoTime() - started) / 1_000_000.0 * 0.2
         }
         if (now % 20L == 0L) trackPace(s)
-        if (i >= total && queue.isEmpty()) {
+        if (i >= total && queue.isEmpty() && (natureCursors[s.id] ?: 0) >= total && (extrasCursors[s.id] ?: 0) >= total) {
+            natureCursors.remove(s.id)
+            extrasCursors.remove(s.id)
             BiomeDresser.beginHeights(s)
             try { BiomeDresser.plantPending(level, s, all = true) } finally { BiomeDresser.endHeights() }
             pace.remove(s.id)

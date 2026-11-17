@@ -91,6 +91,10 @@ class Sanctuary(
 
     /** Columns already dressed by the generator (indexes into [com.rickygamer28.sanctuary.world.ColumnOrder]). */
     var dressed: BitSet = BitSet()
+    /** Columns whose plants and trees are done (the builder's second wave, after the land around is finished). */
+    var decorated: BitSet = BitSet()
+    /** Columns whose resident spots (props, berry trees, route lamps) are done (the third wave). */
+    var furnished: BitSet = BitSet()
 
     /** Dressed columns that are only a meadow, because their biome was still asleep. */
     var meadow: BitSet = BitSet()
@@ -309,6 +313,8 @@ class Sanctuary(
         relationships.forEach { (k, v) -> rel.putInt(k, v) }
         t.put("Relationships", rel)
         t.put("Dressed", LongArrayTag(dressed.toLongArray()))
+        t.put("Decorated", LongArrayTag(decorated.toLongArray()))
+        t.put("Furnished", LongArrayTag(furnished.toLongArray()))
         t.put("Meadow", LongArrayTag(meadow.toLongArray()))
         val ev = ListTag()
         events.forEach { ev.add(StringTag.valueOf(it)) }
@@ -414,6 +420,9 @@ class Sanctuary(
             val onlyWater = version == 9 || version == 15 || version == 16 || version == 17
             if (onlyWater) s.rebuildZones += if (version >= 16) "rock" else "water"
             s.dressed = if (version >= DATA_VERSION || onlyWater) BitSet.valueOf(t.getLongArray("Dressed")) else BitSet()
+            // (before the builder worked in waves, a dressed column was finished in one go)
+            s.decorated = if (t.contains("Decorated")) BitSet.valueOf(t.getLongArray("Decorated")) else s.dressed.clone() as BitSet
+            s.furnished = if (t.contains("Furnished")) BitSet.valueOf(t.getLongArray("Furnished")) else s.dressed.clone() as BitSet
             s.meadow = if (version >= DATA_VERSION || onlyWater) BitSet.valueOf(t.getLongArray("Meadow")) else BitSet()
             s.oldWallRadius = t.getInt("OldWall")
             // the sizes got bigger: grow the valley like an expansion (old wall down, new wall and mountains further out)

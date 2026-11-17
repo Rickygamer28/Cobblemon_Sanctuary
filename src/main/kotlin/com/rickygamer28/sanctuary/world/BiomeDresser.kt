@@ -115,6 +115,31 @@ object BiomeDresser {
 
     fun forgetPending(id: java.util.UUID) { pendingFeatures.remove(id) }
 
+    // ------------------------------------------------------------------ building in waves
+
+    /**
+     * The valley is built in waves, each following the one before a little way behind:
+     * [LAND] shapes the ground (heights, ground blocks, water, caves); [NATURE] then adds trees, bushes, rocks,
+     * flowers and Cobblemon's plants, only once the land all around is finished (so nothing is clipped or buried);
+     * [EXTRAS] adds the residents' spots (props, berry trees, route lamps) once the nature around is done.
+     * Dens and landmarks come last, when the valley is finished. [ALL] does everything at once (meadows, the rim).
+     */
+    enum class Phase { ALL, LAND, NATURE, EXTRAS }
+
+    @JvmStatic
+    var phase = Phase.ALL
+    /** Runs [block] in [p] (then back to the wave that was running). */
+    inline fun <T> withPhase(p: Phase, block: () -> T): T {
+        val was = phase
+        phase = p
+        try { return block() } finally { phase = was }
+    }
+
+    /** Ground is being shaped now. */
+    private val shaping get() = phase == Phase.ALL || phase == Phase.LAND
+    /** Things are being placed on the ground now. */
+    private val decorating get() = phase != Phase.LAND
+
     fun protect(s: Sanctuary, pos: BlockPos) {
         val set = placedFor(s)
         if (set.size < 3_000_000) set += pos.asLong()
@@ -149,9 +174,12 @@ object BiomeDresser {
             return states[(n * states.size).toInt().coerceIn(0, states.size - 1)]
         }
 
-        fun top(state: BlockState) { level.setBlock(surface, state, FLAGS) }
+        /** Things are being placed now (not just ground shaped). */
+        val placing get() = decorating
+        fun top(state: BlockState) { if (shaping) level.setBlock(surface, state, FLAGS) }
         /** Fills below the top, deep enough to cover any exposed cliff side. */
         fun filler(state: BlockState, minDepth: Int = 3) {
+            if (!shaping) return
             val shift = (noise(30.0, 77) * 3).toInt()
             for (i in 1..max(minDepth, exposure)) {
                 val p = surface.below(i)
@@ -192,6 +220,7 @@ object BiomeDresser {
             if (noise(34.0, salt + 500) > woods) grid(dense, salt) else grid(sparse, salt + 1)
         /** Layered ground, e.g. the coloured bands of a mesa. */
         fun bands(bands: List<BlockState>, topOverride: BlockState? = null) {
+            if (!shaping) return
             top(topOverride ?: bands[Math.floorMod(y, bands.size)])
             for (i in 1..max(3, exposure)) {
                 val p = surface.below(i)
@@ -199,6 +228,7 @@ object BiomeDresser {
             }
         }
         fun at(pos: BlockPos, state: BlockState) {
+            if (!decorating) return
             val cur = level.getBlockState(pos)
             if (cur.isAir || (cur.canBeReplaced() && cur.fluidState.isEmpty)) {
                 level.setBlock(pos, state, FLAGS)
@@ -215,7 +245,7 @@ object BiomeDresser {
         fun feature(key: ResourceKey<ConfiguredFeature<*, *>>, protectRadius: Int = 0, protectHeight: Int = 16) {
             // the ground around isn't at its final height yet (old higher ground would clip the tree, lower ground
             // would be filled up through it): plant it later, once it is
-            if (Dens.covers(s, x, z)) return
+            if (!decorating || Dens.covers(s, x, z)) return
             if (!settled(level, s, x, z)) {
                 pendingFeatures.getOrPut(s.id) { ArrayDeque() } += PendingFeature(key, surface, protectRadius, protectHeight, random.nextLong())
                 return
@@ -317,6 +347,7 @@ object BiomeDresser {
         }
         /** A Cobblemon berry tree (or a sweet berry bush without Cobblemon's), where residents meet for meals. */
         fun berryTree() {
+            if (!decorating) return
             if (!level.getBlockState(above).isAir || !level.getBlockState(surface).`is`(BlockTags.DIRT)) return
             val ids = listOf("oran_berry", "pecha_berry", "cheri_berry", "rawst_berry", "sitrus_berry", "leppa_berry", "aspear_berry", "persim_berry")
             val block = BuiltInRegistries.BLOCK.get(ResourceLocation.fromNamespaceAndPath("cobblemon", ids[random.nextInt(ids.size)]))
@@ -327,6 +358,7 @@ object BiomeDresser {
             if (s.berrySpots.size < 600) s.berrySpots += above.asLong()
         }
         fun tallPlant(state: BlockState) {
+            if (!decorating) return
             val lower = above
             val upper = lower.above()
             if (level.getBlockState(lower).isAir && level.getBlockState(upper).isAir) {
@@ -336,15 +368,16 @@ object BiomeDresser {
         }
         /** A shallow pool flush with the ground: water on top, [bed] under it. */
         fun pool(bed: BlockState) {
+            if (!shaping) return
             level.setBlock(surface, b(Blocks.WATER), FLAGS)
             level.setBlock(surface.below(), bed, FLAGS)
             for (i in 2..3) { val p = surface.below(i); if (isNatural(level.getBlockState(p))) level.setBlock(p, bed, FLAGS) }
         }
         /** Fills the column with water from above the ground up to the water line. */
-        fun flood() { for (yy in y + 1..WATER_Y) level.setBlock(BlockPos(x, yy, z), b(Blocks.WATER), FLAGS) }
+        fun flood() { if (shaping) for (yy in y + 1..WATER_Y) level.setBlock(BlockPos(x, yy, z), b(Blocks.WATER), FLAGS) }
         fun waterTop(state: BlockState) = at(BlockPos(x, WATER_Y + 1, z), state)
         /** Places a block on the floor of a lake (into the water). */
-        fun underwater(state: BlockState) { if (level.getBlockState(above).`is`(Blocks.WATER)) level.setBlock(above, state, FLAGS) }
+        fun underwater(state: BlockState) { if (decorating && level.getBlockState(above).`is`(Blocks.WATER)) level.setBlock(above, state, FLAGS) }
     }
 
     // ================================================================== ground / clutter
@@ -895,7 +928,7 @@ object BiomeDresser {
     /** Dresses one column inside the sanctuary. Returns false if it can't be done right now. */
     fun dress(level: ServerLevel, s: Sanctuary, x: Int, z: Int, hit: ZoneLayout.Hit, ring: List<String>): Boolean {
         val done = dressSurface(level, s, x, z, hit, ring)
-        if (done && hit.zone in s.unlocked && hit.dist < s.size.radius - 2 && !Landmarks.near(s, x, z)) {
+        if (done && shaping && hit.zone in s.unlocked && hit.dist < s.size.radius - 2 && !Landmarks.near(s, x, z)) {
             Caves.at(s, x, z)?.let { carveCave(level, s, x, z, it, targetHeight(s, x, z, ring)) }
         }
         return done
@@ -969,26 +1002,37 @@ object BiomeDresser {
     }
 
     private fun dressSurface(level: ServerLevel, s: Sanctuary, x: Int, z: Int, hit: ZoneLayout.Hit, ring: List<String>): Boolean {
-        if (s.oldWallRadius in 1 until s.size.radius && abs(hit.dist - (s.oldWallRadius - 0.8)) < 1.6) clearWall(level, x, z)
-        if (SanctuaryConfig.buildWall.get() && hit.dist > s.size.radius - 1.6) return wall(level, s, x, z)
+        val wallZone = SanctuaryConfig.buildWall.get() && hit.dist > s.size.radius - 1.6
+        if (shaping) {
+            if (s.oldWallRadius in 1 until s.size.radius && abs(hit.dist - (s.oldWallRadius - 0.8)) < 1.6) clearWall(level, x, z)
+            if (wallZone) return wall(level, s, x, z)
+        } else if (wallZone) return true
         if (hit.zone !in s.unlocked) return true
         if (Landmarks.near(s, x, z)) return true
         // a den and the way into it are left as they are
         if (Dens.covers(s, x, z)) return true
 
-        val found = findGround(level, s, x, z) ?: return false
-        if (!isNatural(level.getBlockState(found))) return true
-
         val zone = surfaceZone(s, hit, x, z, ring)
         val target = targetHeight(s, x, z, ring)
-        val surface = reshape(level, found, target, placed[s.id])
+        val surface: BlockPos
+        if (shaping) {
+            val found = findGround(level, s, x, z) ?: return false
+            if (!isNatural(level.getBlockState(found))) return true
+            surface = reshape(level, found, target, placed[s.id])
+        } else {
+            // the land wave already shaped this column: work on top of it (unless something was built there since)
+            surface = BlockPos(x, target, z)
+            if (!isNatural(level.getBlockState(surface))) return true
+        }
+        val nature = phase == Phase.ALL || phase == Phase.NATURE
+        val extras = phase == Phase.ALL || phase == Phase.EXTRAS
         val (exp, slope) = around(s, x, z, target, ring)
         val ctx = Ctx(level, s, surface, randomFor(s, x, z), variantOf(s, zone), hit, exp, slope)
         // a winding route from the town out to the habitat's landmark
         if (target >= WATER_Y + 1 && hit.dist > s.size.hubRadius - 4 && onRoute(s, hit, x, z, ring)) {
             val (top, fill) = routeBlocks(zone, variantOf(s, zone))
             ctx.ground(top, fill)
-            if (Math.floorMod(x * 7 + z * 13, 37) == 0 && hit.dist > s.size.hubRadius + 10) {
+            if (extras && Math.floorMod(x * 7 + z * 13, 37) == 0 && hit.dist > s.size.hubRadius + 10) {
                 // a little lamp along the way, just off the path
                 val side = BlockPos(x + 2, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x + 2, z), z)
                 // only on ground that's already at its final height (or it would be left floating when that column is lowered)
@@ -1005,20 +1049,20 @@ object BiomeDresser {
         if (pocket != null) {
             val (p, d) = pocket
             val pc = Ctx(level, s, surface, ctx.random, variantOf(s, p.zone), hit, exp, slope)
-            cobblemonDecor(pc, p.zone, target)
-            pocket(pc, p, d)
-            Props.place(pc, p.zone, ring) { px, pz -> pathAt(s, px, pz, ring) }
+            if (phase != Phase.EXTRAS) pocket(pc, p, d)
+            if (nature) cobblemonDecor(Ctx(level, s, surface, randomFor(s, x + 7919, z), variantOf(s, p.zone), hit, exp, slope), p.zone, target)
+            if (extras) withPhase(Phase.ALL) { Props.place(pc, p.zone, ring) { px, pz -> pathAt(s, px, pz, ring) } }
             return true
         }
-        cobblemonDecor(ctx, zone, target)
         // berry trees in the lusher biomes, where residents meet for meals
-        if (zone in BERRY_ZONES && ctx.grid(27, 400 + BERRY_ZONES.indexOf(zone)) && ctx.roomy(6) && target >= WATER_Y + 1) ctx.berryTree()
+        if (extras && zone in BERRY_ZONES && ctx.grid(27, 400 + BERRY_ZONES.indexOf(zone)) && ctx.roomy(6) && target >= WATER_Y + 1) ctx.berryTree()
         // a lake that reaches over the border keeps its water, whichever biome it spills into
         if (zone != "water" && target < WATER_Y && (hit.neighbour == "water" || hit.zone == "water") && "water" in s.unlocked) {
-            water(Ctx(level, s, surface, ctx.random, variantOf(s, "water").let { if (it == 2) 0 else it }, hit, exp, slope))
+            if (phase != Phase.EXTRAS) water(Ctx(level, s, surface, ctx.random, variantOf(s, "water").let { if (it == 2) 0 else it }, hit, exp, slope))
             return true
         }
-        when (zone) {
+        // (the land and nature waves run the same dresser: the first only shapes the ground, the second only places things)
+        if (phase != Phase.EXTRAS) when (zone) {
             ZoneLayout.HUB -> hub(ctx)
             "water" -> water(ctx)
             "ground" -> ground(ctx)
@@ -1038,8 +1082,10 @@ object BiomeDresser {
             "ice" -> ice(ctx)
             else -> custom(ctx, zone)
         }
+        // Cobblemon's plants and crystals (with their own randomness, so the dresser's choices are the same in every wave)
+        if (nature) cobblemonDecor(Ctx(level, s, surface, randomFor(s, x + 7919, z), variantOf(s, zone), hit, exp, slope), zone, target)
         // a spot residents like to visit: a log, a rock, a pool, a campfire…
-        Props.place(ctx, zone, ring) { px, pz -> pathAt(s, px, pz, ring) }
+        if (extras) withPhase(Phase.ALL) { Props.place(ctx, zone, ring) { px, pz -> pathAt(s, px, pz, ring) } }
         return true
     }
 
@@ -1457,7 +1503,7 @@ object BiomeDresser {
                 lagoon && depth >= 2 && c.chance(0.12) -> c.underwater(c.pick(b(Blocks.BRAIN_CORAL_BLOCK), b(Blocks.TUBE_CORAL_BLOCK), b(Blocks.HORN_CORAL_BLOCK)))
                 lagoon && depth >= 2 && c.chance(0.12) -> c.underwater(c.pick(b(Blocks.BRAIN_CORAL), b(Blocks.TUBE_CORAL), b(Blocks.HORN_CORAL), b(Blocks.FIRE_CORAL_FAN)))
                 lagoon && c.chance(0.05) -> c.underwater(b(Blocks.SEA_PICKLE))
-                depth >= 3 && c.noise(12.0, 8) > 0.55 && c.chance(0.25) -> { val h = 1 + c.random.nextInt(depth - 1); for (i in 1 until h) c.level.setBlock(c.surface.above(i), b(Blocks.KELP_PLANT), FLAGS); c.level.setBlock(c.surface.above(h), b(Blocks.KELP), FLAGS) }
+                depth >= 3 && c.noise(12.0, 8) > 0.55 && c.chance(0.25) -> if (c.placing) { val h = 1 + c.random.nextInt(depth - 1); for (i in 1 until h) c.level.setBlock(c.surface.above(i), b(Blocks.KELP_PLANT), FLAGS); c.level.setBlock(c.surface.above(h), b(Blocks.KELP), FLAGS) }
                 depth >= 2 && c.chance(0.16) -> c.underwater(b(Blocks.SEAGRASS))
                 depth == 1 && c.noise(10.0, 9) > 0.6 && c.chance(0.2) -> c.waterTop(b(Blocks.LILY_PAD))
             }
@@ -1999,7 +2045,7 @@ object BiomeDresser {
                     c.ground(if (bog) b(Blocks.MUD) else if (host == "ground") b(Blocks.SAND) else b(Blocks.CLAY), b(Blocks.DIRT))
                     val top = BlockPos(c.x, level + 1, c.z)
                     when {
-                        c.chance(0.1) -> if (c.level.getBlockState(top).isAir) c.level.setBlock(top, b(Blocks.LILY_PAD), FLAGS)
+                        c.chance(0.1) -> if (c.placing && c.level.getBlockState(top).isAir) c.level.setBlock(top, b(Blocks.LILY_PAD), FLAGS)
                         c.chance(0.15) -> c.underwater(b(Blocks.SEAGRASS))
                     }
                     return
