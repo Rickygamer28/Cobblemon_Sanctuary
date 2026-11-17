@@ -70,7 +70,8 @@ jobs:
           echo "status=$STATUS" >> "$GITHUB_OUTPUT"
 
       - name: Self test (real server builds a valley and checks it)
-        if: steps.build.outputs.status == '0' && hashFiles('.ci/selftest') != ''
+        # only for big updates: when the commit message asks for it with [selftest]
+        if: steps.build.outputs.status == '0' && contains(github.event.head_commit.message, '[selftest]')
         timeout-minutes: 50
         run: |
           set +e

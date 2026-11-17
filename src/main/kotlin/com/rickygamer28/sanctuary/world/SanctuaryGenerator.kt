@@ -246,11 +246,28 @@ object SanctuaryGenerator {
             s.meadow.clear(idx)
             n++
         }
-        s.generationDirty = true
+        run { Trace.rebuild("repair here"); s.generationDirty = true }
         return n
     }
 
     fun isRepairing(s: Sanctuary) = repairCursor.containsKey(s.id)
+
+    /**
+     * A mountain woke up or fell asleep: the caves change shape (its part opens or closes, and the tunnels joining
+     * it to its neighbours), so the ground over all of them is built again (old tunnels filled, new ones dug).
+     */
+    fun redoCaves(s: Sanctuary) {
+        val net = Caves.network(s) ?: return
+        var n = 0
+        val total = ColumnOrder.countWithin(s.size.radius)
+        for (x in net.minX..net.maxX) for (z in net.minZ..net.maxZ) {
+            val idx = ColumnOrder.indexOf(x - s.center.x, z - s.center.z)
+            if (idx < 0 || idx >= total || !s.dressed.get(idx)) continue
+            if (!Caves.near(s, x, z)) continue
+            s.dressed.clear(idx); s.meadow.clear(idx); n++
+        }
+        if (n > 0) { Trace.rebuild("caves changed"); s.generationDirty = true }
+    }
 
     fun scheduleCheck(id: UUID) { repairCursor[id] = 0; repaired[id] = 0 }
 
@@ -304,7 +321,7 @@ object SanctuaryGenerator {
                 Trace.note(x, z, "route lowered $top->$target")
                 for (y in target + 1..top) level.setBlock(BlockPos(x, y, z), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), net.minecraft.world.level.block.Block.UPDATE_CLIENTS)
                 s.dressed.clear(idx)
-                s.generationDirty = true
+                run { Trace.rebuild("route lowered", x, z); s.generationDirty = true }
                 continue
             }
             // a thin leftover: a lone column of old ground (soil in it, so not a rock spire or ice spike on purpose)
@@ -316,7 +333,7 @@ object SanctuaryGenerator {
                     if (BiomeDresser.isNatural(level.getBlockState(p))) level.setBlock(p, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), net.minecraft.world.level.block.Block.UPDATE_CLIENTS)
                 }
                 s.dressed.clear(idx)
-                s.generationDirty = true
+                run { Trace.rebuild("thin leftover", x, z); s.generationDirty = true }
                 continue
             }
             if (!tooTall(level, s, x, z, ring, top, target)) continue
@@ -336,7 +353,7 @@ object SanctuaryGenerator {
             }
             s.dressed.clear(idx)
             if (found++ < 3) CobblemonSanctuary.LOGGER.info("Sanctuary: cut a leftover pillar at {} {} (was {}, should be {})", x, z, top, target)
-            s.generationDirty = true
+            run { Trace.rebuild("too tall", x, z); s.generationDirty = true }
         }
         } finally {
             BiomeDresser.endHeights()
@@ -583,7 +600,7 @@ object SanctuaryGenerator {
             val retry = retryAt[s.id] ?: return
             if (now < retry) return
             retryAt.remove(s.id)
-            s.generationDirty = true
+            run { Trace.rebuild("retry after missed columns"); s.generationDirty = true }
         }
         // once per server start: sweep the finished valley for leftovers (floating bits, stray water…)
         if (s.needsCheck && !s.generationDirty && s.id !in cursors) {
@@ -641,7 +658,7 @@ object SanctuaryGenerator {
                 // (the rim and sleeping meadows were done in one go)
                 if (!inside || asleep) { s.decorated.set(idx); s.furnished.set(idx) } else { s.decorated.clear(idx); s.furnished.clear(idx) }
                 BiomePainter.mark(s, x, z)
-            } else missedUnloaded[s.id] = true
+            } else run { Trace.rebuild("column failed", x, z); missedUnloaded[s.id] = true }
             budget--
         }
         BiomeDresser.beginHeights(s)
@@ -656,11 +673,11 @@ object SanctuaryGenerator {
             val z = s.center.z + ColumnOrder.dz[idx]
             when (chunksReady(level, s, x, z, now)) {
                 true -> build(idx)
-                null -> missedUnloaded[s.id] = true
+                null -> run { Trace.rebuild("deferred chunk missing"); missedUnloaded[s.id] = true }
                 false -> when {
                     now - since < 200 -> queue.addLast(idx to since)          // still loading
                     level.hasChunk(x shr 4, z shr 4) -> build(idx)              // waited 10 s: build with what's there
-                    else -> missedUnloaded[s.id] = true                         // couldn't load it: next time
+                    else -> run { Trace.rebuild("deferred gave up"); missedUnloaded[s.id] = true }                         // couldn't load it: next time
                 }
             }
         }
@@ -697,7 +714,7 @@ object SanctuaryGenerator {
             when (chunksReady(level, s, x, z, now)) {
                 // not loaded yet: set it aside and carry on with the next ones (only stop when too many are waiting)
                 false -> { if (queue.size < 4096) { queue.addLast(idx to now); continue } else { i = idx; break } }
-                null -> { missedUnloaded[s.id] = true; continue }        // couldn't load it: later
+                null -> { run { Trace.rebuild("chunk not loadable"); missedUnloaded[s.id] = true }; continue }        // couldn't load it: later
                 true -> build(idx)
             }
         }

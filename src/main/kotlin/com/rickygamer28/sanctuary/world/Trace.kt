@@ -19,4 +19,13 @@ object Trace {
     fun of(x: Int, z: Int): String = events[(x.toLong() shl 32) or (z.toLong() and 0xFFFFFFFFL)]?.joinToString(" | ") ?: "-"
 
     fun clear() = events.clear()
+
+    /** Why the builder started another pass, and how often (with the last place it happened). */
+    val reasons = java.util.TreeMap<String, Int>()
+    val lastAt = HashMap<String, String>()
+    fun rebuild(why: String, x: Int = 0, z: Int = 0) {
+        if (!on) return
+        reasons[why] = (reasons[why] ?: 0) + 1
+        lastAt[why] = "$x,$z"
+    }
 }

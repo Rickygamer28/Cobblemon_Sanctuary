@@ -70,8 +70,8 @@ object SelfTest {
             CobblemonSanctuary.LOGGER.error("[selftest] generator failed", e)
         }
         val busy = SanctuaryGenerator.isGrowing(sanctuary) || SanctuaryGenerator.isRepairing(sanctuary)
-        if ((now - stageStart) % 600L == 0L) CobblemonSanctuary.LOGGER.info("[selftest] stage {} at {} s: building {}%, repairing {}, tick {} ms",
-            stage, (now - stageStart) / 20, SanctuaryGenerator.progress(sanctuary), SanctuaryGenerator.isRepairing(sanctuary), "%.1f".format(server.currentSmoothedTickTime))
+        if ((now - stageStart) % 600L == 0L) CobblemonSanctuary.LOGGER.info("[selftest] stage {} at {} s: building {}%, repairing {}, tick {} ms, rebuilt because: {} {}",
+            stage, (now - stageStart) / 20, SanctuaryGenerator.progress(sanctuary), SanctuaryGenerator.isRepairing(sanctuary), "%.1f".format(server.currentSmoothedTickTime), Trace.reasons, Trace.lastAt)
         if (busy) idleSince = -1L else if (idleSince < 0) idleSince = now
         val timedOut = now - stageStart > MAX_STAGE_TICKS
         // finished: nothing building, cleaned up, and a minute for dens and landmarks to go up
@@ -149,6 +149,7 @@ object SelfTest {
         s.typeCounts = counts
         s.unlocked = linkedSetOf(ZoneLayout.HUB) + ZoneLayout.HABITATS
         s.unlockedChanged = true
+        SanctuaryGenerator.redoCaves(s)
         s.rebuildZones += newTypes.filter { z -> ZoneLayout.pockets(s).any { it.zone == z } }
         s.rebuildZones += newTypes.filter { it in s.habitats }
         for (zone in ZoneLayout.HABITATS) {
@@ -365,37 +366,52 @@ object SelfTest {
             val b = level.getBlockState(BlockPos(x, spot.floor + 1, z))
             return !a.isSolid && !b.isSolid
         }
-        // walk the cave from the first hall
-        val start = halls.first()
-        val sx = start.hallX.toInt()
-        val sz = start.hallZ.toInt()
-        val reached = HashSet<Long>()
-        val queue = ArrayDeque<Triple<Int, Int, Caves.Spot>>()
-        Caves.at(s, sx, sz)?.let { if (open(sx, sz, it)) { queue += Triple(sx, sz, it); reached += key(sx, sz) } }
+        // walk the caves from each hall: its own entrances must be reachable, and the hall at the other end of each
+        // open joining tunnel
+        val comp = HashMap<Long, Int>()
         var blocked = 0
         var lava = 0
-        while (queue.isNotEmpty() && reached.size < 400_000) {
-            val (x, z, spot) = queue.removeFirst()
-            if (level.getBlockState(BlockPos(x, spot.floor - 1, z)).`is`(Blocks.LAVA)) lava++
-            for (d in Direction.Plane.HORIZONTAL) {
-                val nx = x + d.stepX
-                val nz = z + d.stepZ
-                if (key(nx, nz) in reached) continue
-                val o = Caves.at(s, nx, nz) ?: continue
-                if (kotlin.math.abs(o.floor - spot.floor) > 1) continue
-                if (!open(nx, nz, o)) { if (!Dens.covers(s, nx, nz) && !Landmarks.near(s, nx, nz)) blocked++; reached += key(nx, nz); continue }
-                reached += key(nx, nz)
-                queue += Triple(nx, nz, o)
+        for ((ci, h) in halls.withIndex()) {
+            val sx = h.hallX.toInt()
+            val sz = h.hallZ.toInt()
+            if (key(sx, sz) in comp) continue
+            val queue = ArrayDeque<Triple<Int, Int, Caves.Spot>>()
+            val first = Caves.at(s, sx, sz)
+            if (first == null || !open(sx, sz, first)) { find("cave hall floor blocked").add(s, sx, first?.floor ?: 0, sz, h.zone); continue }
+            queue += Triple(sx, sz, first); comp[key(sx, sz)] = ci
+            while (queue.isNotEmpty() && comp.size < 400_000) {
+                val (x, z, spot) = queue.removeFirst()
+                if (level.getBlockState(BlockPos(x, spot.floor - 1, z)).`is`(Blocks.LAVA)) lava++
+                for (d in Direction.Plane.HORIZONTAL) {
+                    val nx = x + d.stepX
+                    val nz = z + d.stepZ
+                    if (key(nx, nz) in comp) continue
+                    val o = Caves.at(s, nx, nz) ?: continue
+                    if (kotlin.math.abs(o.floor - spot.floor) > 1) continue
+                    comp[key(nx, nz)] = ci
+                    if (!open(nx, nz, o)) {
+                        if (!Dens.covers(s, nx, nz) && !Landmarks.near(s, nx, nz)) { blocked++; if (blocked <= 3) find("cave passage blocked").add(s, nx, o.floor, nz, o.zone) }
+                        continue
+                    }
+                    queue += Triple(nx, nz, o)
+                }
             }
         }
-        log("caves: walked over ${reached.size} columns from the ${start.zone} hall, $lava lava pools on the way")
-        if (blocked > 40) find("cave passage blocked (columns)").add(s, sx, start.hallX.toInt(), sz, "$blocked columns")
-        for (h in halls) if (key(h.hallX.toInt(), h.hallZ.toInt()) !in reached) find("cave hall can't be reached").add(s, h.hallX.toInt(), 0, h.hallZ.toInt(), h.zone)
+        val reached = comp.keys
+        log("caves: walked over ${comp.size} columns, ${comp.values.toSet().size} separate parts, $lava lava pools, $blocked blocked columns")
+        fun compOf(x: Int, z: Int) = (-3..3).firstNotNullOfOrNull { dx -> (-3..3).firstNotNullOfOrNull { dz -> comp[key(x + dx, z + dz)] } }
         for ((zone, ex, ez) in Caves.entrances(s)) {
-            val x = ex.toInt(); val z = ez.toInt()
-            // the mouth may be a few blocks off the tunnel's first point
-            val near = (-3..3).any { dx -> (-3..3).any { dz -> key(x + dx, z + dz) in reached } }
-            if (!near) find("cave entrance can't be reached").add(s, x, 0, z, zone)
+            val h = halls.indexOfFirst { it.zone == zone }
+            val c = compOf(ex.toInt(), ez.toInt())
+            if (c == null || c != comp[key(halls[h].hallX.toInt(), halls[h].hallZ.toInt())]) find("cave entrance can't be reached from its hall").add(s, ex.toInt(), 0, ez.toInt(), zone)
+        }
+        for (t in network?.links ?: emptyList()) {
+            val l = t.link!!
+            val a = halls.firstOrNull { it.zone == l.a } ?: continue
+            val b = halls.firstOrNull { it.zone == l.b } ?: continue
+            val ca = comp[key(a.hallX.toInt(), a.hallZ.toInt())]
+            val cb = comp[key(b.hallX.toInt(), b.hallZ.toInt())]
+            if (ca == null || ca != cb) find("joining tunnel doesn't get through").add(s, a.hallX.toInt(), 0, a.hallZ.toInt(), "${l.a}-${l.b}")
         }
         // lava running loose, or water inside the caves
         for (k in reached) {

@@ -211,6 +211,8 @@ object Residents {
         }
         val unlocked = linkedSetOf(ZoneLayout.HUB) + counts.keys.filter { it in ring }
         val newTypes = unlocked - s.unlocked
+        val cavesChange = s.state == SanctuaryState.ACTIVE && s.planned && s.caveStyle >= 2 &&
+            com.rickygamer28.sanctuary.world.Caves.MOUNTAINS.any { (it in unlocked) != (it in s.unlocked) }
         val grew = counts.any { (t, c) -> c > (s.typeCounts[t] ?: 0) }
         if (s.state == SanctuaryState.ACTIVE) {
             newTypes.filter { it != ZoneLayout.HUB && s.unlocked.size > 1 && it in s.habitats }.forEach { s.logEvent("The ${zoneName(it)} woke up!") }
@@ -224,6 +226,7 @@ object Residents {
         // a habitat waking up in its place: it and the strip along its borders (which blends into it) are built again
         if (s.planned && s.state == SanctuaryState.ACTIVE) s.rebuildZones += newTypes.filter { it != ZoneLayout.HUB && it in s.habitats }
         if (newTypes.isNotEmpty() || grew) s.generationDirty = true
+        if (cavesChange) com.rickygamer28.sanctuary.world.SanctuaryGenerator.redoCaves(s)
         planRegion(s, counts)
         rt.anchors = unlocked.associateWith { ZoneLayout.anchor(s, it) }
     }

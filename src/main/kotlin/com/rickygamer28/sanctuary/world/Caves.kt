@@ -399,6 +399,24 @@ object Caves {
         return null
     }
 
+    /**
+     * Could (x, z) be touched by any part of the caves, open or not (the ground over them, the tunnels themselves)?
+     * When a mountain wakes up or falls asleep, these columns are built again.
+     */
+    fun near(s: Sanctuary, x: Int, z: Int): Boolean {
+        if (!com.rickygamer28.sanctuary.SanctuaryConfig.caves.get()) return false
+        val net = network(s) ?: return false
+        if (x < net.minX || x > net.maxX || z < net.minZ || z > net.maxZ) return false
+        val xd = x.toDouble()
+        val zd = z.toDouble()
+        for (sec in net.sections) {
+            if (dist(xd, zd, sec.hallX, sec.hallZ) < sec.hallR + 24) return true
+            for (t in sec.tunnels) if (xd >= t.minX && xd <= t.maxX && zd >= t.minZ && zd <= t.maxZ && nearest(t, xd, zd).first < 23) return true
+        }
+        for (t in net.links) if (xd >= t.minX && xd <= t.maxX && zd >= t.minZ && zd <= t.maxZ && nearest(t, xd, zd).first < 23) return true
+        return false
+    }
+
     /** Is [pos] inside the cave (under its ceiling)? */
     fun inside(s: Sanctuary, pos: BlockPos): Boolean {
         val spot = at(s, pos.x, pos.z) ?: return false

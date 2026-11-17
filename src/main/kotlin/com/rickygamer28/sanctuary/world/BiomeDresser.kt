@@ -969,7 +969,8 @@ object BiomeDresser {
      * again right after. A column with anything built in it (a player's cellar) is left as it is.
      */
     private fun fillHollows(level: ServerLevel, x: Int, z: Int, target: Int) {
-        val bottom = max(level.minBuildHeight + 1, G - 8)
+        // (deep enough for the old joining tunnels too, which dip about 20 below the valley floor)
+        val bottom = max(level.minBuildHeight + 1, G - 24)
         val holes = ArrayList<BlockPos>()
         for (y in target - 1 downTo bottom) {
             val p = BlockPos(x, y, z)

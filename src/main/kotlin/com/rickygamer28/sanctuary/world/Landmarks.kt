@@ -91,7 +91,7 @@ object Landmarks {
             val idx = ColumnOrder.indexOf(p.x + dx - s.center.x, p.z + dz - s.center.z)
             if (idx >= 0) s.dressed.clear(idx)
         }
-        s.generationDirty = true
+        run { Trace.rebuild("volcano fix"); s.generationDirty = true }
     }
 
     private fun loadedAround(level: ServerLevel, x: Int, z: Int, r: Int) =
@@ -135,7 +135,7 @@ object Landmarks {
                 val idx = ColumnOrder.indexOf(p.x + ox - s.center.x, p.z + oz - s.center.z)
                 if (idx >= 0) { s.dressed.clear(idx); s.meadow.clear(idx) }
             }
-            s.generationDirty = true
+            run { Trace.rebuild("landmark moved"); s.generationDirty = true }
             return true
         }
         return false
