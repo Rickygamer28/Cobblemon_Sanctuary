@@ -285,6 +285,13 @@ object SanctuaryGenerator {
             Dens.maybeBuild(level, s, x, z, ring)
             val top = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1
             val target = BiomeDresser.targetHeight(s, x, z, ring)
+            // the coarse dirt older versions sprinkled on dirt paths: path again
+            if (top == target && BiomeDresser.routeDistance(s, x, z) < 1.3) {
+                val here = BlockPos(x, top, z)
+                if (level.getBlockState(here).`is`(net.minecraft.world.level.block.Blocks.COARSE_DIRT) &&
+                    net.minecraft.core.Direction.Plane.HORIZONTAL.count { d -> level.getBlockState(here.relative(d)).`is`(net.minecraft.world.level.block.Blocks.DIRT_PATH) } >= 1)
+                    level.setBlock(here, net.minecraft.world.level.block.Blocks.DIRT_PATH.defaultBlockState(), net.minecraft.world.level.block.Block.UPDATE_CLIENTS)
+            }
             // old ground left lying on a route (it should be level path): lower it and lay the path again
             if (top > target && top <= target + 4 && BiomeDresser.routeDistance(s, x, z) < 1.3 &&
                 (target + 1..top).all { y -> BiomeDresser.isNatural(level.getBlockState(BlockPos(x, y, z))) && level.getBlockState(BlockPos(x, y, z)).fluidState.isEmpty }) {
