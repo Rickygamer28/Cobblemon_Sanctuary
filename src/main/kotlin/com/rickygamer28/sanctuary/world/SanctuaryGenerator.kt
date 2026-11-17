@@ -112,6 +112,14 @@ object SanctuaryGenerator {
         // the change to players and loading chunks, which happens elsewhere in the tick. Keep the tick well under
         // its 50 ms so Pokémon keep moving smoothly; speed up while there's room, back off fast when it gets close.
         val tick = runCatching { level.server.currentSmoothedTickTime.toDouble() }.getOrDefault(0.0)
+        if (SanctuaryConfig.buildFast.get()) {
+            // fast: use the full time; only ease off if the server gets badly behind (over ~70 ms a tick)
+            budgetMs = when {
+                tick > 70 -> budgetMs * 0.85
+                else -> budgetMs * 1.1 + 0.5
+            }.coerceIn(2.0, max)
+            return budgetMs.toLong().coerceAtLeast(2)
+        }
         budgetMs = when {
             tick > 45 -> budgetMs * 0.8
             tick > 38 -> budgetMs * 0.95

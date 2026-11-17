@@ -20,12 +20,19 @@ object LoadGuard {
         private set
     private var lastAt = 0L
 
+    /** Set while a sanctuary is being built. */
+    @Volatile
+    var building = false
+
     /** Called once a second. */
     fun tick(server: MinecraftServer, now: Long) {
         if (now - lastAt < 20) return
         lastAt = now
         tickMs = runCatching { server.currentSmoothedTickTime.toDouble() }.getOrDefault(0.0)
         if (!SanctuaryConfig.autoLimitCrowd.get()) { share = 1.0; return }
+        // while the valley is being built fast, the busy server is the builder's doing (and stops when it's done):
+        // don't send Pokémon home for it
+        if (building && SanctuaryConfig.buildFast.get()) return
         share = when {
             tickMs > 48 -> (share - 0.08).coerceAtLeast(0.3)  // falling behind: send some home
             tickMs > 42 -> (share - 0.03).coerceAtLeast(0.3)  // close to the limit: ease off a little

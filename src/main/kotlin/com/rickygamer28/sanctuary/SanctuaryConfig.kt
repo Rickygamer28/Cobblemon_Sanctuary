@@ -48,9 +48,13 @@ object SanctuaryConfig {
         .comment("Milliseconds per tick the sanctuary may spend building biomes (higher = faster building, more server load).")
         .defineInRange("generationMillis", 12, 1, 40)
 
+    val buildFast: ModConfigSpec.BooleanValue = builder
+        .comment("Build as fast as possible (Pokémon may move a bit jumpy while the valley is being built). false = build more gently so Pokémon always move smoothly.")
+        .define("buildFast", true)
+
     val generationMillisMax: ModConfigSpec.IntValue = builder
         .comment("When the server has time to spare, building may use up to this many milliseconds per tick (it drops back to generationMillis when the server gets busy). Set it to generationMillis to turn this off.")
-        .defineInRange("generationMillisMax", 30, 1, 45)
+        .defineInRange("generationMillisMax", 35, 1, 45)
 
     val townPercent: ModConfigSpec.IntValue = builder
         .comment("Size of the town in the middle of the valley, as a percentage of its radius (the rest is habitats, meadows and routes). Reshape after changing it.")

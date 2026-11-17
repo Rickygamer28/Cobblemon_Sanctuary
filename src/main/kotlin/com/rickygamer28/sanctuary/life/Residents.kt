@@ -136,6 +136,7 @@ object Residents {
         Scenes.tick(level, s, rt, now)
 
         if ((now + (s.id.hashCode() and 15)) % 20L != 0L) return
+        LoadGuard.building = SanctuaryGenerator.isGrowing(s)
         LoadGuard.tick(level.server, now)
 
         if (rt.rosterDirty || now - rt.rosterAt > 200) refreshRoster(level, s, rt, now)
