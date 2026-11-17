@@ -138,16 +138,42 @@ object SelfTest {
 
     // ------------------------------------------------------------------ the scan
 
+    private var scanLevel: ServerLevel? = null
+
+    /** What the column is made of, from a little under [from] up to its top: "stone x3, packed_ice x5, air…". */
+    private fun profile(level: ServerLevel, x: Int, z: Int, from: Int): String {
+        val top = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z)
+        val out = ArrayList<String>()
+        var last = ""
+        var n = 0
+        for (y in from..top) {
+            val name = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(level.getBlockState(BlockPos(x, y, z)).block).path
+            if (name == last) { n++; continue }
+            if (n > 0) out += if (n > 1) "$last x$n" else last
+            last = name; n = 1
+        }
+        if (n > 0) out += if (n > 1) "$last x$n" else last
+        return "[from y$from: ${out.joinToString(", ")}]"
+    }
+
     private class Finding(val name: String) {
         var count = 0
         val samples = ArrayList<String>()
+        val kinds = HashMap<String, Int>()
         fun add(s: Sanctuary, x: Int, y: Int, z: Int, note: String = "") {
             count++
-            if (samples.size < 8) samples += "(${x - s.center.x}, ${y}, ${z - s.center.z})${if (note.isNotEmpty()) " $note" else ""}"
+            val level = scanLevel
+            val zone = ZoneLayout.locate(s, x, z)?.zone ?: "-"
+            val pocket = ZoneLayout.pocketAt(s, x, z)?.takeIf { it.first.live(s) && it.second <= it.first.r + 1.5 }?.first?.zone
+            val key = zone + (if (pocket != null) "/pocket:$pocket" else "") + (if (level != null) "/" + net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(level.getBlockState(BlockPos(x, y, z)).block).path else "")
+            kinds[key] = (kinds[key] ?: 0) + 1
+            if (samples.size < 8) samples += "(${x - s.center.x}, ${y}, ${z - s.center.z})${if (note.isNotEmpty()) " $note" else ""}" +
+                (if (samples.size < 4 && level != null) " " + profile(level, x, z, y - 3) else "")
         }
     }
 
     private fun scan(level: ServerLevel, s: Sanctuary) {
+        scanLevel = level
         val f = linkedMapOf<String, Finding>()
         fun find(name: String) = f.getOrPut(name) { Finding(name) }
         val r = s.size.radius - 3
@@ -233,10 +259,12 @@ object SelfTest {
             if (blocked > 3) find("den entrance blocked").add(s, d.mouth.x, d.mouth.y, d.mouth.z, "$blocked blocks")
         }
         try { File("selftest-report.txt").writeText(report.toString()) } catch (_: Exception) {}
+        log("pockets: " + ZoneLayout.pockets(s).joinToString(", ") { "${it.zone} in ${it.host} r${"%.0f".format(it.r)}${if (it.live(s)) "" else " (asleep)"}" })
         log("scanned $columns columns ($unloaded loaded from disk); ${s.landmarks.count { it.value != Landmarks.NONE }} landmarks, $dens dens, ${ZoneLayout.pockets(s).count { it.live(s) }} pockets")
         if (f.isEmpty()) log("  no problems found")
         for (finding in f.values) {
             log("  ${finding.name}: ${finding.count}")
+            log("      by zone/block: " + finding.kinds.entries.sortedByDescending { it.value }.take(10).joinToString(", ") { "${it.key} ${it.value}" })
             for (sample in finding.samples) log("      at $sample")
         }
         try { File("selftest-report.txt").writeText(report.toString()) } catch (_: Exception) {}
