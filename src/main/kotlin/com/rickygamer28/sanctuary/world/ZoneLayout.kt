@@ -328,7 +328,7 @@ object ZoneLayout {
         if (s.planned && s.habitats.isNotEmpty()) {
             val random = java.util.Random(s.seed xor (s.layoutSalt * 0x2545F4914F6CDD1DL) xor 0x9067L)
             val newer = s.pocketStyle >= 2
-            val cell = if (newer) 38 else 44
+            val cell = if (newer) 30 else 44
             val n = s.size.radius / cell + 1
             for (gx in -n..n) for (gz in -n..n) {
                 val x = s.center.x + gx * cell + random.nextInt(cell * 3 / 4) - cell * 3 / 8
@@ -338,11 +338,11 @@ object ZoneLayout {
                 val dist = distance(x, z, s.center.x, s.center.z)
                 if (dist < s.size.hubRadius + 16 || dist > s.size.radius - 18 - r) { why["ring"] = (why["ring"] ?: 0) + 1; continue }
                 val hit = locate(s, x, z) ?: run { why["nohit"] = (why["nohit"] ?: 0) + 1; null } ?: continue
-                if (hit.edgeDistance < r + 6) { why["edge"] = (why["edge"] ?: 0) + 1; continue }
+                if (hit.edgeDistance < r + (if (newer) 2 else 6)) { why["edge"] = (why["edge"] ?: 0) + 1; continue }
                 val host = hit.zone
                 if (host != HUB) {
                     val l = local(s, host, x, z) ?: continue
-                    if (l.dist < 22) { why["middle"] = (why["middle"] ?: 0) + 1; continue }
+                    if (l.dist < (if (newer) 16 else 22)) { why["middle"] = (why["middle"] ?: 0) + 1; continue }
                 }
                 // keep the routes clear (they run roughly from the town to each habitat's middle)
                 // (a route bends up to ~11 blocks either side of its straight line)
@@ -358,7 +358,7 @@ object ZoneLayout {
                     BiomeDresser.baseHeight(s, (x + cos(a) * (r + 3)).toInt(), (z + sin(a) * (r + 3)).toInt(), asIfAwake = true)
                 } + BiomeDresser.baseHeight(s, x, z, asIfAwake = true)
                 // (not on a beach either: at least two above the water)
-                if (heights.min() < BiomeDresser.WATER_Y + 3 || heights.max() - heights.min() > 4) { why["slope"] = (why["slope"] ?: 0) + 1; continue }
+                if (heights.min() < BiomeDresser.WATER_Y + 3 || heights.max() - heights.min() > (if (newer) 6 else 4)) { why["slope"] = (why["slope"] ?: 0) + 1; continue }
                 val options = POCKETS_IN[host] ?: run { why["host"] = (why["host"] ?: 0) + 1; null } ?: continue
                 val zone = options[pick % options.size]
                 list += Pocket(x, z, r, zone, host, pick)
