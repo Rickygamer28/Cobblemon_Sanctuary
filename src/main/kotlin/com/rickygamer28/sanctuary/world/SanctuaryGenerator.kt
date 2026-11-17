@@ -64,11 +64,13 @@ object ColumnOrder {
  */
 object SanctuaryGenerator {
     private val cursors = HashMap<UUID, Int>()
+    /** Columns set aside because their chunks weren't loaded yet (column index, and since when). */
+    private val deferred = HashMap<UUID, ArrayDeque<Pair<Int, Long>>>()
     private val retryAt = HashMap<UUID, Long>()
     private val missedUnloaded = HashMap<UUID, Boolean>()
     private val recheckMeadow = HashSet<UUID>()
 
-    fun forget(id: UUID) { com.rickygamer28.sanctuary.ui.RegionMap.forget(id); Caves.forget(id); grounded.remove(id); recheckMeadow.remove(id); cursors.remove(id); retryAt.remove(id); missedUnloaded.remove(id); requested.remove(id); waiting.remove(id); BiomePainter.forget(id) }
+    fun forget(id: UUID) { deferred.remove(id); com.rickygamer28.sanctuary.ui.RegionMap.forget(id); Caves.forget(id); grounded.remove(id); recheckMeadow.remove(id); cursors.remove(id); retryAt.remove(id); missedUnloaded.remove(id); requested.remove(id); waiting.remove(id); BiomePainter.forget(id) }
 
     // ------------------------------------------------------------------ loading the chunks it builds in
     // Building only where players happen to have chunks loaded (their render distance) split the valley into
@@ -143,6 +145,23 @@ object SanctuaryGenerator {
         if (w == null || w.first != idx) { waiting[s.id] = idx to now; return false }
         // waited ten seconds: build it anyway if its own chunk is there, otherwise skip it for now
         if (now - w.second > 200) { waiting.remove(s.id); return if (level.hasChunk(cx, cz)) true else null }
+        return false
+    }
+
+    /**
+     * Are the column's chunk and its neighbours loaded? If not, all the missing ones are asked for. Null when they
+     * can't be loaded (chunk loading for building is off and its own chunk isn't there).
+     */
+    private fun chunksReady(level: ServerLevel, s: Sanctuary, x: Int, z: Int, now: Long): Boolean? {
+        val cx = x shr 4
+        val cz = z shr 4
+        var all = true
+        for (dx in -1..1) for (dz in -1..1) if (!level.hasChunk(cx + dx, cz + dz)) {
+            all = false
+            if (loadChunks()) request(level, s, cx + dx, cz + dz, now)
+        }
+        if (all) return true
+        if (!loadChunks()) return if (level.hasChunk(cx, cz)) true else null
         return false
     }
 
@@ -425,6 +444,7 @@ object SanctuaryGenerator {
             s.needsCheck = false
             scheduleCheck(s.id)
             cursors[s.id] = 0
+            deferred.remove(s.id)
             missedUnloaded[s.id] = false
             if (s.unlockedChanged) { s.unlockedChanged = false; recheckMeadow += s.id }
         }
@@ -438,8 +458,53 @@ object SanctuaryGenerator {
         val deadline = started + buildMillis(level) * 1_000_000L
         var scanned = 0
         prefetch(level, s, i, total, now)
+        val queue = deferred.getOrPut(s.id) { ArrayDeque() }
+        /** Builds one column (its chunks are loaded). */
+        fun build(idx: Int) {
+            val ox = ColumnOrder.dx[idx]
+            val oz = ColumnOrder.dz[idx]
+            val x = s.center.x + ox
+            val z = s.center.z + oz
+            val dist = sqrt((ox * ox + oz * oz).toDouble())
+            val inside = dist <= radius
+            val hit = if (inside) ZoneLayout.locate(s, x, z, ring) else null
+            if (inside && hit == null) return
+            val asleep = inside && hit!!.zone !in s.unlocked && dist <= radius - 1.6
+            val ok = try {
+                when {
+                    !inside -> BiomeDresser.dressRim(level, s, x, z, dist, ring)
+                    asleep -> BiomeDresser.dressMeadow(level, s, x, z, hit!!, ring)
+                    else -> BiomeDresser.dress(level, s, x, z, hit!!, ring)
+                }
+            } catch (e: Exception) {
+                CobblemonSanctuary.LOGGER.warn("Couldn't build column $x,$z", e)
+                true
+            }
+            if (ok) {
+                s.dressed.set(idx)
+                if (asleep) s.meadow.set(idx) else s.meadow.clear(idx)
+                BiomePainter.mark(s, x, z)
+            } else missedUnloaded[s.id] = true
+            budget--
+        }
         BiomeDresser.beginHeights(s)
         try {
+        // first the columns set aside earlier whose chunks have loaded since
+        var left = queue.size
+        while (left-- > 0 && budget > 0 && System.nanoTime() < deadline) {
+            val (idx, since) = queue.removeFirst()
+            val x = s.center.x + ColumnOrder.dx[idx]
+            val z = s.center.z + ColumnOrder.dz[idx]
+            when (chunksReady(level, s, x, z, now)) {
+                true -> build(idx)
+                null -> missedUnloaded[s.id] = true
+                false -> when {
+                    now - since < 200 -> queue.addLast(idx to since)          // still loading
+                    level.hasChunk(x shr 4, z shr 4) -> build(idx)              // waited 10 s: build with what's there
+                    else -> missedUnloaded[s.id] = true                         // couldn't load it: next time
+                }
+            }
+        }
         while (budget > 0 && i < total) {
             scanned++
             if ((scanned and 31) == 0 && System.nanoTime() > deadline) break
@@ -469,34 +534,20 @@ object SanctuaryGenerator {
                 if (asleep) continue // still asleep: stays a meadow
                 s.dressed.clear(idx); s.meadow.clear(idx) // it woke up: build the real biome here
             }
-            when (ready(level, s, idx, x, z, now)) {
-                false -> { i = idx; break }                              // wait for it to load
+            when (chunksReady(level, s, x, z, now)) {
+                // not loaded yet: set it aside and carry on with the next ones (only stop when too many are waiting)
+                false -> { if (queue.size < 4096) { queue.addLast(idx to now); continue } else { i = idx; break } }
                 null -> { missedUnloaded[s.id] = true; continue }        // couldn't load it: later
-                true -> {}
+                true -> build(idx)
             }
-            val ok = try {
-                when {
-                    !inside -> BiomeDresser.dressRim(level, s, x, z, dist, ring)
-                    asleep -> BiomeDresser.dressMeadow(level, s, x, z, hit!!, ring)
-                    else -> BiomeDresser.dress(level, s, x, z, hit!!, ring)
-                }
-            } catch (e: Exception) {
-                CobblemonSanctuary.LOGGER.warn("Couldn't build column $x,$z", e)
-                true
-            }
-            if (ok) {
-                s.dressed.set(idx)
-                if (asleep) s.meadow.set(idx) else s.meadow.clear(idx)
-                BiomePainter.mark(s, x, z)
-            } else missedUnloaded[s.id] = true
-            budget--
         }
         } finally {
             BiomeDresser.endHeights()
             usedMillis = usedMillis * 0.8 + (System.nanoTime() - started) / 1_000_000.0 * 0.2
         }
-        if (i >= total) {
+        if (i >= total && queue.isEmpty()) {
             cursors.remove(s.id)
+            deferred.remove(s.id)
             requested.remove(s.id)
             BiomeDresser.endPass(s)
             s.rebuildZones.clear()

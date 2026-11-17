@@ -43,6 +43,11 @@ import kotlin.math.sqrt
  */
 object BiomeDresser {
     private const val FLAGS = Block.UPDATE_CLIENTS
+    /**
+     * For bulk work deep in the ground (filling a mountain with stone, cutting it away, hollowing a cave): no need
+     * for the neighbours to re-check their shape, nothing there can change. Much cheaper per block.
+     */
+    private const val BULK = Block.UPDATE_CLIENTS or Block.UPDATE_KNOWN_SHAPE
     private const val G = SanctuaryDimension.GROUND_Y
     const val WATER_Y = G - 1
 
@@ -105,7 +110,7 @@ object BiomeDresser {
                     val accent = STRATA[st.block]
                     if (accent != null && Math.floorMod(p.y + shift, 4) == 0) st = accent
                 }
-                level.setBlock(p, st, FLAGS)
+                level.setBlock(p, st, BULK)
             }
         }
         fun ground(top: BlockState, filler: BlockState = top) { top(top); filler(filler) }
@@ -775,12 +780,12 @@ object BiomeDresser {
         if (target > ground.y) {
             for (yy in ground.y + 1..target) {
                 val p = BlockPos(ground.x, yy, ground.z)
-                if (keep == null || p.asLong() !in keep) level.setBlock(p, b(Blocks.STONE), FLAGS)
+                if (keep == null || p.asLong() !in keep) level.setBlock(p, b(Blocks.STONE), BULK)
             }
         } else if (target < ground.y) {
             for (yy in target + 1..ground.y) {
                 val p = BlockPos(ground.x, yy, ground.z)
-                if (isNatural(level.getBlockState(p))) level.setBlock(p, b(Blocks.AIR), FLAGS)
+                if (isNatural(level.getBlockState(p))) level.setBlock(p, b(Blocks.AIR), BULK)
             }
         }
         return BlockPos(ground.x, target, ground.z)
@@ -813,7 +818,7 @@ object BiomeDresser {
         val air = b(Blocks.AIR)
         for (y in spot.floor..top) {
             val p = BlockPos(x, y, z)
-            if (!level.getBlockState(p).isAir) level.setBlock(p, air, FLAGS)
+            if (!level.getBlockState(p).isAir) level.setBlock(p, air, if (y >= top - 1) FLAGS else BULK)
         }
         val floorPos = BlockPos(x, spot.floor - 1, z)
         val c = Ctx(level, s, floorPos, randomFor(s, x, z), variantOf(s, Caves.ZONE), ZoneLayout.Hit(Caves.ZONE, 0.0, 99.0, null), 3, 0)
