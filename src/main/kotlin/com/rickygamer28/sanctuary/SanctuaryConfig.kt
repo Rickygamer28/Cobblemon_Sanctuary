@@ -126,6 +126,10 @@ object SanctuaryConfig {
         .comment("Friendship a resident needs to come and greet its trainer.")
         .defineInRange("greetFriendship", 120, 0, 255)
 
+    val autoLimitCrowd: ModConfigSpec.BooleanValue = builder
+        .comment("When the server can't keep up (Pokémon start moving in jumps), automatically let fewer residents out until it can, then more again.")
+        .define("autoLimitCrowd", true)
+
     val caves: ModConfigSpec.BooleanValue = builder
         .comment("Dig big caves (a hall and wide tunnels) into the mountains of the Cave & mountain habitat.")
         .define("caves", true)

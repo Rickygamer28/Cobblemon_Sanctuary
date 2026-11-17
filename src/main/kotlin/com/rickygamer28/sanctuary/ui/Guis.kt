@@ -80,7 +80,9 @@ object SanctuaryGuis {
         t.putBoolean("preview", s.state == SanctuaryState.PREVIEW)
         t.putInt("residents", s.residentCount)
         t.putInt("live", rt.live.values.count { !it.leaving })
-        t.putInt("capNow", Residents.spawnCap(s))
+        t.putInt("capNow", com.rickygamer28.sanctuary.life.LoadGuard.limit(Residents.spawnCap(s)))
+        t.putInt("capUsual", Residents.spawnCap(s))
+        t.putInt("tickMs", com.rickygamer28.sanctuary.life.LoadGuard.tickMs.toInt())
         t.put("basketOff", ListTag().also { l -> s.basketOff.forEach { l.add(StringTag.valueOf(it)) } })
         t.put("goals", ListTag().also { list ->
             for (g in com.rickygamer28.sanctuary.life.Milestones.GOALS) list.add(CompoundTag().also {

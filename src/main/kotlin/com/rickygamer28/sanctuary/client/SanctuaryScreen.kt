@@ -650,8 +650,26 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
             )
             cx += cw + gap
         }
+        // the server's speed, and whether fewer Pokémon are out to keep up
+        run {
+            val ms = data.getInt("tickMs")
+            val usual = data.getInt("capUsual")
+            val now = data.getInt("capNow")
+            if (ms > 0) {
+                val (label, col) = when {
+                    now < usual -> "Server busy (${ms} ms/tick): $now of $usual Pokémon out so they move smoothly" to GOLD
+                    ms > 45 -> "Server busy (${ms} ms/tick)" to BAD
+                    else -> "Server running smoothly (${ms} ms/tick)" to DIM
+                }
+                text(g, fit(label, w), x, cy + 22, col)
+                if (over(mx, my, x, cy + 20, w, 12)) tooltip = listOf(
+                    Component.literal("Server speed").withColor(TEXT),
+                    Component.literal("The server has 50 ms per tick. Over that, Pokémon move in little jumps.").withColor(SUB),
+                    Component.literal("When it's busy, fewer residents come out until it catches up.").withColor(SUB))
+            }
+        }
         // recent events
-        val ey = cy + 26
+        val ey = cy + 38
         text(g, "Recently", x, ey, SUB)
         val basket = if (data.getBoolean("hasBasket")) "Basket: ${data.getInt("basketItems")} items" else "No Gathering Basket placed yet"
         var bx2 = x + w

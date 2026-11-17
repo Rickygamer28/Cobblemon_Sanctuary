@@ -136,6 +136,7 @@ object Residents {
         Scenes.tick(level, s, rt, now)
 
         if ((now + (s.id.hashCode() and 15)) % 20L != 0L) return
+        LoadGuard.tick(level.server, now)
 
         if (rt.rosterDirty || now - rt.rosterAt > 200) refreshRoster(level, s, rt, now)
         cleanUp(rt)
@@ -280,7 +281,8 @@ object Residents {
     }
 
     private fun updateSpawns(level: ServerLevel, s: Sanctuary, rt: SanctuaryRuntime, players: List<ServerPlayer>, now: Long) {
-        val cap = spawnCap(s)
+        // fewer while the server can't keep up (so they don't move in jumps)
+        val cap = LoadGuard.limit(spawnCap(s))
         val everyone = s.crowd == 2 && SanctuaryConfig.allowBigCrowds.get()
         val range = SanctuaryConfig.spawnRange.get().toDouble()
         // shift change at dusk and dawn (and now and then in between): a different set of residents comes out
