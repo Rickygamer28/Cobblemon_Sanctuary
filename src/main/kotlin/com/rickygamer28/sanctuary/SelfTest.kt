@@ -130,6 +130,9 @@ object SelfTest {
         Blocks.SMOOTH_STONE, Blocks.BONE_BLOCK, Blocks.CALCITE, Blocks.AMETHYST_BLOCK, Blocks.STONE, Blocks.ANDESITE, Blocks.WEATHERED_COPPER,
         Blocks.EXPOSED_COPPER, Blocks.RAW_IRON_BLOCK, Blocks.SMOOTH_BASALT, Blocks.BLACKSTONE, Blocks.SNOW_BLOCK)
 
+    /** Plain rock alone above the ground could be a leftover, so it isn't excused as a decoration. */
+    private val PLAIN_ROCK = setOf(Blocks.STONE, Blocks.ANDESITE, Blocks.SNOW_BLOCK, Blocks.BLACKSTONE)
+
     private val FIRST = listOf("water", "grass", "fire", "rock")
 
     private fun counts(zones: List<String>): LinkedHashMap<String, Int> {
@@ -258,7 +261,8 @@ object SelfTest {
             // an open cave mouth is dug down to the cave floor (a roofed one keeps its ground)
             val expected = if (cave != null && cave.mouth && target - cave.ceil < 4) cave.floor - 1 else target
             // decorations standing on the ground (boulders, spikes, pylons, basalt columns) aren't ground
-            val decorOnly = ground > target && (target + 1..ground).all { yy -> level.getBlockState(BlockPos(x, yy, z)).block in DECOR_ROCK }
+            val decorOnly = ground > target && (target + 1..ground).map { yy -> level.getBlockState(BlockPos(x, yy, z)).block }.let { bl ->
+                bl.all { it in DECOR_ROCK } && bl.any { it !in PLAIN_ROCK } }
             val diff = if (decorOnly) 0 else ground - expected
             fun why(): String {
                 val base = BiomeDresser.baseHeight(s, x, z)
