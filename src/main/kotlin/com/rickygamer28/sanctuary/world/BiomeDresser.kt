@@ -106,7 +106,7 @@ object BiomeDresser {
             val f = queue.removeFirst()
             val ground = level.getBlockState(f.surface)
             val stillThere = level.isLoaded(f.surface) && isNatural(ground) && ground.fluidState.isEmpty && level.getBlockState(f.surface.above()).isAir
-            if (!stillThere) continue
+            if (!stillThere || Dens.covers(s, f.surface.x, f.surface.z)) continue
             if (settled(level, s, f.surface.x, f.surface.z)) placeFeature(level, s, f.key, f.surface, RandomSource.create(f.seed), f.protectRadius, f.protectHeight)
             else if (!all) queue.addLast(f)
         }
@@ -215,6 +215,7 @@ object BiomeDresser {
         fun feature(key: ResourceKey<ConfiguredFeature<*, *>>, protectRadius: Int = 0, protectHeight: Int = 16) {
             // the ground around isn't at its final height yet (old higher ground would clip the tree, lower ground
             // would be filled up through it): plant it later, once it is
+            if (Dens.covers(s, x, z)) return
             if (!settled(level, s, x, z)) {
                 pendingFeatures.getOrPut(s.id) { ArrayDeque() } += PendingFeature(key, surface, protectRadius, protectHeight, random.nextLong())
                 return
@@ -986,7 +987,7 @@ object BiomeDresser {
         // a winding route from the town out to the habitat's landmark
         if (target >= WATER_Y + 1 && hit.dist > s.size.hubRadius - 4 && onRoute(s, hit, x, z, ring)) {
             val (top, fill) = routeBlocks(zone, variantOf(s, zone))
-            ctx.ground(if (ctx.noise(2.5, 91) > 0.82) fill else top, fill)
+            ctx.ground(top, fill)
             if (Math.floorMod(x * 7 + z * 13, 37) == 0 && hit.dist > s.size.hubRadius + 10) {
                 // a little lamp along the way, just off the path
                 val side = BlockPos(x + 2, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x + 2, z), z)

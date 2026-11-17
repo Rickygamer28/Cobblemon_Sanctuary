@@ -285,6 +285,14 @@ object SanctuaryGenerator {
             Dens.maybeBuild(level, s, x, z, ring)
             val top = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1
             val target = BiomeDresser.targetHeight(s, x, z, ring)
+            // old ground left lying on a route (it should be level path): lower it and lay the path again
+            if (top > target && top <= target + 4 && BiomeDresser.routeDistance(s, x, z) < 1.3 &&
+                (target + 1..top).all { y -> BiomeDresser.isNatural(level.getBlockState(BlockPos(x, y, z))) && level.getBlockState(BlockPos(x, y, z)).fluidState.isEmpty }) {
+                for (y in target + 1..top) level.setBlock(BlockPos(x, y, z), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), net.minecraft.world.level.block.Block.UPDATE_CLIENTS)
+                s.dressed.clear(idx)
+                s.generationDirty = true
+                continue
+            }
             // a thin leftover: a lone column of old ground (soil in it, so not a rock spire or ice spike on purpose)
             // standing over the ground around it
             if (top >= target + 2 && thinLeftover(level, x, z, top, target)) {

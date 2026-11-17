@@ -186,11 +186,13 @@ object Dens {
             if (!level.isLoaded(d.front) || !level.isLoaded(d.center)) return@repeat
             val base = d.center.above()
             val side = d.dir.clockWise
+            // trees and bushes in the way come down whole
+            for (i in R + 1..R + 4 step 3) BiomeDresser.removeTreesIn(level, base.relative(d.dir, i), 2, base.y, base.y + 3)
             for (i in R..R + 4) for (w in -1..1) for (dy in 0..2) {
                 val p = base.relative(d.dir, i).relative(side, w).above(dy)
                 val st = level.getBlockState(p)
                 if (st.isAir || !st.fluidState.isEmpty) continue
-                if (BiomeDresser.isNatural(st) || BiomeDresser.isClutter(st) || BiomeDresser.isModSolid(st))
+                if (BiomeDresser.isNatural(st) || BiomeDresser.isClutter(st) || BiomeDresser.isModSolid(st) || st.`is`(net.minecraft.tags.BlockTags.LEAVES))
                     level.setBlock(p, b(Blocks.AIR), FLAGS)
             }
         }
