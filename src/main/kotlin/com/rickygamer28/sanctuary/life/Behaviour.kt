@@ -29,8 +29,8 @@ object Behaviour {
         if (now < rt.gatherUntil) return hit.zone == ZoneLayout.HUB || hit.zone == home
         if (home == null || r.migrating) return true
         if (r.visitZone != null && now < r.visitUntil) return hit.zone == home || hit.zone == ZoneLayout.HUB || hit.zone == r.visitZone
-        // living in the caves: anywhere inside them
-        if (r.cave) return com.rickygamer28.sanctuary.world.Caves.inside(s, pos)
+        // living in the caves: anywhere in them, and out in their own habitat like the others
+        if (r.cave && com.rickygamer28.sanctuary.world.Caves.inside(s, pos)) return true
         // living in a pocket: around the pocket
         val pocket = r.pocket
         if (pocket != null) return ZoneLayout.distance(pos.x, pos.z, pocket.x, pocket.z) <= pocket.r + 9
@@ -209,9 +209,14 @@ object Behaviour {
         Residents.walkTo(r.entity, Residents.surface(level, x, z), 0.4f, 2)
     }
 
-    /** Somewhere on the cave floor. */
+    /**
+     * Somewhere on the cave floor: mostly in its own mountain's part of the caves, now and then off along the
+     * tunnels to another part, and sometimes out into its habitat for a look around.
+     */
     private fun walkInCave(level: ServerLevel, s: Sanctuary, r: LiveResident) {
-        val p = com.rickygamer28.sanctuary.world.Caves.randomFloor(s, level.random) ?: return
+        val roll = level.random.nextInt(10)
+        if (roll == 0 && r.home != null) { walkToZone(level, s, r, r.home!!); return }
+        val p = com.rickygamer28.sanctuary.world.Caves.randomFloor(s, level.random, if (roll == 1) null else r.home) ?: return
         if (!level.hasChunk(p.x shr 4, p.z shr 4)) return
         Residents.walkTo(r.entity, p, 0.4f, 2)
     }

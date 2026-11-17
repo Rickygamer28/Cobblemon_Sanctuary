@@ -905,6 +905,11 @@ object BiomeDresser {
         off *= smooth((s.size.radius - 6 - dist) / 18.0)
         // the caves always have mountain over them (even where they reach under a neighbouring habitat)
         // (only where there is a cave: elsewhere the cover is 0, and lakes and pools must stay below it)
+        // a level apron in front of the cave mouths of the other mountains (the Cave & mountain range has its own)
+        if (s.caveStyle >= 2) {
+            val ap = Caves.apron(s, x, z, only = null, except = Caves.ZONE)
+            if (ap > 0.0) { val fo = Caves.floorOffset(s); if (off > fo) off = mix(off, fo, ap) }
+        }
         val cover = Caves.cover(s, x, z)
         if (cover > 0.0 && cover > off) off = cover
         return G + off.roundToInt()
@@ -988,18 +993,23 @@ object BiomeDresser {
     /** Dresses one column inside the sanctuary. Returns false if it can't be done right now. */
     fun dress(level: ServerLevel, s: Sanctuary, x: Int, z: Int, hit: ZoneLayout.Hit, ring: List<String>): Boolean {
         val done = dressSurface(level, s, x, z, hit, ring)
-        if (done && shaping && hit.zone in s.unlocked && hit.dist < s.size.radius - 2 && !Landmarks.near(s, x, z)) {
-            Caves.at(s, x, z)?.let { carveCave(level, s, x, z, it, targetHeight(s, x, z, ring)) }
+        if (done && shaping && hit.zone in s.unlocked && hit.dist < s.size.radius - 2) {
+            Caves.at(s, x, z)?.let { spot ->
+                val target = targetHeight(s, x, z, ring)
+                // under a landmark only where the tunnel runs deep below it
+                if (!Landmarks.near(s, x, z) || spot.ceil < target - 8) withPhase(Phase.ALL) { carveCave(level, s, x, z, spot, target, ring) }
+            }
         }
         return done
     }
 
     /**
+     * (Run with everything on: underground, the cave's own dripstone and crystals can go in with the land.)
      * Hollows a column out for the cave: air from its floor to its ceiling (and, at a cave mouth, all the way up),
      * with a rocky floor, glow lichen on the ceiling to light it, dripstone and the odd amethyst cluster.
      * Everything is kept clear of the middle of the passages so big Pokémon get through.
      */
-    private fun carveCave(level: ServerLevel, s: Sanctuary, x: Int, z: Int, spot: Caves.Spot, target: Int) {
+    private fun carveCave(level: ServerLevel, s: Sanctuary, x: Int, z: Int, spot: Caves.Spot, target: Int, ring: List<String>) {
         val roofed = target - spot.ceil >= 4
         val top = when {
             roofed -> spot.ceil
@@ -1012,13 +1022,14 @@ object BiomeDresser {
             val p = BlockPos(x, y, z)
             if (!level.getBlockState(p).isAir) level.setBlock(p, air, if (y >= top - 1) FLAGS else BULK)
         }
+        if (spot.zone != Caves.ZONE) { themedCave(level, s, x, z, spot, target, top, roofed, ring); return }
         val floorPos = BlockPos(x, spot.floor - 1, z)
         val c = Ctx(level, s, floorPos, randomFor(s, x, z), variantOf(s, Caves.ZONE), ZoneLayout.Hit(Caves.ZONE, 0.0, 99.0, null), 3, 0)
         val tuff = c.variant == 2
         val rock = if (tuff) b(Blocks.TUFF) else b(Blocks.STONE)
         // old water buried in the mountain (an older lake or pond under raised ground) mustn't show in the cave:
-        // in the floor, the ceiling and the walls next to it, it's turned into rock
-        fun seal(p: BlockPos) { if (!level.getBlockState(p).fluidState.isEmpty) level.setBlock(p, rock, BULK) }
+        // in the floor, the ceiling and the walls next to it, it's turned into rock (the volcano's lava is left be)
+        fun seal(p: BlockPos) { if (level.getBlockState(p).fluidState.`is`(net.minecraft.tags.FluidTags.WATER)) level.setBlock(p, rock, BULK) }
         for (y in spot.floor - 4 until spot.floor) seal(BlockPos(x, y, z))
         if (roofed) for (y in top + 1..top + 3) seal(BlockPos(x, y, z))
         for (d in Direction.Plane.HORIZONTAL) {
@@ -1060,6 +1071,135 @@ object BiomeDresser {
             c.chance(0.04) -> c.place(c.pick(b(Blocks.BROWN_MUSHROOM), b(Blocks.RED_MUSHROOM)))
             c.chance(0.05) -> c.place(b(Blocks.GLOW_LICHEN).setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.DOWN, true))
         }
+    }
+
+    /**
+     * The other mountains' parts of the caves, each with its own look:
+     * the snowy peak's ice cavern (packed and blue ice, frozen pools, icicles, pale light),
+     * the dragons' crystal grotto (deepslate and calcite, amethyst growing from the ceiling and floor, green light),
+     * and the volcano's magma chamber (blackstone and basalt, glowing magma, shroomlight and real lava pools along
+     * the walls: Pokémon don't mind it, but watch your step).
+     */
+    private fun themedCave(level: ServerLevel, s: Sanctuary, x: Int, z: Int, spot: Caves.Spot, target: Int, top: Int, roofed: Boolean, ring: List<String>) {
+        val zone = spot.zone
+        val floorPos = BlockPos(x, spot.floor - 1, z)
+        val c = Ctx(level, s, floorPos, randomFor(s, x, z), variantOf(s, zone), ZoneLayout.Hit(zone, 0.0, 99.0, null), 3, 0)
+        fun st(block: Block) = b(block)
+        val wallRock = when (zone) {
+            "ice" -> c.broad(st(Blocks.PACKED_ICE), st(Blocks.BLUE_ICE), 0.7, 8.0, 21)
+            "dragon" -> c.broad(st(Blocks.DEEPSLATE), st(Blocks.CALCITE), 0.62, 8.0, 22)
+            "fire" -> c.broad(st(Blocks.BLACKSTONE), st(Blocks.BASALT), 0.58, 7.0, 23)
+            else -> st(Blocks.STONE)
+        }
+        val under = when (zone) { "ice" -> st(Blocks.PACKED_ICE); "dragon" -> st(Blocks.DEEPSLATE); "fire" -> st(Blocks.BLACKSTONE); else -> st(Blocks.STONE) }
+        fun seal(p: BlockPos) { if (level.getBlockState(p).fluidState.`is`(net.minecraft.tags.FluidTags.WATER)) level.setBlock(p, under, BULK) }
+        for (y in spot.floor - 4 until spot.floor) seal(BlockPos(x, y, z))
+        if (roofed) for (y in top + 1..top + 3) seal(BlockPos(x, y, z))
+        // the walls and the ceiling take the part's own rock (where it's inside the mountain, not out in the open)
+        for (d in Direction.Plane.HORIZONTAL) {
+            val nx = x + d.stepX
+            val nz = z + d.stepZ
+            val other = Caves.at(s, nx, nz)
+            val nTop = targetHeight(s, nx, nz, ring) - 2
+            for (y in spot.floor - 2..min(top + 2, nTop)) {
+                if (other != null && y in other.floor..other.ceil) continue // that's cave too
+                val p = BlockPos(nx, y, nz)
+                val cur = level.getBlockState(p)
+                if (cur.fluidState.`is`(net.minecraft.tags.FluidTags.WATER)) { level.setBlock(p, under, BULK); continue }
+                if (!cur.isAir && cur.fluidState.isEmpty && isNatural(cur)) level.setBlock(p, if ((y + nx + nz) % 5 == 0) under else wallRock, BULK)
+            }
+        }
+        if (roofed) for (y in top + 1..min(top + 2, target - 2)) {
+            val p = BlockPos(x, y, z)
+            if (isNatural(level.getBlockState(p)) && level.getBlockState(p).fluidState.isEmpty) level.setBlock(p, wallRock, BULK)
+        }
+        val wall = spot.centre > 0.55 // towards the sides, out of the way
+        // the floor
+        val floorTop = when (zone) {
+            "ice" -> when {
+                spot.mouth -> c.broad(st(Blocks.SNOW_BLOCK), st(Blocks.PACKED_ICE), 0.55, 6.0, 31)
+                c.noise(6.0, 32) > 0.7 -> st(Blocks.ICE) // a frozen pool
+                else -> c.broad(st(Blocks.PACKED_ICE), st(Blocks.SNOW_BLOCK), 0.6, 8.0, 33)
+            }
+            "dragon" -> when {
+                spot.mouth -> c.broad(st(Blocks.GRAVEL), st(Blocks.CALCITE), 0.55, 6.0, 34)
+                spot.inHall && c.noise(5.0, 35) > 0.74 -> st(Blocks.AMETHYST_BLOCK)
+                else -> c.broad(c.broad(st(Blocks.DEEPSLATE), st(Blocks.SMOOTH_BASALT), 0.6, 9.0, 36), st(Blocks.CALCITE), 0.72, 7.0, 37)
+            }
+            "fire" -> when {
+                spot.mouth -> c.broad(st(Blocks.BASALT), st(Blocks.GRAVEL), 0.55, 6.0, 38)
+                c.noise(5.0, 39) > 0.68 -> st(Blocks.MAGMA_BLOCK)
+                else -> c.broad(st(Blocks.BLACKSTONE), st(Blocks.BASALT), 0.55, 8.0, 40)
+            }
+            else -> st(Blocks.STONE)
+        }
+        c.ground(floorTop, under)
+        if (!roofed && spot.mouth) {
+            if (zone == "ice" && c.chance(0.4)) c.place(st(Blocks.SNOW))
+            return
+        }
+        val ceiling = BlockPos(x, top + 1, z)
+        val hanging = ceiling.below()
+        val solidCeiling = level.getBlockState(ceiling).isSolid
+        fun dripDown() = st(Blocks.POINTED_DRIPSTONE)
+            .setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.VERTICAL_DIRECTION, Direction.DOWN)
+            .setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.DRIPSTONE_THICKNESS, net.minecraft.world.level.block.state.properties.DripstoneThickness.TIP)
+        when (zone) {
+            "ice" -> {
+                if (solidCeiling) when {
+                    c.grid(if (spot.inHall) 8 else 11, 41) -> level.setBlock(ceiling, st(Blocks.PEARLESCENT_FROGLIGHT), FLAGS)
+                    c.noise(6.0, 42) > 0.55 -> level.setBlock(ceiling, st(Blocks.BLUE_ICE), FLAGS)
+                    wall && c.grid(5, 43) -> level.setBlock(hanging, dripDown(), FLAGS) // icicles
+                }
+                if (wall) when {
+                    c.grid(9, 44) -> c.spike(st(Blocks.PACKED_ICE), 0, 2 + c.random.nextInt(3))
+                    c.chance(0.25) -> c.place(st(Blocks.SNOW))
+                } else if (floorTop.`is`(Blocks.SNOW_BLOCK) && c.chance(0.3)) c.place(st(Blocks.SNOW))
+            }
+            "dragon" -> {
+                if (solidCeiling) when {
+                    c.grid(if (spot.inHall) 8 else 11, 45) -> level.setBlock(ceiling, st(Blocks.VERDANT_FROGLIGHT), FLAGS)
+                    c.noise(6.0, 46) > 0.5 -> {
+                        level.setBlock(ceiling, st(Blocks.AMETHYST_BLOCK), FLAGS)
+                        if (c.chance(0.35)) level.setBlock(hanging, st(Blocks.AMETHYST_CLUSTER).setValue(net.minecraft.world.level.block.AmethystClusterBlock.FACING, Direction.DOWN), FLAGS)
+                    }
+                    c.noise(7.0, 5) > 0.5 -> level.setBlock(hanging, st(Blocks.GLOW_LICHEN).setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.UP, true), FLAGS)
+                }
+                if (wall) when {
+                    c.grid(7, 47) -> c.place(st(if (c.chance(0.5)) Blocks.AMETHYST_CLUSTER else Blocks.LARGE_AMETHYST_BUD))
+                    c.grid(13, 48) -> c.crystalCluster(st(Blocks.AMETHYST_BLOCK), st(Blocks.AMETHYST_CLUSTER), 2 + c.random.nextInt(2))
+                    c.chance(0.04) -> level.setBlock(floorPos, st(Blocks.CRYING_OBSIDIAN), FLAGS)
+                }
+            }
+            "fire" -> {
+                if (solidCeiling) when {
+                    c.grid(if (spot.inHall) 7 else 10, 49) -> level.setBlock(ceiling, st(Blocks.SHROOMLIGHT), FLAGS)
+                    c.noise(6.0, 50) > 0.5 -> level.setBlock(ceiling, st(Blocks.MAGMA_BLOCK), FLAGS)
+                }
+                // real lava, in pools sunk into the floor along the walls: walled in on every side, so it never spreads
+                if (wall && !spot.link && !spot.mouth && c.noise(5.0, 51) > 0.56 && lavaSafe(level, s, x, z, spot, ring)) {
+                    level.setBlock(floorPos, st(Blocks.LAVA), FLAGS)
+                    return
+                }
+                if (wall && c.grid(9, 52)) c.crystalCluster(st(Blocks.BASALT), null, 2 + c.random.nextInt(3))
+            }
+        }
+    }
+
+    /** Can a lava pool go in the floor of this cave column without flowing anywhere? */
+    private fun lavaSafe(level: ServerLevel, s: Sanctuary, x: Int, z: Int, spot: Caves.Spot, ring: List<String>): Boolean {
+        val y = spot.floor - 1
+        for (d in Direction.Plane.HORIZONTAL) {
+            val nx = x + d.stepX
+            val nz = z + d.stepZ
+            val other = Caves.at(s, nx, nz)
+            if (other != null) {
+                // a lower floor beside it, or the open sky: the lava would run there
+                if (other.floor < spot.floor || other.mouth) return false
+            } else if (targetHeight(s, nx, nz, ring) < spot.floor + 1) return false
+        }
+        // and solid under it
+        return !level.getBlockState(BlockPos(x, y - 1, z)).isAir
     }
 
     private fun dressSurface(level: ServerLevel, s: Sanctuary, x: Int, z: Int, hit: ZoneLayout.Hit, ring: List<String>): Boolean {
@@ -1237,6 +1377,8 @@ object BiomeDresser {
         val surface = reshape(level, found, G, placed[s.id])
         val c = Ctx(level, s, surface, randomFor(s, x, z), 0, hit, exposure(s, x, z, G, ring))
         c.ground(b(Blocks.GRASS_BLOCK), b(Blocks.DIRT))
+        // a tunnel joining two mountains' caves can pass deep under a meadow
+        Caves.at(s, x, z)?.takeIf { it.link && it.ceil < G - 5 && hit.dist < s.size.radius - 2 }?.let { withPhase(Phase.ALL) { carveCave(level, s, x, z, it, G, ring) } }
         when {
             c.chance(0.2) -> c.place(b(Blocks.SHORT_GRASS))
             c.chance(0.01) -> c.place(c.pick(b(Blocks.DANDELION), b(Blocks.POPPY), b(Blocks.OXEYE_DAISY)))

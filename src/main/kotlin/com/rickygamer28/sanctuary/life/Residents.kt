@@ -236,6 +236,7 @@ object Residents {
         if (s.state != SanctuaryState.ACTIVE) return
         if (!s.planned) {
             s.pocketStyle = 2
+            s.caveStyle = 2
             s.habitats.clear()
             s.habitats.putAll(ZoneLayout.plan(s, counts))
             s.planned = true
@@ -378,11 +379,11 @@ object Residents {
         val pos = at ?: run {
             val range = SanctuaryConfig.spawnRange.get().toDouble()
             fun nearPlayer(x: Int, z: Int) = players.isEmpty() || players.any { val dx = it.x - x; val dz = it.z - z; dx * dx + dz * dz < range * range }
-            // some of the Cave & mountain residents live down in the caves
-            if (home == com.rickygamer28.sanctuary.world.Caves.ZONE && !swimmer && !pokemon.form.behaviour.moving.fly.canFly &&
+            // some of the mountain habitats' residents live down in their part of the caves
+            if (home != null && com.rickygamer28.sanctuary.world.Caves.hasSection(s, home) && !swimmer && !pokemon.form.behaviour.moving.fly.canFly &&
                 level.random.nextDouble() < SanctuaryConfig.caveShare.get()) {
                 repeat(4) {
-                    val p = com.rickygamer28.sanctuary.world.Caves.randomFloor(s, level.random) ?: return@repeat
+                    val p = com.rickygamer28.sanctuary.world.Caves.randomFloor(s, level.random, home) ?: return@repeat
                     if (!level.hasChunk(p.x shr 4, p.z shr 4) || !level.getBlockState(p).isAir || !level.getBlockState(p.above()).isAir) return@repeat
                     if (!unseen(players, p.x, p.z)) return@repeat
                     inCave = true

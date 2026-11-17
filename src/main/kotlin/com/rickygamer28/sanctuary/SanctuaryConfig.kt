@@ -135,10 +135,10 @@ object SanctuaryConfig {
         .define("autoLimitCrowd", true)
 
     val caves: ModConfigSpec.BooleanValue = builder
-        .comment("Dig big caves (a hall and wide tunnels) into the mountains of the Cave & mountain habitat.")
+        .comment("Dig big caves (halls and wide tunnels) into the mountain habitats: the Cave & mountain range, and (in valleys planned or reshaped since 1.9.1) the snowy peak, the dragon's den and the volcano, all joined by tunnels.")
         .define("caves", true)
     val caveShare: ModConfigSpec.DoubleValue = builder
-        .comment("Share of the Cave & mountain residents (that can't fly or swim) that live down in the caves.")
+        .comment("Share of the mountain habitats' residents (that can't fly or swim) that live down in their part of the caves.")
         .defineInRange("caveShare", 0.4, 0.0, 1.0)
 
     val pocketShare: ModConfigSpec.DoubleValue = builder

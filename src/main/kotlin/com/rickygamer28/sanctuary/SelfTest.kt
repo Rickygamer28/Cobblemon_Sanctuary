@@ -316,6 +316,7 @@ object SelfTest {
                 if (level.getBlockState(roof).isAir) find("cave open to the sky").add(s, x, roof.y, z)
             }
         }
+        caveCheck(level, s, ::find)
         // dens: their way in must be open
         var dens = 0
         for (d in Dens.all(s)) {
@@ -345,6 +346,68 @@ object SelfTest {
         try { File("selftest-report.txt").writeText(report.toString()) } catch (_: Exception) {}
         before = now
         now = HashMap()
+    }
+
+    /**
+     * The caves: every hall and entrance can be walked to from the first hall (through the joining tunnels), nothing
+     * blocks the passages, no lava runs anywhere and no water got in.
+     */
+    private fun caveCheck(level: ServerLevel, s: Sanctuary, find: (String) -> Finding) {
+        val halls = Caves.halls(s)
+        if (halls.isEmpty()) { log("caves: none"); return }
+        val net = Caves.network(s)
+        log("caves: " + halls.joinToString(", ") { "${it.zone} hall r${it.hallR.toInt()} at (${(it.hallX - s.center.x).toInt()}, ${(it.hallZ - s.center.z).toInt()})" } +
+            "; ${Caves.entrances(s).size} entrances, ${net?.links?.size ?: 0} joining tunnels (${net?.links?.joinToString { "${it.link!!.a}-${it.link.b} ${it.length.toInt()} long" }})")
+        fun key(x: Int, z: Int) = (x.toLong() shl 32) or (z.toLong() and 0xFFFFFFFFL)
+        fun open(x: Int, z: Int, spot: Caves.Spot): Boolean {
+            level.getChunk(x shr 4, z shr 4)
+            val a = level.getBlockState(BlockPos(x, spot.floor, z))
+            val b = level.getBlockState(BlockPos(x, spot.floor + 1, z))
+            return !a.isSolid && !b.isSolid
+        }
+        // walk the cave from the first hall
+        val start = halls.first()
+        val sx = start.hallX.toInt()
+        val sz = start.hallZ.toInt()
+        val reached = HashSet<Long>()
+        val queue = ArrayDeque<Triple<Int, Int, Caves.Spot>>()
+        Caves.at(s, sx, sz)?.let { if (open(sx, sz, it)) { queue += Triple(sx, sz, it); reached += key(sx, sz) } }
+        var blocked = 0
+        var lava = 0
+        while (queue.isNotEmpty() && reached.size < 400_000) {
+            val (x, z, spot) = queue.removeFirst()
+            if (level.getBlockState(BlockPos(x, spot.floor - 1, z)).`is`(Blocks.LAVA)) lava++
+            for (d in Direction.Plane.HORIZONTAL) {
+                val nx = x + d.stepX
+                val nz = z + d.stepZ
+                if (key(nx, nz) in reached) continue
+                val o = Caves.at(s, nx, nz) ?: continue
+                if (kotlin.math.abs(o.floor - spot.floor) > 1) continue
+                if (!open(nx, nz, o)) { if (!Dens.covers(s, nx, nz) && !Landmarks.near(s, nx, nz)) blocked++; reached += key(nx, nz); continue }
+                reached += key(nx, nz)
+                queue += Triple(nx, nz, o)
+            }
+        }
+        log("caves: walked over ${reached.size} columns from the ${start.zone} hall, $lava lava pools on the way")
+        if (blocked > 40) find("cave passage blocked (columns)").add(s, sx, start.hallX.toInt(), sz, "$blocked columns")
+        for (h in halls) if (key(h.hallX.toInt(), h.hallZ.toInt()) !in reached) find("cave hall can't be reached").add(s, h.hallX.toInt(), 0, h.hallZ.toInt(), h.zone)
+        for ((zone, ex, ez) in Caves.entrances(s)) {
+            val x = ex.toInt(); val z = ez.toInt()
+            // the mouth may be a few blocks off the tunnel's first point
+            val near = (-3..3).any { dx -> (-3..3).any { dz -> key(x + dx, z + dz) in reached } }
+            if (!near) find("cave entrance can't be reached").add(s, x, 0, z, zone)
+        }
+        // lava running loose, or water inside the caves
+        for (k in reached) {
+            val x = (k shr 32).toInt(); val z = k.toInt()
+            val spot = Caves.at(s, x, z) ?: continue
+            for (y in spot.floor - 2..spot.ceil + 1) {
+                val fs = level.getFluidState(BlockPos(x, y, z))
+                if (fs.isEmpty) continue
+                if (fs.`is`(net.minecraft.tags.FluidTags.LAVA) && !fs.isSource) { find("lava flowing").add(s, x, y, z); break }
+                if (fs.`is`(net.minecraft.tags.FluidTags.WATER)) { find("water in the cave").add(s, x, y, z, spot.zone); break }
+            }
+        }
     }
 
     private fun leavesHaveTrunk(level: ServerLevel, start: BlockPos, seen: HashSet<Long>): Boolean {

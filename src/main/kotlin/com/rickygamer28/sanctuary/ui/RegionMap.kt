@@ -71,10 +71,8 @@ object RegionMap {
         }
         if ("fire" in s.unlocked) BiomeDresser.peakOf(s, "fire")?.let { mark("peak", "The volcano's crater", it.first, it.second, "fire") }
         if ("ice" in s.unlocked) BiomeDresser.peakOf(s, "ice")?.let { mark("peak", "The snowy summit", it.first, it.second, "ice") }
-        if (Caves.ZONE in s.unlocked && com.rickygamer28.sanctuary.SanctuaryConfig.caves.get()) Caves.network(s)?.let { net ->
-            net.tunnels.forEach { t -> t.points.first().let { mark("cave", "Cave entrance", it.first, it.second, Caves.ZONE) } }
-            mark("hall", "The great cave hall (underground)", net.hallX, net.hallZ, Caves.ZONE)
-        }
+        for ((zone, ex, ez) in Caves.entrances(s)) mark("cave", "Cave entrance", ex, ez, zone)
+        for (h in Caves.halls(s)) mark("hall", "${Caves.HALL_NAMES[h.zone] ?: "A cave hall"} (underground)", h.hallX, h.hallZ, h.zone)
         val tag = CompoundTag()
         tag.putByteArray("map", zones)
         tag.putByteArray("mapH", heights)

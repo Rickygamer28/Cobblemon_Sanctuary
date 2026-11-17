@@ -348,7 +348,7 @@ object ZoneLayout {
                 // (a route bends up to ~11 blocks either side of its straight line)
                 if (nearRouteLine(s, x, z, if (newer) 13.0 + r else 24.0 + r)) { why["route"] = (why["route"] ?: 0) + 1; continue }
                 // not over the caves or in front of their mouths
-                if (host == Caves.ZONE && (Caves.cover(s, x, z) > 0.5 || Caves.apron(s, x, z) > 0)) { why["cave"] = (why["cave"] ?: 0) + 1; continue }
+                if ((host == Caves.ZONE || s.caveStyle >= 2) && (Caves.cover(s, x, z) > 0.5 || Caves.apron(s, x, z, only = if (s.caveStyle >= 2) null else Caves.ZONE) > 0)) { why["cave"] = (why["cave"] ?: 0) + 1; continue }
                 // never overlapping another pocket (each spot must belong to one pocket only)
                 if (list.any { distance(it.x, it.z, x, z) < it.r + r + 14 }) { why["overlap"] = (why["overlap"] ?: 0) + 1; continue }
                 // on fairly level dry land: not in a lake, not on a slope it would have to be cut into
