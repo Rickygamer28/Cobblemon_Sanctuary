@@ -80,9 +80,7 @@ object SanctuaryGuis {
         t.putBoolean("preview", s.state == SanctuaryState.PREVIEW)
         t.putInt("residents", s.residentCount)
         t.putInt("live", rt.live.values.count { !it.leaving })
-        t.putInt("capNow", com.rickygamer28.sanctuary.life.LoadGuard.limit(Residents.spawnCap(s)))
-        t.putInt("capUsual", Residents.spawnCap(s))
-        t.putInt("tickMs", com.rickygamer28.sanctuary.life.LoadGuard.tickMs.toInt())
+        t.putInt("capNow", Residents.spawnCap(s))
         t.put("basketOff", ListTag().also { l -> s.basketOff.forEach { l.add(StringTag.valueOf(it)) } })
         t.put("goals", ListTag().also { list ->
             for (g in com.rickygamer28.sanctuary.life.Milestones.GOALS) list.add(CompoundTag().also {
@@ -381,6 +379,16 @@ object ScreenActions {
                         Sanctuaries.data(level).setDirty()
                         say(player, if (n == 0) "There's nothing built around here to repair yet." else "Rebuilding the land around you (about 40 blocks). Give it a moment.", if (n == 0) ChatFormatting.GRAY else ChatFormatting.GREEN)
                     }
+                }
+                refresh("home")
+            }
+            "respawn" -> {
+                if (ownerOnly()) {
+                    // everyone out goes home and comes out again on proper ground (a few at a time, as usual)
+                    val rt = Residents.runtime(s)
+                    val n = rt.live.size
+                    Residents.despawnAll(rt)
+                    say(player, if (n == 0) "No Pokémon are out right now." else "Sent $n Pokémon home. They'll come back out in a moment.", ChatFormatting.GREEN)
                 }
                 refresh("home")
             }

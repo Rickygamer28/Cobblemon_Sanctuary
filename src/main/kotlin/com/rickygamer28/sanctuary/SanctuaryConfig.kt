@@ -131,7 +131,7 @@ object SanctuaryConfig {
         .defineInRange("greetFriendship", 120, 0, 255)
 
     val autoLimitCrowd: ModConfigSpec.BooleanValue = builder
-        .comment("When the server can't keep up (Pokémon start moving in jumps), automatically let fewer residents out until it can, then more again.")
+        .comment("No longer used.")
         .define("autoLimitCrowd", true)
 
     val caves: ModConfigSpec.BooleanValue = builder

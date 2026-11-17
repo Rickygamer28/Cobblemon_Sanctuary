@@ -611,17 +611,22 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
         // actions
         val ay = sy + 60
         val inside = data.getBoolean("inside")
-        val bw = (w - gap * 3) / 4
+        val bw = (w - gap * 4) / 5
         if (inside) button(g, x, ay, bw, 22, "Return home", PURPLE, mx, my) { send("return") }
         else button(g, x, ay, bw, 22, "Go to valley", PURPLE, mx, my) { send("travel") }
-        button(g, x + bw + gap, ay, bw, 22, "Reshape valley", GOLD, mx, my, enabled = owner, why = "Only the owner can reshape it", filled = false) { send("reshape", page = "home") }
+        button(g, x + bw + gap, ay, bw, 22, "Reshape", GOLD, mx, my, enabled = owner, why = "Only the owner can reshape it", filled = false) { send("reshape", page = "home") }
         button(g, x + (bw + gap) * 2, ay, bw, 22, "Repair here", GOOD, mx, my, enabled = owner && inside,
             why = if (!owner) "Only the owner can repair the land" else "Stand in the valley where you want the land repaired", filled = false) { send("repair", page = "home") }
         if (owner && inside && over(mx, my, x + (bw + gap) * 2, ay, bw, 22)) tooltip = listOf(
             Component.literal("Repair the land around you").withColor(GOOD),
             Component.literal("Rebuilds about 40 blocks around where you stand:").withColor(SUB),
             Component.literal("cut trees, leftovers, odd ground. Your own builds aren't touched.").withColor(SUB))
-        button(g, x + (bw + gap) * 3, ay, bw, 22, "New Journal", ACCENT, mx, my, filled = false) { send("journal", page = "home") }
+        button(g, x + (bw + gap) * 3, ay, bw, 22, "Respawn all", BLUE, mx, my, enabled = owner, why = "Only the owner can do this", filled = false) { send("respawn", page = "home") }
+        if (owner && over(mx, my, x + (bw + gap) * 3, ay, bw, 22)) tooltip = listOf(
+            Component.literal("Respawn all Pokémon").withColor(BLUE),
+            Component.literal("Everyone out goes home and comes back out on proper ground.").withColor(SUB),
+            Component.literal("Frees Pokémon stuck underground or in walls after a reshape.").withColor(SUB))
+        button(g, x + (bw + gap) * 4, ay, bw, 22, "New Journal", ACCENT, mx, my, filled = false) { send("journal", page = "home") }
         // how many Pokémon are out at once
         val cy = ay + 28
         val caps = data.getIntArray("crowdCaps")
@@ -650,26 +655,8 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
             )
             cx += cw + gap
         }
-        // the server's speed, and whether fewer Pokémon are out to keep up
-        run {
-            val ms = data.getInt("tickMs")
-            val usual = data.getInt("capUsual")
-            val now = data.getInt("capNow")
-            if (ms > 0) {
-                val (label, col) = when {
-                    now < usual -> "Server busy (${ms} ms/tick): $now of $usual Pokémon out so they move smoothly" to GOLD
-                    ms > 45 -> "Server busy (${ms} ms/tick)" to BAD
-                    else -> "Server running smoothly (${ms} ms/tick)" to DIM
-                }
-                text(g, fit(label, w), x, cy + 22, col)
-                if (over(mx, my, x, cy + 20, w, 12)) tooltip = listOf(
-                    Component.literal("Server speed").withColor(TEXT),
-                    Component.literal("The server has 50 ms per tick. Over that, Pokémon move in little jumps.").withColor(SUB),
-                    Component.literal("When it's busy, fewer residents come out until it catches up.").withColor(SUB))
-            }
-        }
         // recent events
-        val ey = cy + 38
+        val ey = cy + 26
         text(g, "Recently", x, ey, SUB)
         val basket = if (data.getBoolean("hasBasket")) "Basket: ${data.getInt("basketItems")} items" else "No Gathering Basket placed yet"
         var bx2 = x + w

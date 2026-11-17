@@ -103,6 +103,11 @@ object Dens {
                 if (BiomeDresser.pathAt(s, px, pz, ring) || Landmarks.near(s, px, pz)) return false
             }
         }
+        // only on finished ground, all the way round (so the way in can't be built over afterwards)
+        for (dx in -(R + 4)..(R + 4)) for (dz in -(R + 4)..(R + 4)) {
+            val idx = ColumnOrder.indexOf(x + dx - s.center.x, z + dz - s.center.z)
+            if (idx < 0 || !s.dressed.get(idx)) return false
+        }
         if (s.props.keys.any { BlockPos.of(it).let { p -> abs(p.x - x) <= R + 3 && abs(p.z - z) <= R + 3 } }) return false
         if (s.berrySpots.any { BlockPos.of(it).let { p -> abs(p.x - x) <= R + 2 && abs(p.z - z) <= R + 2 } }) return false
         return true
@@ -142,9 +147,59 @@ object Dens {
         s.dens[center.asLong()] = encode(zone, dir)
     }
 
+    // ------------------------------------------------------------------ keeping dens whole
+
+    private class Cover(val key: Long, val cells: Map<Long, List<BlockPos>>)
+    private val covers = HashMap<java.util.UUID, Cover>()
+
+    /** Is (x, z) on a den or in front of its way in? (The valley's builder leaves those columns alone.) */
+    fun covers(s: Sanctuary, x: Int, z: Int): Boolean {
+        if (s.dens.isEmpty()) return false
+        val key = s.dens.size * 1_000_003L + s.dens.keys.sum()
+        val cover = covers[s.id]?.takeIf { it.key == key } ?: run {
+            val cells = HashMap<Long, MutableList<BlockPos>>()
+            for (k in s.dens.keys) {
+                val c = BlockPos.of(k)
+                cells.getOrPut(Math.floorDiv(c.x, 16).toLong() * 1_000_003L + Math.floorDiv(c.z, 16)) { ArrayList() } += c
+            }
+            Cover(key, cells).also { covers[s.id] = it }
+        }
+        val reach = R + 4
+        for (cx in Math.floorDiv(x - reach, 16)..Math.floorDiv(x + reach, 16)) for (cz in Math.floorDiv(z - reach, 16)..Math.floorDiv(z + reach, 16)) {
+            val list = cover.cells[cx.toLong() * 1_000_003L + cz] ?: continue
+            for (c in list) if (abs(c.x - x) <= reach && abs(c.z - z) <= reach) return true
+        }
+        return false
+    }
+
+    private var entranceCursor = 0
+
+    /**
+     * Digs out den entrances that got blocked (ground built up in front of them): a 3 wide, 3 high way in from the
+     * tunnel out past the frame. A few dens at a time.
+     */
+    fun fixEntrances(level: ServerLevel, s: Sanctuary) {
+        val dens = all(s).filter { it.big }.toList()
+        if (dens.isEmpty()) return
+        repeat(minOf(6, dens.size)) {
+            val d = dens[Math.floorMod(entranceCursor++, dens.size)]
+            if (!level.isLoaded(d.front) || !level.isLoaded(d.center)) return@repeat
+            val base = d.center.above()
+            val side = d.dir.clockWise
+            for (i in R..R + 4) for (w in -1..1) for (dy in 0..2) {
+                val p = base.relative(d.dir, i).relative(side, w).above(dy)
+                val st = level.getBlockState(p)
+                if (st.isAir || !st.fluidState.isEmpty) continue
+                if (BiomeDresser.isNatural(st) || BiomeDresser.isClutter(st) || BiomeDresser.isModSolid(st))
+                    level.setBlock(p, b(Blocks.AIR), FLAGS)
+            }
+        }
+    }
+
     /** Turns the first, small dens into big ones where there's room (a couple at a time). */
     fun upgrade(level: ServerLevel, s: Sanctuary) {
         if (!SanctuaryConfig.dens.get()) return
+        fixEntrances(level, s)
         val ring = ZoneLayout.ring()
         var done = 0
         for (d in all(s).filter { !it.big }.toList()) {

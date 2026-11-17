@@ -902,6 +902,8 @@ object BiomeDresser {
         if (SanctuaryConfig.buildWall.get() && hit.dist > s.size.radius - 1.6) return wall(level, s, x, z)
         if (hit.zone !in s.unlocked) return true
         if (Landmarks.near(s, x, z)) return true
+        // a den and the way into it are left as they are
+        if (Dens.covers(s, x, z)) return true
 
         val found = findGround(level, s, x, z) ?: return false
         if (!isNatural(level.getBlockState(found))) return true
