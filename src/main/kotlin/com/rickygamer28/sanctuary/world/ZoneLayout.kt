@@ -316,6 +316,11 @@ object ZoneLayout {
     /** All the pockets of the region (worked out from the map, so the same every time). */
     fun pockets(s: Sanctuary): List<Pocket> = pocketCache(s).all
 
+    fun forgetPockets(id: java.util.UUID) { pocketCache.remove(id) }
+
+    /** Why pocket spots were turned down (for the self-test). */
+    val why = java.util.TreeMap<String, Int>()
+
     private fun pocketCache(s: Sanctuary): PocketCache {
         val key = pocketKey(s)
         pocketCache[s.id]?.takeIf { it.key == key }?.let { return it }
@@ -331,21 +336,21 @@ object ZoneLayout {
                 val pick = random.nextInt(1000)
                 val r = 6 + random.nextInt(5)
                 val dist = distance(x, z, s.center.x, s.center.z)
-                if (dist < s.size.hubRadius + 16 || dist > s.size.radius - 18 - r) continue
-                val hit = locate(s, x, z) ?: continue
-                if (hit.edgeDistance < r + 6) continue
+                if (dist < s.size.hubRadius + 16 || dist > s.size.radius - 18 - r) { why["ring"] = (why["ring"] ?: 0) + 1; continue }
+                val hit = locate(s, x, z) ?: run { why["nohit"] = (why["nohit"] ?: 0) + 1; null } ?: continue
+                if (hit.edgeDistance < r + 6) { why["edge"] = (why["edge"] ?: 0) + 1; continue }
                 val host = hit.zone
                 if (host != HUB) {
                     val l = local(s, host, x, z) ?: continue
-                    if (l.dist < 22) continue
+                    if (l.dist < 22) { why["middle"] = (why["middle"] ?: 0) + 1; continue }
                 }
                 // keep the routes clear (they run roughly from the town to each habitat's middle)
                 // (a route bends up to ~11 blocks either side of its straight line)
-                if (nearRouteLine(s, x, z, if (newer) 16.0 + r else 24.0 + r)) continue
+                if (nearRouteLine(s, x, z, if (newer) 16.0 + r else 24.0 + r)) { why["route"] = (why["route"] ?: 0) + 1; continue }
                 // not over the caves or in front of their mouths
-                if (host == Caves.ZONE && (Caves.cover(s, x, z) > 0.5 || Caves.apron(s, x, z) > 0)) continue
+                if (host == Caves.ZONE && (Caves.cover(s, x, z) > 0.5 || Caves.apron(s, x, z) > 0)) { why["cave"] = (why["cave"] ?: 0) + 1; continue }
                 // never overlapping another pocket (each spot must belong to one pocket only)
-                if (list.any { distance(it.x, it.z, x, z) < it.r + r + 14 }) continue
+                if (list.any { distance(it.x, it.z, x, z) < it.r + r + 14 }) { why["overlap"] = (why["overlap"] ?: 0) + 1; continue }
                 // on fairly level dry land: not in a lake, not on a slope it would have to be cut into
                 // (measured as if every habitat were awake, so the pockets don't change when one wakes up)
                 val heights = (0 until 8).map { k ->
@@ -353,8 +358,8 @@ object ZoneLayout {
                     BiomeDresser.baseHeight(s, (x + cos(a) * (r + 3)).toInt(), (z + sin(a) * (r + 3)).toInt(), asIfAwake = true)
                 } + BiomeDresser.baseHeight(s, x, z, asIfAwake = true)
                 // (not on a beach either: at least two above the water)
-                if (heights.min() < BiomeDresser.WATER_Y + 3 || heights.max() - heights.min() > 4) continue
-                val options = POCKETS_IN[host] ?: continue
+                if (heights.min() < BiomeDresser.WATER_Y + 3 || heights.max() - heights.min() > 4) { why["slope"] = (why["slope"] ?: 0) + 1; continue }
+                val options = POCKETS_IN[host] ?: run { why["host"] = (why["host"] ?: 0) + 1; null } ?: continue
                 val zone = options[pick % options.size]
                 list += Pocket(x, z, r, zone, host, pick)
             }
