@@ -61,6 +61,60 @@ object BiomeDresser {
 
     private fun placedFor(s: Sanctuary) = placed.getOrPut(s.id) { HashSet() }
 
+    // ------------------------------------------------------------------ trees planted once the ground around is final
+
+    private class PendingFeature(val key: ResourceKey<ConfiguredFeature<*, *>>, val surface: BlockPos, val protectRadius: Int, val protectHeight: Int, val seed: Long)
+    private val pendingFeatures = HashMap<java.util.UUID, ArrayDeque<PendingFeature>>()
+
+    /** Is the ground within 3 blocks of (x, z) at (about) its final height? */
+    private fun settled(level: ServerLevel, s: Sanctuary, x: Int, z: Int, r: Int = 3): Boolean {
+        for (dx in -r..r) for (dz in -r..r) {
+            val nx = x + dx
+            val nz = z + dz
+            if (!level.hasChunk(nx shr 4, nz shr 4)) return false
+            val top = level.getHeight(Heightmap.Types.OCEAN_FLOOR, nx, nz) - 1
+            if (abs(top - targetHeight(s, nx, nz, ZoneLayout.HABITATS)) > 1) return false
+        }
+        return true
+    }
+
+    private fun placeFeature(level: ServerLevel, s: Sanctuary, key: ResourceKey<ConfiguredFeature<*, *>>, surface: BlockPos, random: RandomSource, protectRadius: Int, protectHeight: Int) {
+        runCatching {
+            level.registryAccess().registryOrThrow(Registries.CONFIGURED_FEATURE).getHolder(key).ifPresent {
+                it.value().place(level, level.chunkSource.generator, random, surface.above())
+            }
+        }
+        if (protectRadius > 0) {
+            for (dx in -protectRadius..protectRadius) for (dz in -protectRadius..protectRadius) {
+                if (dx == 0 && dz == 0) continue
+                for (dy in 1..protectHeight) {
+                    val p = surface.offset(dx, dy, dz)
+                    if (!level.getBlockState(p).isAir && level.getBlockState(p).fluidState.isEmpty) protect(s, p)
+                }
+            }
+        }
+    }
+
+    /**
+     * Plants the trees (and other big features) that were waiting for the ground around them. [all] at the end of
+     * a building pass: whatever still can't go is dropped.
+     */
+    fun plantPending(level: ServerLevel, s: Sanctuary, all: Boolean, max: Int = 40) {
+        val queue = pendingFeatures[s.id] ?: return
+        var n = queue.size.coerceAtMost(if (all) Int.MAX_VALUE else max)
+        while (n-- > 0 && queue.isNotEmpty()) {
+            val f = queue.removeFirst()
+            val ground = level.getBlockState(f.surface)
+            val stillThere = level.isLoaded(f.surface) && isNatural(ground) && ground.fluidState.isEmpty && level.getBlockState(f.surface.above()).isAir
+            if (!stillThere) continue
+            if (settled(level, s, f.surface.x, f.surface.z)) placeFeature(level, s, f.key, f.surface, RandomSource.create(f.seed), f.protectRadius, f.protectHeight)
+            else if (!all) queue.addLast(f)
+        }
+        if (queue.isEmpty()) pendingFeatures.remove(s.id)
+    }
+
+    fun forgetPending(id: java.util.UUID) { pendingFeatures.remove(id) }
+
     fun protect(s: Sanctuary, pos: BlockPos) {
         val set = placedFor(s)
         if (set.size < 3_000_000) set += pos.asLong()
@@ -159,6 +213,15 @@ object BiomeDresser {
          * [protectRadius] marks what it built around the spot so neighbouring columns don't cut it off.
          */
         fun feature(key: ResourceKey<ConfiguredFeature<*, *>>, protectRadius: Int = 0, protectHeight: Int = 16) {
+            // the ground around isn't at its final height yet (old higher ground would clip the tree, lower ground
+            // would be filled up through it): plant it later, once it is
+            if (!settled(level, s, x, z)) {
+                pendingFeatures.getOrPut(s.id) { ArrayDeque() } += PendingFeature(key, surface, protectRadius, protectHeight, random.nextLong())
+                return
+            }
+            placeFeature(level, s, key, surface, random, protectRadius, protectHeight)
+        }
+        fun placeNow(key: ResourceKey<ConfiguredFeature<*, *>>, protectRadius: Int = 0, protectHeight: Int = 16) {
             runCatching {
                 level.registryAccess().registryOrThrow(Registries.CONFIGURED_FEATURE).getHolder(key).ifPresent {
                     it.value().place(level, level.chunkSource.generator, random, above)
@@ -771,6 +834,9 @@ object BiomeDresser {
         }
         // down to the wall
         off *= smooth((s.size.radius - 6 - dist) / 18.0)
+        // the caves always have mountain over them (even where they reach under a neighbouring habitat)
+        val cover = Caves.cover(s, x, z)
+        if (cover > off) off = cover
         return G + off.roundToInt()
     }
 

@@ -70,7 +70,7 @@ object SanctuaryGenerator {
     private val missedUnloaded = HashMap<UUID, Boolean>()
     private val recheckMeadow = HashSet<UUID>()
 
-    fun forget(id: UUID) { deferred.remove(id); com.rickygamer28.sanctuary.ui.RegionMap.forget(id); Caves.forget(id); grounded.remove(id); recheckMeadow.remove(id); cursors.remove(id); retryAt.remove(id); missedUnloaded.remove(id); requested.remove(id); waiting.remove(id); BiomePainter.forget(id) }
+    fun forget(id: UUID) { BiomeDresser.forgetPending(id); deferred.remove(id); com.rickygamer28.sanctuary.ui.RegionMap.forget(id); Caves.forget(id); grounded.remove(id); recheckMeadow.remove(id); cursors.remove(id); retryAt.remove(id); missedUnloaded.remove(id); requested.remove(id); waiting.remove(id); BiomePainter.forget(id) }
 
     // ------------------------------------------------------------------ loading the chunks it builds in
     // Building only where players happen to have chunks loaded (their render distance) split the valley into
@@ -461,7 +461,7 @@ object SanctuaryGenerator {
         while (queue.isNotEmpty()) {
             val p = queue.removeFirst()
             leaves += p
-            if (leaves.size > 400) return // a big canopy: part of a real tree
+            if (leaves.size > 4000) return // huge: leave it be
             for (d in net.minecraft.core.Direction.entries) {
                 val n = p.relative(d)
                 if (!seen.add(n.asLong())) continue
@@ -520,7 +520,8 @@ object SanctuaryGenerator {
         var lower = 0
         for ((ox, oz) in listOf(1 to 0, -1 to 0, 0 to 1, 0 to -1)) {
             if (!level.hasChunk((x + ox) shr 4, (z + oz) shr 4)) return false
-            if (level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x + ox, z + oz) - 1 <= top - 2) lower++
+            // solid ground (a lake's water isn't ground: a pillar standing in a lake counts)
+            if (level.getHeight(Heightmap.Types.OCEAN_FLOOR, x + ox, z + oz) - 1 <= top - 2) lower++
         }
         return lower >= 3
     }
@@ -615,6 +616,8 @@ object SanctuaryGenerator {
         }
         BiomeDresser.beginHeights(s)
         try {
+        // trees waiting for the ground around them to be finished
+        if (now % 5L == 0L) BiomeDresser.plantPending(level, s, all = false)
         // first the columns set aside earlier whose chunks have loaded since
         var left = queue.size
         while (left-- > 0 && budget > 0 && System.nanoTime() < deadline) {
@@ -673,6 +676,8 @@ object SanctuaryGenerator {
         }
         if (now % 20L == 0L) trackPace(s)
         if (i >= total && queue.isEmpty()) {
+            BiomeDresser.beginHeights(s)
+            try { BiomeDresser.plantPending(level, s, all = true) } finally { BiomeDresser.endHeights() }
             pace.remove(s.id)
             cursors.remove(s.id)
             deferred.remove(s.id)
