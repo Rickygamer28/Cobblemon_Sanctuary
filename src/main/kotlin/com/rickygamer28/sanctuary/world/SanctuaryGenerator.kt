@@ -279,6 +279,7 @@ object SanctuaryGenerator {
             if (Landmarks.near(s, x, z)) continue
             looseBlocks(level, x, z)
             floatingBits(level, s, x, z)
+            orphanLeaves(level, x, z)
             strayWater(level, s, x, z)
             if (s.meadow.get(idx)) continue
             Dens.maybeBuild(level, s, x, z, ring)
@@ -433,6 +434,45 @@ object SanctuaryGenerator {
             if (level.getBlockState(p.above()).`is`(net.minecraft.world.level.block.Blocks.LILY_PAD)) level.setBlock(p.above(), air, net.minecraft.world.level.block.Block.UPDATE_CLIENTS)
             y--
         }
+    }
+
+    /**
+     * Leaves with no trunk left (their tree was taken away, or cut by a rebuild): a tree's own leaves would rot away
+     * once their trunk is gone, but only when the game notices the change, which it doesn't for the builder's work.
+     * So from the lowest leaves of the column, the leaves joined to them are followed; if no log is found among or
+     * next to them, they all go. Leaves placed on purpose (persistent ones) are left alone.
+     */
+    private fun orphanLeaves(level: ServerLevel, x: Int, z: Int) {
+        val ground = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1
+        val top = level.getHeight(Heightmap.Types.MOTION_BLOCKING, x, z) - 1
+        if (top <= ground) return
+        var start: BlockPos? = null
+        for (y in ground + 1..top) {
+            val st = level.getBlockState(BlockPos(x, y, z))
+            if (st.`is`(BlockTags.LEAVES)) { start = BlockPos(x, y, z); break }
+        }
+        val first = start ?: return
+        val firstState = level.getBlockState(first)
+        if (firstState.getOptionalValue(net.minecraft.world.level.block.LeavesBlock.PERSISTENT).orElse(true)) return
+        val seen = HashSet<Long>()
+        val queue = ArrayDeque<BlockPos>()
+        val leaves = ArrayList<BlockPos>()
+        seen += first.asLong(); queue += first
+        while (queue.isNotEmpty()) {
+            val p = queue.removeFirst()
+            leaves += p
+            if (leaves.size > 400) return // a big canopy: part of a real tree
+            for (d in net.minecraft.core.Direction.entries) {
+                val n = p.relative(d)
+                if (!seen.add(n.asLong())) continue
+                if (!level.hasChunk(n.x shr 4, n.z shr 4)) return
+                val st = level.getBlockState(n)
+                if (st.`is`(BlockTags.LOGS)) return // still has its tree
+                if (st.`is`(BlockTags.LEAVES)) queue += n
+            }
+        }
+        val air = net.minecraft.world.level.block.Blocks.AIR.defaultBlockState()
+        for (p in leaves.sortedByDescending { it.y }) level.setBlock(p, air, net.minecraft.world.level.block.Block.UPDATE_CLIENTS)
     }
 
     /** The lump of blocks joined to [start], or null if it's bigger than [max], holds items, or rests on anything. */
