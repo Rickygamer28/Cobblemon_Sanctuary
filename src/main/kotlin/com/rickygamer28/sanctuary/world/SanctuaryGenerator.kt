@@ -105,15 +105,24 @@ object SanctuaryGenerator {
      * the server leaves time to spare (keeping the whole tick under ~40 ms of its 50), up to generationMillisMax.
      */
     private fun buildMillis(level: ServerLevel): Long {
-        val base = SanctuaryConfig.generationMillis.get()
-        val max = maxOf(base, SanctuaryConfig.generationMillisMax.get())
-        if (max <= base) return base.toLong()
-        val tick = runCatching { level.server.currentSmoothedTickTime.toDouble() }.getOrDefault(50.0)
-        val others = (tick - usedMillis).coerceAtLeast(0.0)
-        // a busy server (lots of Pokémon out) gets the room it needs: building slows down rather than the residents
-        val floor = if (others > 34) 3L else base.toLong()
-        return (40.0 - others).toLong().coerceIn(floor, maxOf(floor, max.toLong()))
+        val max = SanctuaryConfig.generationMillisMax.get().toDouble().coerceAtLeast(2.0)
+        val start = SanctuaryConfig.generationMillis.get().toDouble().coerceIn(2.0, max)
+        if (budgetMs <= 0) budgetMs = start
+        // Steer by the whole tick, not just the builder's own part: every block placed also costs lighting, sending
+        // the change to players and loading chunks, which happens elsewhere in the tick. Keep the tick well under
+        // its 50 ms so Pokémon keep moving smoothly; speed up while there's room, back off fast when it gets close.
+        val tick = runCatching { level.server.currentSmoothedTickTime.toDouble() }.getOrDefault(0.0)
+        budgetMs = when {
+            tick > 45 -> budgetMs * 0.8
+            tick > 38 -> budgetMs * 0.95
+            tick in 0.1..30.0 -> budgetMs * 1.04 + 0.1
+            else -> budgetMs
+        }.coerceIn(2.0, max)
+        return budgetMs.toLong().coerceAtLeast(2)
     }
+
+    /** The builder's time per tick right now (adjusted as the server gets busier or quieter). */
+    private var budgetMs = 0.0
 
     /** Asks for the chunks of the next columns to be loaded. */
     private fun prefetch(level: ServerLevel, s: Sanctuary, from: Int, total: Int, now: Long) {
