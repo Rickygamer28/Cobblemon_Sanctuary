@@ -19,6 +19,8 @@ import kotlin.math.sqrt
  * colours, particles, music and weather (snow in the Ice biome, no rain in the desert, and so on).
  */
 object BiomePainter {
+    /** Height where the painted biomes are compared (they're the same all the way up). */
+    private val SanctuaryDimensionY = com.rickygamer28.sanctuary.SanctuaryDimension.GROUND_Y
     private val pending = HashMap<UUID, LinkedHashSet<Long>>()
 
     fun mark(s: Sanctuary, x: Int, z: Int) {
@@ -62,6 +64,16 @@ object BiomePainter {
                     }
                     biome?.let { holder(it) } ?: chunk.getNoiseBiome(qx, qy, qz)
                 }
+                // only when something actually changes: re-sending makes the player's game redraw the whole chunk
+                // (water flickers while it does), and a chunk is marked again each time another column in it is built
+                val section = chunk.getSectionIndex(SanctuaryDimensionY)
+                val qy = SanctuaryDimensionY shr 2
+                var changed = false
+                loop@ for (qx in (cx shl 2) until (cx shl 2) + 4) for (qz in (cz shl 2) until (cz shl 2) + 4) {
+                    val want = resolver.getNoiseBiome(qx, qy, qz, level.chunkSource.randomState().sampler())
+                    if (want != chunk.getNoiseBiome(qx, qy, qz)) { changed = true; break@loop }
+                }
+                if (section < 0 || !changed) continue
                 chunk.fillBiomesFromNoise(resolver, level.chunkSource.randomState().sampler())
                 chunk.setUnsaved(true)
                 done += chunk

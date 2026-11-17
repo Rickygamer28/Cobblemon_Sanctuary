@@ -284,6 +284,17 @@ object SanctuaryGenerator {
             Dens.maybeBuild(level, s, x, z, ring)
             val top = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1
             val target = BiomeDresser.targetHeight(s, x, z, ring)
+            // a thin leftover: a lone column of old ground (soil in it, so not a rock spire or ice spike on purpose)
+            // standing over the ground around it
+            if (top >= target + 2 && thinLeftover(level, x, z, top, target)) {
+                for (y in target + 1..top) {
+                    val p = BlockPos(x, y, z)
+                    if (BiomeDresser.isNatural(level.getBlockState(p))) level.setBlock(p, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), net.minecraft.world.level.block.Block.UPDATE_CLIENTS)
+                }
+                s.dressed.clear(idx)
+                s.generationDirty = true
+                continue
+            }
             if (!tooTall(level, s, x, z, ring, top, target)) continue
             // a real leftover is wide (decorations like ice spikes and rock spires are thin)
             val wide = listOf(4 to 0, -4 to 0, 0 to 4, 0 to -4).count { (ox, oz) ->
@@ -453,6 +464,25 @@ object SanctuaryGenerator {
             }
         }
         return out
+    }
+
+    /** A lone column with soil in it, standing at least 2 above (nearly) all its neighbours. */
+    private fun thinLeftover(level: ServerLevel, x: Int, z: Int, top: Int, target: Int): Boolean {
+        var soil = false
+        for (y in target + 1..top) {
+            val st = level.getBlockState(BlockPos(x, y, z))
+            if (!st.fluidState.isEmpty) return false
+            if (st.`is`(BlockTags.DIRT) || st.`is`(BlockTags.SAND) || st.`is`(net.minecraft.world.level.block.Blocks.SNOW_BLOCK) ||
+                st.`is`(net.minecraft.world.level.block.Blocks.GRAVEL) || st.`is`(net.minecraft.world.level.block.Blocks.CLAY)) soil = true
+            else if (!BiomeDresser.isNatural(st)) return false // something built on it: leave it
+        }
+        if (!soil) return false
+        var lower = 0
+        for ((ox, oz) in listOf(1 to 0, -1 to 0, 0 to 1, 0 to -1)) {
+            if (!level.hasChunk((x + ox) shr 4, (z + oz) shr 4)) return false
+            if (level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x + ox, z + oz) - 1 <= top - 2) lower++
+        }
+        return lower >= 3
     }
 
     /** Solid natural ground standing more than 10 blocks above where the terrain should be (not a floating island). */
