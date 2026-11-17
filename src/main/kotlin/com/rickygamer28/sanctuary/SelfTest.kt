@@ -113,7 +113,7 @@ object SelfTest {
                 log("== build 3 (only ${FIRST.size} habitats awake) finished in ${"%.0f".format(secs)} s${if (timedOut) " (TIMED OUT)" else ""}")
                 scan(level, sanctuary)
                 wakeTheRest(sanctuary)
-                log("woke up: ${sanctuary.habitats.keys - FIRST.toSet()} (no room for: ${ZoneLayout.HABITATS - sanctuary.habitats.keys})")
+                log("woke up: ${ZoneLayout.HABITATS - FIRST.toSet()} (no room for: ${ZoneLayout.HABITATS - sanctuary.habitats.keys})")
                 stage = 4; stageStart = now; idleSince = -1L
             }
             else -> {
@@ -150,6 +150,7 @@ object SelfTest {
         s.unlocked = linkedSetOf(ZoneLayout.HUB) + ZoneLayout.HABITATS
         s.unlockedChanged = true
         s.rebuildZones += newTypes.filter { z -> ZoneLayout.pockets(s).any { it.zone == z } }
+        s.rebuildZones += newTypes.filter { it in s.habitats }
         for (zone in ZoneLayout.HABITATS) {
             if (zone in s.habitats) continue
             val hb = ZoneLayout.fitIn(s, zone, counts[zone] ?: 1) ?: continue

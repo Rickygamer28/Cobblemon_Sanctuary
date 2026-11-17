@@ -221,6 +221,8 @@ object Residents {
         if (newTypes.isNotEmpty()) s.unlockedChanged = true
         // the pockets of a habitat that just woke up get built too
         if (s.planned && s.state == SanctuaryState.ACTIVE) s.rebuildZones += newTypes.filter { it != ZoneLayout.HUB && ZoneLayout.pockets(s).any { p -> p.zone == it } }
+        // a habitat waking up in its place: it and the strip along its borders (which blends into it) are built again
+        if (s.planned && s.state == SanctuaryState.ACTIVE) s.rebuildZones += newTypes.filter { it != ZoneLayout.HUB && it in s.habitats }
         if (newTypes.isNotEmpty() || grew) s.generationDirty = true
         planRegion(s, counts)
         rt.anchors = unlocked.associateWith { ZoneLayout.anchor(s, it) }

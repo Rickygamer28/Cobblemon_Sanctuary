@@ -100,15 +100,21 @@ object ZoneLayout {
 
     /** Lays out the habitats for [counts] (residents per habitat): busier habitats get more room. */
     fun plan(s: Sanctuary, counts: Map<String, Int>): Map<String, Habitat> {
-        val zones = AROUND.filter { (counts[it] ?: 0) > 0 }
-        if (zones.isEmpty()) return emptyMap()
+        val awake = AROUND.filter { (counts[it] ?: 0) > 0 }
+        if (awake.isEmpty()) return emptyMap()
+        // every habitat gets its place in the order around the town, the ones nobody lives in yet too (they're
+        // meadows until their first Pokémon moves in, then wake up right there, between their neighbours);
+        // otherwise the first few habitats took the whole valley and later ones found no room
+        val zones = AROUND
         val random = java.util.Random(s.seed xor (s.layoutSalt * 0x9E3779B97F4A7C15uL.toLong()) xor 0x5A17L)
         val h = inner(s)
         val r = outer(s)
         val band = r - h
         // the habitats fill the land from the town out to the wall, each in its own slice (busier ones get wider
         // slices), leaving meadows with the routes between them
-        val weights = zones.map { Math.pow((counts[it] ?: 1).toDouble(), 0.55) }
+        val awakeWeights = awake.map { Math.pow((counts[it] ?: 1).toDouble(), 0.55) }
+        val reserve = awakeWeights.average() * 0.6
+        val weights = zones.map { z -> if ((counts[z] ?: 0) > 0) Math.pow(counts[z]!!.toDouble(), 0.55) else reserve }
         val total = weights.sum()
         val minShare = min(0.06, 1.0 / zones.size)
         val shares = weights.map { max(it / total, minShare) }.let { sh -> val t = sh.sum(); sh.map { it / t } }
