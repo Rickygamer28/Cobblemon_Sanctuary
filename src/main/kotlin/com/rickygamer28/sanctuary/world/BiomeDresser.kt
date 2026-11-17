@@ -1637,7 +1637,9 @@ object BiomeDresser {
         when {
             graveyard && Math.floorMod(c.x, 4) == 0 && Math.floorMod(c.z, 5) == 0 && c.roomy() -> c.gravestone()
             !graveyard && c.tree(9, 19, 5) && c.roomy() -> when {
-                (c.variant == 1 && c.random.nextInt(2) == 0) || c.random.nextInt(4) == 0 -> c.deadTree(b(Blocks.DARK_OAK_LOG), b(Blocks.DARK_OAK_FENCE))
+                // dead trees only well inside the haunted habitat (not in the patches mixed into its neighbours)
+                c.hit.zone == "ghost" && c.hit.edgeDistance > 18 &&
+                    ((c.variant == 1 && c.random.nextInt(2) == 0) || c.random.nextInt(4) == 0) -> c.deadTree(b(Blocks.DARK_OAK_LOG), b(Blocks.DARK_OAK_FENCE))
                 else -> c.feature(TreeFeatures.DARK_OAK)
             }
             c.variant == 1 && c.grid(23, 7) && c.roomy() -> c.place(b(Blocks.CARVED_PUMPKIN))
