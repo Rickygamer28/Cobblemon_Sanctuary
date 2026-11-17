@@ -95,11 +95,27 @@ object SanctuaryGenerator {
         level.chunkSource.addRegionTicket(BUILD_TICKET, pos, 1, pos)
     }
 
+    /** Time the builder used per tick lately (smoothed). */
+    private var usedMillis = 0.0
+
+    /**
+     * How long the builder may work this tick: at least [SanctuaryConfig.generationMillis], and more while the rest of
+     * the server leaves time to spare (keeping the whole tick under ~40 ms of its 50), up to generationMillisMax.
+     */
+    private fun buildMillis(level: ServerLevel): Long {
+        val base = SanctuaryConfig.generationMillis.get()
+        val max = maxOf(base, SanctuaryConfig.generationMillisMax.get())
+        if (max <= base) return base.toLong()
+        val tick = runCatching { level.server.currentSmoothedTickTime.toDouble() }.getOrDefault(50.0)
+        val others = (tick - usedMillis).coerceAtLeast(0.0)
+        return (40.0 - others).toLong().coerceIn(base.toLong(), max.toLong())
+    }
+
     /** Asks for the chunks of the next columns to be loaded. */
     private fun prefetch(level: ServerLevel, s: Sanctuary, from: Int, total: Int, now: Long) {
-        if (!loadChunks() || now % 5L != 0L) return
+        if (!loadChunks() || now % 2L != 0L) return
         var last = Long.MIN_VALUE
-        for (idx in from until minOf(total, from + 6000)) {
+        for (idx in from until minOf(total, from + 12000)) {
             val x = s.center.x + ColumnOrder.dx[idx]
             val z = s.center.z + ColumnOrder.dz[idx]
             val k = net.minecraft.world.level.ChunkPos.asLong(x shr 4, z shr 4)
@@ -182,11 +198,14 @@ object SanctuaryGenerator {
         var i = repairCursor[s.id] ?: return false
         val ring = ZoneLayout.ring()
         val total = ColumnOrder.countWithin(s.size.radius - 2)
-        val deadline = System.nanoTime() + SanctuaryConfig.generationMillis.get() * 1_000_000L
+        val started = System.nanoTime()
+        val deadline = started + buildMillis(level) * 1_000_000L
         var scanned = 0
         var found = repaired[s.id] ?: 0
         val now = level.gameTime
         prefetch(level, s, i, total, now)
+        BiomeDresser.beginHeights(s)
+        try {
         while (i < total) {
             if ((++scanned and 31) == 0 && System.nanoTime() > deadline) break
             val idx = i++
@@ -223,6 +242,10 @@ object SanctuaryGenerator {
             s.dressed.clear(idx)
             if (found++ < 3) CobblemonSanctuary.LOGGER.info("Sanctuary: cut a leftover pillar at {} {} (was {}, should be {})", x, z, top, target)
             s.generationDirty = true
+        }
+        } finally {
+            BiomeDresser.endHeights()
+            usedMillis = usedMillis * 0.8 + (System.nanoTime() - started) / 1_000_000.0 * 0.2
         }
         repaired[s.id] = found
         if (i >= total) {
@@ -409,9 +432,12 @@ object SanctuaryGenerator {
         val radius = s.size.radius
         var i = cursors[s.id] ?: 0
         var budget = SanctuaryConfig.generationSpeed.get()
-        val deadline = System.nanoTime() + SanctuaryConfig.generationMillis.get() * 1_000_000L
+        val started = System.nanoTime()
+        val deadline = started + buildMillis(level) * 1_000_000L
         var scanned = 0
         prefetch(level, s, i, total, now)
+        BiomeDresser.beginHeights(s)
+        try {
         while (budget > 0 && i < total) {
             scanned++
             if ((scanned and 31) == 0 && System.nanoTime() > deadline) break
@@ -462,6 +488,10 @@ object SanctuaryGenerator {
                 BiomePainter.mark(s, x, z)
             } else missedUnloaded[s.id] = true
             budget--
+        }
+        } finally {
+            BiomeDresser.endHeights()
+            usedMillis = usedMillis * 0.8 + (System.nanoTime() - started) / 1_000_000.0 * 0.2
         }
         if (i >= total) {
             cursors.remove(s.id)

@@ -645,7 +645,41 @@ object BiomeDresser {
      * Target top height of a column. Near a border both biomes' shapes are mixed (50/50 right on the border),
      * so hills and lakes flow from one biome into the next instead of stopping at a flat strip.
      */
+    // ------------------------------------------------------------------ height memory while building
+    // Each column's height is asked for ~5 times in a pass (for itself, and by each neighbour measuring its slope).
+    // While the generator runs, heights are remembered in a fixed-size table; anything that changes the shape of
+    // the land (the map, the size, a habitat waking up) gives a new key and so forgets all of them.
+    private const val HC_BITS = 17
+    private val hcPos = LongArray(1 shl HC_BITS)
+    private val hcVal = IntArray(1 shl HC_BITS)
+    private val hcStamp = IntArray(1 shl HC_BITS)
+    private var stamp = 1
+    private var hcKey = Long.MIN_VALUE
+    private var hcFor: java.util.UUID? = null
+    private var hcOn = false
+
+    /** Start remembering heights for [s] (only while the generator is working on it). */
+    fun beginHeights(s: Sanctuary) {
+        var k = s.layoutSalt * 1_000_003L + s.size.radius * 31L + s.unlocked.hashCode() * 7L + s.center.hashCode() +
+            (if (SanctuaryConfig.reshapeTerrain.get()) 1 else 0) + (if (SanctuaryConfig.caves.get()) 2 else 0)
+        for ((zone, hb) in s.habitats) k = k * 31 + zone.hashCode() + hb.x * 131L + hb.z * 17L + (hb.radial * 7).toLong()
+        if (k != hcKey || s.id != hcFor) { hcKey = k; hcFor = s.id; stamp++ }
+        hcOn = true
+    }
+
+    fun endHeights() { hcOn = false }
+
     fun targetHeight(s: Sanctuary, x: Int, z: Int, ring: List<String>): Int {
+        if (!hcOn || s.id != hcFor) return computeHeight(s, x, z, ring)
+        val pos = (x.toLong() shl 32) or (z.toLong() and 0xFFFFFFFFL)
+        val slot = ((pos * -0x61c8864680b583ebL) ushr (64 - HC_BITS)).toInt()
+        if (hcStamp[slot] == stamp && hcPos[slot] == pos) return hcVal[slot]
+        val h = computeHeight(s, x, z, ring)
+        hcPos[slot] = pos; hcVal[slot] = h; hcStamp[slot] = stamp
+        return h
+    }
+
+    private fun computeHeight(s: Sanctuary, x: Int, z: Int, ring: List<String>): Int {
         val base = baseHeight(s, x, z, ring)
         val (p, d) = ZoneLayout.pocketAt(s, x, z) ?: return base
         if (!p.live(s)) return base
