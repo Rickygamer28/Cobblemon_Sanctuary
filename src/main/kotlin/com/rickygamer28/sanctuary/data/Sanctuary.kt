@@ -363,7 +363,7 @@ class Sanctuary(
 
     companion object {
         /** Bump to make existing sanctuaries rebuild their biomes after a generator change. */
-        const val DATA_VERSION = 18
+        const val DATA_VERSION = 19
 
         /** 2: the region map (town, habitats, meadows and routes) instead of a ring of type biomes. */
         const val LAYOUT_VERSION = 2
@@ -417,8 +417,13 @@ class Sanctuary(
             // version 9 → 10 only changed the Water biome: rebuild just that part (and the shores next to it)
             // (15: the lakes got deeper, only the lake is rebuilt; 16: caves in the Cave & mountain habitat, only it is rebuilt)
             // (17: the mountain always covers the caves; the Cave & mountain habitat and its borders are rebuilt)
-            val onlyWater = version == 9 || version == 15 || version == 16 || version == 17
-            if (onlyWater) s.rebuildZones += if (version >= 16) "rock" else "water"
+            // (18: lakes, ponds and pools were filled in by mistake in 1.7.4–1.8.0; the watery habitats are rebuilt)
+            val onlyWater = version == 9 || version == 15 || version == 16 || version == 17 || version == 18
+            if (onlyWater) when (version) {
+                16, 17 -> s.rebuildZones += "rock"
+                18 -> s.rebuildZones += listOf("water", "poison", "fairy", "ground", "ice")
+                else -> s.rebuildZones += "water"
+            }
             s.dressed = if (version >= DATA_VERSION || onlyWater) BitSet.valueOf(t.getLongArray("Dressed")) else BitSet()
             // (before the builder worked in waves, a dressed column was finished in one go)
             s.decorated = if (t.contains("Decorated")) BitSet.valueOf(t.getLongArray("Decorated")) else s.dressed.clone() as BitSet

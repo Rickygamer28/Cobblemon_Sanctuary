@@ -869,8 +869,9 @@ object BiomeDresser {
         // down to the wall
         off *= smooth((s.size.radius - 6 - dist) / 18.0)
         // the caves always have mountain over them (even where they reach under a neighbouring habitat)
+        // (only where there is a cave: elsewhere the cover is 0, and lakes and pools must stay below it)
         val cover = Caves.cover(s, x, z)
-        if (cover > off) off = cover
+        if (cover > 0.0 && cover > off) off = cover
         return G + off.roundToInt()
     }
 

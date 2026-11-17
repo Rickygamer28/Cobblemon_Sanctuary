@@ -743,10 +743,10 @@ object SanctuaryGenerator {
             }
             return c
         }
-        val j = wave(natureCursors[s.id] ?: 0, BiomeDresser.Phase.NATURE, s.decorated, ::landFinal, landDone, 5)
+        val j = wave(natureCursors[s.id] ?: 0, BiomeDresser.Phase.NATURE, s.decorated, ::landFinal, landDone, 9)
         natureCursors[s.id] = j
         val natureDone = landDone && j >= total
-        val k = wave(extrasCursors[s.id] ?: 0, BiomeDresser.Phase.EXTRAS, s.furnished, { idx -> s.decorated.get(idx) || idx < j }, natureDone, 4)
+        val k = wave(extrasCursors[s.id] ?: 0, BiomeDresser.Phase.EXTRAS, s.furnished, { idx -> s.decorated.get(idx) || idx < j }, natureDone, 7)
         extrasCursors[s.id] = k
         } finally {
             BiomeDresser.endHeights()
