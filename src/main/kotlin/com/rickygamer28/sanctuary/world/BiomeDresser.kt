@@ -824,6 +824,20 @@ object BiomeDresser {
         val c = Ctx(level, s, floorPos, randomFor(s, x, z), variantOf(s, Caves.ZONE), ZoneLayout.Hit(Caves.ZONE, 0.0, 99.0, null), 3, 0)
         val tuff = c.variant == 2
         val rock = if (tuff) b(Blocks.TUFF) else b(Blocks.STONE)
+        // old water buried in the mountain (an older lake or pond under raised ground) mustn't show in the cave:
+        // in the floor, the ceiling and the walls next to it, it's turned into rock
+        fun seal(p: BlockPos) { if (!level.getBlockState(p).fluidState.isEmpty) level.setBlock(p, rock, BULK) }
+        for (y in spot.floor - 4 until spot.floor) seal(BlockPos(x, y, z))
+        if (roofed) for (y in top + 1..top + 3) seal(BlockPos(x, y, z))
+        for (d in Direction.Plane.HORIZONTAL) {
+            val nx = x + d.stepX
+            val nz = z + d.stepZ
+            val other = Caves.at(s, nx, nz)
+            for (y in spot.floor - 2..top + 2) {
+                if (other != null && y in other.floor..other.ceil) continue // that's cave too
+                seal(BlockPos(nx, y, nz))
+            }
+        }
         // the floor: rock and gravel, mossy where daylight reaches in
         c.ground(when {
             spot.mouth -> c.broad(b(Blocks.GRAVEL), b(Blocks.MOSS_BLOCK), 0.5, 6.0, 1)

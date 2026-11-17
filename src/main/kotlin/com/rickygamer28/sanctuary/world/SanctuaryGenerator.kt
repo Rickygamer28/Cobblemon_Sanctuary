@@ -271,7 +271,7 @@ object SanctuaryGenerator {
             if (Landmarks.near(s, x, z)) continue
             looseBlocks(level, x, z)
             floatingBits(level, s, x, z)
-            strayWater(level, x, z)
+            strayWater(level, s, x, z)
             if (s.meadow.get(idx)) continue
             Dens.maybeBuild(level, s, x, z, ring)
             val top = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1
@@ -381,7 +381,20 @@ object SanctuaryGenerator {
      * Water standing above the lake level with open air beside it (a wall of water left by an older layout or a
      * leaky pond): it would spill, so it's taken away, from the top down.
      */
-    private fun strayWater(level: ServerLevel, x: Int, z: Int) {
+    private fun strayWater(level: ServerLevel, s: Sanctuary, x: Int, z: Int) {
+        // in the caves: water left over inside the mountain, with the cave beside or under it, goes too
+        Caves.at(s, x, z)?.let { spot ->
+            val air = net.minecraft.world.level.block.Blocks.AIR.defaultBlockState()
+            for (y in spot.ceil + 3 downTo spot.floor - 1) {
+                val p = BlockPos(x, y, z)
+                if (!level.getBlockState(p).`is`(net.minecraft.world.level.block.Blocks.WATER)) continue
+                val open = level.getBlockState(p.below()).isAir || net.minecraft.core.Direction.Plane.HORIZONTAL.any { d ->
+                    val n = p.relative(d)
+                    level.hasChunk(n.x shr 4, n.z shr 4) && level.getBlockState(n).isAir
+                }
+                if (open) level.setBlock(p, air, net.minecraft.world.level.block.Block.UPDATE_CLIENTS)
+            }
+        }
         val top = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z) - 1
         var y = top
         val air = net.minecraft.world.level.block.Blocks.AIR.defaultBlockState()
