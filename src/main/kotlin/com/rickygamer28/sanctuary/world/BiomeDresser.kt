@@ -958,7 +958,9 @@ object BiomeDresser {
                 val st = level.getBlockState(p)
                 // natural ground, and whatever was growing or hanging inside it (glow lichen from an old cave's
                 // ceiling, dripstone, mushrooms…), or it would be left floating in the air
-                if (isNatural(st) || (!st.isAir && (isClutter(st) || isCobblemonDecor(st) || (st.block in MOD_SOLID && !nextToBuild(level, p)))))
+                // (and lava: an old cave's lava pool would be left on the new ground, and run)
+                if (isNatural(st) || st.fluidState.`is`(net.minecraft.tags.FluidTags.LAVA) ||
+                    (!st.isAir && (isClutter(st) || isCobblemonDecor(st) || (st.block in MOD_SOLID && !nextToBuild(level, p)))))
                     level.setBlock(p, b(Blocks.AIR), BULK)
             }
         }
@@ -1508,7 +1510,7 @@ object BiomeDresser {
                     if (!clear) return p
                     if (!removeTree(level, s, p)) p = p.below()
                 }
-                isClutter(st) -> { level.setBlock(p, air, FLAGS); p = p.below() }
+                isClutter(st) || st.fluidState.`is`(net.minecraft.tags.FluidTags.LAVA) -> { level.setBlock(p, air, FLAGS); p = p.below() }
                 // the sanctuary's own decorations (not a player's build): taken away too, or the old ground under
                 // them would be left standing
                 st.block in MOD_SOLID && !nextToBuild(level, p) -> { level.setBlock(p, air, FLAGS); p = p.below() }

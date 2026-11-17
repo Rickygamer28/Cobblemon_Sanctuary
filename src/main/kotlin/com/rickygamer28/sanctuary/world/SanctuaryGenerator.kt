@@ -322,6 +322,15 @@ object SanctuaryGenerator {
             Dens.maybeBuild(level, s, x, z, ring)
             val top = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1
             val target = BiomeDresser.targetHeight(s, x, z, ring)
+            // lava out in the open (left from an older layout's cave): only the caves' own pools may have it
+            run {
+                val pool = Caves.at(s, x, z)?.floor?.minus(1)
+                for (y in target..top + 1) {
+                    val p = BlockPos(x, y, z)
+                    if (y != pool && level.getFluidState(p).`is`(net.minecraft.tags.FluidTags.LAVA))
+                        level.setBlock(p, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), net.minecraft.world.level.block.Block.UPDATE_ALL)
+                }
+            }
             // the coarse dirt older versions sprinkled on dirt paths: path again
             if (top == target && BiomeDresser.routeDistance(s, x, z) < 1.3) {
                 val here = BlockPos(x, top, z)
