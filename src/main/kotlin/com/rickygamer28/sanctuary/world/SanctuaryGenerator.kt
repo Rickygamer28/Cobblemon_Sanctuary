@@ -322,6 +322,18 @@ object SanctuaryGenerator {
             Dens.maybeBuild(level, s, x, z, ring)
             val top = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1
             val target = BiomeDresser.targetHeight(s, x, z, ring)
+            // leftovers standing in a lake (an old post, lantern or log from before it was a lake): the floating check
+            // leaves alone whatever touches water, so they're looked for here
+            if (target < BiomeDresser.WATER_Y && !inDen) {
+                for (y in BiomeDresser.WATER_Y + 4 downTo target + 1) {
+                    val p = BlockPos(x, y, z)
+                    val st = level.getBlockState(p)
+                    if (BiomeDresser.isLooseDecor(level, p, st)) {
+                        Trace.note(x, z, "removed ${st.block} standing in the lake at $y")
+                        level.setBlock(p, if (y <= BiomeDresser.WATER_Y) net.minecraft.world.level.block.Blocks.WATER.defaultBlockState() else net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), net.minecraft.world.level.block.Block.UPDATE_CLIENTS)
+                    }
+                }
+            }
             // lava out in the open (left from an older layout's cave): only the caves' own pools may have it
             run {
                 val pool = Caves.at(s, x, z)?.floor?.minus(1)

@@ -1508,7 +1508,11 @@ object BiomeDresser {
                 }
                 st.`is`(BlockTags.LOGS) -> {
                     if (!clear) return p
-                    if (!removeTree(level, s, p)) p = p.below()
+                    if (removeTree(level, s, p)) continue
+                    // wood that isn't a tree (a lantern post, a fallen log, a bare dead tree): it goes with the old
+                    // ground, or it's left floating where that ground was (unless it's part of something built)
+                    if (!treeLeavesNear(level, p) && !nextToBuild(level, p)) { level.setBlock(p, air, FLAGS); p = p.below(); continue }
+                    p = p.below()
                 }
                 isClutter(st) || st.fluidState.`is`(net.minecraft.tags.FluidTags.LAVA) -> { level.setBlock(p, air, FLAGS); p = p.below() }
                 // the sanctuary's own decorations (not a player's build): taken away too, or the old ground under
@@ -1612,6 +1616,28 @@ object BiomeDresser {
                 }
             }
         }
+    }
+
+    /** Is [p] part of a living tree (leaves on or right next to it)? */
+    private fun treeLeavesNear(level: ServerLevel, p: BlockPos): Boolean {
+        for (dx in -2..2) for (dy in -1..3) for (dz in -2..2) if (level.getBlockState(p.offset(dx, dy, dz)).`is`(BlockTags.LEAVES)) return true
+        return false
+    }
+
+    /**
+     * Something of the valley's own (a post, a lantern, a fence, a lone log, a decoration block) that isn't part of
+     * anything built, for the cleanup: plants that grow under water, and anything holding items, aren't.
+     */
+    fun isLooseDecor(level: ServerLevel, p: BlockPos, st: BlockState): Boolean {
+        if (st.isAir || isNatural(st) || !st.fluidState.isEmpty && !st.hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED)) return false
+        if (st.`is`(Blocks.KELP) || st.`is`(Blocks.KELP_PLANT) || st.`is`(Blocks.SEAGRASS) || st.`is`(Blocks.TALL_SEAGRASS) || st.`is`(Blocks.SEA_PICKLE) ||
+            st.`is`(Blocks.LILY_PAD) || st.`is`(BlockTags.CORALS) || st.`is`(BlockTags.CORAL_BLOCKS) || st.`is`(BlockTags.WALL_CORALS) ||
+            // the swamp's own: roots in the water, vines hanging into it, dripleaves
+            st.`is`(Blocks.VINE) || st.`is`(Blocks.MANGROVE_ROOTS) || st.`is`(Blocks.MUDDY_MANGROVE_ROOTS) || st.`is`(Blocks.MANGROVE_PROPAGULE) ||
+            st.`is`(Blocks.HANGING_ROOTS) || st.`is`(Blocks.BIG_DRIPLEAF) || st.`is`(Blocks.BIG_DRIPLEAF_STEM) || st.`is`(Blocks.SMALL_DRIPLEAF)) return false
+        if (level.getBlockEntity(p) != null) return false
+        val ours = isClutter(st) || st.block in MOD_SOLID || isCobblemonDecor(st) || (st.`is`(BlockTags.LOGS) && !treeLeavesNear(level, p))
+        return ours && !nextToBuild(level, p)
     }
 
     /** Do the leaves joined to [start] touch any wood (followed through up to a few thousand leaves)? */
