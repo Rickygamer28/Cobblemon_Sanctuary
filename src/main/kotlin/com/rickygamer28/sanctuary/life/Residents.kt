@@ -233,6 +233,7 @@ object Residents {
     private fun planRegion(s: Sanctuary, counts: Map<String, Int>) {
         if (s.state != SanctuaryState.ACTIVE) return
         if (!s.planned) {
+            s.pocketStyle = 2
             s.habitats.clear()
             s.habitats.putAll(ZoneLayout.plan(s, counts))
             s.planned = true

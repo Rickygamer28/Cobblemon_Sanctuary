@@ -302,7 +302,7 @@ object ZoneLayout {
     private const val POCKET_CELL = 32
 
     private fun pocketKey(s: Sanctuary): Long {
-        var k = s.layoutSalt.toLong() * 1_000_003L + s.size.radius
+        var k = s.layoutSalt.toLong() * 1_000_003L + s.size.radius + s.pocketStyle * 7_000_001L
         for ((zone, hb) in s.habitats) k = k * 31 + zone.hashCode() * 7L + hb.x * 131L + hb.z
         return k
     }
@@ -316,7 +316,8 @@ object ZoneLayout {
         val list = ArrayList<Pocket>()
         if (s.planned && s.habitats.isNotEmpty()) {
             val random = java.util.Random(s.seed xor (s.layoutSalt * 0x2545F4914F6CDD1DL) xor 0x9067L)
-            val cell = 44
+            val newer = s.pocketStyle >= 2
+            val cell = if (newer) 38 else 44
             val n = s.size.radius / cell + 1
             for (gx in -n..n) for (gz in -n..n) {
                 val x = s.center.x + gx * cell + random.nextInt(cell * 3 / 4) - cell * 3 / 8
@@ -333,7 +334,8 @@ object ZoneLayout {
                     if (l.dist < 22) continue
                 }
                 // keep the routes clear (they run roughly from the town to each habitat's middle)
-                if (nearRouteLine(s, x, z, 24.0 + r)) continue
+                // (a route bends up to ~11 blocks either side of its straight line)
+                if (nearRouteLine(s, x, z, if (newer) 16.0 + r else 24.0 + r)) continue
                 // not over the caves or in front of their mouths
                 if (host == Caves.ZONE && (Caves.cover(s, x, z) > 0.5 || Caves.apron(s, x, z) > 0)) continue
                 // never overlapping another pocket (each spot must belong to one pocket only)

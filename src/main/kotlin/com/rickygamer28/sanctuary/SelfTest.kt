@@ -259,7 +259,7 @@ object SelfTest {
             if (blocked > 3) find("den entrance blocked").add(s, d.mouth.x, d.mouth.y, d.mouth.z, "$blocked blocks")
         }
         try { File("selftest-report.txt").writeText(report.toString()) } catch (_: Exception) {}
-        log("pockets: " + ZoneLayout.pockets(s).joinToString(", ") { "${it.zone} in ${it.host} r${"%.0f".format(it.r)}${if (it.live(s)) "" else " (asleep)"}" })
+        log("pockets: " + ZoneLayout.pockets(s).joinToString(", ") { "${it.zone} in ${it.host} r${it.r}${if (it.live(s)) "" else " (asleep)"}" })
         log("scanned $columns columns ($unloaded loaded from disk); ${s.landmarks.count { it.value != Landmarks.NONE }} landmarks, $dens dens, ${ZoneLayout.pockets(s).count { it.live(s) }} pockets")
         if (f.isEmpty()) log("  no problems found")
         for (finding in f.values) {

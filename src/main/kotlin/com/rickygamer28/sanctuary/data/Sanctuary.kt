@@ -179,6 +179,8 @@ class Sanctuary(
 
     /** Bumped on every Reshape, so the habitats are arranged differently. */
     var layoutSalt: Int = 0
+    /** How pockets are laid out (2: closer to the routes, so there are more of them). Older valleys keep theirs until a Reshape. */
+    var pocketStyle: Int = 2
     /** The valley radius the region map was planned for (it's planned again when the valley grows). */
     var planRadius: Int = 0
 
@@ -223,6 +225,7 @@ class Sanctuary(
 
     fun reshape() {
         layoutSalt++
+        pocketStyle = 2
         planned = false
         habitats.clear()
         rebuild()
@@ -345,6 +348,7 @@ class Sanctuary(
         t.putInt("Layout", LAYOUT_VERSION)
         t.putBoolean("Planned", planned)
         t.putInt("LayoutSalt", layoutSalt)
+        t.putInt("PocketStyle", pocketStyle)
         t.putInt("PlanRadius", planRadius)
         t.put("Habitats", CompoundTag().also { c ->
             habitats.forEach { (k, h) -> c.put(k, CompoundTag().also { e ->
@@ -465,6 +469,7 @@ class Sanctuary(
                 s.landmarks.clear()
             }
             s.layoutSalt = t.getInt("LayoutSalt")
+            s.pocketStyle = if (t.contains("PocketStyle")) t.getInt("PocketStyle") else 1
             s.planRadius = t.getInt("PlanRadius")
             if (t.getInt("Layout") >= LAYOUT_VERSION) {
                 s.planned = t.getBoolean("Planned")
