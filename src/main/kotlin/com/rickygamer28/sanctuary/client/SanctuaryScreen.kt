@@ -601,11 +601,17 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
         // actions
         val ay = sy + 60
         val inside = data.getBoolean("inside")
-        val bw = (w - gap * 2) / 3
+        val bw = (w - gap * 3) / 4
         if (inside) button(g, x, ay, bw, 22, "Return home", PURPLE, mx, my) { send("return") }
-        else button(g, x, ay, bw, 22, "Travel to the valley", PURPLE, mx, my) { send("travel") }
-        button(g, x + bw + gap, ay, bw, 22, "Reshape the valley", GOLD, mx, my, enabled = owner, why = "Only the owner can reshape it", filled = false) { send("reshape", page = "home") }
-        button(g, x + (bw + gap) * 2, ay, bw, 22, "New Journal", ACCENT, mx, my, filled = false) { send("journal", page = "home") }
+        else button(g, x, ay, bw, 22, "Go to valley", PURPLE, mx, my) { send("travel") }
+        button(g, x + bw + gap, ay, bw, 22, "Reshape valley", GOLD, mx, my, enabled = owner, why = "Only the owner can reshape it", filled = false) { send("reshape", page = "home") }
+        button(g, x + (bw + gap) * 2, ay, bw, 22, "Repair here", GOOD, mx, my, enabled = owner && inside,
+            why = if (!owner) "Only the owner can repair the land" else "Stand in the valley where you want the land repaired", filled = false) { send("repair", page = "home") }
+        if (owner && inside && over(mx, my, x + (bw + gap) * 2, ay, bw, 22)) tooltip = listOf(
+            Component.literal("Repair the land around you").withColor(GOOD),
+            Component.literal("Rebuilds about 40 blocks around where you stand:").withColor(SUB),
+            Component.literal("cut trees, leftovers, odd ground. Your own builds aren't touched.").withColor(SUB))
+        button(g, x + (bw + gap) * 3, ay, bw, 22, "New Journal", ACCENT, mx, my, filled = false) { send("journal", page = "home") }
         // how many Pokémon are out at once
         val cy = ay + 28
         val caps = data.getIntArray("crowdCaps")

@@ -152,6 +152,25 @@ object SanctuaryGenerator {
     private val repairAgainAt = HashMap<UUID, Long>()
 
     /** Check the valley once after loading (and after each rebuild). */
+    /**
+     * Rebuilds the land in a circle of [radius] around (x, z): its trees come down whole (so anything left cut in
+     * half goes), and every column is dressed again on the next pass. Returns how many columns will be redone.
+     */
+    fun repairArea(level: ServerLevel, s: Sanctuary, x: Int, z: Int, radius: Int): Int {
+        BiomeDresser.removeTreesIn(level, BlockPos(x, 0, z), radius + 4, SanctuaryDimension.GROUND_Y - 6, SanctuaryDimension.GROUND_Y + 140)
+        var n = 0
+        for (dx in -radius..radius) for (dz in -radius..radius) {
+            if (dx * dx + dz * dz > radius * radius) continue
+            val idx = ColumnOrder.indexOf(x + dx - s.center.x, z + dz - s.center.z)
+            if (idx < 0 || !s.dressed.get(idx)) continue
+            s.dressed.clear(idx)
+            s.meadow.clear(idx)
+            n++
+        }
+        s.generationDirty = true
+        return n
+    }
+
     fun scheduleCheck(id: UUID) { repairCursor[id] = 0; repaired[id] = 0 }
 
     /**

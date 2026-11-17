@@ -1110,22 +1110,35 @@ object BiomeDresser {
      */
     fun removeTreesIn(level: ServerLevel, center: BlockPos, r: Int, y0: Int, y1: Int) {
         val logs = LinkedHashSet<BlockPos>()
+        val kept = HashSet<BlockPos>()
         for (dx in -r..r) for (dz in -r..r) {
             if (dx * dx + dz * dz > r * r) continue
             for (y in y0..y1) {
                 val p = BlockPos(center.x + dx, y, center.z + dz)
-                if (p in logs || !level.getBlockState(p).`is`(BlockTags.LOGS)) continue
+                if (p in logs || p in kept || !level.getBlockState(p).`is`(BlockTags.LOGS)) continue
                 // the whole tree joined to this log
+                val tree = LinkedHashSet<BlockPos>()
                 val queue = ArrayDeque<BlockPos>()
-                queue += p; logs += p
+                queue += p; tree += p
                 var n = 0
+                var leafy = false
+                var built = false
                 while (queue.isNotEmpty() && n++ < 1500) {
                     val q = queue.removeFirst()
                     for (ox in -1..1) for (oy in -1..1) for (oz in -1..1) {
                         val m = q.offset(ox, oy, oz)
-                        if (m !in logs && level.getBlockState(m).`is`(BlockTags.LOGS)) { logs += m; queue += m }
+                        val st = level.getBlockState(m)
+                        when {
+                            st.`is`(BlockTags.LOGS) -> if (m !in tree) { tree += m; queue += m }
+                            st.`is`(BlockTags.LEAVES) -> leafy = true
+                            // touching planks, glass, a door… that's somebody's build, not a tree
+                            !st.isAir && !isNatural(st) && !isClutter(st) && !isCobblemonDecor(st) -> built = true
+                        }
                     }
+                    if (level.getBlockEntity(q) != null) built = true
                 }
+                // only real trees (with leaves) that aren't part of a build come down
+                if (leafy && !built) logs += tree else kept += tree
             }
         }
         if (logs.isEmpty()) return

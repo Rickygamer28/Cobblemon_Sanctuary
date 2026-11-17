@@ -375,6 +375,19 @@ object ScreenActions {
                 }
                 refresh("home")
             }
+            "repair" -> {
+                if (ownerOnly()) {
+                    val here = player.serverLevel()
+                    if (!SanctuaryDimension.isSanctuary(here) || Sanctuaries.current(player)?.second?.id != s.id) {
+                        say(player, "Stand in your valley, where you want the land repaired.", ChatFormatting.RED)
+                    } else {
+                        val n = com.rickygamer28.sanctuary.world.SanctuaryGenerator.repairArea(here, s, player.blockX, player.blockZ, 40)
+                        Sanctuaries.data(level).setDirty()
+                        say(player, if (n == 0) "There's nothing built around here to repair yet." else "Rebuilding the land around you (about 40 blocks). Give it a moment.", if (n == 0) ChatFormatting.GRAY else ChatFormatting.GREEN)
+                    }
+                }
+                refresh("home")
+            }
             "journal" -> { Sanctuaries.giveJournal(player); say(player, "Here's a new Journal.", ChatFormatting.GREEN); refresh() }
             "invite" -> {
                 if (ownerOnly()) {
