@@ -68,7 +68,7 @@ object SanctuaryGenerator {
     private val missedUnloaded = HashMap<UUID, Boolean>()
     private val recheckMeadow = HashSet<UUID>()
 
-    fun forget(id: UUID) { grounded.remove(id); recheckMeadow.remove(id); cursors.remove(id); retryAt.remove(id); missedUnloaded.remove(id); requested.remove(id); waiting.remove(id); BiomePainter.forget(id) }
+    fun forget(id: UUID) { Caves.forget(id); grounded.remove(id); recheckMeadow.remove(id); cursors.remove(id); retryAt.remove(id); missedUnloaded.remove(id); requested.remove(id); waiting.remove(id); BiomePainter.forget(id) }
 
     // ------------------------------------------------------------------ loading the chunks it builds in
     // Building only where players happen to have chunks loaded (their render distance) split the valley into

@@ -357,7 +357,7 @@ class Sanctuary(
 
     companion object {
         /** Bump to make existing sanctuaries rebuild their biomes after a generator change. */
-        const val DATA_VERSION = 16
+        const val DATA_VERSION = 17
 
         /** 2: the region map (town, habitats, meadows and routes) instead of a ring of type biomes. */
         const val LAYOUT_VERSION = 2
@@ -409,9 +409,9 @@ class Sanctuary(
             rel.allKeys.forEach { k -> s.relationships[k] = rel.getInt(k) }
             val version = t.getInt("Version")
             // version 9 → 10 only changed the Water biome: rebuild just that part (and the shores next to it)
-            // (15: the lakes got deeper; only the lake is rebuilt)
-            val onlyWater = version == 9 || version == 15
-            if (onlyWater) s.rebuildZones += "water"
+            // (15: the lakes got deeper, only the lake is rebuilt; 16: caves in the Cave & mountain habitat, only it is rebuilt)
+            val onlyWater = version == 9 || version == 15 || version == 16
+            if (onlyWater) s.rebuildZones += if (version == 16) "rock" else "water"
             s.dressed = if (version >= DATA_VERSION || onlyWater) BitSet.valueOf(t.getLongArray("Dressed")) else BitSet()
             s.meadow = if (version >= DATA_VERSION || onlyWater) BitSet.valueOf(t.getLongArray("Meadow")) else BitSet()
             s.oldWallRadius = t.getInt("OldWall")

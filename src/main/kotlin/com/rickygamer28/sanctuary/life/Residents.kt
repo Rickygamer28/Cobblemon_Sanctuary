@@ -80,6 +80,8 @@ class LiveResident(
     var leaving = false
     /** Lives in a little pocket of its habitat out in another area instead of in the habitat itself. */
     var pocket: ZoneLayout.Pocket? = null
+    /** Lives down in the caves of the Cave & mountain habitat. */
+    var cave = false
     var leaveTarget: BlockPos? = null
     var leaveSince = 0L
     val pokemon: Pokemon get() = entity.pokemon
@@ -366,9 +368,21 @@ object Residents {
         if (swimmer && "water" !in s.unlocked) return null
         var fromDen: com.rickygamer28.sanctuary.world.Dens.Den? = null
         var inPocket: ZoneLayout.Pocket? = null
+        var inCave = false
         val pos = at ?: run {
             val range = SanctuaryConfig.spawnRange.get().toDouble()
             fun nearPlayer(x: Int, z: Int) = players.isEmpty() || players.any { val dx = it.x - x; val dz = it.z - z; dx * dx + dz * dz < range * range }
+            // some of the Cave & mountain residents live down in the caves
+            if (home == com.rickygamer28.sanctuary.world.Caves.ZONE && !swimmer && !pokemon.form.behaviour.moving.fly.canFly &&
+                level.random.nextDouble() < SanctuaryConfig.caveShare.get()) {
+                repeat(4) {
+                    val p = com.rickygamer28.sanctuary.world.Caves.randomFloor(s, level.random) ?: return@repeat
+                    if (!level.hasChunk(p.x shr 4, p.z shr 4) || !level.getBlockState(p).isAir || !level.getBlockState(p.above()).isAir) return@repeat
+                    if (!unseen(players, p.x, p.z)) return@repeat
+                    inCave = true
+                    return@run p
+                }
+            }
             // some live out in a pocket of their habitat (a pond in the forest, an outcrop in the meadow…)
             if (home != null && home != ZoneLayout.HUB && level.random.nextDouble() < SanctuaryConfig.pocketShare.get()) {
                 val near = players.randomOrNull()?.let { it.blockX to it.blockZ }
@@ -425,6 +439,7 @@ object Residents {
         live.flyer = TypeLogic.canFlyInFlocks(pokemon)
         live.swimmer = swimmer
         live.pocket = inPocket
+        live.cave = inCave
         live.personality = Personality.of(pokemon)
         live.nextMeetAt = level.gameTime + 200 + level.random.nextInt(400)
         tethering.roamCheck = { p -> Behaviour.canRoam(s, rt, live, p) }

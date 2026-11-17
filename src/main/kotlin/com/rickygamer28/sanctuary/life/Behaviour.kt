@@ -29,6 +29,8 @@ object Behaviour {
         if (now < rt.gatherUntil) return hit.zone == ZoneLayout.HUB || hit.zone == home
         if (home == null || r.migrating) return true
         if (r.visitZone != null && now < r.visitUntil) return hit.zone == home || hit.zone == ZoneLayout.HUB || hit.zone == r.visitZone
+        // living in the caves: anywhere inside them
+        if (r.cave) return com.rickygamer28.sanctuary.world.Caves.inside(s, pos)
         // living in a pocket: around the pocket
         val pocket = r.pocket
         if (pocket != null) return ZoneLayout.distance(pos.x, pos.z, pocket.x, pocket.z) <= pocket.r + 9
@@ -111,6 +113,7 @@ object Behaviour {
                 val visit = r.visitZone
                 when {
                     visit != null -> walkToZone(level, s, r, visit)
+                    r.cave -> walkInCave(level, s, r)
                     r.pocket != null -> walkInPocket(level, r)
                     SanctuaryConfig.borderReach.get() > 0 && random.nextInt(3) == 0 ->
                         ZoneLayout.borderPoint(s, r.home ?: ZoneLayout.HUB, random)?.let { Residents.walkTo(e, Residents.surface(level, it.first, it.second), 0.4f, 2) }
@@ -175,7 +178,7 @@ object Behaviour {
     private fun wander(level: ServerLevel, s: Sanctuary, r: LiveResident, now: Long): Boolean {
         val share = SanctuaryConfig.wanderShare.get()
         val home = r.home ?: return false
-        if (share <= 0 || r.visitZone != null || r.migrating || r.followParents != null || Routines.isNight(level)) return false
+        if (share <= 0 || r.cave || r.visitZone != null || r.migrating || r.followParents != null || Routines.isNight(level)) return false
         // out for ~90 s on average; leave often enough that about `share` of them are out
         val perSecond = share / (1 - share) / 90.0 * r.personality.explore
         if (level.random.nextDouble() >= perSecond) return false
@@ -203,7 +206,15 @@ object Behaviour {
         Residents.walkTo(r.entity, Residents.surface(level, x, z), 0.4f, 2)
     }
 
+    /** Somewhere on the cave floor. */
+    private fun walkInCave(level: ServerLevel, s: Sanctuary, r: LiveResident) {
+        val p = com.rickygamer28.sanctuary.world.Caves.randomFloor(s, level.random) ?: return
+        if (!level.hasChunk(p.x shr 4, p.z shr 4)) return
+        Residents.walkTo(r.entity, p, 0.4f, 2)
+    }
+
     fun goHome(level: ServerLevel, s: Sanctuary, r: LiveResident, viaHub: Boolean) {
+        if (r.cave) { walkInCave(level, s, r); return }
         if (r.pocket != null) { walkInPocket(level, r); return }
         val home = r.home ?: return
         if (viaHub) commute(level, s, r, home) else walkToZone(level, s, r, home)

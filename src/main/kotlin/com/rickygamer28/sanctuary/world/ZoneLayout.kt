@@ -312,6 +312,8 @@ object ZoneLayout {
                 }
                 // keep the routes clear (they run roughly from the town to each habitat's middle)
                 if (nearRouteLine(s, x, z, 24.0 + r)) continue
+                // not over the caves or in front of their mouths
+                if (host == Caves.ZONE && (Caves.cover(s, x, z) > 0.5 || Caves.apron(s, x, z) > 0)) continue
                 // never overlapping another pocket (each spot must belong to one pocket only)
                 if (list.any { distance(it.x, it.z, x, z) < it.r + r + 14 }) continue
                 // on fairly level dry land: not in a lake, not on a slope it would have to be cut into

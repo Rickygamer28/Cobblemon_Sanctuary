@@ -122,6 +122,13 @@ object SanctuaryConfig {
         .comment("Friendship a resident needs to come and greet its trainer.")
         .defineInRange("greetFriendship", 120, 0, 255)
 
+    val caves: ModConfigSpec.BooleanValue = builder
+        .comment("Dig big caves (a hall and wide tunnels) into the mountains of the Cave & mountain habitat.")
+        .define("caves", true)
+    val caveShare: ModConfigSpec.DoubleValue = builder
+        .comment("Share of the Cave & mountain residents (that can't fly or swim) that live down in the caves.")
+        .defineInRange("caveShare", 0.4, 0.0, 1.0)
+
     val pocketShare: ModConfigSpec.DoubleValue = builder
         .comment("Share of residents that live in a little pocket of their habitat out in another area (a pond in the forest, an outcrop in the meadow…).")
         .defineInRange("pocketShare", 0.3, 0.0, 1.0)

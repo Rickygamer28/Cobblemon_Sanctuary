@@ -418,6 +418,7 @@ object BiomeDresser {
     // ================================================================== terrain shapes
 
     private fun smooth(t: Double): Double { val c = t.coerceIn(0.0, 1.0); return c * c * (3 - 2 * c) }
+    fun smoothstep(t: Double): Double = smooth(t)
     private fun terrace(v: Double, step: Int) = floor(v / step) * step
 
     /** Terraces with sloped edges (not sheer walls): flat steps joined by short, steep slopes. */
@@ -531,7 +532,9 @@ object BiomeDresser {
                 val tors = smooth((f01(s, wx, wz, 14.0, 37, 2) - 0.8) / 0.08) * 3 * (1 - massif)
                 // the range rises behind the valley at the front
                 val back = smooth((backness(s, zone, x, z) + 0.15) / 0.55)
-                2 + f(s, wx, wz, 40.0, 34, 3) * 2 + smooth((rB - 10) / (size * 0.35)) * smooth((1.0 - q) / 0.4) * massif * back * (top * m * m + 4) + tors
+                val hills = 2 + f(s, wx, wz, 40.0, 34, 3) * 2 + smooth((rB - 10) / (size * 0.35)) * smooth((1.0 - q) / 0.4) * massif * back * (top * m * m + 4) + tors
+                // always enough mountain over the caves, and a level apron in front of each cave mouth
+                mix(max(hills, Caves.cover(s, x, z)), Caves.floorOffset(s), Caves.apron(s, x, z))
             }
             "ground" -> {
                 val c = clearing(12.0)
@@ -754,6 +757,67 @@ object BiomeDresser {
 
     /** Dresses one column inside the sanctuary. Returns false if it can't be done right now. */
     fun dress(level: ServerLevel, s: Sanctuary, x: Int, z: Int, hit: ZoneLayout.Hit, ring: List<String>): Boolean {
+        val done = dressSurface(level, s, x, z, hit, ring)
+        if (done && hit.zone in s.unlocked && hit.dist < s.size.radius - 2 && !Landmarks.near(s, x, z)) {
+            Caves.at(s, x, z)?.let { carveCave(level, s, x, z, it, targetHeight(s, x, z, ring)) }
+        }
+        return done
+    }
+
+    /**
+     * Hollows a column out for the cave: air from its floor to its ceiling (and, at a cave mouth, all the way up),
+     * with a rocky floor, glow lichen on the ceiling to light it, dripstone and the odd amethyst cluster.
+     * Everything is kept clear of the middle of the passages so big Pokémon get through.
+     */
+    private fun carveCave(level: ServerLevel, s: Sanctuary, x: Int, z: Int, spot: Caves.Spot, target: Int) {
+        val roofed = target - spot.ceil >= 4
+        val top = when {
+            roofed -> spot.ceil
+            spot.mouth -> target + 20
+            else -> max(spot.floor + 4, target - 4)
+        }
+        val air = b(Blocks.AIR)
+        for (y in spot.floor..top) {
+            val p = BlockPos(x, y, z)
+            if (!level.getBlockState(p).isAir) level.setBlock(p, air, FLAGS)
+        }
+        val floorPos = BlockPos(x, spot.floor - 1, z)
+        val c = Ctx(level, s, floorPos, randomFor(s, x, z), variantOf(s, Caves.ZONE), ZoneLayout.Hit(Caves.ZONE, 0.0, 99.0, null), 3, 0)
+        val tuff = c.variant == 2
+        val rock = if (tuff) b(Blocks.TUFF) else b(Blocks.STONE)
+        // the floor: rock and gravel, mossy where daylight reaches in
+        c.ground(when {
+            spot.mouth -> c.broad(b(Blocks.GRAVEL), b(Blocks.MOSS_BLOCK), 0.5, 6.0, 1)
+            else -> c.broad(c.broad(rock, b(Blocks.GRAVEL), 0.62, 9.0, 2), if (tuff) b(Blocks.DRIPSTONE_BLOCK) else b(Blocks.ANDESITE), 0.72, 7.0, 3)
+        }, rock)
+        if (!roofed && spot.mouth) {
+            if (c.chance(0.15)) c.place(b(Blocks.MOSS_CARPET))
+            return
+        }
+        val ceiling = BlockPos(x, top + 1, z)
+        val wall = spot.centre > 0.55 // towards the sides, out of the way
+        // light: glow lichen spreading over the ceiling, a few glowing spots in the hall
+        if (level.getBlockState(ceiling).isSolid) {
+            if (spot.inHall && c.grid(9, 4)) level.setBlock(ceiling, b(Blocks.OCHRE_FROGLIGHT), FLAGS)
+            else if (c.noise(7.0, 5) > 0.42) level.setBlock(ceiling.below(), b(Blocks.GLOW_LICHEN).setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.UP, true), FLAGS)
+            else if (wall && c.grid(7, 6)) {
+                level.setBlock(ceiling.below(), b(Blocks.POINTED_DRIPSTONE)
+                    .setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.VERTICAL_DIRECTION, Direction.DOWN)
+                    .setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.DRIPSTONE_THICKNESS, net.minecraft.world.level.block.state.properties.DripstoneThickness.TIP), FLAGS)
+            }
+        }
+        if (!wall) return
+        when {
+            c.grid(11, 7) -> c.place(b(Blocks.POINTED_DRIPSTONE)
+                .setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.VERTICAL_DIRECTION, Direction.UP)
+                .setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.DRIPSTONE_THICKNESS, net.minecraft.world.level.block.state.properties.DripstoneThickness.TIP))
+            spot.inHall && c.grid(13, 8) -> c.place(b(Blocks.AMETHYST_CLUSTER))
+            c.chance(0.04) -> c.place(c.pick(b(Blocks.BROWN_MUSHROOM), b(Blocks.RED_MUSHROOM)))
+            c.chance(0.05) -> c.place(b(Blocks.GLOW_LICHEN).setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.DOWN, true))
+        }
+    }
+
+    private fun dressSurface(level: ServerLevel, s: Sanctuary, x: Int, z: Int, hit: ZoneLayout.Hit, ring: List<String>): Boolean {
         if (s.oldWallRadius in 1 until s.size.radius && abs(hit.dist - (s.oldWallRadius - 0.8)) < 1.6) clearWall(level, x, z)
         if (SanctuaryConfig.buildWall.get() && hit.dist > s.size.radius - 1.6) return wall(level, s, x, z)
         if (hit.zone !in s.unlocked) return true
@@ -1294,6 +1358,7 @@ object BiomeDresser {
 
     /** Cave & mountain: rugged peaks over grassy valleys, mossy (or tuff and dripstone) heights, snow on the tops. */
     private fun rock(c: Ctx) {
+        if (Caves.at(c.s, c.x, c.z)?.mouth == true) { c.ground(b(Blocks.GRAVEL), b(Blocks.STONE)); return }
         val tuff = c.variant == 2
         val rock = if (tuff) b(Blocks.TUFF) else b(Blocks.STONE)
         val alt = if (tuff) b(Blocks.DRIPSTONE_BLOCK) else b(Blocks.ANDESITE)
