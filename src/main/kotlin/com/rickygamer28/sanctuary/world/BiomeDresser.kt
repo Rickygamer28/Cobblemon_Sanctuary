@@ -280,10 +280,39 @@ object BiomeDresser {
         }
 
         // ---- little structures
+        /** The top of the ground at (x, z) (ignoring plants and leaves), as it is now. */
+        fun groundAt(px: Int, pz: Int): Int = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, px, pz) - 1
+
+        /**
+         * A rounded rock. Each part of it rests on the ground under it, so on a slope it sits into the hill
+         * instead of hanging over the low side.
+         */
         fun boulder(main: BlockState, accent: BlockState, size: Int = 1) {
-            for (dx in -size..size) for (dz in -size..size) for (dy in 0..size) {
-                if (dx * dx + dz * dz + dy * dy > size * size + 1) continue
-                at(above.offset(dx, dy, dz), if (random.nextInt(4) == 0) accent else main)
+            for (dx in -size..size) for (dz in -size..size) {
+                val rr = size * size + 1 - dx * dx - dz * dz
+                if (rr < 0) continue
+                val top = y + 1 + floor(sqrt(rr.toDouble())).toInt()
+                val base = if (dx == 0 && dz == 0) y else groundAt(x + dx, z + dz)
+                // lower ground beside it (more than a step down): leave that side off rather than hang it in the air
+                if (base < y - 1) continue
+                for (yy in base + 1..top) at(BlockPos(x + dx, yy, z + dz), if (random.nextInt(4) == 0) accent else main)
+            }
+        }
+
+        /**
+         * A spike of [main] (ice spikes, rock spires): [height] tall with a base [radius] wide, built up from the
+         * ground under each part of it, so nothing of it hangs off a slope.
+         */
+        fun spike(main: BlockState, radius: Int, height: Int, tip: BlockState = main) {
+            if (!decorating) return
+            for (dx in -radius..radius) for (dz in -radius..radius) {
+                val d = sqrt((dx * dx + dz * dz).toDouble())
+                if (d > radius + 0.4) continue
+                val t = 1.0 - d / (radius + 0.6)
+                val top = y + max(1, (height * Math.pow(t, 1.7)).toInt())
+                val base = if (dx == 0 && dz == 0) y else groundAt(x + dx, z + dz)
+                if (base >= top) continue
+                for (yy in base + 1..top) at(BlockPos(x + dx, yy, z + dz), if (yy == top && dx == 0 && dz == 0) tip else main)
             }
         }
         /** A cluster of crystals or columns: a tall centre with shorter ones around it. */
@@ -2009,7 +2038,8 @@ object BiomeDresser {
         c.ground(if (c.slope == 2 && c.noise(9.0, 2) > 0.62) b(Blocks.STONE) else b(Blocks.SNOW_BLOCK), if (c.rise > 6) b(Blocks.STONE) else b(Blocks.DIRT))
         val forest = c.rise < (if (c.variant == 1) 22 else 14) + c.noise(16.0, 3) * 5
         when {
-            c.variant == 0 && c.rise > 10 && c.grid(19, 4) && c.roomy(8) -> c.feature(MiscOverworldFeatures.ICE_SPIKE, 4, 34)
+            c.variant == 0 && c.rise > 10 && c.grid(19, 4) && c.roomy(8) && settled(c.level, c.s, c.x, c.z, 4) ->
+                c.spike(b(Blocks.PACKED_ICE), 1 + c.random.nextInt(3), 7 + c.random.nextInt(14))
             forest && c.tree(if (c.variant == 1) 6 else 9, 22, 5) && c.roomy() -> c.feature(TreeFeatures.SPRUCE)
             c.grid(21, 6) && c.roomy() -> c.boulder(b(Blocks.PACKED_ICE), b(Blocks.STONE), 1)
             c.chance(0.55) -> c.place(b(Blocks.SNOW))

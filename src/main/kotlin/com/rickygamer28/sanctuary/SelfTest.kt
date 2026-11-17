@@ -139,6 +139,9 @@ object SelfTest {
     // ------------------------------------------------------------------ the scan
 
     private var scanLevel: ServerLevel? = null
+    /** What each column's top was at the previous scan ("y block"), to see what a problem column used to be. */
+    private var before = HashMap<Long, String>()
+    private var now = HashMap<Long, String>()
 
     /** What the column is made of, from a little under [from] up to its top: "stone x3, packed_ice x5, air…". */
     private fun profile(level: ServerLevel, x: Int, z: Int, from: Int): String {
@@ -167,8 +170,11 @@ object SelfTest {
             val pocket = ZoneLayout.pocketAt(s, x, z)?.takeIf { it.first.live(s) && it.second <= it.first.r + 1.5 }?.first?.zone
             val key = zone + (if (pocket != null) "/pocket:$pocket" else "") + (if (level != null) "/" + net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(level.getBlockState(BlockPos(x, y, z)).block).path else "")
             kinds[key] = (kinds[key] ?: 0) + 1
+            val idx = com.rickygamer28.sanctuary.world.ColumnOrder.indexOf(x - s.center.x, z - s.center.z)
+            val bits = if (idx >= 0) " dressed=${s.dressed.get(idx)} nature=${s.decorated.get(idx)} extras=${s.furnished.get(idx)} meadow=${s.meadow.get(idx)}" else ""
+            val was = before[BlockPos.asLong(x, 0, z)]?.let { " was: $it" } ?: ""
             if (samples.size < 8) samples += "(${x - s.center.x}, ${y}, ${z - s.center.z})${if (note.isNotEmpty()) " $note" else ""}" +
-                (if (samples.size < 4 && level != null) " " + profile(level, x, z, y - 3) else "")
+                (if (samples.size < 4 && level != null) " " + profile(level, x, z, y - 3) + bits + was else "")
         }
     }
 
@@ -192,6 +198,8 @@ object SelfTest {
             if (Landmarks.near(s, x, z) || Dens.covers(s, x, z)) continue
             val target = BiomeDresser.targetHeight(s, x, z, ZoneLayout.HABITATS)
             val top = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z) - 1
+            now[BlockPos.asLong(x, 0, z)] = "$top " + net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(level.getBlockState(BlockPos(x, top, z)).block).path +
+                "/" + (level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1)
             // the ground: the highest natural block, not counting plants, leaves, logs and decorations
             var ground = top
             while (ground > level.minBuildHeight) {
@@ -268,6 +276,8 @@ object SelfTest {
             for (sample in finding.samples) log("      at $sample")
         }
         try { File("selftest-report.txt").writeText(report.toString()) } catch (_: Exception) {}
+        before = now
+        now = HashMap()
     }
 
     private fun leavesHaveTrunk(level: ServerLevel, start: BlockPos, seen: HashSet<Long>): Boolean {
