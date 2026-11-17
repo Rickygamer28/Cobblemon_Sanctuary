@@ -308,6 +308,29 @@ object BiomeDresser {
         Blocks.CHIPPED_ANVIL, Blocks.DAMAGED_ANVIL, Blocks.BRICKS, Blocks.PURPUR_PILLAR, Blocks.WITHER_ROSE,
     ) + Props.DECOR_BLOCKS
 
+    /**
+     * Solid blocks the sanctuary's own decorations are made of (ruins, gravestones, posts, toadstools, giant
+     * mushrooms, cave lights, dripstone…). When the valley is rebuilt they're taken away like plants, unless they
+     * touch something that looks like a player's build.
+     */
+    private val MOD_SOLID: Set<Block> = setOf(
+        Blocks.MOSSY_STONE_BRICKS, Blocks.CRACKED_STONE_BRICKS, Blocks.STONE_BRICKS, Blocks.STONE_BRICK_SLAB,
+        Blocks.POLISHED_ANDESITE, Blocks.SMOOTH_STONE, Blocks.BONE_BLOCK,
+        Blocks.MUSHROOM_STEM, Blocks.RED_MUSHROOM_BLOCK, Blocks.BROWN_MUSHROOM_BLOCK, Blocks.SHROOMLIGHT, Blocks.OCHRE_FROGLIGHT,
+        Blocks.AMETHYST_CLUSTER, Blocks.POINTED_DRIPSTONE, Blocks.BEE_NEST, Blocks.MELON, Blocks.CACTUS, Blocks.SUGAR_CANE, Blocks.BAMBOO,
+        Blocks.COBWEB, Blocks.SPRUCE_FENCE_GATE, Blocks.STRIPPED_SPRUCE_LOG, Blocks.ICE, Blocks.PACKED_ICE, Blocks.BLUE_ICE, Blocks.SNOW,
+    )
+
+    fun isModSolid(st: BlockState) = st.block in MOD_SOLID
+
+    /** Is this block touching something that looks like a player's build (planks, glass, a door, a chest…)? */
+    private fun nextToBuild(level: ServerLevel, p: BlockPos): Boolean = Direction.entries.any { d ->
+        val n = p.relative(d)
+        val st = level.getBlockState(n)
+        !st.isAir && !isNatural(st) && !isClutter(st) && st.block !in MOD_SOLID && !isCobblemonDecor(st) &&
+            !st.`is`(BlockTags.LOGS) && !st.`is`(BlockTags.LEAVES) || level.getBlockEntity(n) != null
+    }
+
     // ================================================================== Cobblemon's own plants and crystals
 
     /** What each biome grows from Cobblemon: apricorn trees, mints and herbs, flowers, gem clusters, tumblestone… */
@@ -1150,6 +1173,9 @@ object BiomeDresser {
                     if (!removeTree(level, s, p)) p = p.below()
                 }
                 isClutter(st) -> { level.setBlock(p, air, FLAGS); p = p.below() }
+                // the sanctuary's own decorations (not a player's build): taken away too, or the old ground under
+                // them would be left standing
+                st.block in MOD_SOLID && !nextToBuild(level, p) -> { level.setBlock(p, air, FLAGS); p = p.below() }
                 else -> return p
             }
         }
@@ -1185,7 +1211,7 @@ object BiomeDresser {
                             st.`is`(BlockTags.LOGS) -> if (m !in tree) { tree += m; queue += m }
                             st.`is`(BlockTags.LEAVES) -> leafy = true
                             // touching planks, glass, a door… that's somebody's build, not a tree
-                            !st.isAir && !isNatural(st) && !isClutter(st) && !isCobblemonDecor(st) -> built = true
+                            !st.isAir && !isNatural(st) && !isClutter(st) && !isCobblemonDecor(st) && st.block !in MOD_SOLID -> built = true
                         }
                     }
                     if (level.getBlockEntity(q) != null) built = true
