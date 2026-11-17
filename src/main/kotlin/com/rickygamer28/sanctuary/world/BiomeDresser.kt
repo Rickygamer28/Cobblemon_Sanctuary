@@ -808,7 +808,11 @@ object BiomeDresser {
         } else if (target < ground.y) {
             for (yy in target + 1..ground.y) {
                 val p = BlockPos(ground.x, yy, ground.z)
-                if (isNatural(level.getBlockState(p))) level.setBlock(p, b(Blocks.AIR), BULK)
+                val st = level.getBlockState(p)
+                // natural ground, and whatever was growing or hanging inside it (glow lichen from an old cave's
+                // ceiling, dripstone, mushrooms…), or it would be left floating in the air
+                if (isNatural(st) || (!st.isAir && (isClutter(st) || isCobblemonDecor(st) || (st.block in MOD_SOLID && !nextToBuild(level, p)))))
+                    level.setBlock(p, b(Blocks.AIR), BULK)
             }
         }
         return BlockPos(ground.x, target, ground.z)
