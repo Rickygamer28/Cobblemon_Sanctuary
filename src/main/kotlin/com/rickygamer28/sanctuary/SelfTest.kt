@@ -55,6 +55,8 @@ object SelfTest {
     fun tick(server: MinecraftServer) {
         if (!active) return
         val level = SanctuaryDimension.level(server)
+        Trace.on = true
+        Trace.tick = server.tickCount.toLong()
         if (!announced) { announced = true; CobblemonSanctuary.LOGGER.info("[selftest] active, size {}, dimension {}", sizeArg, if (level == null) "MISSING" else "ok") }
         if (level == null) return
         val data = SanctuaryData.get(server)
@@ -123,6 +125,10 @@ object SelfTest {
             }
         }
     }
+
+    private val DECOR_ROCK = setOf(Blocks.MOSSY_COBBLESTONE, Blocks.COBBLESTONE, Blocks.PACKED_ICE, Blocks.BASALT, Blocks.POLISHED_ANDESITE,
+        Blocks.SMOOTH_STONE, Blocks.BONE_BLOCK, Blocks.CALCITE, Blocks.AMETHYST_BLOCK, Blocks.STONE, Blocks.ANDESITE, Blocks.WEATHERED_COPPER,
+        Blocks.EXPOSED_COPPER, Blocks.RAW_IRON_BLOCK, Blocks.SMOOTH_BASALT, Blocks.BLACKSTONE, Blocks.SNOW_BLOCK)
 
     private val FIRST = listOf("water", "grass", "fire", "rock")
 
@@ -215,7 +221,7 @@ object SelfTest {
             val was = before[BlockPos.asLong(x, 0, z)]?.let { " was: $it" } ?: ""
             // two examples of each kind (zone and block), with what the column is made of
             if (kinds[key]!! <= 2 && samples.size < 16) samples += "[$key] (${x - s.center.x}, ${y}, ${z - s.center.z})${if (note.isNotEmpty()) " $note" else ""}" +
-                (if (level != null) " " + profile(level, x, z, y - 6) + bits + was else "")
+                (if (level != null) " " + profile(level, x, z, y - 6) + bits + was + " trace: " + com.rickygamer28.sanctuary.world.Trace.of(x, z) else "")
         }
     }
 
@@ -249,8 +255,11 @@ object SelfTest {
                 ground--
             }
             val cave = Caves.at(s, x, z)
-            val expected = if (cave != null && cave.mouth) cave.floor - 1 else target
-            val diff = ground - expected
+            // an open cave mouth is dug down to the cave floor (a roofed one keeps its ground)
+            val expected = if (cave != null && cave.mouth && target - cave.ceil < 4) cave.floor - 1 else target
+            // decorations standing on the ground (boulders, spikes, pylons, basalt columns) aren't ground
+            val decorOnly = ground > target && (target + 1..ground).all { yy -> level.getBlockState(BlockPos(x, yy, z)).block in DECOR_ROCK }
+            val diff = if (decorOnly) 0 else ground - expected
             fun why(): String {
                 val base = BiomeDresser.baseHeight(s, x, z)
                 val cover = Caves.cover(s, x, z)
@@ -290,7 +299,7 @@ object SelfTest {
                 }
             }
             // a lone pillar of ground
-            if (ground >= target + 3) {
+            if (ground >= target + 3 && !decorOnly) {
                 var lower = 0
                 for (d in Direction.Plane.HORIZONTAL) if (level.getHeight(Heightmap.Types.OCEAN_FLOOR, x + d.stepX, z + d.stepZ) - 1 <= ground - 2) lower++
                 if (lower >= 3) find("lone pillar").add(s, x, ground, z)

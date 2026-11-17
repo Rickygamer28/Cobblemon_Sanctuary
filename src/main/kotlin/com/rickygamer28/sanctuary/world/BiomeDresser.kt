@@ -979,6 +979,7 @@ object BiomeDresser {
             else -> max(spot.floor + 4, target - 4)
         }
         val air = b(Blocks.AIR)
+        Trace.note(x, z, "carve ${spot.floor}..$top target=$target cave=${Caves.network(s)?.key}")
         for (y in spot.floor..top) {
             val p = BlockPos(x, y, z)
             if (!level.getBlockState(p).isAir) level.setBlock(p, air, if (y >= top - 1) FLAGS else BULK)
@@ -1049,7 +1050,8 @@ object BiomeDresser {
         val surface: BlockPos
         if (shaping) {
             val found = findGround(level, s, x, z) ?: return false
-            if (!isNatural(level.getBlockState(found))) return true
+            if (!isNatural(level.getBlockState(found))) { Trace.note(x, z, "skip: ${level.getBlockState(found).block} at ${found.y}"); return true }
+            Trace.note(x, z, "land ${found.y}->$target ${hit.zone}")
             surface = reshape(level, found, target, placed[s.id])
         } else {
             // the land wave already shaped this column: work on top of it (unless something was built there since)

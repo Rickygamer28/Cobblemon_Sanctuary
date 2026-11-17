@@ -118,6 +118,7 @@ object Landmarks {
             BiomeDresser.removeTreesIn(level, p, r, p.y + 1, minOf(level.maxBuildHeight - 1, p.y + 120))
             for (ox in -r..r) for (oz in -r..r) {
                 if (ox * ox + oz * oz > r * r) continue
+                Trace.note(p.x + ox, p.z + oz, "landmark $zone taken down to ${p.y}")
                 // all the way up: spires and towers can be tall (their tops used to be left floating)
                 for (y in p.y + 1..minOf(level.maxBuildHeight - 1, p.y + 120)) {
                     val pos = BlockPos(p.x + ox, y, p.z + oz)

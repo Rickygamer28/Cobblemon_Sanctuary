@@ -301,6 +301,7 @@ object SanctuaryGenerator {
             // old ground left lying on a route (it should be level path): lower it and lay the path again
             if (top > target && top <= target + 4 && BiomeDresser.routeDistance(s, x, z) < 1.3 &&
                 (target + 1..top).all { y -> BiomeDresser.isNatural(level.getBlockState(BlockPos(x, y, z))) && level.getBlockState(BlockPos(x, y, z)).fluidState.isEmpty }) {
+                Trace.note(x, z, "route lowered $top->$target")
                 for (y in target + 1..top) level.setBlock(BlockPos(x, y, z), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), net.minecraft.world.level.block.Block.UPDATE_CLIENTS)
                 s.dressed.clear(idx)
                 s.generationDirty = true
@@ -309,6 +310,7 @@ object SanctuaryGenerator {
             // a thin leftover: a lone column of old ground (soil in it, so not a rock spire or ice spike on purpose)
             // standing over the ground around it
             if (top >= target + 2 && thinLeftover(level, x, z, top, target)) {
+                Trace.note(x, z, "thin leftover cut $top->$target")
                 for (y in target + 1..top) {
                     val p = BlockPos(x, y, z)
                     if (BiomeDresser.isNatural(level.getBlockState(p))) level.setBlock(p, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), net.minecraft.world.level.block.Block.UPDATE_CLIENTS)
@@ -326,6 +328,7 @@ object SanctuaryGenerator {
                     tooTall(level, s, nx, nz, ring, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, nx, nz) - 1, BiomeDresser.targetHeight(s, nx, nz, ring))
             }
             if (wide < 3) continue
+            Trace.note(x, z, "too tall cut $top->$target")
             // cut the natural blocks above the target height, then dress the column again
             for (y in target + 1..top) {
                 val p = BlockPos(x, y, z)
@@ -412,6 +415,7 @@ object SanctuaryGenerator {
             val lump = lumpAround(level, p, 400, known) ?: continue
             val air = net.minecraft.world.level.block.Blocks.AIR.defaultBlockState()
             // top down, so nothing drops or pops off as items
+            Trace.note(x, z, "floating lump of ${lump.size} removed at ${p.y}")
             for (q in lump.sortedByDescending { it.y }) level.setBlock(q, air, net.minecraft.world.level.block.Block.UPDATE_CLIENTS)
             CobblemonSanctuary.LOGGER.debug("Sanctuary: removed a floating lump of {} blocks at {}", lump.size, p)
             return
