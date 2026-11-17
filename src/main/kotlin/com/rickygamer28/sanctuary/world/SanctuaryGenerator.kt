@@ -250,6 +250,8 @@ object SanctuaryGenerator {
         return n
     }
 
+    fun isRepairing(s: Sanctuary) = repairCursor.containsKey(s.id)
+
     fun scheduleCheck(id: UUID) { repairCursor[id] = 0; repaired[id] = 0 }
 
     /**

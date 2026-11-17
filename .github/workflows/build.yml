@@ -69,6 +69,32 @@ jobs:
           cp build/libs/*.jar ci-out/jar/ 2>/dev/null || true
           echo "status=$STATUS" >> "$GITHUB_OUTPUT"
 
+      - name: Self test (real server builds a valley and checks it)
+        if: steps.build.outputs.status == '0' && hashFiles('.ci/selftest') != ''
+        timeout-minutes: 45
+        run: |
+          set +e
+          SIZE=$(cat .ci/selftest | head -1)
+          mkdir -p ci-test/mods ci-out/selftest
+          cd ci-test
+          curl -fsSL -o installer.jar "https://maven.neoforged.net/releases/net/neoforged/neoforge/$NEO/neoforge-$NEO-installer.jar"
+          java -jar installer.jar --installServer > ../ci-out/selftest/install.log 2>&1
+          curl -fsSL -o mods/cobblemon.jar "$COBBLE_URL"
+          KFF_URL=$(curl -fsSL 'https://api.modrinth.com/v2/project/kotlin-for-forge/version?loaders=%5B%22neoforge%22%5D&game_versions=%5B%221.21.1%22%5D' | jq -r '.[0].files[0].url')
+          curl -fsSL -o mods/kotlinforforge.jar "$KFF_URL"
+          cp ../build/libs/*.jar mods/ 2>/dev/null
+          rm -f mods/*-sources.jar
+          ls -la mods > ../ci-out/selftest/mods.txt
+          echo "eula=true" > eula.txt
+          printf 'online-mode=false\nmax-tick-time=-1\nspawn-protection=0\nlevel-type=minecraft\\:flat\nview-distance=4\nsimulation-distance=4\ngenerate-structures=false\n' > server.properties
+          echo "-Xmx4G -Dsanctuary.selftest=$SIZE" >> user_jvm_args.txt
+          timeout 40m ./run.sh nogui > ../ci-out/selftest/server.log 2>&1
+          echo "exit=$?" > ../ci-out/selftest/exit.txt
+          cp selftest-report.txt ../ci-out/selftest/ 2>/dev/null || echo "no report" > ../ci-out/selftest/selftest-report.txt
+          grep -E "selftest|ERROR|Exception" ../ci-out/selftest/server.log | head -300 > ../ci-out/selftest/highlights.txt
+          tail -200 ../ci-out/selftest/server.log > ../ci-out/selftest/server-tail.log
+          rm -f ../ci-out/selftest/server.log
+
       - name: Publish results to ci-output branch
         if: always()
         timeout-minutes: 5

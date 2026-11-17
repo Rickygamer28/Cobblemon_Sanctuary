@@ -53,10 +53,12 @@ class CobblemonSanctuary(modBus: IEventBus, container: ModContainer) {
     }
 
     private fun onServerTick(event: ServerTickEvent.Post) {
+        if (SelfTest.active) SelfTest.tick(event.server)
         val level = SanctuaryDimension.level(event.server) ?: return
         val data = SanctuaryData.get(event.server)
         if (data.sanctuaries.isEmpty()) return
         for (s in data.sanctuaries.values.toList()) {
+            if (SelfTest.isTest(s)) continue
             try {
                 Residents.tick(level, data, s)
             } catch (e: Exception) {
