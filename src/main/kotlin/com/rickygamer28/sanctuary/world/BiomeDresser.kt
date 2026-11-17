@@ -564,7 +564,9 @@ object BiomeDresser {
         val id = BuiltInRegistries.BLOCK.getKey(st.block)
         if (id.namespace != "cobblemon") return false
         val p = id.path
-        return p.endsWith("_cluster") || p.endsWith("_bud") || p.endsWith("_mint") || p.endsWith("_berry") || p in COB_PLANTS
+        // (apricorns are the fruit hanging off apricorn trees: they go with the tree)
+        return p.endsWith("_cluster") || p.endsWith("_bud") || p.endsWith("_mint") || p.endsWith("_berry") || p.endsWith("_apricorn") ||
+            p.endsWith("_apricorn_sapling") || p in COB_PLANTS
     }
 
     fun isClutter(st: BlockState): Boolean =

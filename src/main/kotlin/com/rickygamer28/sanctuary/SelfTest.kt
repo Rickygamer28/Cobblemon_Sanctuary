@@ -173,8 +173,9 @@ object SelfTest {
             val idx = com.rickygamer28.sanctuary.world.ColumnOrder.indexOf(x - s.center.x, z - s.center.z)
             val bits = if (idx >= 0) " dressed=${s.dressed.get(idx)} nature=${s.decorated.get(idx)} extras=${s.furnished.get(idx)} meadow=${s.meadow.get(idx)}" else ""
             val was = before[BlockPos.asLong(x, 0, z)]?.let { " was: $it" } ?: ""
-            if (samples.size < 8) samples += "(${x - s.center.x}, ${y}, ${z - s.center.z})${if (note.isNotEmpty()) " $note" else ""}" +
-                (if (samples.size < 4 && level != null) " " + profile(level, x, z, y - 3) + bits + was else "")
+            // two examples of each kind (zone and block), with what the column is made of
+            if (kinds[key]!! <= 2 && samples.size < 16) samples += "[$key] (${x - s.center.x}, ${y}, ${z - s.center.z})${if (note.isNotEmpty()) " $note" else ""}" +
+                (if (level != null) " " + profile(level, x, z, y - 6) + bits + was else "")
         }
     }
 
