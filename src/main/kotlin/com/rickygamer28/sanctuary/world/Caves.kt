@@ -2,7 +2,7 @@ package com.rickygamer28.sanctuary.world
 
 import com.rickygamer28.sanctuary.SanctuaryDimension
 import com.rickygamer28.sanctuary.data.Sanctuary
-import BlockPos
+import net.minecraft.core.BlockPos
 import net.minecraft.util.RandomSource
 import java.util.UUID
 import kotlin.math.PI
