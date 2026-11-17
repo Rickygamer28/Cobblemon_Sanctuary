@@ -1,6 +1,8 @@
 package com.rickygamer28.sanctuary.world
 
+import com.rickygamer28.sanctuary.SanctuaryDimension
 import com.rickygamer28.sanctuary.data.Sanctuary
+import BlockPos
 import net.minecraft.util.RandomSource
 import java.util.UUID
 import kotlin.math.PI
@@ -198,7 +200,7 @@ object Caves {
     fun floorOffset(s: Sanctuary): Double = ((network(s)?.floor ?: SanctuaryDimension.GROUND_Y + 1) - 1 - SanctuaryDimension.GROUND_Y).toDouble()
 
     /** A random spot on the cave floor (for residents living in the cave), or null. */
-    fun randomFloor(s: Sanctuary, random: RandomSource): net.minecraft.core.BlockPos? {
+    fun randomFloor(s: Sanctuary, random: RandomSource): BlockPos? {
         val net = network(s) ?: return null
         repeat(10) {
             val inHall = random.nextInt(3) > 0
@@ -213,13 +215,13 @@ object Caves {
             }
             val spot = at(s, x, z) ?: return@repeat
             if (spot.mouth) return@repeat
-            return net.minecraft.core.BlockPos(x, spot.floor, z)
+            return BlockPos(x, spot.floor, z)
         }
         return null
     }
 
     /** Is [pos] inside the cave (under its ceiling)? */
-    fun inside(s: Sanctuary, pos: net.minecraft.core.BlockPos): Boolean {
+    fun inside(s: Sanctuary, pos: BlockPos): Boolean {
         val spot = at(s, pos.x, pos.z) ?: return false
         return pos.y in spot.floor - 1..spot.ceil
     }
