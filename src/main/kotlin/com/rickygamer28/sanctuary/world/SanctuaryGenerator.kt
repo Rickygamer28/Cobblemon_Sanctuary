@@ -73,7 +73,7 @@ object SanctuaryGenerator {
     private val missedUnloaded = HashMap<UUID, Boolean>()
     private val recheckMeadow = HashSet<UUID>()
 
-    fun forget(id: UUID) { natureCursors.remove(id); extrasCursors.remove(id); BiomeDresser.forgetPending(id); deferred.remove(id); com.rickygamer28.sanctuary.ui.RegionMap.forget(id); Caves.forget(id); grounded.remove(id); recheckMeadow.remove(id); cursors.remove(id); retryAt.remove(id); missedUnloaded.remove(id); requested.remove(id); waiting.remove(id); BiomePainter.forget(id) }
+    fun forget(id: UUID) { cuts.remove(id); natureCursors.remove(id); extrasCursors.remove(id); BiomeDresser.forgetPending(id); deferred.remove(id); com.rickygamer28.sanctuary.ui.RegionMap.forget(id); Caves.forget(id); grounded.remove(id); recheckMeadow.remove(id); cursors.remove(id); retryAt.remove(id); missedUnloaded.remove(id); requested.remove(id); waiting.remove(id); BiomePainter.forget(id) }
 
     // ------------------------------------------------------------------ loading the chunks it builds in
     // Building only where players happen to have chunks loaded (their render distance) split the valley into
@@ -253,6 +253,19 @@ object SanctuaryGenerator {
     fun isRepairing(s: Sanctuary) = repairCursor.containsKey(s.id)
 
     /**
+     * How often each column was cut down by the cleanup since the server started. A column that keeps coming back
+     * (the builder makes it that way on purpose, or something rebuilds it) is left alone after two tries, so the
+     * builder and the cleanup can never undo each other's work forever.
+     */
+    private val cuts = HashMap<UUID, HashMap<Int, Int>>()
+    private fun mayCut(s: Sanctuary, idx: Int): Boolean {
+        val m = cuts.getOrPut(s.id) { HashMap() }
+        val n = (m[idx] ?: 0) + 1
+        m[idx] = n
+        return n <= 2
+    }
+
+    /**
      * A mountain woke up or fell asleep: the caves change shape (its part opens or closes, and the tunnels joining
      * it to its neighbours), so the ground over all of them is built again (old tunnels filled, new ones dug).
      */
@@ -300,6 +313,7 @@ object SanctuaryGenerator {
                 true -> {}
             }
             if (Landmarks.near(s, x, z)) continue
+            val inDen = Dens.covers(s, x, z)
             looseBlocks(level, x, z)
             floatingBits(level, s, x, z)
             orphanLeaves(level, x, z)
@@ -316,7 +330,7 @@ object SanctuaryGenerator {
                     level.setBlock(here, net.minecraft.world.level.block.Blocks.DIRT_PATH.defaultBlockState(), net.minecraft.world.level.block.Block.UPDATE_CLIENTS)
             }
             // old ground left lying on a route (it should be level path): lower it and lay the path again
-            if (top > target && top <= target + 4 && BiomeDresser.routeDistance(s, x, z) < 1.3 &&
+            if (!inDen && top > target && top <= target + 4 && BiomeDresser.routeDistance(s, x, z) < 1.3 && mayCut(s, idx) &&
                 (target + 1..top).all { y -> BiomeDresser.isNatural(level.getBlockState(BlockPos(x, y, z))) && level.getBlockState(BlockPos(x, y, z)).fluidState.isEmpty }) {
                 Trace.note(x, z, "route lowered $top->$target")
                 for (y in target + 1..top) level.setBlock(BlockPos(x, y, z), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), net.minecraft.world.level.block.Block.UPDATE_CLIENTS)
@@ -326,7 +340,7 @@ object SanctuaryGenerator {
             }
             // a thin leftover: a lone column of old ground (soil in it, so not a rock spire or ice spike on purpose)
             // standing over the ground around it
-            if (top >= target + 2 && thinLeftover(level, x, z, top, target)) {
+            if (!inDen && top >= target + 2 && thinLeftover(level, x, z, top, target) && mayCut(s, idx)) {
                 Trace.note(x, z, "thin leftover cut $top->$target")
                 for (y in target + 1..top) {
                     val p = BlockPos(x, y, z)
@@ -344,7 +358,7 @@ object SanctuaryGenerator {
                 level.hasChunk(nx shr 4, nz shr 4) &&
                     tooTall(level, s, nx, nz, ring, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, nx, nz) - 1, BiomeDresser.targetHeight(s, nx, nz, ring))
             }
-            if (wide < 3) continue
+            if (wide < 3 || inDen || !mayCut(s, idx)) continue
             Trace.note(x, z, "too tall cut $top->$target")
             // cut the natural blocks above the target height, then dress the column again
             for (y in target + 1..top) {

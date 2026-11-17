@@ -1153,7 +1153,7 @@ object BiomeDresser {
                     wall && c.grid(5, 43) -> level.setBlock(hanging, dripDown(), FLAGS) // icicles
                 }
                 if (wall) when {
-                    c.grid(9, 44) -> c.spike(st(Blocks.PACKED_ICE), 0, 2 + c.random.nextInt(3))
+                    spot.centre > 0.78 && c.grid(9, 44) -> c.spike(st(Blocks.PACKED_ICE), 0, 2 + c.random.nextInt(3))
                     c.chance(0.25) -> c.place(st(Blocks.SNOW))
                 } else if (floorTop.`is`(Blocks.SNOW_BLOCK) && c.chance(0.3)) c.place(st(Blocks.SNOW))
             }
@@ -1168,7 +1168,7 @@ object BiomeDresser {
                 }
                 if (wall) when {
                     c.grid(7, 47) -> c.place(st(if (c.chance(0.5)) Blocks.AMETHYST_CLUSTER else Blocks.LARGE_AMETHYST_BUD))
-                    c.grid(13, 48) -> c.crystalCluster(st(Blocks.AMETHYST_BLOCK), st(Blocks.AMETHYST_CLUSTER), 2 + c.random.nextInt(2))
+                    spot.centre > 0.78 && c.grid(13, 48) -> c.crystalCluster(st(Blocks.AMETHYST_BLOCK), st(Blocks.AMETHYST_CLUSTER), 2 + c.random.nextInt(2))
                     c.chance(0.04) -> level.setBlock(floorPos, st(Blocks.CRYING_OBSIDIAN), FLAGS)
                 }
             }
@@ -1182,7 +1182,7 @@ object BiomeDresser {
                     level.setBlock(floorPos, st(Blocks.LAVA), FLAGS)
                     return
                 }
-                if (wall && c.grid(9, 52)) c.crystalCluster(st(Blocks.BASALT), null, 2 + c.random.nextInt(3))
+                if (spot.centre > 0.78 && c.grid(9, 52)) c.crystalCluster(st(Blocks.BASALT), null, 2 + c.random.nextInt(3))
             }
         }
     }

@@ -337,6 +337,10 @@ object SelfTest {
         ZoneLayout.pockets(s)
         log("pocket spots turned down: ${ZoneLayout.why}")
         log("pockets: " + ZoneLayout.pockets(s).joinToString(", ") { "${it.zone} in ${it.host} r${it.r}${if (it.live(s)) "" else " (asleep)"}" })
+        for ((why, at) in Trace.lastAt) {
+            val (ax, az) = at.split(",").map { it.toInt() }
+            if (ax != 0 || az != 0) log("last '$why' at (${ax - s.center.x}, ${az - s.center.z}): ${Trace.of(ax, az)}")
+        }
         log("scanned $columns columns ($unloaded loaded from disk); ${s.landmarks.count { it.value != Landmarks.NONE }} landmarks, $dens dens, ${ZoneLayout.pockets(s).count { it.live(s) }} pockets")
         if (f.isEmpty()) log("  no problems found")
         for (finding in f.values) {
@@ -390,7 +394,8 @@ object SelfTest {
                     if (kotlin.math.abs(o.floor - spot.floor) > 1) continue
                     comp[key(nx, nz)] = ci
                     if (!open(nx, nz, o)) {
-                        if (!Dens.covers(s, nx, nz) && !Landmarks.near(s, nx, nz)) { blocked++; if (blocked <= 3) find("cave passage blocked").add(s, nx, o.floor, nz, o.zone) }
+                        // (decorations stand by the walls: only the middle of the passage must be clear)
+                        if (o.centre < 0.5 && !Dens.covers(s, nx, nz) && !Landmarks.near(s, nx, nz)) { blocked++; if (blocked <= 3) find("cave passage blocked").add(s, nx, o.floor, nz, o.zone) }
                         continue
                     }
                     queue += Triple(nx, nz, o)
