@@ -489,7 +489,12 @@ object SanctuaryGenerator {
     private fun tooTall(level: ServerLevel, s: Sanctuary, x: Int, z: Int, ring: List<String>, top: Int, target: Int): Boolean {
         if (top <= target + 10) return false
         if (Landmarks.near(s, x, z)) return false
-        for (y in target + 1..top) if (!BiomeDresser.isNatural(level.getBlockState(BlockPos(x, y, z)))) return false
+        for (y in target + 1..top) {
+            val st = level.getBlockState(BlockPos(x, y, z))
+            // water over a deep lake bed is the lake, not a leftover (cutting it made the water blink: cut, refilled, cut…)
+            if (!st.fluidState.isEmpty) return false
+            if (!BiomeDresser.isNatural(st)) return false
+        }
         @Suppress("UNUSED_VARIABLE") val r = ring
         return true
     }
