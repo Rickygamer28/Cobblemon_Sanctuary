@@ -157,7 +157,7 @@ object SanctuaryGenerator {
      * half goes), and every column is dressed again on the next pass. Returns how many columns will be redone.
      */
     fun repairArea(level: ServerLevel, s: Sanctuary, x: Int, z: Int, radius: Int): Int {
-        BiomeDresser.removeTreesIn(level, BlockPos(x, 0, z), radius + 4, SanctuaryDimension.GROUND_Y - 6, SanctuaryDimension.GROUND_Y + 140)
+        BiomeDresser.removeTreesIn(level, BlockPos(x, 0, z), radius + 4, com.rickygamer28.sanctuary.SanctuaryDimension.GROUND_Y - 6, com.rickygamer28.sanctuary.SanctuaryDimension.GROUND_Y + 140)
         var n = 0
         for (dx in -radius..radius) for (dz in -radius..radius) {
             if (dx * dx + dz * dz > radius * radius) continue
