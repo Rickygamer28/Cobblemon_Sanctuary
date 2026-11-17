@@ -240,6 +240,7 @@ object SelfTest {
         var unloaded = 0
         val water = BiomeDresser.WATER_Y
         val seenLeaves = HashSet<Long>()
+        seenFloating.clear()
         for (dx in -r..r) for (dz in -r..r) {
             if (dx * dx + dz * dz > r * r) continue
             val x = s.center.x + dx
@@ -288,10 +289,10 @@ object SelfTest {
                 if (!level.getBlockState(p).`is`(Blocks.WATER)) continue
                 if (Direction.Plane.HORIZONTAL.any { level.getBlockState(p.relative(it)).isAir } || level.getBlockState(p.below()).isAir) { find("spilling water").add(s, x, y, z); break }
             }
-            // things in the air: the lowest block of each hanging piece
+            // things in the air: the lowest block of each hanging piece (posts, lanterns and logs too)
             var y = top
             var checks = 0
-            while (y > ground && checks < 4) {
+            while (y > ground && checks < 8) {
                 val p = BlockPos(x, y, z)
                 y--
                 val st = level.getBlockState(p)
@@ -301,9 +302,18 @@ object SelfTest {
                 if (st.`is`(BlockTags.LEAVES)) {
                     if (p.asLong() in seenLeaves) continue
                     if (!leavesHaveTrunk(level, p, seenLeaves)) find("leaves with no trunk").add(s, x, p.y, z)
-                } else if (!st.`is`(BlockTags.LOGS) && !BiomeDresser.isClutter(st) && floating(level, p)) {
-                    find("floating block").add(s, x, p.y, z, st.block.name.string)
+                } else if (p.asLong() !in seenFloating && floating(level, p)) {
+                    find("floating piece").add(s, x, p.y, z, st.block.name.string)
                 }
+            }
+            // something standing in a lake that doesn't belong there (a post, a lantern, a log…)
+            if (target < water) for (yy in target + 1..water + 3) {
+                val st = level.getBlockState(BlockPos(x, yy, z))
+                if (st.isAir || BiomeDresser.isNatural(st) || st.`is`(Blocks.KELP) || st.`is`(Blocks.KELP_PLANT) || st.`is`(Blocks.SEAGRASS) ||
+                    st.`is`(Blocks.TALL_SEAGRASS) || st.`is`(Blocks.SEA_PICKLE) || st.`is`(Blocks.LILY_PAD) || st.`is`(BlockTags.CORALS) ||
+                    st.`is`(BlockTags.CORAL_BLOCKS) || st.`is`(BlockTags.WALL_CORALS) || st.`is`(Blocks.ICE) || !st.fluidState.isEmpty && st.block == Blocks.WATER) continue
+                if (st.`is`(BlockTags.LEAVES) || st.`is`(BlockTags.LOGS) && hit.zone != "water") continue
+                find("thing standing in the lake").add(s, x, yy, z, st.block.name.string); break
             }
             // a lone pillar of ground
             if (ground >= target + 3 && !decorOnly) {
@@ -450,6 +460,8 @@ object SelfTest {
         return false
     }
 
+    private val seenFloating = HashSet<Long>()
+
     /** Is the piece of blocks joined to [start] small and touching nothing else (hanging in the air)? */
     private fun floating(level: ServerLevel, start: BlockPos): Boolean {
         val queue = ArrayDeque<BlockPos>()
@@ -467,6 +479,7 @@ object SelfTest {
                 seen += n.asLong(); queue += n
             }
         }
+        seenFloating.addAll(seen)
         return true
     }
 }
