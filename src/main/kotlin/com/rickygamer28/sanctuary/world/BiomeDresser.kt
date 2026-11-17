@@ -322,8 +322,12 @@ object BiomeDresser {
             for (d in Direction.Plane.HORIZONTAL) {
                 if (random.nextInt(3) == 0) continue
                 val h = max(1, height - 1 - random.nextInt(height))
-                for (i in 0 until h) at(above.relative(d).above(i), state)
-                if (tip != null && random.nextBoolean()) at(above.relative(d).above(h), tip)
+                // from the ground beside it (lower on a slope: built up from there, much lower: left out)
+                val side = surface.relative(d)
+                val g = groundAt(side.x, side.z)
+                if (g < y - 1 || g > y + h) continue
+                for (yy in g + 1..y + h) at(BlockPos(side.x, yy, side.z), state)
+                if (tip != null && random.nextBoolean()) at(BlockPos(side.x, y + h + 1, side.z), tip)
             }
         }
         fun lampPost(post: BlockState, lantern: BlockState, height: Int = 2) {
@@ -954,6 +958,30 @@ object BiomeDresser {
         return BlockPos(ground.x, target, ground.z)
     }
 
+    /**
+     * Fills what's hollow under the new ground: the tunnels of a cave from an older layout (or an old pond) would
+     * otherwise stay under it with a thin roof, and open into a pit once the roof goes. Today's cave is carved out
+     * again right after. A column with anything built in it (a player's cellar) is left as it is.
+     */
+    private fun fillHollows(level: ServerLevel, x: Int, z: Int, target: Int) {
+        val bottom = max(level.minBuildHeight + 1, G - 8)
+        val holes = ArrayList<BlockPos>()
+        for (y in target - 1 downTo bottom) {
+            val p = BlockPos(x, y, z)
+            val st = level.getBlockState(p)
+            if (st.isAir || !st.fluidState.isEmpty || (isClutter(st) && !st.`is`(BlockTags.FLOWERS)) || st.`is`(Blocks.OCHRE_FROGLIGHT) || st.`is`(Blocks.AMETHYST_CLUSTER)) {
+                // (a lake bed's own water is above the target, so water down here is buried)
+                holes += p
+                continue
+            }
+            if (isNatural(st)) continue
+            return // something built: leave the column alone
+        }
+        if (holes.isEmpty()) return
+        Trace.note(x, z, "filled ${holes.size} hollow blocks under $target")
+        for (p in holes) level.setBlock(p, b(Blocks.STONE), BULK)
+    }
+
     private fun randomFor(s: Sanctuary, x: Int, z: Int): RandomSource =
         RandomSource.create(s.seed xor (x * 341873128712L) xor (z * 132897987541L))
 
@@ -1053,6 +1081,7 @@ object BiomeDresser {
             if (!isNatural(level.getBlockState(found))) { Trace.note(x, z, "skip: ${level.getBlockState(found).block} at ${found.y}"); return true }
             Trace.note(x, z, "land ${found.y}->$target ${hit.zone}")
             surface = reshape(level, found, target, placed[s.id])
+            fillHollows(level, x, z, target)
         } else {
             // the land wave already shaped this column: work on top of it (unless something was built there since)
             surface = BlockPos(x, target, z)
@@ -1315,6 +1344,8 @@ object BiomeDresser {
                 st.isAir -> p = p.below()
                 mine != null && p.asLong() in mine -> p = p.below() // placed by a neighbour in this pass: keep it, look under it
                 st.`is`(BlockTags.LEAVES) -> {
+                    // placed leaves with no wood anywhere near (the canopy of a landmark that was taken down)
+                    if (!naturalLeaf(st) && (mine == null || p.asLong() !in mine) && !leavesReachWood(level, p)) { level.setBlock(p, air, FLAGS); p = p.below(); continue }
                     if (!clear || !naturalLeaf(st)) return p
                     // take the whole tree while its leaves still show it's a natural one
                     val log = nearbyLog(level, p)
@@ -1394,6 +1425,63 @@ object BiomeDresser {
             if (level.getBlockState(p).`is`(BlockTags.LOGS)) return p
         }
         return null
+    }
+
+    /**
+     * Leaves in the cylinder (placed ones too) that no longer touch any wood, with what hangs from them: what's left
+     * of a canopy after its tree or landmark was taken down.
+     */
+    fun removeLooseLeaves(level: ServerLevel, center: BlockPos, r: Int, y0: Int, y1: Int) {
+        val air = b(Blocks.AIR)
+        val done = HashSet<Long>()
+        for (dx in -r..r) for (dz in -r..r) {
+            if (dx * dx + dz * dz > r * r) continue
+            for (y in y0..y1) {
+                val start = BlockPos(center.x + dx, y, center.z + dz)
+                if (start.asLong() in done || !level.getBlockState(start).`is`(BlockTags.LEAVES)) continue
+                val part = ArrayList<BlockPos>()
+                val queue = ArrayDeque<BlockPos>()
+                queue += start; done += start.asLong()
+                var wood = false
+                while (queue.isNotEmpty() && part.size < 6000) {
+                    val q = queue.removeFirst()
+                    part += q
+                    for (d in Direction.entries) {
+                        val n = q.relative(d)
+                        if (!level.hasChunk(n.x shr 4, n.z shr 4)) { wood = true; continue }
+                        val st = level.getBlockState(n)
+                        if (st.`is`(BlockTags.LOGS)) wood = true
+                        else if (st.`is`(BlockTags.LEAVES) && done.add(n.asLong())) queue += n
+                    }
+                }
+                if (wood || part.size >= 6000) continue
+                for (q in part.sortedByDescending { it.y }) {
+                    level.setBlock(q, air, FLAGS)
+                    val under = q.below()
+                    if (isClutter(level.getBlockState(under)) && !level.getBlockState(under).`is`(BlockTags.FLOWERS)) level.setBlock(under, air, FLAGS)
+                }
+            }
+        }
+    }
+
+    /** Do the leaves joined to [start] touch any wood (followed through up to a few thousand leaves)? */
+    private fun leavesReachWood(level: ServerLevel, start: BlockPos): Boolean {
+        val seen = HashSet<Long>()
+        val queue = ArrayDeque<BlockPos>()
+        queue += start; seen += start.asLong()
+        while (queue.isNotEmpty()) {
+            if (seen.size > 3000) return true
+            val q = queue.removeFirst()
+            for (d in Direction.entries) {
+                val n = q.relative(d)
+                if (!seen.add(n.asLong())) continue
+                if (!level.hasChunk(n.x shr 4, n.z shr 4)) return true
+                val st = level.getBlockState(n)
+                if (st.`is`(BlockTags.LOGS)) return true
+                if (st.`is`(BlockTags.LEAVES)) queue += n
+            }
+        }
+        return false
     }
 
     /** Removes a whole tree: logs first, then its leaves and anything hanging from them. */

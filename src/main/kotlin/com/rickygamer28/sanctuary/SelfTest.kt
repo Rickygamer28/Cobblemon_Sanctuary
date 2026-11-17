@@ -297,7 +297,7 @@ object SelfTest {
                 if (!level.getBlockState(p.below()).isAir) continue
                 checks++
                 if (st.`is`(BlockTags.LEAVES)) {
-                    if (st.getOptionalValue(LeavesBlock.PERSISTENT).orElse(true) || p.asLong() in seenLeaves) continue
+                    if (p.asLong() in seenLeaves) continue
                     if (!leavesHaveTrunk(level, p, seenLeaves)) find("leaves with no trunk").add(s, x, p.y, z)
                 } else if (!st.`is`(BlockTags.LOGS) && !BiomeDresser.isClutter(st) && floating(level, p)) {
                     find("floating block").add(s, x, p.y, z, st.block.name.string)
