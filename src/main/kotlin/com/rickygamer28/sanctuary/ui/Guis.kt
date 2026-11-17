@@ -148,22 +148,15 @@ object SanctuaryGuis {
                 it.putInt("pct", pct)
             })
         })
-        // a small map of the region (each cell: 0 outside, 1 town and meadows, 2+ a habitat)
+        // the map of the region (worked out once, kept until the region changes)
         run {
-            val n = 48
-            val cells = ByteArray(n * n)
+            val m = RegionMap.build(s)
+            for (k in m.allKeys) t.put(k, m.get(k)!!.copy())
             val r = s.size.radius
-            for (i in 0 until n) for (j in 0 until n) {
-                val x = s.center.x - r + ((i + 0.5) * 2 * r / n).toInt()
-                val z = s.center.z - r + ((j + 0.5) * 2 * r / n).toInt()
-                val hit = ZoneLayout.locate(s, x, z) ?: continue
-                val k = ZoneLayout.HABITATS.indexOf(hit.zone)
-                cells[j * n + i] = (if (k >= 0 && hit.zone in s.unlocked) k + 2 else 1).toByte()
-            }
-            t.putByteArray("map", cells)
             if (SanctuaryDimension.isSanctuary(player.level())) {
                 t.putFloat("mapX", ((player.x - s.center.x) / r).toFloat())
                 t.putFloat("mapZ", ((player.z - s.center.z) / r).toFloat())
+                t.putFloat("mapYaw", player.yRot)
             }
         }
         t.put("events", ListTag().also { list -> s.events.toList().reversed().forEach { list.add(StringTag.valueOf(it)) } })

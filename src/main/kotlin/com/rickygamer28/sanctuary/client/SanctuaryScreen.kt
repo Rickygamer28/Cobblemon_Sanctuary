@@ -960,42 +960,104 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
 
     /** The region: a little map of the valley and its habitats, and who lives in each. */
     private fun biomesPage(g: GuiGraphics, x: Int, y: Int, w: Int, h: Int, mx: Int, my: Int) {
-        // the map
+        // the map: areas in their colours, hills shaded, water, routes, pockets, caves and landmarks
         val map = data.getByteArray("map")
-        val n = 48
+        val heights = data.getByteArray("mapH")
+        val flags = data.getByteArray("mapF")
+        val n = kotlin.math.sqrt(map.size.toDouble()).toInt().coerceAtLeast(1)
         val size = min(h - 6, w / 2 - 6).coerceAtLeast(96)
         val cell = size.toDouble() / n
         val mx0 = x
         val my0 = y + 2
         box(g, mx0 - 2, my0 - 2, size + 4, size + 4, 0xFF5E5A50.toInt())
+        val zoneList = listOf("water", "ice", "rock", "ground", "fire", "dragon", "ghost", "poison", "grass", "fairy", "electric")
         val colorOf = HashMap<Int, Int>()
-        biomes.forEach { b -> val k = if (b.zone == "normal") 1 else (listOf("water", "ice", "rock", "ground", "fire", "dragon", "ghost", "poison", "grass", "fairy", "electric").indexOf(b.zone) + 2); colorOf[k] = opaque(b.color) }
-        var hovered: Int = -1
+        biomes.forEach { b -> val k = if (b.zone == "normal") 1 else (zoneList.indexOf(b.zone) + 2); colorOf[k] = opaque(b.color) }
+        fun heightAt(i: Int, j: Int): Int = if (heights.size == n * n) (heights[j.coerceIn(0, n - 1) * n + i.coerceIn(0, n - 1)].toInt() and 0xFF) - 40 else 0
+        fun flagAt(i: Int, j: Int): Int = if (flags.size == n * n) flags[j * n + i].toInt() and 0xFF else 0
+        var hovered = -1
+        var hoveredFlags = 0
         if (map.size == n * n) for (j in 0 until n) for (i in 0 until n) {
             val v = map[j * n + i].toInt()
             if (v == 0) continue
-            val c = if (v == 1) 0xFFA9C98A.toInt() else mix(colorOf[v] ?: 0xFFAAAAAA.toInt(), 0x2A3A20, 0.12f)
+            val f = flagAt(i, j)
+            val hh = heightAt(i, j)
+            var c = when {
+                f and 8 != 0 -> mix(0xFF3F86C8.toInt(), 0x123A6A, (((-hh) - 1) / 16f).coerceIn(0f, 0.7f)) // water, darker where deep
+                v == 1 -> 0xFF8DB86A.toInt()
+                else -> mix(colorOf[v] ?: 0xFFAAAAAA.toInt(), 0x6E9A4E, 0.35f)
+            }
+            if (f and 8 == 0) {
+                // snow on the high tops
+                if (hh > 30 && v != 6) c = mix(c, 0xF4F6FA, ((hh - 30) / 14f).coerceIn(0f, 0.75f))
+                // light from the top left: slopes facing it are brighter, the others darker
+                val slope = (heightAt(i - 1, j - 1) - hh).coerceIn(-8, 8)
+                c = if (slope < 0) mix(c, 0xFFFFFF, (-slope * 0.045f).coerceAtMost(0.3f)) else mix(c, 0x10140C, (slope * 0.06f).coerceAtMost(0.45f))
+                if (f and 1 != 0) c = mix(c, 0xD8B878, 0.75f) // a route
+                if (f and 4 != 0 && (i + j) % 2 == 0) c = mix(c, 0x1A1410, 0.35f) // a cave underneath
+                if (f and 16 != 0) c = 0xFF2A221C.toInt() // a cave mouth
+            }
             val x0 = mx0 + (i * cell).toInt()
             val y0 = my0 + (j * cell).toInt()
             val x1 = mx0 + ((i + 1) * cell).toInt()
             val y1 = my0 + ((j + 1) * cell).toInt()
-            g.fill(x0, y0, x1, y1, c)
-            if (mx in x0 until x1 && my in y0 until y1) hovered = v
+            g.fill(x0, y0, x1, y1, c or 0xFF000000.toInt())
+            if (mx in x0 until x1 && my in y0 until y1) { hovered = v; hoveredFlags = f }
         }
-        // the town, and where you are
+        // the town
         val cx = mx0 + size / 2
         val cy = my0 + size / 2
+        box(g, cx - 4, cy - 4, 8, 8, 0xFF5E5A50.toInt())
         box(g, cx - 3, cy - 3, 6, 6, 0xFFF4EEDC.toInt())
+        if (over(mx, my, cx - 4, cy - 4, 8, 8)) tooltip = listOf(Component.literal("The town").withColor(TEXT), Component.literal("Where the routes start").withColor(SUB))
+        // markers
+        val marks = data.getList("mapMarks", 10)
+        for (k in 0 until marks.size) {
+            val m = marks.getCompound(k)
+            val px = cx + (m.getFloat("x") * size / 2).toInt()
+            val pz = cy + (m.getFloat("z") * size / 2).toInt()
+            val zc = colorOf[zoneList.indexOf(m.getString("zone")) + 2] ?: 0xFFFFFFFF.toInt()
+            when (m.getString("k")) {
+                "landmark" -> { box(g, px - 3, pz - 3, 7, 7, 0xFF1A1A1A.toInt()); box(g, px - 2, pz - 2, 5, 5, 0xFFFFFFFF.toInt()); box(g, px - 1, pz - 1, 3, 3, zc) }
+                "peak" -> { // a little mountain
+                    g.fill(px, pz - 3, px + 1, pz - 2, 0xFFFFFFFF.toInt())
+                    g.fill(px - 1, pz - 2, px + 2, pz - 1, 0xFFFFFFFF.toInt())
+                    g.fill(px - 2, pz - 1, px + 3, pz, 0xFF1A1A1A.toInt())
+                    g.fill(px - 3, pz, px + 4, pz + 1, 0xFF1A1A1A.toInt())
+                }
+                "cave" -> { box(g, px - 2, pz - 2, 5, 5, 0xFFB8A890.toInt()); box(g, px - 1, pz - 1, 3, 3, 0xFF0E0A08.toInt()) }
+                "hall" -> { g.fill(px - 3, pz, px + 4, pz + 1, 0xFF0E0A08.toInt()); g.fill(px, pz - 3, px + 1, pz + 4, 0xFF0E0A08.toInt()) }
+            }
+            if (tooltip == null && over(mx, my, px - 4, pz - 4, 9, 9)) tooltip = listOf(Component.literal(m.getString("n")).withColor(zc))
+        }
+        // where you are, and which way you're looking
         if (data.contains("mapX")) {
             val ux = cx + (data.getFloat("mapX") * size / 2).toInt()
             val uz = cy + (data.getFloat("mapZ") * size / 2).toInt()
-            box(g, ux - 2, uz - 2, 5, 5, 0xFFFFFFFF.toInt())
-            box(g, ux - 1, uz - 1, 3, 3, 0xFFE24B4A.toInt())
-            if (over(mx, my, ux - 3, uz - 3, 7, 7)) tooltip = listOf(Component.literal("You are here"))
+            val yaw = Math.toRadians(data.getFloat("mapYaw").toDouble())
+            val fx = -kotlin.math.sin(yaw)
+            val fz = kotlin.math.cos(yaw)
+            for (step in 2..6) {
+                val ax = ux + (fx * step).toInt()
+                val az = uz + (fz * step).toInt()
+                g.fill(ax - 1, az - 1, ax + 1, az + 1, 0xFFFFFFFF.toInt())
+            }
+            box(g, ux - 3, uz - 3, 7, 7, 0xFFFFFFFF.toInt())
+            box(g, ux - 2, uz - 2, 5, 5, 0xFFE24B4A.toInt())
+            if (over(mx, my, ux - 4, uz - 4, 9, 9)) tooltip = listOf(Component.literal("You are here"))
         }
         if (hovered >= 1 && tooltip == null) {
-            val b = if (hovered == 1) biomes.firstOrNull { it.zone == "normal" } else biomes.firstOrNull { it.zone == listOf("water", "ice", "rock", "ground", "fire", "dragon", "ghost", "poison", "grass", "fairy", "electric").getOrNull(hovered - 2) }
-            if (b != null) tooltip = listOf(Component.literal(b.name).withColor(opaque(b.color)), Component.literal("${b.count} Pokémon").withColor(SUB))
+            val b = if (hovered == 1) biomes.firstOrNull { it.zone == "normal" } else biomes.firstOrNull { it.zone == zoneList.getOrNull(hovered - 2) }
+            if (b != null) {
+                val lines = mutableListOf<Component>(
+                    Component.literal(if (hoveredFlags and 2 != 0) "${b.name} (a little pocket)" else b.name).withColor(opaque(b.color)),
+                    Component.literal("${b.count} Pokémon").withColor(SUB),
+                )
+                if (hoveredFlags and 1 != 0) lines += Component.literal("A route").withColor(SUB)
+                if (hoveredFlags and 4 != 0) lines += Component.literal("Caves underneath").withColor(SUB)
+                if (hoveredFlags and 16 != 0) lines += Component.literal("A cave entrance").withColor(SUB)
+                tooltip = lines
+            }
         }
         // the habitats
         val lx = mx0 + size + 12
