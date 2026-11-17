@@ -355,9 +355,9 @@ object SelfTest {
     private fun caveCheck(level: ServerLevel, s: Sanctuary, find: (String) -> Finding) {
         val halls = Caves.halls(s)
         if (halls.isEmpty()) { log("caves: none"); return }
-        val net = Caves.network(s)
+        val network = Caves.network(s)
         log("caves: " + halls.joinToString(", ") { "${it.zone} hall r${it.hallR.toInt()} at (${(it.hallX - s.center.x).toInt()}, ${(it.hallZ - s.center.z).toInt()})" } +
-            "; ${Caves.entrances(s).size} entrances, ${net?.links?.size ?: 0} joining tunnels (${net?.links?.joinToString { "${it.link!!.a}-${it.link.b} ${it.length.toInt()} long" }})")
+            "; ${Caves.entrances(s).size} entrances, ${network?.links?.size ?: 0} joining tunnels (${network?.links?.joinToString { "${it.link!!.a}-${it.link.b} ${it.length.toInt()} long" }})")
         fun key(x: Int, z: Int) = (x.toLong() shl 32) or (z.toLong() and 0xFFFFFFFFL)
         fun open(x: Int, z: Int, spot: Caves.Spot): Boolean {
             level.getChunk(x shr 4, z shr 4)
