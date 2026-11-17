@@ -1626,7 +1626,8 @@ object BiomeDresser {
         if (c.cliff) return
         val onGrass = c.level.getBlockState(c.surface).`is`(Blocks.GRASS_BLOCK)
         when {
-            c.grid(17, 7) && c.roomy() -> c.feature(MiscOverworldFeatures.FOREST_ROCK, 3, 5)
+            // (a vanilla mossy rock hangs over the low side on a slope: this one sits into it)
+            c.grid(17, 7) && c.roomy() -> c.boulder(b(Blocks.MOSSY_COBBLESTONE), b(Blocks.COBBLESTONE), 1 + c.random.nextInt(2))
             tuff && c.grid(11, 8) && c.roomy() -> c.crystalCluster(b(Blocks.DRIPSTONE_BLOCK), b(Blocks.POINTED_DRIPSTONE), 2 + c.random.nextInt(3))
             c.variant == 1 && c.grid(10, 9) && c.roomy() -> c.boulder(b(Blocks.MOSSY_COBBLESTONE), b(Blocks.COBBLESTONE), 1)
             onGrass && c.rise < 24 && c.tree(9, 23, 10) && c.roomy(6) -> c.feature(TreeFeatures.SPRUCE)

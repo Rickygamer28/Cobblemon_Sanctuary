@@ -97,8 +97,24 @@ object SelfTest {
                 stageStart = now
                 idleSince = -1L
             }
-            else -> {
+            2 -> {
                 log("== after Repair here, finished in ${"%.0f".format(secs)} s${if (timedOut) " (TIMED OUT)" else ""}")
+                scan(level, sanctuary)
+                // as in play: a valley with a few habitats, the rest waking up later
+                sanctuary.reshape()
+                plan(sanctuary, FIRST)
+                log("few habitats: ${sanctuary.habitats.keys}")
+                stage = 3; stageStart = now; idleSince = -1L
+            }
+            3 -> {
+                log("== build 3 (only ${FIRST.size} habitats awake) finished in ${"%.0f".format(secs)} s${if (timedOut) " (TIMED OUT)" else ""}")
+                scan(level, sanctuary)
+                wakeTheRest(sanctuary)
+                log("woke up: ${sanctuary.habitats.keys - FIRST.toSet()} (no room for: ${ZoneLayout.HABITATS - sanctuary.habitats.keys})")
+                stage = 4; stageStart = now; idleSince = -1L
+            }
+            else -> {
+                log("== after the rest woke up, finished in ${"%.0f".format(secs)} s${if (timedOut) " (TIMED OUT)" else ""}")
                 scan(level, sanctuary)
                 log("total test time ${(now - startedAt) / 20} s")
                 File("selftest-report.txt").writeText(report.toString())
@@ -106,6 +122,31 @@ object SelfTest {
                 server.halt(false)
             }
         }
+    }
+
+    private val FIRST = listOf("water", "grass", "fire", "rock")
+
+    private fun counts(zones: List<String>): LinkedHashMap<String, Int> {
+        val counts = linkedMapOf<String, Int>()
+        ZoneLayout.HABITATS.forEachIndexed { i, z -> if (z in zones) counts[z] = 40 + (i * 37) % 160 }
+        return counts
+    }
+
+    /** What Residents does when new types move in: wake them, fit new habitats into free meadows, rebuild. */
+    private fun wakeTheRest(s: Sanctuary) {
+        val counts = counts(ZoneLayout.HABITATS)
+        val newTypes = ZoneLayout.HABITATS.filter { it !in s.unlocked }
+        s.typeCounts = counts
+        s.unlocked = linkedSetOf(ZoneLayout.HUB) + ZoneLayout.HABITATS
+        s.unlockedChanged = true
+        s.rebuildZones += newTypes.filter { z -> ZoneLayout.pockets(s).any { it.zone == z } }
+        for (zone in ZoneLayout.HABITATS) {
+            if (zone in s.habitats) continue
+            val hb = ZoneLayout.fitIn(s, zone, counts[zone] ?: 1) ?: continue
+            s.habitats[zone] = hb
+            s.rebuildZones += zone
+        }
+        s.generationDirty = true
     }
 
     private fun create(server: MinecraftServer, level: ServerLevel, data: SanctuaryData, now: Long): Sanctuary {
@@ -123,12 +164,11 @@ object SelfTest {
         return sanctuary
     }
 
-    /** Every habitat awake, with made-up resident numbers (busier ones bigger), and the region laid out. */
-    private fun plan(s: Sanctuary) {
-        val counts = linkedMapOf<String, Int>()
-        ZoneLayout.HABITATS.forEachIndexed { i, z -> counts[z] = 40 + (i * 37) % 160 }
+    /** The given habitats awake (all by default), with made-up resident numbers, and the region laid out. */
+    private fun plan(s: Sanctuary, zones: List<String> = ZoneLayout.HABITATS) {
+        val counts = counts(zones)
         s.typeCounts = counts
-        s.unlocked = linkedSetOf(ZoneLayout.HUB) + ZoneLayout.HABITATS
+        s.unlocked = linkedSetOf(ZoneLayout.HUB) + zones
         s.habitats.clear()
         s.habitats.putAll(ZoneLayout.plan(s, counts))
         s.planned = true
@@ -211,8 +251,16 @@ object SelfTest {
             val cave = Caves.at(s, x, z)
             val expected = if (cave != null && cave.mouth) cave.floor - 1 else target
             val diff = ground - expected
-            if (diff > 3) find("ground too high (>3 over its height)").add(s, x, ground, z, "zone ${hit.zone} +$diff")
-            if (diff < -3) find("ground too low (>3 under its height)").add(s, x, ground, z, "zone ${hit.zone} $diff")
+            fun why(): String {
+                val base = BiomeDresser.baseHeight(s, x, z)
+                val cover = Caves.cover(s, x, z)
+                Caves.forget(s.id)
+                val fresh = BiomeDresser.targetHeight(s, x, z, ZoneLayout.HABITATS)
+                val c2 = Caves.at(s, x, z)
+                return "target=$target base=$base cover=${"%.1f".format(cover)} fresh=$fresh cave=${cave?.let { "${it.floor}..${it.ceil}${if (it.mouth) " mouth" else ""}" }}/${c2?.let { "${it.floor}..${it.ceil}" }} nb=${hit.neighbour} edge=${"%.0f".format(hit.edgeDistance)}"
+            }
+            if (diff > 3) find("ground too high (>3 over its height)").add(s, x, ground, z, "zone ${hit.zone} +$diff ${why()}")
+            if (diff < -3) find("ground too low (>3 under its height)").add(s, x, ground, z, "zone ${hit.zone} $diff ${why()}")
             // water where the ground is under the water line
             if (target < water && cave == null) {
                 val st = level.getBlockState(BlockPos(x, water, z))
