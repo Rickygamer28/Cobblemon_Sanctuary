@@ -465,6 +465,8 @@ object BiomeDresser {
         Blocks.WEATHERED_COPPER, Blocks.OXIDIZED_COPPER, Blocks.EXPOSED_COPPER,
         // (the custom types' habitats)
         Blocks.END_STONE, Blocks.PRISMARINE, Blocks.PRISMARINE_BRICKS, Blocks.SLIME_BLOCK, Blocks.SEA_LANTERN,
+        Blocks.CRIMSON_NYLIUM, Blocks.NETHERRACK, Blocks.RED_NETHER_BRICKS, Blocks.NETHER_WART_BLOCK, Blocks.SHROOMLIGHT,
+        Blocks.SCULK, Blocks.SCULK_CATALYST,
         // route and landmark floors: they must count as ground too, or a rebuild leaves them (and a step) behind
         Blocks.MUD_BRICKS, Blocks.POLISHED_BLACKSTONE_BRICKS, Blocks.POLISHED_BLACKSTONE, Blocks.POLISHED_DEEPSLATE,
         Blocks.DEEPSLATE_BRICKS, Blocks.CUT_SANDSTONE, Blocks.CHISELED_SANDSTONE, Blocks.POLISHED_DIORITE,

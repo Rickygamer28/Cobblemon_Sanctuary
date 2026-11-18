@@ -7,8 +7,8 @@ import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.Blocks
 
 /**
- * Types other mods add (Gravelmon's Cosmic, Crystal, Digital, Light, Nuclear, Plastic, ???, Shadow, Slime, Sound
- * and Wind; Lost Lore's Shadow and Crystal…).
+ * Types other mods add (Gravelmon's, through Gravel's Extended Battles: Blood, Cosmic, Crystal, Digital, Eldritch,
+ * Light, Nuclear, Plastic, ???, Shadow, Slime, Sound and Wind; Lost Lore's Shadow and Crystal…).
  *
  * Their Pokémon live in a habitat that suits them (Shadow in the Haunted tower, Slime in the Swamp…), or the one the
  * owner picks on the Region tab. Once a custom type has enough Pokémon, it gets a habitat of its own in the valley,
@@ -22,11 +22,15 @@ object CustomTypes {
     private val DEFAULT_HOMES = mapOf(
         "shadow" to "ghost", "crystal" to "rock", "cosmic" to "fairy", "light" to "fairy", "digital" to "electric",
         "nuclear" to "electric", "plastic" to "electric", "slime" to "poison", "sound" to ZoneLayout.HUB, "wind" to ZoneLayout.HUB,
+        "blood" to "poison", "eldritch" to "ghost",
     )
 
     /** Guesses from a type's name, for types this list doesn't know. */
     private val GUESSES = listOf(
-        listOf("shadow", "dark", "void", "abyss", "night") to "ghost",
+        // (Gravelmon's "???" type, whatever its id: in the town, where anyone fits)
+        listOf("question", "qmark", "unknown", "mystery", "typeless", "curse", "?") to ZoneLayout.HUB,
+        listOf("shadow", "dark", "void", "abyss", "night", "eldritch", "horror", "eerie") to "ghost",
+        listOf("blood", "flesh", "vampire", "crimson") to "poison",
         listOf("light", "holy", "star", "moon", "sun", "cosmic", "space", "astral", "fairy", "magic") to "fairy",
         listOf("crystal", "gem", "stone", "metal", "earth") to "rock",
         listOf("digital", "cyber", "tech", "nuclear", "atom", "radio", "plastic", "machine", "laser") to "electric",
@@ -43,7 +47,7 @@ object CustomTypes {
     private val NAMES = mapOf(
         "shadow" to "Shadow hollow", "crystal" to "Crystal fields", "cosmic" to "Starfall crater", "light" to "Radiant meadow",
         "digital" to "Digital grid", "nuclear" to "Glowing wastes", "plastic" to "Plastic park", "slime" to "Slime bog",
-        "sound" to "Echo canyon", "wind" to "Windswept heights",
+        "sound" to "Echo canyon", "wind" to "Windswept heights", "blood" to "Crimson marsh", "eldritch" to "Eldritch depths",
     )
 
     /** The blocks a custom habitat is built from: its ground, patches in it, its rock, crystals, plants and trees. */
@@ -73,12 +77,17 @@ object CustomTypes {
             listOf(Blocks.SHORT_GRASS, Blocks.AZURE_BLUET), glow = Blocks.AMETHYST_CLUSTER),
         "wind" to Palette(Blocks.GRASS_BLOCK, Blocks.CALCITE, Blocks.DIRT, Blocks.CALCITE, Blocks.WHITE_TERRACOTTA,
             listOf(Blocks.TALL_GRASS, Blocks.SHORT_GRASS, Blocks.CORNFLOWER), tree = "birch"),
+        "blood" to Palette(Blocks.CRIMSON_NYLIUM, Blocks.RED_TERRACOTTA, Blocks.NETHERRACK, Blocks.RED_NETHER_BRICKS, Blocks.NETHER_WART_BLOCK,
+            listOf(Blocks.CRIMSON_ROOTS, Blocks.CRIMSON_FUNGUS, Blocks.RED_MUSHROOM), tree = "dark_oak", glow = Blocks.SHROOMLIGHT),
+        "eldritch" to Palette(Blocks.SCULK, Blocks.DEEPSLATE, Blocks.DEEPSLATE, Blocks.COBBLED_DEEPSLATE, Blocks.CRYING_OBSIDIAN,
+            emptyList(), tree = "dark_oak", glow = Blocks.SCULK_CATALYST),
     )
 
     /** Palettes by colour, for types this list doesn't know (picked by the type's own colour). */
     private val BY_HUE = listOf(
         0x7B3FA0 to "cosmic", 0x2E2A3A to "shadow", 0xE6E6F0 to "crystal", 0xF6E89A to "light", 0x4FC3D6 to "digital",
         0x8BE04A to "nuclear", 0xF2A2C6 to "plastic", 0x6FBF5A to "slime", 0xB48CD6 to "sound", 0xBFE3F0 to "wind",
+        0x9A1B1B to "blood", 0x0F3D44 to "eldritch",
     )
 
     /** The three looks a custom habitat can have. */

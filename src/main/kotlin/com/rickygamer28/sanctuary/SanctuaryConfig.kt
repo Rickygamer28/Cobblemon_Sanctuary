@@ -169,6 +169,10 @@ object SanctuaryConfig {
             "Aegislash's Blade Forme, Darmanitan's Zen Mode…). Primal Groudon and Kyogre follow megaEnabled. With megaNeedsStone,",
             "they need the item too (the Gracidea, the Red or Blue Orb…). Uses the mega chance and times above.")
         .define("formsEnabled", true)
+    val formSkip: ModConfigSpec.ConfigValue<List<String>> = builder
+        .comment("Form changes that don't happen in play-fights: any whose aspects contain one of these words",
+            "(by default Lost Lore's Shadow forms, which are a corruption rather than a power-up).")
+        .defineListAllowEmpty("formSkip", listOf("shadow"), { "" }, { it is String })
 
     // ---- families and eggs
     val eggsEnabled: ModConfigSpec.BooleanValue = builder
