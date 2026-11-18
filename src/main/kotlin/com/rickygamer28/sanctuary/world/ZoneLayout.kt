@@ -383,7 +383,11 @@ object ZoneLayout {
         val taken = HashSet<Int>()
         for (t in s.customPockets.sorted()) {
             val home = CustomTypes.zoneFor(s, t)
-            val i = list.indices.filter { it !in taken && list[it].host == home }.maxByOrNull { list[it].r * 1000 + (999 - list[it].salt) } ?: continue
+            val free = list.indices.filter { it !in taken && !CustomTypes.isCustom(list[it].host) && !CustomTypes.isCustom(list[it].zone) }
+            // (if that habitat has no pocket spot, the free pocket nearest to it, out in the meadows or next door)
+            val (ax, az) = anchor(s, home)
+            val i = free.filter { list[it].host == home }.maxByOrNull { list[it].r * 1000 + (999 - list[it].salt) }
+                ?: free.minByOrNull { distance(list[it].x, list[it].z, ax, az) } ?: continue
             taken += i
             val p = list[i]
             list[i] = Pocket(p.x, p.z, p.r, t, p.host, p.salt)
