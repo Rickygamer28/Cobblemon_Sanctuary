@@ -107,7 +107,7 @@ object SanctuaryGuis {
         t.putBoolean("inside", SanctuaryDimension.isSanctuary(player.level()))
         val ring = ZoneLayout.ring(s)
         t.putInt("awake", s.unlocked.size)
-        t.putInt("zones", ZoneLayout.HABITATS.size + 1)
+        t.putInt("zones", ZoneLayout.HABITATS.size + 1 + ZoneLayout.customZones(s).size)
         Sizes.nextSize(s.size)?.let { next ->
             t.putString("nextLabel", next.label)
             t.putInt("nextNeeded", Sizes.residentsNeeded(next))
@@ -134,21 +134,39 @@ object SanctuaryGuis {
             })
         }
         t.put("biomes", ListTag().also { list ->
-            for (zone in listOf(ZoneLayout.HUB) + ZoneLayout.HABITATS) list.add(CompoundTag().also {
-                val count = s.typeCounts[zone] ?: 0
+            // the habitats, the custom types' own habitats, then custom types that don't have one (yet)
+            val customPlaced = ZoneLayout.customZones(s)
+            val customOthers = s.customCounts.keys.filter { it !in customPlaced }.sorted()
+            for (zone in listOf(ZoneLayout.HUB) + ZoneLayout.HABITATS + customPlaced + customOthers) list.add(CompoundTag().also {
+                val custom = com.rickygamer28.sanctuary.world.CustomTypes.isCustom(zone)
+                val placed = zone == ZoneLayout.HUB || zone in s.habitats
+                val count = if (custom && !placed) s.customCounts[zone] ?: 0 else s.typeCounts[zone] ?: 0
                 it.putString("zone", zone)
-                it.putString("name", Residents.zoneName(zone))
+                it.putString("name", if (custom && !placed) com.rickygamer28.sanctuary.world.CustomTypes.typeName(zone) + " type" else Residents.zoneName(zone))
                 it.putInt("color", typeColor(zone))
                 it.putBoolean("awake", zone in s.unlocked)
-                it.putBoolean("placed", zone == ZoneLayout.HUB || zone in s.habitats)
-                it.putString("types", ZoneLayout.typesOf(zone).joinToString(" · ") { ty -> ty.replaceFirstChar { c -> c.uppercase() } })
+                it.putBoolean("placed", placed)
+                it.putString("types", if (custom) com.rickygamer28.sanctuary.world.CustomTypes.typeName(zone)
+                    else ZoneLayout.typesOf(zone).joinToString(" · ") { ty -> ty.replaceFirstChar { c -> c.uppercase() } })
                 it.putInt("count", if (zone == ZoneLayout.HUB) rosterHomes(s).count { h -> h == ZoneLayout.HUB } else count)
+                if (custom) {
+                    // where its Pokémon live, and what the owner chose
+                    val home = com.rickygamer28.sanctuary.world.CustomTypes.zoneFor(s, zone)
+                    it.putBoolean("custom", true)
+                    it.putString("home", home)
+                    it.putString("homeName", Residents.zoneName(home))
+                    it.putString("choice", com.rickygamer28.sanctuary.world.CustomTypes.choice(s, zone) ?: com.rickygamer28.sanctuary.world.CustomTypes.OWN)
+                    it.putInt("need", com.rickygamer28.sanctuary.world.CustomTypes.minResidents())
+                    it.putInt("typeCount", s.customCounts[zone] ?: 0)
+                    it.putBoolean("noRoom", zone in s.noRoomFor)
+                    it.putBoolean("ownOn", runCatching { com.rickygamer28.sanctuary.SanctuaryConfig.customTypeBiomes.get() }.getOrDefault(true))
+                }
                 // how lively the biome is: its share of the residents, compared with the busiest biome
                 val busiest = (s.typeCounts.values.maxOrNull() ?: 1).coerceAtLeast(1)
                 val pct = if (zone == ZoneLayout.HUB) 100 else (count * 100 / busiest).coerceIn(0, 100)
                 it.putInt("pct", pct)
                 // its look, and the looks the owner can choose from
-                com.rickygamer28.sanctuary.world.Looks.ALL[zone]?.let { looks ->
+                com.rickygamer28.sanctuary.world.Looks.of(zone)?.takeIf { placed }?.let { looks ->
                     it.putInt("look", com.rickygamer28.sanctuary.world.BiomeDresser.variantOf(s, zone))
                     it.put("looks", ListTag().also { l -> looks.forEach { (n, d) -> l.add(StringTag.valueOf("$n|$d")) } })
                 }
@@ -182,7 +200,7 @@ object SanctuaryGuis {
                         it.put("as", ListTag().also { a -> pk.aspects.forEach { x -> a.add(StringTag.valueOf(x)) } })
                         it.putString("n", json(player, pk.getDisplayName(false)))
                         it.putInt("l", pk.level)
-                        it.putString("h", TypeLogic.homeZone(pk, s.residents[pk.uuid], ring) ?: "")
+                        it.putString("h", TypeLogic.homeZone(pk, s.residents[pk.uuid], ring, s) ?: "")
                         it.putBoolean("o", rt.live.containsKey(pk.uuid))
                         it.putBoolean("m", pk.getOwnerUUID() == player.uuid)
                         it.putBoolean("sh", pk.shiny)
@@ -243,7 +261,7 @@ object SanctuaryGuis {
 
     private fun rosterHomes(s: Sanctuary): List<String?> {
         val ring = ZoneLayout.ring(s)
-        return Residents.runtime(s).roster.map { TypeLogic.homeZone(it.pokemon, s.residents[it.pokemon.uuid], ring) }
+        return Residents.runtime(s).roster.map { TypeLogic.homeZone(it.pokemon, s.residents[it.pokemon.uuid], ring, s) }
     }
 
     private fun detail(player: ServerPlayer, s: Sanctuary, pk: Pokemon, ring: List<String>): CompoundTag {
@@ -262,7 +280,7 @@ object SanctuaryGuis {
         t.putBoolean("m", pk.getOwnerUUID() == player.uuid)
         t.putBoolean("o", rt.live.containsKey(id))
         t.putString("tr", Residents.findRoster(rt, id)?.ownerName ?: s.ownerName)
-        val home = TypeLogic.homeZone(pk, s.residents[id], ring)
+        val home = TypeLogic.homeZone(pk, s.residents[id], ring, s)
         t.putString("h", home ?: "")
         t.put("t", ListTag().also { l -> TypeLogic.currentTypes(pk).forEach { x -> l.add(StringTag.valueOf(x)) } })
         t.putInt("friendship", pk.friendship)
@@ -306,7 +324,7 @@ object SanctuaryGuis {
         t.put("children", ListTag().also { l ->
             s.families.entries.filter { it.value.first == id || it.value.second == id }.take(6).forEach { l.add(StringTag.valueOf(nameOf(it.key))) }
         })
-        val options = if (TypeLogic.waterOnly(pk) && "water" in ring) listOf("water") else TypeLogic.zoneTypes(pk).ifEmpty { listOf(ZoneLayout.HUB) + ring.filter { it in s.unlocked } }.distinct()
+        val options = if (TypeLogic.waterOnly(pk) && "water" in ring) listOf("water") else TypeLogic.zoneTypes(pk, s).ifEmpty { listOf(ZoneLayout.HUB) + ring.filter { it in s.unlocked } }.distinct()
         t.put("homes", ListTag().also { l -> options.forEach { l.add(StringTag.valueOf(it)) } })
         return t
     }
@@ -390,11 +408,28 @@ object ScreenActions {
                 }
                 refresh("home")
             }
+            "customHome" -> {
+                // the owner picks where a custom type's Pokémon live: its own habitat, the town, or a habitat
+                val type = v.substringBefore(':')
+                val choice = v.substringAfter(':')
+                val valid = choice == com.rickygamer28.sanctuary.world.CustomTypes.OWN || choice == ZoneLayout.HUB || choice in ZoneLayout.HABITATS
+                if (ownerOnly() && com.rickygamer28.sanctuary.world.CustomTypes.isCustom(type) && valid) {
+                    s.customHomes[type] = choice
+                    s.noRoomFor.remove(type)
+                    Residents.runtime(s).rosterDirty = true
+                    s.generationDirty = true
+                    Sanctuaries.data(level).setDirty()
+                    val name = com.rickygamer28.sanctuary.world.CustomTypes.typeName(type)
+                    say(player, if (choice == com.rickygamer28.sanctuary.world.CustomTypes.OWN) "$name Pokémon will get a habitat of their own once there are enough of them."
+                        else "$name Pokémon now live in the ${Residents.zoneName(choice)}.", ChatFormatting.GREEN)
+                }
+                refresh("biomes")
+            }
             "look" -> {
                 // the owner picks a habitat's look: only that habitat (and the strip along its borders) is built again
                 val zone = v.substringBefore(':')
                 val look = v.substringAfter(':').toIntOrNull()
-                val looks = com.rickygamer28.sanctuary.world.Looks.ALL[zone]
+                val looks = com.rickygamer28.sanctuary.world.Looks.of(zone)?.takeIf { zone == ZoneLayout.HUB || zone in s.habitats }
                 val now = level.gameTime
                 when {
                     !ownerOnly() -> {}

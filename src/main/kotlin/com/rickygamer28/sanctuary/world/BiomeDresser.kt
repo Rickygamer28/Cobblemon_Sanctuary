@@ -463,6 +463,8 @@ object BiomeDresser {
         Blocks.MOSS_BLOCK, Blocks.PURPUR_BLOCK, Blocks.QUARTZ_BLOCK, Blocks.BONE_BLOCK, Blocks.MAGMA_BLOCK, Blocks.PODZOL, Blocks.MYCELIUM,
         Blocks.ROOTED_DIRT, Blocks.COARSE_DIRT, Blocks.OBSIDIAN, Blocks.CRYING_OBSIDIAN, Blocks.WARPED_NYLIUM, Blocks.DRIPSTONE_BLOCK,
         Blocks.WEATHERED_COPPER, Blocks.OXIDIZED_COPPER, Blocks.EXPOSED_COPPER,
+        // (the custom types' habitats)
+        Blocks.END_STONE, Blocks.PRISMARINE, Blocks.PRISMARINE_BRICKS, Blocks.SLIME_BLOCK, Blocks.SEA_LANTERN,
         // route and landmark floors: they must count as ground too, or a rebuild leaves them (and a step) behind
         Blocks.MUD_BRICKS, Blocks.POLISHED_BLACKSTONE_BRICKS, Blocks.POLISHED_BLACKSTONE, Blocks.POLISHED_DEEPSLATE,
         Blocks.DEEPSLATE_BRICKS, Blocks.CUT_SANDSTONE, Blocks.CHISELED_SANDSTONE, Blocks.POLISHED_DIORITE,
@@ -803,7 +805,12 @@ object BiomeDresser {
                     else -> Math.pow(ridge(s, wx, wz, 60.0, 31, 2), 1.6) * 10 + f(s, wx, wz, 30.0, 30, 2) * 1.5
                 }
             }
-            else -> f(s, wx, wz, 34.0, 62) * 4 + 1
+            else -> if (CustomTypes.isCustom(zone)) when (variant) {
+                // a custom type's own habitat: rolling hills, plateaus, or a hollow ringed by higher ground
+                0 -> f(s, wx, wz, 44.0, 63) * 5 + 2.5
+                1 -> 2 + 9 * smooth((f01(s, wx, wz, 38.0, 64, 2) - 0.52) / 0.06) + f(s, xd, zd, 20.0, 65, 2) * 0.8
+                else -> 1.0 + 7 * smooth((q - 0.6) / 0.22) + f(s, wx, wz, 30.0, 66, 2) * 1.2
+            } else f(s, wx, wz, 34.0, 62) * 4 + 1
         }
         return h * e + EDGE_LEVEL * (1 - e)
     }
@@ -1396,7 +1403,7 @@ object BiomeDresser {
             if (along < s.size.hubRadius - 5 || along > anchorDist - 3) continue
             val side = px * uz - pz * ux
             // bent by noise so the route winds
-            val i = ZoneLayout.HABITATS.indexOf(zone)
+            val i = ZoneLayout.HABITATS.indexOf(zone).let { if (it >= 0) it else 40 + (zone.hashCode() and 63) }
             val bend = (Noise.value(s.seed + 909 + i, along / 26.0, 0.5) - 0.5) * 22 * smooth((along - s.size.hubRadius) / 20.0) * smooth((anchorDist - along) / 14.0)
             best = min(best, abs(side - bend))
         }
@@ -2637,17 +2644,31 @@ object BiomeDresser {
         }
     }
 
-    /** Biomes for custom types from other mods: tinted ground in a colour picked from the type's name. */
+    /**
+     * A custom type's own habitat (Gravelmon's, Lost Lore's…), built from a palette that suits it: Shadow from
+     * blackstone and soul soil with dark oaks and crying obsidian; Crystal from calcite with amethyst; Cosmic from end
+     * stone with chorus and end rods; Light from bright grass and quartz with white flowers; and so on. Types it
+     * doesn't know get the palette closest to their colour.
+     */
     private fun custom(c: Ctx, zone: String) {
-        val tints = listOf(
-            Blocks.PURPLE_TERRACOTTA, Blocks.CYAN_TERRACOTTA, Blocks.LIGHT_BLUE_TERRACOTTA, Blocks.MAGENTA_TERRACOTTA,
-            Blocks.LIME_TERRACOTTA, Blocks.PINK_TERRACOTTA, Blocks.GRAY_TERRACOTTA, Blocks.BLUE_TERRACOTTA,
-        )
-        val tint = b(tints[Math.floorMod(zone.hashCode(), tints.size)])
-        c.ground(c.patch(10.0, 1, b(Blocks.GRASS_BLOCK), tint, b(Blocks.GRASS_BLOCK)), b(Blocks.DIRT))
+        val p = CustomTypes.palette(zone)
+        c.natural(c.broad(b(p.top), b(p.patch), 0.6, 10.0, 61), b(p.filler), b(p.rock), b(p.patch))
+        if (c.cliff) return
+        val tip = p.glow?.let { b(it) }?.takeIf { it.`is`(Blocks.AMETHYST_CLUSTER) || it.`is`(Blocks.END_ROD) }
+        // the hollow's rim of tall spires
+        val q = if (c.variant == 2) ZoneLayout.local(c.s, zone, c.x, c.z)?.q ?: 0.0 else 0.0
+        val rimSpire = c.variant == 2 && q in 0.5..0.72 && c.grid(7, 62) && c.roomy()
         when {
-            c.grid(10, 2) && c.roomy() -> c.crystalCluster(tint, null, 2 + c.random.nextInt(3))
-            c.chance(0.15) -> c.place(b(Blocks.SHORT_GRASS))
+            rimSpire -> c.spike(b(p.crystal), 1, 6 + c.random.nextInt(7))
+            c.grid(if (c.variant == 2) 8 else 12, 63) && c.roomy() -> c.crystalCluster(b(p.crystal), tip, 2 + c.random.nextInt(3))
+            p.tree != null && c.tree(9, 18, 64) && c.roomy() -> c.feature(when (p.tree) {
+                "dark_oak" -> TreeFeatures.DARK_OAK
+                "swamp_oak" -> TreeFeatures.SWAMP_OAK
+                else -> TreeFeatures.BIRCH
+            })
+            p.glow != null && c.grid(15, 65) -> c.place(b(p.glow))
+            p.plants.isNotEmpty() && c.noise(9.0, 66) > 0.55 && c.chance(0.3) -> c.place(b(p.plants[c.random.nextInt(p.plants.size)]))
+            c.level.getBlockState(c.surface).`is`(Blocks.GRASS_BLOCK) && c.chance(0.15) -> c.place(b(Blocks.SHORT_GRASS))
         }
     }
 }

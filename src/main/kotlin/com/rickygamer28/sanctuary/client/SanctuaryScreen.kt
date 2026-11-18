@@ -71,6 +71,9 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
         val zone: String, val name: String, val color: Int, val awake: Boolean, val count: Int, val pct: Int, val placed: Boolean, val types: String,
         /** Its look (which of [looks]), and the looks it can have: name to description. */
         val look: Int = 0, val looks: List<Pair<String, String>> = emptyList(),
+        /** A custom type (another mod's): where its Pokémon live, the owner's choice, how many it needs for a habitat of its own. */
+        val custom: Boolean = false, val home: String = "", val homeName: String = "", val choice: String = "own",
+        val need: Int = 10, val typeCount: Int = 0, val noRoom: Boolean = false, val ownOn: Boolean = true,
     )
 
     private class Hit(val x: Int, val y: Int, val w: Int, val h: Int, val action: (Int) -> Unit)
@@ -101,6 +104,19 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
     /** The habitat whose look is being picked (and the look picked so far), or null. */
     private var lookZone: String? = null
     private var lookPick = 0
+    /** The custom type whose home is being picked (and the choice so far), or null. */
+    private var homeType: String? = null
+    private var homePick = "own"
+
+    /** A zone's number on the region map: the town 1, the habitats 2..12, the custom types' own habitats 13 on. */
+    private val zoneList = listOf("water", "ice", "rock", "ground", "fire", "dragon", "ghost", "poison", "grass", "fairy", "electric")
+    private fun mapKey(zone: String): Int {
+        if (zone == "normal") return 1
+        val k = zoneList.indexOf(zone)
+        if (k >= 0) return k + 2
+        val ci = biomes.filter { it.custom && it.placed }.indexOfFirst { it.zone == zone }
+        return if (ci >= 0) 13 + ci else -1
+    }
     private var portrait: ModelWidget? = null
     private var portraitKey: String? = null
     private lateinit var search: EditBox
@@ -144,7 +160,8 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
             val b = bl.getCompound(i)
             val looks = strings(b.getList("looks", Tag.TAG_STRING.toInt())).map { it.substringBefore('|') to it.substringAfter('|') }
             Biome(b.getString("zone"), b.getString("name"), b.getInt("color"), b.getBoolean("awake"), b.getInt("count"), b.getInt("pct"), b.getBoolean("placed"), b.getString("types"),
-                b.getInt("look"), looks)
+                b.getInt("look"), looks, b.getBoolean("custom"), b.getString("home"), b.getString("homeName"), b.getString("choice").ifEmpty { "own" },
+                b.getInt("need"), b.getInt("typeCount"), b.getBoolean("noRoom"), !b.contains("ownOn") || b.getBoolean("ownOn"))
         }
         if (tag.contains("eggs")) {
             val el = tag.getList("eggs", Tag.TAG_COMPOUND.toInt())
@@ -286,6 +303,7 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
         }
         if (confirmCrowd > 0) crowdWarning(g, mouseX, mouseY)
         if (lookZone != null) lookPicker(g, mouseX, mouseY)
+        if (homeType != null) homePicker(g, mouseX, mouseY)
         tooltip?.let { g.renderComponentTooltip(font, it, mouseX, mouseY) }
     }
 
@@ -326,6 +344,51 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
             send("look", "$zone:$pick", page = "biomes"); lookZone = null
         }
         button(g, bx + 20 + half, by + bh - 28, half, 20, "Cancel", ACCENT, mx, my, filled = false) { lookZone = null }
+        g.pose().popPose()
+    }
+
+    /** Picking where a custom type's Pokémon live (the owner): its own habitat, the town, or one of the habitats. */
+    private fun homePicker(g: GuiGraphics, mx: Int, my: Int) {
+        val b = biomes.firstOrNull { it.zone == homeType } ?: run { homeType = null; return }
+        tooltip = null
+        g.pose().pushPose()
+        g.pose().translate(0f, 0f, 400f)
+        g.fill(px, py, px + pw, py + ph, 0xC0000000.toInt())
+        hit(0, 0, width, height) { }
+        val c = opaque(b.color)
+        val options = (if (b.ownOn) listOf("own") else emptyList()) + listOf("normal") + zoneList
+        fun label(o: String) = if (o == "own") "Its own habitat" else biomes.firstOrNull { it.zone == o }?.name ?: o
+        val bw = min(360, pw - 30)
+        val rowH = 18
+        val colW = (bw - 30) / 2
+        val rows = (options.size + 1) / 2
+        val bh = 44 + rows * (rowH + 3) + 40
+        val bx = px + (pw - bw) / 2
+        val by = py + (ph - bh) / 2
+        box(g, bx - 1, by - 1, bw + 2, bh + 2, c)
+        box(g, bx, by, bw, bh, PANEL)
+        g.fill(bx, by, bx + bw, by + 3, c)
+        text(g, "Where ${b.types} Pokémon live", bx + 10, by + 12, TEXT, true)
+        text(g, fit(if (b.ownOn) "Their own habitat comes once there are ${b.need} of them (now ${b.typeCount})." else "Pick the habitat that suits them.", bw - 20), bx + 10, by + 26, SUB)
+        options.forEachIndexed { i, o ->
+            val rx = bx + 10 + (i % 2) * (colW + 10)
+            val ry = by + 42 + (i / 2) * (rowH + 3)
+            val chosen = o == homePick
+            val hover = over(mx, my, rx, ry, colW, rowH)
+            val oc = if (o == "own") c else biomes.firstOrNull { it.zone == o }?.let { opaque(it.color) } ?: ACCENT
+            box(g, rx, ry, colW, rowH, if (chosen) mix(oc, 0x1A222B, 0.55f) else if (hover) CARD_HOVER else CARD)
+            g.fill(rx + 1, ry + 1, rx + 4, ry + rowH - 1, oc)
+            if (chosen) outline(g, rx, ry, colW, rowH, oc)
+            text(g, fit(label(o) + if (o == b.choice) " (now)" else "", colW - 14), rx + 8, ry + 5, if (chosen) 0xFFFFFFFF.toInt() else TEXT)
+            hit(rx, ry, colW, rowH) { homePick = o }
+        }
+        val half = (bw - 30) / 2
+        val type = b.zone
+        val pick = homePick
+        button(g, bx + 10, by + bh - 28, half, 20, "Apply", GOLD, mx, my, enabled = pick != b.choice, why = "That's where they live now") {
+            send("customHome", "$type:$pick", page = "biomes"); homeType = null
+        }
+        button(g, bx + 20 + half, by + bh - 28, half, 20, "Cancel", ACCENT, mx, my, filled = false) { homeType = null }
         g.pose().popPose()
     }
 
@@ -389,6 +452,7 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
     override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
         if (confirmCrowd > 0 && keyCode == 256) { confirmCrowd = -1; return true }
         if (lookZone != null && keyCode == 256) { lookZone = null; return true }
+        if (homeType != null && keyCode == 256) { homeType = null; return true }
         if (search.isFocused && keyCode != 256) return search.keyPressed(keyCode, scanCode, modifiers)
         return super.keyPressed(keyCode, scanCode, modifiers)
     }
@@ -1036,9 +1100,8 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
         val mx0 = x
         val my0 = y + 2
         box(g, mx0 - 2, my0 - 2, size + 4, size + 4, 0xFF5E5A50.toInt())
-        val zoneList = listOf("water", "ice", "rock", "ground", "fire", "dragon", "ghost", "poison", "grass", "fairy", "electric")
         val colorOf = HashMap<Int, Int>()
-        biomes.forEach { b -> val k = if (b.zone == "normal") 1 else (zoneList.indexOf(b.zone) + 2); colorOf[k] = opaque(b.color) }
+        biomes.forEach { b -> val k = mapKey(b.zone); if (k > 0) colorOf[k] = opaque(b.color) }
         fun heightAt(i: Int, j: Int): Int = if (heights.size == n * n) (heights[j.coerceIn(0, n - 1) * n + i.coerceIn(0, n - 1)].toInt() and 0xFF) - 40 else 0
         fun flagAt(i: Int, j: Int): Int = if (flags.size == n * n) flags[j * n + i].toInt() and 0xFF else 0
         var hovered = -1
@@ -1082,7 +1145,7 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
             val m = marks.getCompound(k)
             val px = cx + (m.getFloat("x") * size / 2).toInt()
             val pz = cy + (m.getFloat("z") * size / 2).toInt()
-            val zc = colorOf[zoneList.indexOf(m.getString("zone")) + 2] ?: 0xFFFFFFFF.toInt()
+            val zc = colorOf[mapKey(m.getString("zone"))] ?: 0xFFFFFFFF.toInt()
             when (m.getString("k")) {
                 "landmark" -> { box(g, px - 3, pz - 3, 7, 7, 0xFF1A1A1A.toInt()); box(g, px - 2, pz - 2, 5, 5, 0xFFFFFFFF.toInt()); box(g, px - 1, pz - 1, 3, 3, zc) }
                 "peak" -> { // a little mountain
@@ -1113,7 +1176,7 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
             if (over(mx, my, ux - 4, uz - 4, 9, 9)) tooltip = listOf(Component.literal("You are here"))
         }
         if (hovered >= 1 && tooltip == null) {
-            val b = if (hovered == 1) biomes.firstOrNull { it.zone == "normal" } else biomes.firstOrNull { it.zone == zoneList.getOrNull(hovered - 2) }
+            val b = biomes.firstOrNull { mapKey(it.zone) == hovered }
             if (b != null) {
                 val lines = mutableListOf<Component>(
                     Component.literal(if (hoveredFlags and 2 != 0) "${b.name} (a little pocket)" else b.name).withColor(opaque(b.color)),
@@ -1140,23 +1203,32 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
             val by = gy + i * (th + gap) - scroll.toInt()
             if (by > gy + gh || by + th < gy) return@forEachIndexed
             val c = opaque(b.color)
+            // a custom type without a habitat of its own: its Pokémon live elsewhere (shown, not asleep)
+            val homeless = b.custom && !b.placed
+            val shown = b.awake || (homeless && b.count > 0)
             val live = b.awake && b.placed
-            val hover = b.awake && over(mx, my, lx, by, lw, th) && my in gy until gy + gh
-            box(g, lx, by, lw, th, if (!b.awake) 0xFF1A222B.toInt() else if (hover) CARD_HOVER else CARD)
-            g.fill(lx + 1, by + 1, lx + 4, by + th - 1, if (b.awake) c else mix(c, 0x1A222B, 0.7f))
-            text(g, fit(b.name, lw - 70), lx + 9, by + 5, if (b.awake) TEXT else DIM)
+            val hover = shown && over(mx, my, lx, by, lw, th) && my in gy until gy + gh
+            box(g, lx, by, lw, th, if (!shown) 0xFF1A222B.toInt() else if (hover) CARD_HOVER else CARD)
+            g.fill(lx + 1, by + 1, lx + 4, by + th - 1, if (shown) c else mix(c, 0x1A222B, 0.7f))
+            text(g, fit(b.name, lw - 70), lx + 9, by + 5, if (shown) TEXT else DIM)
             val right = when {
-                !b.awake -> ""
+                !shown -> ""
                 else -> "${b.count} Pokémon"
             }
             if (right.isNotEmpty()) text(g, right, lx + lw - 6 - font.width(right), by + 5, SUB)
             val sub = when {
+                homeless -> "Live in the ${b.homeName}" + when {
+                    b.choice != "own" || !b.ownOn -> ""
+                    b.noRoom -> " · own habitat on the next Reshape"
+                    else -> " · own habitat at ${b.need}"
+                }
                 !b.awake -> "Asleep: needs a ${b.types.ifEmpty { "Normal" }} type"
                 !live -> "No room yet: Reshape to add it to the map"
                 else -> b.types.ifEmpty { "Normal" } + (b.looks.getOrNull(b.look)?.let { " · ${it.first}" } ?: "")
             }
-            val lookRoom = if (data.getBoolean("isOwner") && b.looks.size > 1) font.width("Look") + 20 else 0
-            text(g, fit(sub, lw - 14 - lookRoom), lx + 9, by + 17, if (!live && b.awake) GOLD else DIM)
+            val owner = data.getBoolean("isOwner")
+            val lookRoom = (if (owner && b.looks.size > 1) font.width("Look") + 20 else 0) + (if (owner && b.custom) font.width("Home") + 18 else 0)
+            text(g, fit(sub, lw - 14 - lookRoom), lx + 9, by + 17, if (homeless) SUB else if (!live && b.awake) GOLD else DIM)
             if (hover) {
                 tooltip = listOf(Component.literal(b.name).withColor(c), Component.literal("${b.count} Pokémon live here").withColor(SUB), Component.literal("Click to see them").withColor(SUB))
                 hit(lx, by, lw, th) { filterZone = b.zone; goTab("residents") }
@@ -1168,6 +1240,14 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
                 val bx = lx + lw - 6 - bw
                 if (over(mx, my, bx, by + 15, bw, 12)) tooltip = listOf(Component.literal("Look: ${b.looks.getOrNull(b.look)?.first ?: "?"}").withColor(c), Component.literal("Click to choose another").withColor(SUB))
                 button(g, bx, by + 15, bw, 12, label, ACCENT, mx, my, filled = false) { lookZone = b.zone; lookPick = b.look }
+            }
+            // and where a custom type's Pokémon live
+            if (owner && b.custom && my in gy until gy + gh) {
+                val label = "Home"
+                val bw = font.width(label) + 12
+                val bx = lx + lw - 6 - bw - (if (b.looks.size > 1) font.width("Look") + 18 else 0)
+                if (over(mx, my, bx, by + 15, bw, 12)) tooltip = listOf(Component.literal("${b.types} Pokémon live in the ${b.homeName}").withColor(c), Component.literal("Click to choose where").withColor(SUB))
+                button(g, bx, by + 15, bw, 12, label, ACCENT, mx, my, filled = false) { homeType = b.zone; homePick = b.choice }
             }
         }
         g.disableScissor()

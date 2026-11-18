@@ -207,6 +207,12 @@ class Sanctuary(
 
     /** Biome variant chosen per type for this sanctuary. */
     val variants: MutableMap<String, Int> = mutableMapOf()
+    /** The owner's choice of where each custom type's Pokémon live: a habitat, the town, or "own" (its own habitat). */
+    val customHomes: MutableMap<String, String> = mutableMapOf()
+    /** How many residents each custom type has (worked out with the roster; not saved). */
+    var customCounts: Map<String, Int> = emptyMap()
+    /** Custom types that are ready for a habitat of their own but found no room (until the next Reshape; not saved). */
+    var noRoomFor: MutableSet<String> = mutableSetOf()
 
     /**
      * A fingerprint of the habitats' looks, for caches of anything they shape (heights, pockets, the map). Built so
@@ -235,6 +241,7 @@ class Sanctuary(
 
     fun reshape() {
         layoutSalt++
+        noRoomFor.clear()
         pocketStyle = 2
         caveStyle = 2
         planned = false
@@ -340,6 +347,9 @@ class Sanctuary(
         val vars = CompoundTag()
         variants.forEach { (k, v) -> vars.putInt(k, v) }
         t.put("Variants", vars)
+        val homes = CompoundTag()
+        customHomes.forEach { (k, v) -> homes.putString(k, v) }
+        t.put("CustomHomes", homes)
         val eggList = ListTag()
         eggs.values.forEach { eggList.add(it.save()) }
         t.put("Eggs", eggList)
@@ -526,6 +536,8 @@ class Sanctuary(
             }
             val vars = t.getCompound("Variants")
             vars.allKeys.forEach { k -> s.variants[k] = vars.getInt(k) }
+            val homes = t.getCompound("CustomHomes")
+            homes.allKeys.forEach { k -> s.customHomes[k] = homes.getString(k) }
             if (version in 1..20 && s.dens.isNotEmpty()) com.rickygamer28.sanctuary.world.Dens.demolishAll(s)
             if (version in 1..20) s.variants[com.rickygamer28.sanctuary.world.ZoneLayout.HUB] = 0
             return s

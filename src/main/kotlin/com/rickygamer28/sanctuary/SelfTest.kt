@@ -105,7 +105,7 @@ object SelfTest {
                 scan(level, sanctuary)
                 // as in play: a valley with a few habitats, the rest waking up later
                 sanctuary.reshape()
-                plan(sanctuary, FIRST)
+                plan(sanctuary, FIRST + CUSTOM)
                 log("few habitats: ${sanctuary.habitats.keys}")
                 stage = 3; stageStart = now; idleSince = -1L
             }
@@ -120,7 +120,7 @@ object SelfTest {
                 log("== after the rest woke up, finished in ${"%.0f".format(secs)} s${if (timedOut) " (TIMED OUT)" else ""}")
                 scan(level, sanctuary)
                 // the owner picks other looks for two habitats (as the Region tab's Look button does)
-                for (zone in listOf("water", "rock", com.rickygamer28.sanctuary.world.ZoneLayout.HUB)) {
+                for (zone in listOf("water", "rock", com.rickygamer28.sanctuary.world.ZoneLayout.HUB) + CUSTOM.filter { it in sanctuary.habitats }) {
                     val now0 = BiomeDresser.variantOf(sanctuary, zone)
                     // (the town goes to the Old Kanto village, with its koi ponds)
                     val next = if (zone == com.rickygamer28.sanctuary.world.ZoneLayout.HUB) (if (now0 == 1) 2 else 1) else (now0 + 1) % 3
@@ -151,19 +151,22 @@ object SelfTest {
     private val PLAIN_ROCK = setOf(Blocks.STONE, Blocks.ANDESITE, Blocks.SNOW_BLOCK, Blocks.BLACKSTONE)
 
     private val FIRST = listOf("water", "grass", "fire", "rock")
+    /** Two custom types (as Gravelmon's would be), each with a habitat of its own from the start. */
+    private val CUSTOM = listOf("shadow", "crystal")
 
     private fun counts(zones: List<String>): LinkedHashMap<String, Int> {
         val counts = linkedMapOf<String, Int>()
         ZoneLayout.HABITATS.forEachIndexed { i, z -> if (z in zones) counts[z] = 40 + (i * 37) % 160 }
+        CUSTOM.forEachIndexed { i, z -> if (z in zones) counts[z] = 30 + i * 10 }
         return counts
     }
 
     /** What Residents does when new types move in: wake them, fit new habitats into free meadows, rebuild. */
     private fun wakeTheRest(s: Sanctuary) {
-        val counts = counts(ZoneLayout.HABITATS)
+        val counts = counts(ZoneLayout.HABITATS + CUSTOM)
         val newTypes = ZoneLayout.HABITATS.filter { it !in s.unlocked }
         s.typeCounts = counts
-        s.unlocked = linkedSetOf(ZoneLayout.HUB) + ZoneLayout.HABITATS
+        s.unlocked = linkedSetOf(ZoneLayout.HUB) + ZoneLayout.HABITATS + CUSTOM.filter { it in s.habitats }
         s.unlockedChanged = true
         SanctuaryGenerator.redoCaves(s)
         s.rebuildZones += newTypes.filter { z -> ZoneLayout.pockets(s).any { it.zone == z } }
@@ -197,6 +200,7 @@ object SelfTest {
         val counts = counts(zones)
         s.typeCounts = counts
         s.unlocked = linkedSetOf(ZoneLayout.HUB) + zones
+        s.customCounts = counts.filterKeys { it in CUSTOM }
         s.habitats.clear()
         s.habitats.putAll(ZoneLayout.plan(s, counts))
         s.planned = true

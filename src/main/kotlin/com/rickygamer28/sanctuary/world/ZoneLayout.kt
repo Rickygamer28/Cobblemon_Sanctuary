@@ -85,8 +85,14 @@ object ZoneLayout {
     /** Every habitat there can be. */
     fun ring(): List<String> = HABITATS
 
+    /** The habitats there can be in [s]: the standard ones, and the custom types' that have a place on its map. */
+    fun zonesOf(s: Sanctuary): List<String> = HABITATS + customZones(s)
+
+    /** The custom types' habitats on [s]'s map (in a fixed order: the map's colours go by it). */
+    fun customZones(s: Sanctuary): List<String> = s.habitats.keys.filter { CustomTypes.isCustom(it) }.sorted()
+
     /** The habitats this sanctuary has on its map right now. */
-    fun ring(s: Sanctuary): List<String> = HABITATS.filter { it in s.habitats }
+    fun ring(s: Sanctuary): List<String> = zonesOf(s).filter { it in s.habitats }
 
     // ------------------------------------------------------------------ the plan
 
@@ -100,12 +106,20 @@ object ZoneLayout {
 
     /** Lays out the habitats for [counts] (residents per habitat): busier habitats get more room. */
     fun plan(s: Sanctuary, counts: Map<String, Int>): Map<String, Habitat> {
-        val awake = AROUND.filter { (counts[it] ?: 0) > 0 }
+        // custom types with a habitat of their own sit right after the habitat that suits them best (Shadow after
+        // the Haunted tower…); ones that would live in the town go last
+        val customs = counts.keys.filter { CustomTypes.isCustom(it) && (counts[it] ?: 0) > 0 }.sorted()
+        val order = ArrayList(AROUND)
+        for (c in customs) {
+            val after = order.indexOf(CustomTypes.defaultHome(c))
+            if (after < 0) order += c else order.add(after + 1, c)
+        }
+        val awake = order.filter { (counts[it] ?: 0) > 0 }
         if (awake.isEmpty()) return emptyMap()
         // every habitat gets its place in the order around the town, the ones nobody lives in yet too (they're
         // meadows until their first Pokémon moves in, then wake up right there, between their neighbours);
         // otherwise the first few habitats took the whole valley and later ones found no room
-        val zones = AROUND
+        val zones: List<String> = order
         val random = java.util.Random(s.seed xor (s.layoutSalt * 0x9E3779B97F4A7C15uL.toLong()) xor 0x5A17L)
         val h = inner(s)
         val r = outer(s)

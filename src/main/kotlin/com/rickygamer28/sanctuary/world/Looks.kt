@@ -67,4 +67,7 @@ object Looks {
             "Tall flowers" to "Meadows of tall, bright flowers",
         ),
     )
+
+    /** The looks [zone] can have (custom types' habitats share three), or null. */
+    fun of(zone: String): List<Pair<String, String>>? = ALL[zone] ?: if (CustomTypes.isCustom(zone)) CustomTypes.LOOKS else null
 }

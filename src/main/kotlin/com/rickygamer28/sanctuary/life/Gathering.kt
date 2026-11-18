@@ -55,7 +55,7 @@ object Gathering {
                 if (count > 0) found += ItemStack(item, count.coerceAtMost(3))
             }
             // something from its biome
-            val home = TypeLogic.homeZone(pk, s.residents[pk.uuid], ring)
+            val home = TypeLogic.homeZone(pk, s.residents[pk.uuid], ring, s)
             if (home in LUSH && random.nextDouble() < 0.3) {
                 if (random.nextDouble() < 0.7) { if ("berries" !in s.basketOff) randomFromTag(BERRIES, level)?.let { found += it } }
                 else if ("apricorns" !in s.basketOff) randomFromTag(APRICORNS, level)?.let { found += it }

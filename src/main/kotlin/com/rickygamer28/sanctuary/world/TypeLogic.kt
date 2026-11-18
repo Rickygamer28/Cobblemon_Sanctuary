@@ -39,13 +39,17 @@ object TypeLogic {
      * and mountain…). Types without a habitat (ones other mods add) are skipped; a Pokémon with only such types,
      * or a Normal type, lives in the town and meadows.
      */
-    fun zoneTypes(pokemon: Pokemon): List<String> {
+    fun zoneTypes(pokemon: Pokemon, s: com.rickygamer28.sanctuary.data.Sanctuary? = null): List<String> {
         val types = finalTypes(pokemon).filter { it != FLYING }
-        val homes = types.mapNotNull { ZoneLayout.habitatOf(it) }.distinct()
+        // a custom type (another mod's): its own habitat if it has one here, or the habitat that suits it
+        val homes = types.map { ZoneLayout.habitatOf(it) ?: CustomTypes.zoneFor(s, it) }.distinct()
         return if (homes.isEmpty() && types.isNotEmpty()) listOf(ZoneLayout.HUB) else homes
     }
 
     fun isTraveler(pokemon: Pokemon) = zoneTypes(pokemon).isEmpty()
+
+    /** The custom types (other mods') a Pokémon has. */
+    fun customTypes(pokemon: Pokemon): List<String> = finalTypes(pokemon).filter { it != FLYING && ZoneLayout.habitatOf(it) == null }
 
     fun canFlyInFlocks(pokemon: Pokemon) = FLYING in currentTypes(pokemon)
 
@@ -61,9 +65,9 @@ object TypeLogic {
 
     /** The zone this Pokémon calls home, or null for a traveler that hasn't settled anywhere. */
     /** The habitat a Pokémon lives in; [ring] is the habitats on the map (a habitat that isn't there yet → meadows). */
-    fun homeZone(pokemon: Pokemon, data: ResidentData?, ring: List<String>): String? {
+    fun homeZone(pokemon: Pokemon, data: ResidentData?, ring: List<String>, s: com.rickygamer28.sanctuary.data.Sanctuary? = null): String? {
         if ("water" in ring && waterOnly(pokemon)) return "water"
-        val all = zoneTypes(pokemon)
+        val all = zoneTypes(pokemon, s)
         val options = all.filter { it == ZoneLayout.HUB || it in ring }.ifEmpty { if (all.isEmpty()) all else listOf(ZoneLayout.HUB) }
         val choice = data?.homeChoice
         if (choice != null) {
@@ -74,8 +78,8 @@ object TypeLogic {
     }
 
     /** The other biome a dual-type Pokémon belongs to, if any. */
-    fun secondZone(pokemon: Pokemon, home: String?, ring: List<String> = ZoneLayout.HABITATS): String? =
-        if (waterOnly(pokemon)) null else zoneTypes(pokemon).firstOrNull { it != home && (it == ZoneLayout.HUB || it in ring) }
+    fun secondZone(pokemon: Pokemon, home: String?, ring: List<String> = ZoneLayout.HABITATS, s: com.rickygamer28.sanctuary.data.Sanctuary? = null): String? =
+        if (waterOnly(pokemon)) null else zoneTypes(pokemon, s).firstOrNull { it != home && (it == ZoneLayout.HUB || it in ring) }
 
     private fun typesOf(form: FormData): List<String> = form.types.map { it.name.lowercase() }
 

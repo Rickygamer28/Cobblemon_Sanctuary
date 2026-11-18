@@ -42,6 +42,7 @@ object RegionMap {
         val flags = ByteArray(N * N)
         val r = s.size.radius
         val g = SanctuaryDimension.GROUND_Y
+        val customs = ZoneLayout.customZones(s)
         for (i in 0 until N) for (j in 0 until N) {
             val x = s.center.x - r + ((i + 0.5) * 2 * r / N).toInt()
             val z = s.center.z - r + ((j + 0.5) * 2 * r / N).toInt()
@@ -51,7 +52,8 @@ object RegionMap {
             var zone = hit.zone
             val pocket = ZoneLayout.pocketAt(s, x, z)?.takeIf { it.first.live(s) && it.second <= it.first.r }
             if (pocket != null) { zone = pocket.first.zone; f = f or POCKET }
-            val k = ZoneLayout.HABITATS.indexOf(zone)
+            // (the standard habitats are 2..12, the custom types' own habitats 13 on, in the Region list's order)
+            val k = ZoneLayout.HABITATS.indexOf(zone).let { if (it >= 0) it else customs.indexOf(zone).let { ci -> if (ci >= 0) 11 + ci else -1 } }
             zones[c] = (if (k >= 0 && zone in s.unlocked) k + 2 else 1).toByte()
             val h = BiomeDresser.targetHeight(s, x, z, ZoneLayout.HABITATS)
             heights[c] = (h - g + 40).coerceIn(0, 255).toByte()

@@ -203,12 +203,16 @@ object Residents {
             Sanctuaries.data(level).setDirty()
         }
 
-        val ring = ZoneLayout.ring()
+        val ring = ZoneLayout.zonesOf(s)
         val counts = HashMap<String, Int>()
+        // custom types (other mods'): how many Pokémon each has, for giving it a habitat of its own
+        val customCounts = HashMap<String, Int>()
         for (e in list) {
-            val types = runCatching { TypeLogic.zoneTypes(e.pokemon) }.getOrDefault(emptyList())
+            val types = runCatching { TypeLogic.zoneTypes(e.pokemon, s) }.getOrDefault(emptyList())
             for (t in types.toSet()) counts[t] = (counts[t] ?: 0) + 1
+            for (t in runCatching { TypeLogic.customTypes(e.pokemon) }.getOrDefault(emptyList()).toSet()) customCounts[t] = (customCounts[t] ?: 0) + 1
         }
+        s.customCounts = customCounts
         val unlocked = linkedSetOf(ZoneLayout.HUB) + counts.keys.filter { it in ring }
         val newTypes = unlocked - s.unlocked
         val cavesChange = s.state == SanctuaryState.ACTIVE && s.planned && s.caveStyle >= 2 &&
@@ -227,7 +231,7 @@ object Residents {
         if (s.planned && s.state == SanctuaryState.ACTIVE) s.rebuildZones += newTypes.filter { it != ZoneLayout.HUB && it in s.habitats }
         if (newTypes.isNotEmpty() || grew) s.generationDirty = true
         if (cavesChange) com.rickygamer28.sanctuary.world.SanctuaryGenerator.redoCaves(s)
-        planRegion(s, counts)
+        planRegion(s, counts, customCounts)
         rt.anchors = unlocked.associateWith { ZoneLayout.anchor(s, it) }
     }
 
@@ -235,22 +239,31 @@ object Residents {
      * The region map: laid out the first time (and after a Reshape) from how many residents live in each habitat;
      * a habitat that wakes up later is fitted into a free meadow without moving the others.
      */
-    private fun planRegion(s: Sanctuary, counts: Map<String, Int>) {
+    private fun planRegion(s: Sanctuary, counts: Map<String, Int>, customCounts: Map<String, Int> = emptyMap()) {
         if (s.state != SanctuaryState.ACTIVE) return
+        // custom types with enough Pokémon (and the owner hasn't sent them to live elsewhere) want a habitat of their own
+        val ownWanted = customCounts.filter { (t, n) -> n >= com.rickygamer28.sanctuary.world.CustomTypes.minResidents() && com.rickygamer28.sanctuary.world.CustomTypes.wantsOwn(s, t) }
         if (!s.planned) {
             s.pocketStyle = 2
             s.caveStyle = 2
             s.habitats.clear()
-            s.habitats.putAll(ZoneLayout.plan(s, counts))
+            s.habitats.putAll(ZoneLayout.plan(s, counts + ownWanted))
             s.planned = true
             s.planRadius = s.size.radius
             s.generationDirty = true
             return
         }
-        for (zone in ZoneLayout.HABITATS) {
-            val n = counts[zone] ?: 0
+        for ((zone, n) in ZoneLayout.HABITATS.associateWith { counts[it] ?: 0 } + ownWanted) {
             if (n <= 0 || zone in s.habitats) continue
-            val hb = ZoneLayout.fitIn(s, zone, n) ?: continue
+            if (zone in s.noRoomFor) continue
+            val hb = ZoneLayout.fitIn(s, zone, n) ?: run {
+                // no room for it until the next Reshape (its Pokémon live in the habitat that suits them meanwhile)
+                if (com.rickygamer28.sanctuary.world.CustomTypes.isCustom(zone)) {
+                    s.noRoomFor += zone
+                    s.logEvent("The ${zoneName(zone)} is ready to appear, but there's no room left: it will on the next Reshape.")
+                }
+                null
+            } ?: continue
             s.habitats[zone] = hb
             s.rebuildZones += zone
             s.generationDirty = true
@@ -317,7 +330,7 @@ object Residents {
         val zoneDist = HashMap<String, Double>()
         for (e in rt.roster) {
             // fainted ones come out too: the sanctuary heals them when they appear
-            val home = TypeLogic.homeZone(e.pokemon, s.residents[e.pokemon.uuid], ring)
+            val home = TypeLogic.homeZone(e.pokemon, s.residents[e.pokemon.uuid], ring, s)
             if (home != null && home !in s.unlocked) continue
             val key = home ?: "~travelers"
             val d = zoneDist.getOrPut(key) { distToPlayers(home) }
@@ -372,7 +385,7 @@ object Residents {
         val pokemon = e.pokemon
         if (pokemon.tetheringId != null || pokemon.entity != null) return null
         val ring = ZoneLayout.ring(s)
-        val home = TypeLogic.homeZone(pokemon, s.residents[pokemon.uuid], ring)
+        val home = TypeLogic.homeZone(pokemon, s.residents[pokemon.uuid], ring, s)
         val swimmer = TypeLogic.waterOnly(pokemon)
         val spawnZone = if (swimmer) "water" else home ?: s.unlocked.random()
         if (swimmer && "water" !in s.unlocked) return null
@@ -445,7 +458,7 @@ object Residents {
         }
         val live = LiveResident(pokemon.uuid, e.owner, entity, tethering)
         live.home = home
-        live.second = TypeLogic.secondZone(pokemon, home, ring)
+        live.second = TypeLogic.secondZone(pokemon, home, ring, s)
         live.flyer = TypeLogic.canFlyInFlocks(pokemon)
         live.swimmer = swimmer
         live.pocket = inPocket
@@ -572,7 +585,7 @@ object Residents {
 
     fun zoneName(zone: String?): String = when (zone) {
         null -> "skies"
-        else -> ZoneLayout.NAMES[zone] ?: (zone.replaceFirstChar { it.uppercase() } + " biome")
+        else -> ZoneLayout.NAMES[zone] ?: com.rickygamer28.sanctuary.world.CustomTypes.habitatName(zone)
     }
 
     fun findRoster(rt: SanctuaryRuntime, pokemonId: UUID): RosterEntry? = rt.roster.firstOrNull { it.pokemon.uuid == pokemonId }

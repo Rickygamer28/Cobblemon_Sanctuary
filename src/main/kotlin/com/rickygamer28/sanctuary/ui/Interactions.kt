@@ -49,7 +49,7 @@ object Interactions {
         when (action) {
             "menu", "summary" -> return SanctuaryGuis.openResident(player, f.s, pokemonId)
             "pet" -> {
-                if (live == null) return say(player, "$name isn't out right now. Go find it in the ${Residents.zoneName(TypeLogic.homeZone(pokemon, data, ZoneLayout.ring(f.s)))}!", net.minecraft.ChatFormatting.GRAY)
+                if (live == null) return say(player, "$name isn't out right now. Go find it in the ${Residents.zoneName(TypeLogic.homeZone(pokemon, data, ZoneLayout.ring(f.s), f.s))}!", net.minecraft.ChatFormatting.GRAY)
                 if (!near(player, live)) return say(player, "Get closer to $name first.", net.minecraft.ChatFormatting.GRAY)
                 Residents.stop(live.entity)
                 live.entity.lookControl.setLookAt(player)
@@ -97,12 +97,12 @@ object Interactions {
                 if (!owner) return say(player, "Only its trainer can change its home.", net.minecraft.ChatFormatting.RED)
                 val zone = arg ?: return
                 val ring = ZoneLayout.ring(f.s)
-                val options = TypeLogic.zoneTypes(pokemon).filter { it == ZoneLayout.HUB || it in ring }.ifEmpty { listOf(ZoneLayout.HUB) + ring }
+                val options = TypeLogic.zoneTypes(pokemon, f.s).filter { it == ZoneLayout.HUB || it in ring }.ifEmpty { listOf(ZoneLayout.HUB) + ring }
                 if (zone !in options) return say(player, "$name can't live there.", net.minecraft.ChatFormatting.RED)
                 data.homeChoice = zone
                 if (live != null) {
                     live.home = zone
-                    live.second = TypeLogic.secondZone(pokemon, zone, ring)
+                    live.second = TypeLogic.secondZone(pokemon, zone, ring, f.s)
                     Behaviour.commute(f.level, f.s, live, zone)
                 }
                 f.s.logEvent("$name moved to the ${Residents.zoneName(zone)}.")

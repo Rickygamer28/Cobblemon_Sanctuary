@@ -21,7 +21,7 @@ object AwayLife {
 
     private fun circles(s: Sanctuary, roster: List<RosterEntry>): Circle {
         val ring = ZoneLayout.ring(s)
-        val homes = roster.associate { it.pokemon.uuid to TypeLogic.homeZone(it.pokemon, s.residents[it.pokemon.uuid], ring) }
+        val homes = roster.associate { it.pokemon.uuid to TypeLogic.homeZone(it.pokemon, s.residents[it.pokemon.uuid], ring, s) }
         val byId = roster.associateBy { it.pokemon.uuid }
         val friends = HashMap<UUID, MutableList<UUID>>()
         for ((k, v) in s.relationships) {

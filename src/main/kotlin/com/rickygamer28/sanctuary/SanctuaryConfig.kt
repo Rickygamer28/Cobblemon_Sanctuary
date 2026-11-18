@@ -208,8 +208,14 @@ object SanctuaryConfig {
         .comment("The valley builder loads the chunks it's building in (so the whole valley is built in one go, whatever players' render distance).")
         .define("loadChunksToBuild", true)
     val customTypeBiomes: ModConfigSpec.BooleanValue = builder
-        .comment("Give types added by other mods a biome of their own in the ring (off: their Pokémon live in the biome of their other type, or the Normal hub).")
-        .define("customTypeBiomes", false)
+        .comment("Types added by other mods (Gravelmon's, Lost Lore's…) get a habitat of their own once they have enough Pokémon (off: they always live in a habitat that suits them).")
+        .define("customTypeBiomes", true)
+    val customHabitatMin: ModConfigSpec.IntValue = builder
+        .comment("How many Pokémon of a custom type it takes for it to get a habitat of its own.")
+        .defineInRange("customHabitatMin", 10, 1, 1000)
+    val customTypeHomes = builder
+        .comment("Where Pokémon of custom types live (until they get a habitat of their own), as \"type=habitat\": habitats are normal, water, ice, rock, ground, fire, dragon, ghost, poison, grass, fairy, electric. The sanctuary's owner can change it on the Region tab.")
+        .defineListAllowEmpty("customTypeHomes", listOf<String>(), { "" }, { it is String })
     val dens: ModConfigSpec.BooleanValue = builder
         .comment("Build dens in every biome that residents walk into to rest and come out of.")
         .define("dens", true)
