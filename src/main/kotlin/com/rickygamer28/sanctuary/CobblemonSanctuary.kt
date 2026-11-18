@@ -39,6 +39,9 @@ class CobblemonSanctuary(modBus: IEventBus, container: ModContainer) {
 
         val bus = NeoForge.EVENT_BUS
         bus.addListener(ServerTickEvent.Post::class.java) { onServerTick(it) }
+        // types can change when the game loads its data (Gravelmon retypes some Pokémon) or on /reload: read them again
+        bus.addListener(net.neoforged.neoforge.event.server.ServerStartedEvent::class.java) { com.rickygamer28.sanctuary.world.TypeLogic.clearCache() }
+        bus.addListener(net.neoforged.neoforge.event.OnDatapackSyncEvent::class.java) { if (it.player == null) com.rickygamer28.sanctuary.world.TypeLogic.clearCache() }
         bus.addListener(RegisterCommandsEvent::class.java) { onRegisterCommands(it) }
         bus.addListener(PlayerInteractEvent.EntityInteract::class.java) { onEntityInteract(it) }
         bus.addListener(EntityJoinLevelEvent::class.java) { onEntityJoin(it) }
