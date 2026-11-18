@@ -369,7 +369,11 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
         hit(0, 0, width, height) { }
         val c = opaque(b.color)
         val options = (if (b.ownOn) listOf("own") else emptyList()) + listOf("normal") + zoneList
-        fun label(o: String) = if (o == "own") "Its own habitat" else biomes.firstOrNull { it.zone == o }?.name ?: o
+        fun label(o: String) = when (o) {
+            "own" -> "Automatic"
+            "normal" -> "Town (nothing of its own)"
+            else -> biomes.firstOrNull { it.zone == o }?.name ?: o
+        }
         val bw = min(360, pw - 30)
         val rowH = 18
         val colW = (bw - 30) / 2
@@ -381,7 +385,7 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
         box(g, bx, by, bw, bh, PANEL)
         g.fill(bx, by, bx + bw, by + 3, c)
         text(g, "Where ${b.types} Pokémon live", bx + 10, by + 12, TEXT, true)
-        text(g, fit(if (b.ownOn) "A pocket at ${b.pocketNeed}, a sub-biome at ${b.subNeed}, a habitat of their own at ${b.need} (now ${b.typeCount})." else "Pick the habitat that suits them.", bw - 20), bx + 10, by + 26, SUB)
+        text(g, fit(if (b.ownOn) "Their pocket and sub-biome go in the habitat you pick (now ${b.typeCount} of them; a sub-biome at ${b.subNeed})." else "Pick the habitat that suits them.", bw - 20), bx + 10, by + 26, SUB)
         options.forEachIndexed { i, o ->
             val rx = bx + 10 + (i % 2) * (colW + 10)
             val ry = by + 42 + (i / 2) * (rowH + 3)

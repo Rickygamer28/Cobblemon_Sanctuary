@@ -316,6 +316,23 @@ object Residents {
     }
 
     /**
+     * Builds again only what changed since [before]: pockets that changed hands, and sub-biomes that came, went,
+     * grew or moved. Returns the pockets now.
+     */
+    fun rebuildChanged(s: Sanctuary, before: List<ZoneLayout.Pocket>): List<ZoneLayout.Pocket> {
+        val after = ZoneLayout.pockets(s)
+        fun sig(p: ZoneLayout.Pocket) = "${p.x},${p.z},${p.r},${p.zone}"
+        val oldSigs = before.map { sig(it) }.toSet()
+        val newSigs = after.map { sig(it) }.toSet()
+        for (p in before + after) {
+            if (sig(p) in oldSigs && sig(p) in newSigs) continue
+            if (p.sub) s.rebuildZones += "circle:${p.x},${p.z},${p.r + 6}" else s.rebuildZones += "pocket:${p.x},${p.z}"
+            s.generationDirty = true
+        }
+        return after
+    }
+
+    /**
      * Custom types grow in stages: with a few Pokémon a pocket of their own inside the habitat they live in, with more
      * a sub-biome (a district of that habitat, growing with them), and with lots a habitat of their own in the ring.
      */
@@ -344,16 +361,7 @@ object Residents {
         s.customPockets.clear(); s.customPockets += pockets
         s.customSubs.clear(); s.customSubs.putAll(subs)
         s.unlocked = s.unlocked - gone + pockets + subs.keys
-        val after = ZoneLayout.pockets(s)
-        // only what changed is built again: pockets that changed hands, and sub-biomes that came, went or grew
-        fun sig(p: ZoneLayout.Pocket) = "${p.x},${p.z},${p.r},${p.zone}"
-        val oldSigs = before.map { sig(it) }.toSet()
-        val newSigs = after.map { sig(it) }.toSet()
-        for (p in before + after) {
-            if (sig(p) in oldSigs && sig(p) in newSigs) continue
-            if (p.sub) s.rebuildZones += "circle:${p.x},${p.z},${p.r + 6}" else s.rebuildZones += "pocket:${p.x},${p.z}"
-        }
-        s.generationDirty = true
+        val after = rebuildChanged(s, before)
         for (t in addedPockets) {
             val p = after.firstOrNull { it.zone == t } ?: continue
             s.logEvent("A little ${com.rickygamer28.sanctuary.world.CustomTypes.pocketName(t)} appeared in the ${zoneName(p.host)}!")

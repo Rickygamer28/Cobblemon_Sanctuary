@@ -217,6 +217,8 @@ object SelfTest {
             s.customPockets += CUSTOM_POCKETS
             s.customSubs.clear()
             s.customSubs.putAll(CUSTOM_SUBS)
+            // (the owner sends Eldritch to the Rock mountain: its sub-biome goes there)
+            s.customHomes["eldritch"] = "rock"
             s.unlocked = s.unlocked + CUSTOM_POCKETS + CUSTOM_SUBS.keys
             log("sub-biomes: " + CUSTOM_SUBS.keys.joinToString { t -> ZoneLayout.customPocket(s, t)?.let { "$t in ${it.host} r${it.r} at (${it.x - s.center.x}, ${it.z - s.center.z})" } ?: "$t (no room)" })
             log("custom pockets: " + CUSTOM_POCKETS.joinToString { t -> ZoneLayout.customPocket(s, t)?.let { "$t in ${it.host} r${it.r} at (${it.x - s.center.x}, ${it.z - s.center.z})" } ?: "$t (no room)" })

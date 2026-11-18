@@ -238,7 +238,7 @@ object CustomTypes {
 
     /** Does [type] get a habitat of its own in [s] once it has enough Pokémon? */
     fun wantsOwn(s: Sanctuary?, type: String): Boolean =
-        !townOnly(type) && runCatching { SanctuaryConfig.customTypeBiomes.get() }.getOrDefault(true) && (choice(s, type) ?: OWN) == OWN
+        !townOnly(type) && runCatching { SanctuaryConfig.customTypeBiomes.get() }.getOrDefault(true) && choice(s, type) != ZoneLayout.HUB
 
     /** How many Pokémon of a custom type it takes for it to get a habitat of its own. */
     fun minResidents(): Int = runCatching { SanctuaryConfig.customHabitatMin.get() }.getOrDefault(15)

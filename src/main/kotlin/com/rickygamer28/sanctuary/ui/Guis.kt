@@ -416,19 +416,25 @@ object ScreenActions {
                 refresh("home")
             }
             "customHome" -> {
-                // the owner picks where a custom type's Pokémon live: its own habitat, the town, or a habitat
+                // the owner picks where a custom type's Pokémon live, and so where its pocket and sub-biome go:
+                // automatically, in a habitat they pick (a mountain too), or in the town (nothing of its own)
                 val type = v.substringBefore(':')
                 val choice = v.substringAfter(':')
                 val valid = choice == com.rickygamer28.sanctuary.world.CustomTypes.OWN || choice == ZoneLayout.HUB || choice in ZoneLayout.HABITATS
                 if (ownerOnly() && com.rickygamer28.sanctuary.world.CustomTypes.isCustom(type) && valid) {
+                    val before = ZoneLayout.pockets(s)
                     s.customHomes[type] = choice
                     s.noRoomFor.remove(type)
                     Residents.runtime(s).rosterDirty = true
                     s.generationDirty = true
+                    Residents.rebuildChanged(s, before)
                     Sanctuaries.data(level).setDirty()
                     val name = com.rickygamer28.sanctuary.world.CustomTypes.typeName(type)
-                    say(player, if (choice == com.rickygamer28.sanctuary.world.CustomTypes.OWN) "$name Pokémon will get a habitat of their own once there are enough of them."
-                        else "$name Pokémon now live in the ${Residents.zoneName(choice)}.", ChatFormatting.GREEN)
+                    say(player, when (choice) {
+                        com.rickygamer28.sanctuary.world.CustomTypes.OWN -> "$name Pokémon live where it suits them; their pocket and sub-biome go there."
+                        ZoneLayout.HUB -> "$name Pokémon now live in the town (no pocket or sub-biome of their own)."
+                        else -> "$name Pokémon now live in the ${Residents.zoneName(choice)}; their pocket and sub-biome go there."
+                    }, ChatFormatting.GREEN)
                 }
                 refresh("biomes")
             }
