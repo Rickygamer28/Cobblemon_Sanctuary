@@ -140,6 +140,7 @@ object SanctuaryGuis {
             for (zone in listOf(ZoneLayout.HUB) + ZoneLayout.HABITATS + customPlaced + customOthers) list.add(CompoundTag().also {
                 val custom = com.rickygamer28.sanctuary.world.CustomTypes.isCustom(zone)
                 val placed = zone == ZoneLayout.HUB || zone in s.habitats
+                val pocket = if (custom && !placed) ZoneLayout.customPocket(s, zone) else null
                 val count = if (custom && !placed) s.customCounts[zone] ?: 0 else s.typeCounts[zone] ?: 0
                 it.putString("zone", zone)
                 it.putString("name", if (custom && !placed) com.rickygamer28.sanctuary.world.CustomTypes.typeName(zone) + " type" else Residents.zoneName(zone))
@@ -159,14 +160,18 @@ object SanctuaryGuis {
                     it.putInt("need", com.rickygamer28.sanctuary.world.CustomTypes.minResidents())
                     it.putInt("typeCount", s.customCounts[zone] ?: 0)
                     it.putBoolean("noRoom", zone in s.noRoomFor)
-                    it.putBoolean("ownOn", runCatching { com.rickygamer28.sanctuary.SanctuaryConfig.customTypeBiomes.get() }.getOrDefault(true))
+                    it.putBoolean("ownOn", runCatching { com.rickygamer28.sanctuary.SanctuaryConfig.customTypeBiomes.get() }.getOrDefault(true) &&
+                        !com.rickygamer28.sanctuary.world.CustomTypes.townOnly(zone))
+                    it.putInt("pocketNeed", com.rickygamer28.sanctuary.world.CustomTypes.pocketMin())
+                    it.putBoolean("townOnly", com.rickygamer28.sanctuary.world.CustomTypes.townOnly(zone))
+                    if (pocket != null) { it.putBoolean("pocket", true); it.putString("pocketIn", Residents.zoneName(pocket.host)) }
                 }
                 // how lively the biome is: its share of the residents, compared with the busiest biome
                 val busiest = (s.typeCounts.values.maxOrNull() ?: 1).coerceAtLeast(1)
                 val pct = if (zone == ZoneLayout.HUB) 100 else (count * 100 / busiest).coerceIn(0, 100)
                 it.putInt("pct", pct)
                 // its look, and the looks the owner can choose from
-                com.rickygamer28.sanctuary.world.Looks.of(zone)?.takeIf { placed }?.let { looks ->
+                com.rickygamer28.sanctuary.world.Looks.of(zone)?.takeIf { placed || pocket != null }?.let { looks ->
                     it.putInt("look", com.rickygamer28.sanctuary.world.BiomeDresser.variantOf(s, zone))
                     it.put("looks", ListTag().also { l -> looks.forEach { (n, d) -> l.add(StringTag.valueOf("$n|$d")) } })
                 }
@@ -429,7 +434,7 @@ object ScreenActions {
                 // the owner picks a habitat's look: only that habitat (and the strip along its borders) is built again
                 val zone = v.substringBefore(':')
                 val look = v.substringAfter(':').toIntOrNull()
-                val looks = com.rickygamer28.sanctuary.world.Looks.of(zone)?.takeIf { zone == ZoneLayout.HUB || zone in s.habitats }
+                val looks = com.rickygamer28.sanctuary.world.Looks.of(zone)?.takeIf { zone == ZoneLayout.HUB || zone in s.habitats || zone in s.customPockets }
                 val now = level.gameTime
                 when {
                     !ownerOnly() -> {}

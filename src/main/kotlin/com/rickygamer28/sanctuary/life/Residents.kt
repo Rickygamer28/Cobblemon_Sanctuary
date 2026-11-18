@@ -213,7 +213,7 @@ object Residents {
             for (t in runCatching { TypeLogic.customTypes(e.pokemon) }.getOrDefault(emptyList()).toSet()) customCounts[t] = (customCounts[t] ?: 0) + 1
         }
         s.customCounts = customCounts
-        val unlocked = linkedSetOf(ZoneLayout.HUB) + counts.keys.filter { it in ring }
+        val unlocked = linkedSetOf(ZoneLayout.HUB) + counts.keys.filter { it in ring } + s.customPockets
         val newTypes = unlocked - s.unlocked
         val cavesChange = s.state == SanctuaryState.ACTIVE && s.planned && s.caveStyle >= 2 &&
             com.rickygamer28.sanctuary.world.Caves.MOUNTAINS.any { (it in unlocked) != (it in s.unlocked) }
@@ -251,6 +251,7 @@ object Residents {
             s.planned = true
             s.planRadius = s.size.radius
             s.generationDirty = true
+            updatePockets(s, customCounts)
             return
         }
         for ((zone, n) in ZoneLayout.HABITATS.associateWith { counts[it] ?: 0 } + ownWanted) {
@@ -268,6 +269,31 @@ object Residents {
             s.rebuildZones += zone
             s.generationDirty = true
             s.logEvent("A new habitat appeared in the valley: the ${zoneName(zone)}!")
+        }
+        updatePockets(s, customCounts)
+    }
+
+    /**
+     * Custom types with a few Pokémon (not yet enough for a habitat) get a pocket of their own, inside the habitat
+     * they live in: a little patch built from their palette and look.
+     */
+    private fun updatePockets(s: Sanctuary, customCounts: Map<String, Int>) {
+        val min = com.rickygamer28.sanctuary.world.CustomTypes.pocketMin()
+        val wanted = customCounts.filter { (t, n) -> n >= min && t !in s.habitats && com.rickygamer28.sanctuary.world.CustomTypes.wantsOwn(s, t) }.keys
+        if (wanted == s.customPockets.toSet()) return
+        val before = ZoneLayout.pockets(s).associate { (it.x to it.z) to it.zone }
+        val added = wanted - s.customPockets
+        val gone = s.customPockets - wanted
+        s.customPockets.clear()
+        s.customPockets += wanted
+        s.unlocked = s.unlocked - gone + wanted
+        val after = ZoneLayout.pockets(s)
+        // only the pockets that changed are built again
+        for (p in after) if (before[p.x to p.z] != p.zone) s.rebuildZones += "pocket:${p.x},${p.z}"
+        s.generationDirty = true
+        for (t in added) {
+            val p = after.firstOrNull { it.zone == t } ?: continue
+            s.logEvent("A little ${com.rickygamer28.sanctuary.world.CustomTypes.pocketName(t)} appeared in the ${zoneName(p.host)}!")
         }
     }
 
@@ -404,6 +430,18 @@ object Residents {
                     if (!unseen(players, p.x, p.z)) return@repeat
                     inCave = true
                     return@run p
+                }
+            }
+            // a custom type's Pokémon mostly live in its pocket, while it has one
+            val ownPocket = if (swimmer) null else runCatching { TypeLogic.customTypes(pokemon) }.getOrDefault(emptyList())
+                .firstOrNull { t -> ZoneLayout.customPocket(s, t)?.live(s) == true }
+            if (ownPocket != null && level.random.nextDouble() < 0.8) {
+                repeat(4) {
+                    val (p, pt) = ZoneLayout.pocketPoint(s, ownPocket, level.random) ?: return@repeat
+                    if (!level.hasChunk(pt.first shr 4, pt.second shr 4)) return@repeat
+                    if (!unseen(players, pt.first, pt.second)) return@repeat
+                    inPocket = p
+                    return@run BlockPos(pt.first, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, pt.first, pt.second), pt.second)
                 }
             }
             // some live out in a pocket of their habitat (a pond in the forest, an outcrop in the meadow…)

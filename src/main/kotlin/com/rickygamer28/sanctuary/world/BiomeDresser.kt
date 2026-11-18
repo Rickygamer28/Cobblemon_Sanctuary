@@ -29,6 +29,7 @@ import net.minecraft.world.level.levelgen.Heightmap
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature
 import kotlin.math.abs
 import kotlin.math.cos
+import kotlin.math.exp
 import kotlin.math.floor
 import kotlin.math.max
 import kotlin.math.min
@@ -465,8 +466,7 @@ object BiomeDresser {
         Blocks.WEATHERED_COPPER, Blocks.OXIDIZED_COPPER, Blocks.EXPOSED_COPPER,
         // (the custom types' habitats)
         Blocks.END_STONE, Blocks.PRISMARINE, Blocks.PRISMARINE_BRICKS, Blocks.SLIME_BLOCK, Blocks.SEA_LANTERN,
-        Blocks.CRIMSON_NYLIUM, Blocks.NETHERRACK, Blocks.RED_NETHER_BRICKS, Blocks.NETHER_WART_BLOCK, Blocks.SHROOMLIGHT,
-        Blocks.SCULK, Blocks.SCULK_CATALYST,
+        Blocks.CRIMSON_NYLIUM, Blocks.NETHERRACK, Blocks.SCULK,
         // route and landmark floors: they must count as ground too, or a rebuild leaves them (and a step) behind
         Blocks.MUD_BRICKS, Blocks.POLISHED_BLACKSTONE_BRICKS, Blocks.POLISHED_BLACKSTONE, Blocks.POLISHED_DEEPSLATE,
         Blocks.DEEPSLATE_BRICKS, Blocks.CUT_SANDSTONE, Blocks.CHISELED_SANDSTONE, Blocks.POLISHED_DIORITE,
@@ -807,12 +807,8 @@ object BiomeDresser {
                     else -> Math.pow(ridge(s, wx, wz, 60.0, 31, 2), 1.6) * 10 + f(s, wx, wz, 30.0, 30, 2) * 1.5
                 }
             }
-            else -> if (CustomTypes.isCustom(zone)) when (variant) {
-                // a custom type's own habitat: rolling hills, plateaus, or a hollow ringed by higher ground
-                0 -> f(s, wx, wz, 44.0, 63) * 5 + 2.5
-                1 -> 2 + 9 * smooth((f01(s, wx, wz, 38.0, 64, 2) - 0.52) / 0.06) + f(s, xd, zd, 20.0, 65, 2) * 0.8
-                else -> 1.0 + 7 * smooth((q - 0.6) / 0.22) + f(s, wx, wz, 30.0, 66, 2) * 1.2
-            } else f(s, wx, wz, 34.0, 62) * 4 + 1
+            else -> if (CustomTypes.isCustom(zone)) customShape(s, CustomTypes.looksOf(zone).let { it[variant.coerceIn(0, it.size - 1)] }.terrain, xd, zd, wx, wz, q)
+                else f(s, wx, wz, 34.0, 62) * 4 + 1
         }
         return h * e + EDGE_LEVEL * (1 - e)
     }
@@ -911,7 +907,19 @@ object BiomeDresser {
                 val n = 0.7 + 0.6 * Noise.value(s.seed + 5050 + p.salt, x / 4.0, z / 4.0)
                 flat + tall * Math.pow(smooth((p.r - d) / p.r), 1.3) * n
             }
-            else -> mix(base.toDouble(), level.toDouble(), w * 0.6)
+            // a custom type's pocket, shaped like its look in small
+            else -> if (CustomTypes.isCustom(p.zone)) {
+                val k = d / p.r
+                val rise = Math.pow(smooth((p.r - d) / p.r), 1.3)
+                when (CustomTypes.look(s, p.zone).terrain) {
+                    CustomTypes.Terrain.HOLLOW -> flat - 2.0 * smooth((0.8 - k) / 0.4)
+                    CustomTypes.Terrain.CRATER -> flat - 2.0 * smooth((0.6 - k) / 0.3) + 2.0 * exp(-((k - 0.82) / 0.13).let { it * it })
+                    CustomTypes.Terrain.SPIRES, CustomTypes.Terrain.CANYON, CustomTypes.Terrain.PLATEAUS, CustomTypes.Terrain.TERRACES ->
+                        flat + 3.0 * rise * (0.7 + 0.6 * Noise.value(s.seed + 5051 + p.salt, x / 4.0, z / 4.0))
+                    CustomTypes.Terrain.HILLS, CustomTypes.Terrain.DUNES -> flat + 1.6 * rise
+                    else -> flat
+                }
+            } else mix(base.toDouble(), level.toDouble(), w * 0.6)
         }
         return h.roundToInt()
     }
@@ -921,6 +929,37 @@ object BiomeDresser {
         val (p, d) = ZoneLayout.pocketAt(s, x, z) ?: return null
         if (!p.live(s) || (p.zone != "water" && p.zone != "poison") || d >= p.r * 0.72) return null
         return p.level(s)
+    }
+
+    /** The ground of a custom type's own habitat, by its look's shape ([q]: 0 in the middle, 1 at its edge). */
+    private fun customShape(s: Sanctuary, t: CustomTypes.Terrain, xd: Double, zd: Double, wx: Double, wz: Double, q: Double): Double {
+        val h = when (t) {
+            CustomTypes.Terrain.HILLS -> f(s, wx, wz, 44.0, 63) * 5 + 2.5
+            CustomTypes.Terrain.PLATEAUS -> 2 + 9 * smooth((f01(s, wx, wz, 38.0, 64, 2) - 0.52) / 0.06) + f(s, xd, zd, 20.0, 65, 2) * 0.8
+            // steps with short risers
+            CustomTypes.Terrain.TERRACES -> {
+                val v = f01(s, wx, wz, 46.0, 67, 2) * 4.5
+                floor(v) * 2.5 + smooth((v - floor(v) - 0.8) / 0.2) * 2.5 + 1
+            }
+            CustomTypes.Terrain.HOLLOW -> 1.0 + 7 * smooth((q - 0.6) / 0.22) + f(s, wx, wz, 30.0, 66, 2) * 1.2
+            // a basin with a raised rim, the ground outside it lower again
+            CustomTypes.Terrain.CRATER -> 2.0 + 8 * exp(-((q - 0.5) / 0.12).let { it * it }) - 1.2 * smooth((0.38 - q) / 0.15) + f(s, wx, wz, 26.0, 68, 2) * 0.6
+            CustomTypes.Terrain.SPIRES -> f(s, wx, wz, 40.0, 69) * 2 + 1.8
+            CustomTypes.Terrain.MARSH -> 0.8 + f(s, wx, wz, 24.0, 70) * 0.5
+            // long rounded ridges
+            CustomTypes.Terrain.DUNES -> {
+                val r = 1 - abs(2 * f01(s, wx + zd * 0.6, wz * 0.45, 30.0, 71, 2) - 1)
+                1.2 + 5.5 * Math.pow(r, 1.6)
+            }
+            // high ground split by a winding gorge
+            CustomTypes.Terrain.CANYON -> {
+                val g = abs(f01(s, wx, wz, 55.0, 72, 2) - 0.5)
+                9.0 - 7.5 * smooth((0.075 - g) / 0.04) + f(s, xd, zd, 18.0, 73, 2) * 0.8
+            }
+            CustomTypes.Terrain.FLAT -> 1.4 + f(s, xd, zd, 40.0, 74, 2) * 0.4
+        }
+        // (no lakes in them)
+        return h.coerceAtLeast(0.6)
     }
 
     /** Target height without pockets (a pocket is built at the height its surroundings have here). */
@@ -2642,7 +2681,7 @@ object BiomeDresser {
                     c.chance(0.2) -> c.place(b(Blocks.SHORT_GRASS))
                 }
             }
-            else -> c.ground(hostSoil(), b(Blocks.DIRT))
+            else -> if (CustomTypes.isCustom(p.zone)) custom(c, p.zone, (d / p.r).coerceIn(0.0, 1.0)) else c.ground(hostSoil(), b(Blocks.DIRT))
         }
     }
 
@@ -2652,29 +2691,59 @@ object BiomeDresser {
      * stone with chorus and end rods; Light from bright grass and quartz with white flowers; and so on. Types it
      * doesn't know get the palette closest to their colour.
      */
-    private fun custom(c: Ctx, zone: String) {
+    private fun custom(c: Ctx, zone: String, inPocket: Double? = null) {
         val p = CustomTypes.palette(zone)
-        c.natural(c.broad(b(p.top), b(p.patch), 0.6, 10.0, 61), b(p.filler), b(p.rock), b(p.patch))
+        val look = CustomTypes.look(c.s, zone)
+        val small = inPocket != null
+        // how far out it is: 0 in the middle, 1 at the edge (of the habitat, or of the pocket)
+        val q = inPocket ?: ZoneLayout.local(c.s, zone, c.x, c.z)?.q ?: 0.5
+        val top = b(look.top ?: p.top)
+        val patch = b(look.patch ?: p.patch)
+        val onGridX = Math.floorMod(c.x, 8) == 0
+        val onGridZ = Math.floorMod(c.z, 8) == 0
+        var soil = c.broad(top, patch, 0.6, if (small) 5.0 else 10.0, 61)
+        if (look.grid) soil = when {
+            onGridX && onGridZ && p.glow == Blocks.SEA_LANTERN -> b(Blocks.SEA_LANTERN)
+            onGridX || onGridZ -> patch
+            else -> top
+        }
+        // pools of slime or amethyst in the low middle
+        val poolReach = if (look.terrain == CustomTypes.Terrain.MARSH) 0.6 else 0.32
+        if (look.pools != null && q < poolReach && c.slope < 2 && c.noise(6.0, 67) > 0.42) soil = b(look.pools)
+        c.natural(soil, b(p.filler), b(p.rock), patch)
         if (c.cliff) return
+        fun room(margin: Int) = if (small) q < 0.65 else c.roomy(margin)
         val tip = p.glow?.let { b(it) }?.takeIf { it.`is`(Blocks.AMETHYST_CLUSTER) || it.`is`(Blocks.END_ROD) }
-        // the hollow's rim of tall spires
-        val q = if (c.variant == 2) ZoneLayout.local(c.s, zone, c.x, c.z)?.q ?: 0.0 else 0.0
-        // (only crystal-like palettes get the tall spires; the rest a low, wide rim of outcrops)
-        val crystalLike = p.crystal == Blocks.AMETHYST_BLOCK || p.crystal == Blocks.QUARTZ_BLOCK || p.crystal == Blocks.CALCITE || p.crystal == Blocks.PURPUR_BLOCK
-        val rimSpire = c.variant == 2 && q in 0.5..0.72 && c.grid(7, 62) && c.roomy(8)
+        val rim = look.terrain == CustomTypes.Terrain.HOLLOW || look.terrain == CustomTypes.Terrain.CRATER
+        val spires = look.spires?.let { b(it) }
+        val towers = look.grid && look.terrain == CustomTypes.Terrain.SPIRES
+        val treeKind = look.tree ?: p.tree
         when {
-            rimSpire && crystalLike -> c.spike(b(p.crystal), 1, 5 + c.random.nextInt(5))
-            rimSpire -> c.crystalCluster(b(p.crystal), tip, 2)
-            // outcrops stay low (a block or two, with a tip on top for amethyst and end rods), away from the edge
-            c.grid(if (c.variant == 2) 8 else 12, 63) && c.roomy(8) -> c.crystalCluster(b(p.crystal), tip, 1 + c.random.nextInt(2))
-            p.tree != null && c.tree(9, 18, 64) && c.roomy() -> c.feature(when (p.tree) {
+            // data towers: tall columns where the grid lines cross, lit on top
+            towers && spires != null -> if (Math.floorMod(c.x, 16) == 0 && Math.floorMod(c.z, 16) == 0 && room(6))
+                c.spike(spires, 0, if (small) 3 else 5 + c.random.nextInt(6), b(Blocks.SEA_LANTERN))
+            // spires: all over a spire plain, or around a hollow's rim
+            spires != null && (look.terrain == CustomTypes.Terrain.SPIRES || (rim && q in 0.45..0.72)) && c.grid(if (small) 6 else 8, 62) && room(8) ->
+                c.spike(spires, 1, if (small) 3 + c.random.nextInt(3) else 5 + c.random.nextInt(5))
+            look.boulders != null && c.grid(if (small) 6 else 13, 69) && room(6) -> {
+                // (toy blocks come in all colours)
+                val main = if (look.boulders == Blocks.RED_CONCRETE) b(listOf(Blocks.RED_CONCRETE, Blocks.YELLOW_CONCRETE, Blocks.LIGHT_BLUE_CONCRETE, Blocks.LIME_CONCRETE)[c.random.nextInt(4)])
+                    else b(look.boulders)
+                c.boulder(main, if (look.boulders == Blocks.RED_CONCRETE) main else b(p.rock), 1)
+            }
+            // outcrops stay low (a block or two, with a tip on top for amethyst and end rods)
+            look.outcrops && c.grid(if (small) 7 else if (rim) 8 else 12, 63) && room(8) -> c.crystalCluster(b(p.crystal), tip, 1 + c.random.nextInt(2))
+            look.trees > 0 && treeKind != null && (if (look.trees == 2) c.tree(5, 9, 64) else c.tree(9, 18, 64)) && room(5) -> c.feature(when (treeKind) {
                 "dark_oak" -> TreeFeatures.DARK_OAK
                 "swamp_oak" -> TreeFeatures.SWAMP_OAK
+                "azalea" -> TreeFeatures.AZALEA_TREE
                 else -> TreeFeatures.BIRCH
             })
-            p.glow != null && c.grid(15, 65) -> c.place(b(p.glow))
-            p.plants.isNotEmpty() && c.noise(9.0, 66) > 0.55 && c.chance(0.3) -> c.place(b(p.plants[c.random.nextInt(p.plants.size)]))
-            c.level.getBlockState(c.surface).`is`(Blocks.GRASS_BLOCK) && c.chance(0.15) -> c.place(b(Blocks.SHORT_GRASS))
+            p.glow != null && look.glow > 0 && !look.grid && c.grid((15 / look.glow).toInt().coerceAtLeast(5), 65) -> c.place(b(p.glow))
+            p.plants.isNotEmpty() && c.noise(9.0, 66) > 0.55 - look.plants * 0.3 && c.chance(look.plants) -> c.place(b(p.plants[c.random.nextInt(p.plants.size)]))
+            c.level.getBlockState(c.surface).`is`(Blocks.GRASS_BLOCK) && c.chance(0.1 + look.plants * 0.3) ->
+                c.place(b(if (look.plants > 0.5 && c.chance(0.4)) Blocks.FERN else Blocks.SHORT_GRASS))
+            c.level.getBlockState(c.surface).`is`(Blocks.MOSS_BLOCK) && look.tree == "azalea" && c.chance(0.04) -> c.place(b(Blocks.BIG_DRIPLEAF))
         }
     }
 }

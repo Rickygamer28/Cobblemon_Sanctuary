@@ -42,7 +42,8 @@ object RegionMap {
         val flags = ByteArray(N * N)
         val r = s.size.radius
         val g = SanctuaryDimension.GROUND_Y
-        val customs = ZoneLayout.customZones(s)
+        // (custom types' own habitats, then their pockets: in the Region list's order)
+        val customs = ZoneLayout.customZones(s) + s.customPockets.filter { it !in s.habitats }.sorted()
         for (i in 0 until N) for (j in 0 until N) {
             val x = s.center.x - r + ((i + 0.5) * 2 * r / N).toInt()
             val z = s.center.z - r + ((j + 0.5) * 2 * r / N).toInt()

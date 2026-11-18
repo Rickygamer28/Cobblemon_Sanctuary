@@ -324,6 +324,7 @@ object ZoneLayout {
     private fun pocketKey(s: Sanctuary): Long {
         var k = s.layoutSalt.toLong() * 1_000_003L + s.size.radius + s.pocketStyle * 7_000_001L
         for ((zone, hb) in s.habitats) k = k * 31 + zone.hashCode() * 7L + hb.x * 131L + hb.z
+        for (t in s.customPockets) k = k * 37 + t.hashCode() + CustomTypes.zoneFor(s, t).hashCode() * 3L
         return k
     }
 
@@ -378,6 +379,15 @@ object ZoneLayout {
                 list += Pocket(x, z, r, zone, host, pick)
             }
         }
+        // a custom type with a pocket of its own takes over one of the pockets of the habitat it lives in (the biggest)
+        val taken = HashSet<Int>()
+        for (t in s.customPockets.sorted()) {
+            val home = CustomTypes.zoneFor(s, t)
+            val i = list.indices.filter { it !in taken && list[it].host == home }.maxByOrNull { list[it].r * 1000 + (999 - list[it].salt) } ?: continue
+            taken += i
+            val p = list[i]
+            list[i] = Pocket(p.x, p.z, p.r, t, p.host, p.salt)
+        }
         val grid = HashMap<Long, MutableList<Pocket>>()
         for (p in list) {
             val reach = p.r + 6
@@ -419,6 +429,9 @@ object ZoneLayout {
         }
         return null
     }
+
+    /** The pocket a custom type has (null if it has none). */
+    fun customPocket(s: Sanctuary, type: String): Pocket? = if (type in s.customPockets) pockets(s).firstOrNull { it.zone == type } else null
 
     /** A random spot in one of the living pockets of [zone] (null if it has none). */
     fun pocketPoint(s: Sanctuary, zone: String, random: RandomSource, near: Pair<Int, Int>? = null): Pair<Pocket, Pair<Int, Int>>? {

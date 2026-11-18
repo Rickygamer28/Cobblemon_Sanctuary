@@ -74,6 +74,10 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
         /** A custom type (another mod's): where its Pokémon live, the owner's choice, how many it needs for a habitat of its own. */
         val custom: Boolean = false, val home: String = "", val homeName: String = "", val choice: String = "own",
         val need: Int = 10, val typeCount: Int = 0, val noRoom: Boolean = false, val ownOn: Boolean = true,
+        /** A custom type's pocket (inside [pocketIn]), and how many it takes for one. */
+        val pocket: Boolean = false, val pocketIn: String = "", val pocketNeed: Int = 5,
+        /** Gravelmon's "???": always lives in the town. */
+        val townOnly: Boolean = false,
     )
 
     private class Hit(val x: Int, val y: Int, val w: Int, val h: Int, val action: (Int) -> Unit)
@@ -114,7 +118,7 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
         if (zone == "normal") return 1
         val k = zoneList.indexOf(zone)
         if (k >= 0) return k + 2
-        val ci = biomes.filter { it.custom && it.placed }.indexOfFirst { it.zone == zone }
+        val ci = biomes.filter { it.custom && (it.placed || it.pocket) }.indexOfFirst { it.zone == zone }
         return if (ci >= 0) 13 + ci else -1
     }
     private var portrait: ModelWidget? = null
@@ -161,7 +165,8 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
             val looks = strings(b.getList("looks", Tag.TAG_STRING.toInt())).map { it.substringBefore('|') to it.substringAfter('|') }
             Biome(b.getString("zone"), b.getString("name"), b.getInt("color"), b.getBoolean("awake"), b.getInt("count"), b.getInt("pct"), b.getBoolean("placed"), b.getString("types"),
                 b.getInt("look"), looks, b.getBoolean("custom"), b.getString("home"), b.getString("homeName"), b.getString("choice").ifEmpty { "own" },
-                b.getInt("need"), b.getInt("typeCount"), b.getBoolean("noRoom"), !b.contains("ownOn") || b.getBoolean("ownOn"))
+                b.getInt("need"), b.getInt("typeCount"), b.getBoolean("noRoom"), !b.contains("ownOn") || b.getBoolean("ownOn"),
+                b.getBoolean("pocket"), b.getString("pocketIn"), if (b.contains("pocketNeed")) b.getInt("pocketNeed") else 5, b.getBoolean("townOnly"))
         }
         if (tag.contains("eggs")) {
             val el = tag.getList("eggs", Tag.TAG_COMPOUND.toInt())
@@ -369,7 +374,7 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
         box(g, bx, by, bw, bh, PANEL)
         g.fill(bx, by, bx + bw, by + 3, c)
         text(g, "Where ${b.types} Pokémon live", bx + 10, by + 12, TEXT, true)
-        text(g, fit(if (b.ownOn) "Their own habitat comes once there are ${b.need} of them (now ${b.typeCount})." else "Pick the habitat that suits them.", bw - 20), bx + 10, by + 26, SUB)
+        text(g, fit(if (b.ownOn) "A pocket of their own at ${b.pocketNeed}, a whole habitat at ${b.need} (now ${b.typeCount})." else "Pick the habitat that suits them.", bw - 20), bx + 10, by + 26, SUB)
         options.forEachIndexed { i, o ->
             val rx = bx + 10 + (i % 2) * (colW + 10)
             val ry = by + 42 + (i / 2) * (rowH + 3)
@@ -1217,9 +1222,13 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
             }
             if (right.isNotEmpty()) text(g, right, lx + lw - 6 - font.width(right), by + 5, SUB)
             val sub = when {
+                homeless && b.pocket -> "A pocket in the ${b.pocketIn}" + (b.looks.getOrNull(b.look)?.let { " · ${it.first}" } ?: "") +
+                    if (b.noRoom) " · own habitat on the next Reshape" else " · own habitat at ${b.need}"
+                homeless && b.townOnly -> "Live in the ${b.homeName}, where anyone fits"
                 homeless -> "Live in the ${b.homeName}" + when {
                     b.choice != "own" || !b.ownOn -> ""
                     b.noRoom -> " · own habitat on the next Reshape"
+                    b.typeCount < b.pocketNeed && b.pocketNeed < b.need -> " · a pocket at ${b.pocketNeed}"
                     else -> " · own habitat at ${b.need}"
                 }
                 !b.awake -> "Asleep: needs a ${b.types.ifEmpty { "Normal" }} type"
@@ -1227,7 +1236,7 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
                 else -> b.types.ifEmpty { "Normal" } + (b.looks.getOrNull(b.look)?.let { " · ${it.first}" } ?: "")
             }
             val owner = data.getBoolean("isOwner")
-            val lookRoom = (if (owner && b.looks.size > 1) font.width("Look") + 20 else 0) + (if (owner && b.custom) font.width("Home") + 18 else 0)
+            val lookRoom = (if (owner && b.looks.size > 1) font.width("Look") + 20 else 0) + (if (owner && b.custom && !b.townOnly) font.width("Home") + 18 else 0)
             text(g, fit(sub, lw - 14 - lookRoom), lx + 9, by + 17, if (homeless) SUB else if (!live && b.awake) GOLD else DIM)
             if (hover) {
                 tooltip = listOf(Component.literal(b.name).withColor(c), Component.literal("${b.count} Pokémon live here").withColor(SUB), Component.literal("Click to see them").withColor(SUB))
@@ -1242,7 +1251,7 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
                 button(g, bx, by + 15, bw, 12, label, ACCENT, mx, my, filled = false) { lookZone = b.zone; lookPick = b.look }
             }
             // and where a custom type's Pokémon live
-            if (owner && b.custom && my in gy until gy + gh) {
+            if (owner && b.custom && !b.townOnly && my in gy until gy + gh) {
                 val label = "Home"
                 val bw = font.width(label) + 12
                 val bx = lx + lw - 6 - bw - (if (b.looks.size > 1) font.width("Look") + 18 else 0)

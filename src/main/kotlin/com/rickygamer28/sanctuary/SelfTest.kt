@@ -120,7 +120,7 @@ object SelfTest {
                 log("== after the rest woke up, finished in ${"%.0f".format(secs)} s${if (timedOut) " (TIMED OUT)" else ""}")
                 scan(level, sanctuary)
                 // the owner picks other looks for two habitats (as the Region tab's Look button does)
-                for (zone in listOf("water", "rock", com.rickygamer28.sanctuary.world.ZoneLayout.HUB) + CUSTOM.filter { it in sanctuary.habitats }) {
+                for (zone in listOf("water", "rock", com.rickygamer28.sanctuary.world.ZoneLayout.HUB) + CUSTOM.filter { it in sanctuary.habitats } + CUSTOM_POCKETS) {
                     val now0 = BiomeDresser.variantOf(sanctuary, zone)
                     // (the town goes to the Old Kanto village, with its koi ponds)
                     val next = if (zone == com.rickygamer28.sanctuary.world.ZoneLayout.HUB) (if (now0 == 1) 2 else 1) else (now0 + 1) % 3
@@ -147,14 +147,16 @@ object SelfTest {
         Blocks.SMOOTH_STONE, Blocks.BONE_BLOCK, Blocks.CALCITE, Blocks.AMETHYST_BLOCK, Blocks.STONE, Blocks.ANDESITE, Blocks.WEATHERED_COPPER,
         Blocks.EXPOSED_COPPER, Blocks.RAW_IRON_BLOCK, Blocks.SMOOTH_BASALT, Blocks.BLACKSTONE, Blocks.SNOW_BLOCK) +
         // (the custom types' outcrops and spires)
-        listOf("shadow", "crystal", "cosmic", "light", "digital", "nuclear", "plastic", "slime", "sound", "wind").map { com.rickygamer28.sanctuary.world.CustomTypes.palette(it).crystal }
+        com.rickygamer28.sanctuary.world.CustomTypes.DECOR
 
     /** Plain rock alone above the ground could be a leftover, so it isn't excused as a decoration. */
     private val PLAIN_ROCK = setOf(Blocks.STONE, Blocks.ANDESITE, Blocks.SNOW_BLOCK, Blocks.BLACKSTONE)
 
     private val FIRST = listOf("water", "grass", "fire", "rock")
-    /** Two custom types (as Gravelmon's would be), each with a habitat of its own from the start. */
-    private val CUSTOM = listOf("shadow", "crystal")
+    /** Two custom types (as Gravelmon's would be), each with a habitat of its own from the start… */
+    private val CUSTOM = listOf("blood", "digital")
+    /** …and two with only a few Pokémon, each with a pocket in the habitat it lives in (Cosmic in Fairy, Slime in Poison). */
+    private val CUSTOM_POCKETS = listOf("cosmic", "slime")
 
     private fun counts(zones: List<String>): LinkedHashMap<String, Int> {
         val counts = linkedMapOf<String, Int>()
@@ -168,7 +170,7 @@ object SelfTest {
         val counts = counts(ZoneLayout.HABITATS + CUSTOM)
         val newTypes = ZoneLayout.HABITATS.filter { it !in s.unlocked }
         s.typeCounts = counts
-        s.unlocked = linkedSetOf(ZoneLayout.HUB) + ZoneLayout.HABITATS + CUSTOM.filter { it in s.habitats }
+        s.unlocked = linkedSetOf(ZoneLayout.HUB) + ZoneLayout.HABITATS + CUSTOM.filter { it in s.habitats } + CUSTOM_POCKETS
         s.unlockedChanged = true
         SanctuaryGenerator.redoCaves(s)
         s.rebuildZones += newTypes.filter { z -> ZoneLayout.pockets(s).any { it.zone == z } }
@@ -202,12 +204,18 @@ object SelfTest {
         val counts = counts(zones)
         s.typeCounts = counts
         s.unlocked = linkedSetOf(ZoneLayout.HUB) + zones
-        s.customCounts = counts.filterKeys { it in CUSTOM }
+        s.customCounts = counts.filterKeys { it in CUSTOM } + CUSTOM_POCKETS.associateWith { 6 }
         s.habitats.clear()
         s.habitats.putAll(ZoneLayout.plan(s, counts))
         s.planned = true
         s.planRadius = s.size.radius
         s.generationDirty = true
+        if (zones.any { it in CUSTOM }) {
+            s.customPockets.clear()
+            s.customPockets += CUSTOM_POCKETS
+            s.unlocked = s.unlocked + CUSTOM_POCKETS
+            log("custom pockets: " + CUSTOM_POCKETS.joinToString { t -> ZoneLayout.customPocket(s, t)?.let { "$t in ${it.host} r${it.r} at (${it.x - s.center.x}, ${it.z - s.center.z})" } ?: "$t (no room)" })
+        }
     }
 
     // ------------------------------------------------------------------ the scan

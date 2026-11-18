@@ -221,7 +221,11 @@ object SanctuaryConfig {
         .define("customTypeBiomes", true)
     val customHabitatMin: ModConfigSpec.IntValue = builder
         .comment("How many Pokémon of a custom type it takes for it to get a habitat of its own.")
-        .defineInRange("customHabitatMin", 10, 1, 1000)
+        .defineInRange("customHabitatMin", 15, 1, 1000)
+    val customPocketMin: ModConfigSpec.IntValue = builder
+        .comment("How many Pokémon of a custom type it takes for a small pocket of its own, inside the habitat it lives in",
+            "(until it has enough for a whole habitat).")
+        .defineInRange("customPocketMin", 5, 1, 1000)
     val customTypeHomes = builder
         .comment("Where Pokémon of custom types live (until they get a habitat of their own), as \"type=habitat\": habitats are normal, water, ice, rock, ground, fire, dragon, ghost, poison, grass, fairy, electric. The sanctuary's owner can change it on the Region tab.")
         .defineListAllowEmpty("customTypeHomes", listOf<String>(), { "" }, { it is String })
