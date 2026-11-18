@@ -145,7 +145,9 @@ object SelfTest {
 
     private val DECOR_ROCK = setOf(Blocks.MOSSY_COBBLESTONE, Blocks.COBBLESTONE, Blocks.PACKED_ICE, Blocks.BASALT, Blocks.POLISHED_ANDESITE,
         Blocks.SMOOTH_STONE, Blocks.BONE_BLOCK, Blocks.CALCITE, Blocks.AMETHYST_BLOCK, Blocks.STONE, Blocks.ANDESITE, Blocks.WEATHERED_COPPER,
-        Blocks.EXPOSED_COPPER, Blocks.RAW_IRON_BLOCK, Blocks.SMOOTH_BASALT, Blocks.BLACKSTONE, Blocks.SNOW_BLOCK)
+        Blocks.EXPOSED_COPPER, Blocks.RAW_IRON_BLOCK, Blocks.SMOOTH_BASALT, Blocks.BLACKSTONE, Blocks.SNOW_BLOCK) +
+        // (the custom types' outcrops and spires)
+        listOf("shadow", "crystal", "cosmic", "light", "digital", "nuclear", "plastic", "slime", "sound", "wind").map { com.rickygamer28.sanctuary.world.CustomTypes.palette(it).crystal }
 
     /** Plain rock alone above the ground could be a leftover, so it isn't excused as a decoration. */
     private val PLAIN_ROCK = setOf(Blocks.STONE, Blocks.ANDESITE, Blocks.SNOW_BLOCK, Blocks.BLACKSTONE)

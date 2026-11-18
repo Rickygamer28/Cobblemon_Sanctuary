@@ -2657,10 +2657,14 @@ object BiomeDresser {
         val tip = p.glow?.let { b(it) }?.takeIf { it.`is`(Blocks.AMETHYST_CLUSTER) || it.`is`(Blocks.END_ROD) }
         // the hollow's rim of tall spires
         val q = if (c.variant == 2) ZoneLayout.local(c.s, zone, c.x, c.z)?.q ?: 0.0 else 0.0
-        val rimSpire = c.variant == 2 && q in 0.5..0.72 && c.grid(7, 62) && c.roomy()
+        // (only crystal-like palettes get the tall spires; the rest a low, wide rim of outcrops)
+        val crystalLike = p.crystal == Blocks.AMETHYST_BLOCK || p.crystal == Blocks.QUARTZ_BLOCK || p.crystal == Blocks.CALCITE || p.crystal == Blocks.PURPUR_BLOCK
+        val rimSpire = c.variant == 2 && q in 0.5..0.72 && c.grid(7, 62) && c.roomy(8)
         when {
-            rimSpire -> c.spike(b(p.crystal), 1, 6 + c.random.nextInt(7))
-            c.grid(if (c.variant == 2) 8 else 12, 63) && c.roomy() -> c.crystalCluster(b(p.crystal), tip, 2 + c.random.nextInt(3))
+            rimSpire && crystalLike -> c.spike(b(p.crystal), 1, 5 + c.random.nextInt(5))
+            rimSpire -> c.crystalCluster(b(p.crystal), tip, 2)
+            // outcrops stay low (a block or two, with a tip on top for amethyst and end rods), away from the edge
+            c.grid(if (c.variant == 2) 8 else 12, 63) && c.roomy(8) -> c.crystalCluster(b(p.crystal), tip, 1 + c.random.nextInt(2))
             p.tree != null && c.tree(9, 18, 64) && c.roomy() -> c.feature(when (p.tree) {
                 "dark_oak" -> TreeFeatures.DARK_OAK
                 "swamp_oak" -> TreeFeatures.SWAMP_OAK
