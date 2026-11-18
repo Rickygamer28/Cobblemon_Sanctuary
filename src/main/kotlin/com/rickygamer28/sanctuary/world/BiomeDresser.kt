@@ -1841,7 +1841,7 @@ object BiomeDresser {
                 val pond = c.noise(16.0, 43) > 0.74 && d > 10 && d < hubR - 9
                 if (pond) {
                     c.pool(b(Blocks.CLAY))
-                    if (c.chance(0.12)) c.place(b(Blocks.LILY_PAD), 1)
+                    if (c.level.getBlockState(c.surface).`is`(Blocks.WATER) && c.chance(0.12)) c.place(b(Blocks.LILY_PAD), 1)
                     return
                 }
                 c.ground(if (c.noise(9.0, 44) > 0.7) b(Blocks.MOSS_BLOCK) else b(Blocks.GRASS_BLOCK), b(Blocks.DIRT))

@@ -122,7 +122,8 @@ object SelfTest {
                 // the owner picks other looks for two habitats (as the Region tab's Look button does)
                 for (zone in listOf("water", "rock", com.rickygamer28.sanctuary.world.ZoneLayout.HUB)) {
                     val now0 = BiomeDresser.variantOf(sanctuary, zone)
-                    val next = (now0 + 1) % 3
+                    // (the town goes to the Old Kanto village, with its koi ponds)
+                    val next = if (zone == com.rickygamer28.sanctuary.world.ZoneLayout.HUB) (if (now0 == 1) 2 else 1) else (now0 + 1) % 3
                     sanctuary.variants[zone] = next
                     sanctuary.rebuildZones += zone
                     sanctuary.landmarks.remove(zone)?.let { if (it != Long.MIN_VALUE) sanctuary.staleLandmarks[zone] = it }
