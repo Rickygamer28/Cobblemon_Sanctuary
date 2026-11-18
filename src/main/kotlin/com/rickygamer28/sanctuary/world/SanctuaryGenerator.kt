@@ -317,6 +317,7 @@ object SanctuaryGenerator {
             }
             val atLandmark = Landmarks.near(s, x, z)
             val inDen = Dens.covers(s, x, z)
+            if (!atLandmark && !inDen && tooLow(level, s, x, z) && mayCut(s, idx)) { s.dressed.clear(idx); Trace.rebuild("ground too low", x, z); s.generationDirty = true }
             if (!atLandmark && !inDen && dryCoral(level, s, x, z) && mayCut(s, idx)) { s.dressed.clear(idx); Trace.rebuild("dry coral removed", x, z); s.generationDirty = true }
             // anything a player built (they can't build here): taken away, top down; if that leaves a hole in the
             // ground, the column is built again
@@ -413,6 +414,25 @@ object SanctuaryGenerator {
         }
         repairCursor[s.id] = i
         return true
+    }
+
+    /**
+     * Is the ground here more than 3 blocks under where it should be (something changed the land's shape around it
+     * after it was built)? Then the column is built again.
+     */
+    private fun tooLow(level: ServerLevel, s: Sanctuary, x: Int, z: Int): Boolean {
+        val target = BiomeDresser.targetHeight(s, x, z, ZoneLayout.ring())
+        val cave = Caves.at(s, x, z)
+        // an open cave mouth is dug down to its floor on purpose
+        val expected = if (cave != null && cave.mouth && target - cave.ceil < 4) cave.floor - 1 else target
+        var y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1
+        val bottom = expected - 12
+        while (y > bottom) {
+            val st = level.getBlockState(BlockPos(x, y, z))
+            if (!st.isAir && st.fluidState.isEmpty && BiomeDresser.isNatural(st)) break
+            y--
+        }
+        return y < expected - 3
     }
 
     /**
