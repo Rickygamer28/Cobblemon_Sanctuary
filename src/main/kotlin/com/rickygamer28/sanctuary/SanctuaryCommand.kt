@@ -63,8 +63,66 @@ object SanctuaryCommand {
                         },
                     ),
                 )
-                .then(Commands.literal("accept").executes { ctx -> Sanctuaries.accept(ctx.source.playerOrException); 1 }),
+                .then(Commands.literal("accept").executes { ctx -> Sanctuaries.accept(ctx.source.playerOrException); 1 })
+                // for trying the valley out: every Pokémon (and its forms) in your PC, and out again (needs cheats / op)
+                .then(
+                    Commands.literal("testpc").requires { it.hasPermission(2) }
+                        .then(Commands.literal("add").executes { ctx -> testAdd(ctx, false) }
+                            .then(Commands.literal("forms").executes { ctx -> testAdd(ctx, true) }))
+                        .then(Commands.literal("clear").executes { ctx -> testClear(ctx) }),
+                ),
         )
+    }
+
+    private const val TEST_TAG = "sanctuary_test"
+
+    /** Forms that only exist in battle (or for a while): not added. */
+    private fun battleForm(name: String): Boolean {
+        val n = name.lowercase()
+        return n.startsWith("mega") || n.startsWith("primal") || n.startsWith("gmax") || n.contains("gigantamax") || n.contains("eternamax") || n.startsWith("ultra")
+    }
+
+    /** Every implemented Pokémon (with [forms], every form too) into the player's PC, marked so they can be taken out again. */
+    private fun testAdd(ctx: CommandContext<CommandSourceStack>, forms: Boolean): Int {
+        val player = ctx.source.playerOrException
+        val pc = com.cobblemon.mod.common.Cobblemon.storage.getPC(player)
+        val todo = ArrayList<com.cobblemon.mod.common.pokemon.Pokemon>()
+        for (sp in com.cobblemon.mod.common.api.pokemon.PokemonSpecies.implemented) {
+            // (Gravelmon's placeholder "billboard" Pokémon without a model are left out)
+            if ("not_modeled" in sp.labels) continue
+            val list = listOf(sp.standardForm) + if (forms) sp.forms.filter { it.name != sp.standardForm.name && !battleForm(it.name) && it.aspects.isNotEmpty() } else emptyList()
+            for (f in list.distinctBy { it.name }) runCatching {
+                val p = sp.create(30)
+                if (f.name != sp.standardForm.name) {
+                    p.forcedAspects = p.forcedAspects + f.aspects
+                    p.updateAspects()
+                    p.updateForm()
+                }
+                p.persistentData.putBoolean(TEST_TAG, true)
+                todo += p
+            }
+        }
+        // a bigger PC if they don't fit
+        val used = pc.count()
+        val boxes = (used + todo.size + 29) / 30 + 1
+        if (boxes > pc.boxes.size) runCatching { pc.resize(boxes, false) { } }
+        var added = 0
+        for (p in todo) if (runCatching { pc.add(p) }.getOrDefault(false)) added++
+        ctx.source.sendSuccess({ net.minecraft.network.chat.Component.literal("Added $added Pokémon to your PC (${pc.boxes.size} boxes). They're residents of your sanctuary now; /sanctuary testpc clear takes them out again.") }, false)
+        return added
+    }
+
+    /** Takes the Pokémon [testAdd] put in the player's PC out again (others are left alone). */
+    private fun testClear(ctx: CommandContext<CommandSourceStack>): Int {
+        val player = ctx.source.playerOrException
+        val pc = com.cobblemon.mod.common.Cobblemon.storage.getPC(player)
+        val test = pc.filter { runCatching { it.persistentData.getBoolean(TEST_TAG) }.getOrDefault(false) }
+        for (p in test) {
+            runCatching { p.entity?.discard() }
+            pc.remove(p)
+        }
+        ctx.source.sendSuccess({ net.minecraft.network.chat.Component.literal("Took ${test.size} test Pokémon out of your PC.") }, false)
+        return test.size
     }
 
     private fun journal(ctx: CommandContext<CommandSourceStack>, section: String, page: Int): Int {
