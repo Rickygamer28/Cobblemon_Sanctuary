@@ -765,6 +765,7 @@ object SanctuaryGenerator {
             } else run { Trace.rebuild("column failed", x, z); missedUnloaded[s.id] = true }
             budget--
         }
+        var clearDone = true
         BiomeDresser.beginHeights(s)
         try {
         // trees waiting for the ground around them to be finished
@@ -807,7 +808,7 @@ object SanctuaryGenerator {
             }
         }
         clearCursors[s.id] = w
-        val clearDone = w >= total
+        clearDone = w >= total
         val landDeadline = if (i - (natureCursors[s.id] ?: 0) > 4000) started + (deadline - started) / 2 else deadline
         while (budget > 0 && i < total) {
             scanned++
