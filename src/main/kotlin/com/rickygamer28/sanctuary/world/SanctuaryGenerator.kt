@@ -317,6 +317,7 @@ object SanctuaryGenerator {
             }
             val atLandmark = Landmarks.near(s, x, z)
             val inDen = Dens.covers(s, x, z)
+            if (!atLandmark && !inDen && spillingPool(level, s, x, z) && mayCut(s, idx)) { s.dressed.clear(idx); s.wipe.set(idx); Trace.rebuild("pool that would spill", x, z); s.generationDirty = true }
             if (!atLandmark && !inDen && tooLow(level, s, x, z) && mayCut(s, idx)) { s.dressed.clear(idx); Trace.rebuild("ground too low", x, z); s.generationDirty = true }
             if (!atLandmark && !inDen && dryCoral(level, s, x, z) && mayCut(s, idx)) { s.dressed.clear(idx); Trace.rebuild("dry coral removed", x, z); s.generationDirty = true }
             // anything a player built (they can't build here): taken away, top down; if that leaves a hole in the
@@ -414,6 +415,19 @@ object SanctuaryGenerator {
         }
         repairCursor[s.id] = i
         return true
+    }
+
+    /**
+     * A pool's water standing in this column (above the lake's level) beside lower ground: it pours over, and the
+     * cleanup would be taking the spilt water away forever. The column is built again (as dry ground).
+     */
+    private fun spillingPool(level: ServerLevel, s: Sanctuary, x: Int, z: Int): Boolean {
+        val target = BiomeDresser.targetHeight(s, x, z, ZoneLayout.ring())
+        if (target <= BiomeDresser.WATER_Y) return false
+        val st = level.getBlockState(BlockPos(x, target, z))
+        if (!st.`is`(net.minecraft.world.level.block.Blocks.WATER)) return false
+        if (BiomeDresser.pondLevel(s, x, z) != null) return false // a pond with its own level: it has banks
+        return !BiomeDresser.poolSafe(s, x, z, target)
     }
 
     /**

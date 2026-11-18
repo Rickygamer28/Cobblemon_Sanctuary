@@ -116,6 +116,10 @@ object BiomeDresser {
 
     fun forgetPending(id: java.util.UUID) { pendingFeatures.remove(id) }
 
+    /** Can a pool's water sit at [y] in column (x, z) without pouring over into a lower column beside it? */
+    fun poolSafe(s: Sanctuary, x: Int, z: Int, y: Int): Boolean =
+        Direction.Plane.HORIZONTAL.all { d -> targetHeight(s, x + d.stepX, z + d.stepZ, ZoneLayout.HABITATS) >= y }
+
     /** Coral, alive or dead (blocks, plants, fans): the lake's decoration, never part of the ground. */
     fun isCoral(st: BlockState): Boolean {
         if (st.`is`(BlockTags.CORAL_BLOCKS) || st.`is`(BlockTags.CORALS) || st.`is`(BlockTags.WALL_CORALS)) return true
@@ -430,9 +434,13 @@ object BiomeDresser {
                 level.setBlock(upper, state.setValue(DoublePlantBlock.HALF, DoubleBlockHalf.UPPER), FLAGS)
             }
         }
-        /** A shallow pool flush with the ground: water on top, [bed] under it. */
+        /**
+         * A shallow pool flush with the ground: water on top, [bed] under it. Only where no ground beside it is lower
+         * (on a slope, water would pour over the edge into the next column down, over and over): there the bed shows.
+         */
         fun pool(bed: BlockState) {
             if (!shaping) return
+            if (!poolSafe(s, x, z, y)) { level.setBlock(surface, bed, FLAGS); return }
             level.setBlock(surface, b(Blocks.WATER), FLAGS)
             level.setBlock(surface.below(), bed, FLAGS)
             for (i in 2..3) { val p = surface.below(i); if (isNatural(level.getBlockState(p))) level.setBlock(p, bed, FLAGS) }
