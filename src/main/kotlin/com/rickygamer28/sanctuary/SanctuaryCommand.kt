@@ -67,8 +67,7 @@ object SanctuaryCommand {
                 // for trying the valley out: every Pokémon (and its forms) in your PC, and out again (needs cheats / op)
                 .then(
                     Commands.literal("testpc").requires { it.hasPermission(2) }
-                        .then(Commands.literal("add").executes { ctx -> testAdd(ctx, false) }
-                            .then(Commands.literal("forms").executes { ctx -> testAdd(ctx, true) }))
+                        .then(Commands.literal("add").executes { ctx -> testAdd(ctx, true) })
                         .then(Commands.literal("clear").executes { ctx -> testClear(ctx) }),
                 ),
         )
