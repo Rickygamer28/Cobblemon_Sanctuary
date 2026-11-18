@@ -859,7 +859,7 @@ object BiomeDresser {
     /** Start remembering heights for [s] (only while the generator is working on it). */
     fun beginHeights(s: Sanctuary) {
         // (the habitats' looks shape their ground too)
-        var k = s.layoutSalt * 1_000_003L + s.size.radius * 31L + s.unlocked.hashCode() * 7L + s.center.hashCode() + s.variants.hashCode() * 13L +
+        var k = s.layoutSalt * 1_000_003L + s.size.radius * 31L + s.unlocked.hashCode() * 7L + s.center.hashCode() + s.looksKey() * 13L +
             (if (SanctuaryConfig.reshapeTerrain.get()) 1 else 0) + (if (SanctuaryConfig.caves.get()) 2 else 0)
         for ((zone, hb) in s.habitats) k = k * 31 + zone.hashCode() + hb.x * 131L + hb.z * 17L + (hb.radial * 7).toLong()
         if (k != hcKey || s.id != hcFor) { hcKey = k; hcFor = s.id; stamp++ }

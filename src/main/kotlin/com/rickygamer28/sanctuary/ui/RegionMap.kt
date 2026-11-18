@@ -29,7 +29,7 @@ object RegionMap {
     private val cache = HashMap<UUID, Cached>()
 
     private fun key(s: Sanctuary): Long {
-        var k = s.layoutSalt * 1_000_003L + s.size.radius * 31L + s.unlocked.hashCode() * 7L + s.landmarks.hashCode() + s.variants.hashCode() * 13L
+        var k = s.layoutSalt * 1_000_003L + s.size.radius * 31L + s.unlocked.hashCode() * 7L + s.landmarks.hashCode() + s.looksKey() * 13L
         for ((zone, hb) in s.habitats) k = k * 31 + zone.hashCode() + hb.x * 131L + hb.z
         return k
     }

@@ -208,6 +208,12 @@ class Sanctuary(
     /** Biome variant chosen per type for this sanctuary. */
     val variants: MutableMap<String, Int> = mutableMapOf()
 
+    /**
+     * A fingerprint of the habitats' looks, for caches of anything they shape (heights, pockets, the map). Built so
+     * that different looks can't add up to the same number (a plain hash of the map could: +1 here, -1 there).
+     */
+    fun looksKey(): Long = variants.entries.sortedBy { it.key }.fold(17L) { acc, e -> (acc * 1_000_003L + e.key.hashCode()) * 31L + e.value + 1 }
+
     // ---- runtime values (recomputed from the members' PCs, not saved) ----
     /** How many residents belong to each type (home or second type). */
     var typeCounts: Map<String, Int> = emptyMap()
