@@ -18,7 +18,14 @@ class ViewPayload(val tag: CompoundTag) : CustomPacketPayload {
 
     companion object {
         val TYPE = CustomPacketPayload.Type<ViewPayload>(ResourceLocation.fromNamespaceAndPath(CobblemonSanctuary.MOD_ID, "view"))
-        val CODEC: StreamCodec<ByteBuf, ViewPayload> = ByteBufCodecs.COMPOUND_TAG.map({ ViewPayload(it) }, { it.tag })
+        /**
+         * Sent compressed, and read without the usual 2 MB limit: with a couple of thousand residents the screen's
+         * data is bigger than that (and compressed it's a fraction of the size).
+         */
+        val CODEC: StreamCodec<ByteBuf, ViewPayload> = ByteBufCodecs.byteArray(64 * 1024 * 1024).map(
+            { bytes -> ViewPayload(net.minecraft.nbt.NbtIo.readCompressed(java.io.ByteArrayInputStream(bytes), net.minecraft.nbt.NbtAccounter.unlimitedHeap())) },
+            { payload -> java.io.ByteArrayOutputStream().also { net.minecraft.nbt.NbtIo.writeCompressed(payload.tag, it) }.toByteArray() },
+        )
     }
 }
 
