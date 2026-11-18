@@ -1905,16 +1905,31 @@ object BiomeDresser {
                     fountainHere && fd < 0.8 -> { c.column(b(Blocks.STONE_BRICKS), 2); c.place(b(Blocks.LANTERN), 3) }
                     fountainHere && fd < 2.6 -> { c.pool(b(Blocks.STONE_BRICKS)) }
                     fountainHere && fd < 3.4 -> c.place(b(Blocks.STONE_BRICK_SLAB))
-                    // low hedges along the walkways, with gaps (and a bench in some)
-                    hedge -> {
-                        val gap = Math.floorMod(dx * 5 + dz * 3, 11) == 0
-                        if (!gap) c.place(if (c.noise(5.0, 52) > 0.6) b(Blocks.FLOWERING_AZALEA) else b(Blocks.AZALEA))
-                        else if (Math.floorMod(dx + dz, 2) == 0) c.place(b(Blocks.OAK_STAIRS).setValue(net.minecraft.world.level.block.StairBlock.FACING, outward(dx, dz, d < hubR - 5)))
+                    // low hedges along the walkways, with a lamp every so often and gaps (some with a bench)
+                    hedge -> when {
+                        Math.floorMod(dx * 3 - dz * 7, 17) == 0 -> c.lampPost(b(Blocks.POLISHED_BLACKSTONE_WALL), b(Blocks.LANTERN), 2)
+                        Math.floorMod(dx * 5 + dz * 3, 11) == 0 ->
+                            if (Math.floorMod(dx + dz, 2) == 0) c.place(b(Blocks.OAK_STAIRS).setValue(net.minecraft.world.level.block.StairBlock.FACING, outward(dx, dz, d < hubR - 5)))
+                        else -> c.place(if (c.noise(5.0, 52) > 0.6) b(Blocks.FLOWERING_AZALEA) else b(Blocks.AZALEA))
                     }
+                    // lamps down the walkways into the plaza, evenly spaced
+                    (abs(dx) == 2 || abs(dz) == 2) && d > 8 && d < hubR - 9 && Math.floorMod(max(abs(dx), abs(dz)), 9) == 0 ->
+                        c.lampPost(b(Blocks.POLISHED_BLACKSTONE_WALL), b(Blocks.LANTERN), 2)
                     border -> c.place(c.patch(4.0, 53, b(Blocks.RED_TULIP), b(Blocks.ORANGE_TULIP), b(Blocks.WHITE_TULIP), b(Blocks.PINK_TULIP), b(Blocks.ALLIUM)))
-                    d > 11 && d < hubR - 10 && c.grid(14, 54) && c.roomy() -> c.feature(TreeFeatures.BIRCH)
-                    Math.floorMod(dx * 7 + dz * 13, 37) == 0 && d > 9 -> c.lampPost(b(Blocks.POLISHED_BLACKSTONE_WALL), b(Blocks.LANTERN), 2)
-                    c.chance(0.12) -> c.place(b(Blocks.SHORT_GRASS))
+                    // the lawns: groves of oaks and birches, round flower beds edged with azalea, the odd lone tree
+                    else -> {
+                        val grove = c.noise(22.0, 55)
+                        val bed = c.noise(8.0, 57)
+                        when {
+                            d > 11 && d < hubR - 10 && grove > 0.6 && c.grid(6, 56) && c.roomy() ->
+                                c.feature(if (c.noise(30.0, 58) > 0.5) TreeFeatures.FANCY_OAK else TreeFeatures.BIRCH)
+                            d > 11 && d < hubR - 10 && grove < 0.5 && bed > 0.8 ->
+                                c.place(c.patch(3.0, 59, b(Blocks.RED_TULIP), b(Blocks.PINK_TULIP), b(Blocks.WHITE_TULIP), b(Blocks.CORNFLOWER), b(Blocks.ALLIUM)))
+                            d > 11 && d < hubR - 10 && grove < 0.5 && bed > 0.76 -> c.place(b(Blocks.AZALEA))
+                            d > 11 && d < hubR - 10 && c.grid(23, 54) && c.roomy() -> c.feature(TreeFeatures.BIRCH)
+                            c.chance(0.1) -> c.place(b(Blocks.SHORT_GRASS))
+                        }
+                    }
                 }
             }
         }
