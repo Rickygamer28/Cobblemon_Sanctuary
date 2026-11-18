@@ -105,7 +105,8 @@ object BiomeDresser {
         while (n-- > 0 && queue.isNotEmpty()) {
             val f = queue.removeFirst()
             val ground = level.getBlockState(f.surface)
-            val stillThere = level.isLoaded(f.surface) && isNatural(ground) && ground.fluidState.isEmpty && level.getBlockState(f.surface.above()).isAir
+            val stillThere = level.isLoaded(f.surface) && isNatural(ground) && ground.fluidState.isEmpty && level.getBlockState(f.surface.above()).isAir &&
+                f.surface.y == targetHeight(s, f.surface.x, f.surface.z, ZoneLayout.HABITATS)
             if (!stillThere || Dens.covers(s, f.surface.x, f.surface.z)) continue
             if (settled(level, s, f.surface.x, f.surface.z)) placeFeature(level, s, f.key, f.surface, RandomSource.create(f.seed), f.protectRadius, f.protectHeight)
             else if (!all) queue.addLast(f)
@@ -114,6 +115,29 @@ object BiomeDresser {
     }
 
     fun forgetPending(id: java.util.UUID) { pendingFeatures.remove(id) }
+
+    /**
+     * Wipes a column clean before it's built again: everything but the bare ground goes (trees, giant mushrooms,
+     * plants, water, lava, lamps, rocks set on the ground, anything built), from its top down to well under the
+     * valley floor, so nothing of what stood there before can be left over. The mod's own blocks (the Core, nests,
+     * beds…) stay, and so does whatever this pass has already put there for a neighbour.
+     */
+    fun wipeColumn(level: ServerLevel, s: Sanctuary, x: Int, z: Int) {
+        val top = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z) - 1
+        val bottom = max(level.minBuildHeight + 1, G - 30)
+        val mine = placed[s.id]
+        var n = 0
+        for (y in top downTo bottom) {
+            val p = BlockPos(x, y, z)
+            val st = level.getBlockState(p)
+            if (st.isAir || ValleyBlocks.isMods(st)) continue
+            if (mine != null && p.asLong() in mine) continue
+            if (isNatural(st) && st.fluidState.isEmpty) continue // the ground: shaped next
+            ValleyBlocks.remove(level, p)
+            n++
+        }
+        if (n > 0) Trace.note(x, z, "wiped $n blocks")
+    }
 
     // ------------------------------------------------------------------ building in waves
 
@@ -631,13 +655,16 @@ object BiomeDresser {
         fun clearing(radius: Double) = smooth((rB * (1 + f(s, xd, zd, 20.0, 77, 2) * 0.45) - radius) / 26.0)
         val h: Double = when (zone) {
             "water" -> if (variant == 2) {
-                // a mangrove delta: winding channels between low banks
-                val ch = ridge(s, wx, wz, 30.0, 7, 3)
-                val delta = -3.2 * smooth((ch - 0.66) / 0.2) + f01(s, xd, zd, 30.0, 8, 2) * 1.4
-                // with a deep pool in its middle, for the big swimmers
-                val qn = q + f(s, wx, wz, 30.0, 5, 2) * 0.15
-                val pool = smooth((0.32 - qn) / 0.12) * smooth((rB - 10) / 5.0)
-                mix(delta, -3.0 - clamp(big * 0.1, 7.0, 14.0) * smooth((0.28 - qn) / 0.2), pool)
+                // a rocky coast: a wide, deep bay with beaches at its foot, cliffs rising behind them, and rock stacks
+                // standing out in the water
+                val qn = q + f(s, wx, wz, 40.0, 5, 2) * 0.18
+                val m = smooth((0.66 - qn) / 0.12)
+                val deep = clamp(big * 0.14, 9.0, 20.0) * smooth((0.55 - qn) / 0.35)
+                val cliffs = smooth((qn - 0.74) / 0.06) * (4.0 + f01(s, wx, wz, 30.0, 12, 2) * 5.0)
+                val land = 1.0 + cliffs + smooth((qn - 0.85) / 0.3) * 2.0 + f(s, wx, wz, 40.0, 9, 2) * 1.2
+                val base = land * (1 - m) + (-2.0 - deep) * m
+                val stack = smooth((f01(s, xd, zd, 9.0, 13, 2) - 0.8) / 0.04) * smooth((0.6 - qn) / 0.12) * smooth((qn - 0.2) / 0.1) * smooth((rB - 12) / 6.0)
+                mix(base, 3.0 + f01(s, xd, zd, 5.0, 14, 2) * 5.0, stack)
             } else {
                 // a lake in a shallow basin, with beaches, grassy banks rising behind them, and a few islands
                 val qn = q + f(s, wx, wz, 36.0, 5, 2) * 0.2
@@ -1772,21 +1799,30 @@ object BiomeDresser {
     /** Lake & coast: a clear lake with beaches and islands, a turquoise lagoon, or a mangrove delta. */
     private fun water(c: Ctx) {
         val depth = WATER_Y - c.y
-        if (c.variant == 2) { // mangrove delta
+        if (c.variant == 2) { // rocky coast
             if (depth >= 1) {
                 c.flood()
-                c.ground(c.broad(b(Blocks.MUD), b(Blocks.CLAY), 0.7, 18.0, 1), b(Blocks.MUD))
+                c.ground(c.broad(c.broad(b(Blocks.GRAVEL), b(Blocks.SAND), 0.55, 18.0, 15), b(Blocks.STONE), 0.7, 12.0, 16), b(Blocks.STONE))
                 when {
-                    c.chance(0.06) -> c.waterTop(b(Blocks.LILY_PAD))
-                    c.chance(0.12) -> c.underwater(b(Blocks.SEAGRASS))
+                    depth >= 3 && c.noise(12.0, 8) > 0.45 && c.chance(0.35) -> if (c.placing) { val h = 1 + c.random.nextInt(depth - 1); for (i in 1 until h) c.level.setBlock(c.surface.above(i), b(Blocks.KELP_PLANT), FLAGS); c.level.setBlock(c.surface.above(h), b(Blocks.KELP), FLAGS) }
+                    depth >= 2 && c.chance(0.18) -> c.underwater(b(Blocks.SEAGRASS))
                 }
-            } else {
-                c.ground(if (c.y <= WATER_Y + 1 && c.noise(10.0, 1) > 0.4) b(Blocks.MUD) else b(Blocks.GRASS_BLOCK), b(Blocks.MUD))
-                when {
-                    c.tree(6, 13, 2) && c.roomy() -> c.feature(TreeFeatures.MANGROVE)
-                    c.y <= WATER_Y + 1 && c.chance(0.06) -> c.column(b(Blocks.SUGAR_CANE), 2 + c.random.nextInt(2))
-                    c.chance(0.2) -> c.place(b(Blocks.SHORT_GRASS))
-                }
+                return
+            }
+            // beaches of sand and shingle at the water's edge
+            if (c.y <= WATER_Y + 1 && !c.cliff) {
+                c.ground(c.broad(b(Blocks.SAND), b(Blocks.GRAVEL), 0.55, 14.0, 17), b(Blocks.SANDSTONE))
+                if (c.grid(17, 18) && c.roomy()) c.boulder(b(Blocks.STONE), b(Blocks.MOSSY_COBBLESTONE), 1)
+                return
+            }
+            // the cliffs and the stacks show their rock; on top, grass with wind-bent spruces
+            c.natural(b(Blocks.GRASS_BLOCK), b(Blocks.DIRT), b(Blocks.STONE), b(Blocks.ANDESITE))
+            if (c.cliff) return
+            when {
+                c.tree(12, 26, 19) && c.roomy() && c.y > WATER_Y + 3 -> c.feature(TreeFeatures.SPRUCE)
+                c.chance(0.22) -> c.place(b(Blocks.SHORT_GRASS))
+                c.chance(0.05) -> c.place(b(Blocks.FERN))
+                c.noise(11.0, 20) > 0.72 && c.chance(0.15) -> c.place(c.pick(b(Blocks.BLUE_ORCHID), b(Blocks.CORNFLOWER)))
             }
             return
         }

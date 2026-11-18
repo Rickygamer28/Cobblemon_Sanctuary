@@ -98,6 +98,8 @@ class Sanctuary(
 
     /** Dressed columns that are only a meadow, because their biome was still asleep. */
     var meadow: BitSet = BitSet()
+    /** Columns to wipe clean before they're built again (after a Reshape, a full rebuild or Repair here). */
+    var wipe: BitSet = BitSet()
 
     /** Pokémon left linked to the sanctuary by older versions were brought back once. */
     var legacyTethersFixed: Boolean = false
@@ -237,6 +239,9 @@ class Sanctuary(
     fun rebuild() {
         dressed = BitSet()
         meadow = BitSet()
+        // everything goes: every column is wiped clean (but for the mod's own blocks) before it's built again
+        wipe = BitSet().apply { set(0, com.rickygamer28.sanctuary.world.ColumnOrder.countWithin(size.radius + com.rickygamer28.sanctuary.Sanctuaries.RIM)) }
+        com.rickygamer28.sanctuary.world.BiomeDresser.forgetPending(id)
         berrySpots.clear()
         // the valley's own spots go; decorations players placed stay
         props.values.removeIf { !it.startsWith("player_") }
@@ -320,6 +325,7 @@ class Sanctuary(
         t.put("Relationships", rel)
         t.put("Dressed", LongArrayTag(dressed.toLongArray()))
         t.put("Decorated", LongArrayTag(decorated.toLongArray()))
+        t.put("Wipe", LongArrayTag(wipe.toLongArray()))
         t.put("Furnished", LongArrayTag(furnished.toLongArray()))
         t.put("Meadow", LongArrayTag(meadow.toLongArray()))
         val ev = ListTag()
@@ -371,7 +377,7 @@ class Sanctuary(
 
     companion object {
         /** Bump to make existing sanctuaries rebuild their biomes after a generator change. */
-        const val DATA_VERSION = 19
+        const val DATA_VERSION = 20
 
         /** 2: the region map (town, habitats, meadows and routes) instead of a ring of type biomes. */
         const val LAYOUT_VERSION = 2
@@ -426,7 +432,8 @@ class Sanctuary(
             // (15: the lakes got deeper, only the lake is rebuilt; 16: caves in the Cave & mountain habitat, only it is rebuilt)
             // (17: the mountain always covers the caves; the Cave & mountain habitat and its borders are rebuilt)
             // (18: lakes, ponds and pools were filled in by mistake in 1.7.4–1.8.0; the watery habitats are rebuilt)
-            val onlyWater = version == 9 || version == 15 || version == 16 || version == 17 || version == 18
+            // (19: the lake's swampy mangrove-delta look became a rocky coast; the lake is rebuilt)
+            val onlyWater = version == 9 || version == 15 || version == 16 || version == 17 || version == 18 || version == 19
             if (onlyWater) when (version) {
                 16, 17 -> s.rebuildZones += "rock"
                 18 -> s.rebuildZones += listOf("water", "poison", "fairy", "ground", "ice")
@@ -434,6 +441,7 @@ class Sanctuary(
             }
             s.dressed = if (version >= DATA_VERSION || onlyWater) BitSet.valueOf(t.getLongArray("Dressed")) else BitSet()
             // (before the builder worked in waves, a dressed column was finished in one go)
+            if (t.contains("Wipe")) s.wipe = BitSet.valueOf(t.getLongArray("Wipe"))
             s.decorated = if (t.contains("Decorated")) BitSet.valueOf(t.getLongArray("Decorated")) else s.dressed.clone() as BitSet
             s.furnished = if (t.contains("Furnished")) BitSet.valueOf(t.getLongArray("Furnished")) else s.dressed.clone() as BitSet
             s.meadow = if (version >= DATA_VERSION || onlyWater) BitSet.valueOf(t.getLongArray("Meadow")) else BitSet()

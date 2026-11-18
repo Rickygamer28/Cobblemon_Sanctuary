@@ -244,6 +244,7 @@ object SanctuaryGenerator {
             if (idx < 0 || !s.dressed.get(idx)) continue
             s.dressed.clear(idx)
             s.meadow.clear(idx)
+            s.wipe.set(idx)
             n++
         }
         run { Trace.rebuild("repair here"); s.generationDirty = true }
@@ -486,6 +487,12 @@ object SanctuaryGenerator {
             }
             if (p.asLong() in known) continue
             checked++
+            if (isHugeMushroom(st)) {
+                val shroom = unheldMushroom(level, p) ?: continue
+                Trace.note(x, z, "floating mushroom of ${shroom.size} blocks removed")
+                for (q in shroom.sortedByDescending { it.y }) level.setBlock(q, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), net.minecraft.world.level.block.Block.UPDATE_CLIENTS)
+                return
+            }
             val lump = lumpAround(level, p, 3000, known) ?: continue
             val air = net.minecraft.world.level.block.Blocks.AIR.defaultBlockState()
             // top down, so nothing drops or pops off as items
@@ -572,6 +579,31 @@ object SanctuaryGenerator {
         }
         val air = net.minecraft.world.level.block.Blocks.AIR.defaultBlockState()
         for (p in leaves.sortedByDescending { it.y }) level.setBlock(p, air, net.minecraft.world.level.block.Block.UPDATE_CLIENTS)
+    }
+
+    private fun isHugeMushroom(st: net.minecraft.world.level.block.state.BlockState) =
+        st.`is`(net.minecraft.world.level.block.Blocks.MUSHROOM_STEM) || st.`is`(net.minecraft.world.level.block.Blocks.RED_MUSHROOM_BLOCK) ||
+            st.`is`(net.minecraft.world.level.block.Blocks.BROWN_MUSHROOM_BLOCK)
+
+    /** A giant mushroom (stem and cap) that nothing holds up from below (leaves don't count), or null. */
+    private fun unheldMushroom(level: ServerLevel, start: BlockPos): List<BlockPos>? {
+        val seen = HashSet<Long>()
+        val queue = ArrayDeque<BlockPos>()
+        val out = ArrayList<BlockPos>()
+        seen += start.asLong(); queue += start
+        while (queue.isNotEmpty()) {
+            val p = queue.removeFirst()
+            if (!level.hasChunk(p.x shr 4, p.z shr 4)) return null
+            out += p
+            if (out.size > 800) return null
+            val below = level.getBlockState(p.below())
+            if (!below.isAir && !isHugeMushroom(below) && !below.`is`(BlockTags.LEAVES) && below.fluidState.isEmpty && !BiomeDresser.isClutter(below)) return null
+            for (d in net.minecraft.core.Direction.entries) {
+                val n = p.relative(d)
+                if (seen.add(n.asLong()) && isHugeMushroom(level.getBlockState(n))) queue += n
+            }
+        }
+        return out
     }
 
     /** The lump of blocks joined to [start], or null if it's bigger than [max], holds items, or rests on anything. */
@@ -698,6 +730,8 @@ object SanctuaryGenerator {
             val hit = if (inside) ZoneLayout.locate(s, x, z, ring) else null
             if (inside && hit == null) return
             val asleep = inside && hit!!.zone !in s.unlocked && dist <= radius - 1.6
+            // after a Reshape (or Repair here): the column is wiped clean first
+            if (s.wipe.get(idx)) { BiomeDresser.wipeColumn(level, s, x, z); s.wipe.clear(idx) }
             val ok = try {
                 when {
                     !inside -> BiomeDresser.withPhase(BiomeDresser.Phase.ALL) { BiomeDresser.dressRim(level, s, x, z, dist, ring) }
@@ -760,6 +794,7 @@ object SanctuaryGenerator {
                     (pocket != null && (pocket.zone in s.rebuildZones || pocket.host in s.rebuildZones)))
                 if (!touched || meadowDone) continue
                 s.dressed.clear(idx)
+                s.wipe.set(idx)
             }
             if (inside && hit == null) continue
             // a biome that hasn't woken up is a plain meadow until a Pokémon of its type moves in (the wall is always built)
