@@ -162,8 +162,13 @@ object SanctuaryConfig {
         .comment("Let residents that have a Mega Evolution Mega Evolve during play-fights (needs Mega Showdown).")
         .define("megaEnabled", true)
     val megaNeedsStone: ModConfigSpec.BooleanValue = builder
-        .comment("Only residents holding their Mega Stone can Mega Evolve in the sanctuary.")
+        .comment("Only residents holding their Mega Stone (or Red / Blue Orb, Gracidea…) can change in the sanctuary.")
         .define("megaNeedsStone", false)
+    val formsEnabled: ModConfigSpec.BooleanValue = builder
+        .comment("Let residents change form for a while during play-fights, as Mega Showdown's items would (Shaymin's Sky Forme,",
+            "Aegislash's Blade Forme, Darmanitan's Zen Mode…). Primal Groudon and Kyogre follow megaEnabled. With megaNeedsStone,",
+            "they need the item too (the Gracidea, the Red or Blue Orb…). Uses the mega chance and times above.")
+        .define("formsEnabled", true)
 
     // ---- families and eggs
     val eggsEnabled: ModConfigSpec.BooleanValue = builder

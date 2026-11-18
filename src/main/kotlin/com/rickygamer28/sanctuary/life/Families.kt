@@ -100,7 +100,7 @@ object Families {
     /** First stage of the mother's line, in the same regional form. */
     fun babyForm(mother: Pokemon): FormData {
         val name = mother.form.name.lowercase()
-        var form = if (name.startsWith("mega") || name == "primal") mother.species.standardForm else mother.form
+        var form = if (name.startsWith("mega") || name == "primal" || MegaCompat.isChanged(mother)) mother.species.standardForm else mother.form
         repeat(10) {
             val pre = runCatching { form.preEvolution }.getOrNull() ?: return form
             form = pre.form

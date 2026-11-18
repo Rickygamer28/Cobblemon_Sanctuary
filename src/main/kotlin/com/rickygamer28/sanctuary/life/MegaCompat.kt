@@ -20,18 +20,27 @@ import net.neoforged.fml.ModList
 import java.util.UUID
 
 /**
- * Mega Evolution during play-fights, with Cobblemon: Mega Showdown installed.
+ * Mega Evolution, Primal Reversion and other form changes during play-fights, with Cobblemon: Mega Showdown installed.
  *
  * Mega Showdown describes every Mega Stone in a data file (`data/<ns>/mega_showdown/mega/<stone>.json`) with the
- * species it works for and the aspects to apply ("mega_evolution=mega") and to revert ("mega_evolution=none").
- * Those files are read here, so the sanctuary works with every Mega Showdown version and with custom megas.
- * The Pokémon keeps its original typing for its home: see TypeLogic.
+ * species it works for and the aspects to apply ("mega_evolution=mega") and to revert ("mega_evolution=none"), and
+ * its other form changes the same way: items held (the Red and Blue Orbs for Primal Groudon and Kyogre), items used
+ * on a Pokémon (the Gracidea for Shaymin's Sky Forme) and forms taken in battle (Aegislash's Blade Forme, Darmanitan's
+ * Zen Mode…). Those files are read here, so the sanctuary works with every Mega Showdown version and with custom ones.
+ * A changed Pokémon keeps its original typing for its home (see TypeLogic), and goes back after a while.
  */
 object MegaCompat {
     val megaShowdownLoaded: Boolean by lazy { ModList.get().isLoaded("mega_showdown") }
 
+    /** What a change is: a Mega Evolution, a Primal Reversion, or another form change (and from which kind of file). */
+    enum class Kind { MEGA, PRIMAL, FORM }
+
     private class Stone(val items: Set<String>, val species: Set<String>, val apply: List<String>, val revert: List<String>,
-                        val required: List<List<String>>, val blacklist: List<List<String>>)
+                        val required: List<List<String>>, val blacklist: List<List<String>>, val kind: Kind, val held: Boolean = false)
+
+    /** Mega Showdown's folders of form changes, and whether the item has to be held for the form (then it's Mega Showdown's to keep). */
+    private val FOLDERS = listOf("mega" to false, "held_form_change" to true, "form_change_interact" to false, "battle_form" to false)
+    private const val SAVED_REVERT = "sanctuary_form_revert"
 
     private class Active(val revertAt: Long, val revert: List<String>, val entity: PokemonEntity)
 
@@ -56,8 +65,8 @@ object MegaCompat {
     private fun load(server: MinecraftServer): List<Stone> {
         if (loadedFor === server) stones?.let { return it }
         val list = ArrayList<Stone>()
-        runCatching {
-            val found = server.resourceManager.listResources("mega_showdown/mega") { it.path.endsWith(".json") }
+        for ((folder, heldForm) in FOLDERS) runCatching {
+            val found = server.resourceManager.listResources("mega_showdown/$folder") { it.path.endsWith(".json") }
             for ((id, res) in found) {
                 runCatching {
                     val json = res.openAsReader().use { JsonParser.parseReader(it) }.asJsonObject
@@ -70,18 +79,27 @@ object MegaCompat {
                     }
                     val apply = cond?.getAsJsonObject("apply")
                     val revert = cond?.getAsJsonObject("revert")
-                    val applyAspects = strings(apply?.get("aspects")).ifEmpty { listOf("mega_evolution=mega") }
-                    val revertAspects = strings(revert?.get("aspects")).ifEmpty { listOf("mega_evolution=none") }
+                    val mega = folder == "mega"
+                    val applyAspects = strings(apply?.get("aspects")).ifEmpty { if (mega) listOf("mega_evolution=mega") else emptyList() }
+                    val revertAspects = strings(revert?.get("aspects")).ifEmpty { if (mega) listOf("mega_evolution=none") else emptyList() }
+                    // (a form change needs both ways, or the Pokémon couldn't go back)
+                    if (applyAspects.isEmpty() || revertAspects.isEmpty()) return@runCatching
+                    val kind = when {
+                        applyAspects.any { it.lowercase().endsWith("=primal") } -> Kind.PRIMAL
+                        mega -> Kind.MEGA
+                        else -> Kind.FORM
+                    }
                     val aspectCond = apply?.getAsJsonObject("aspect")
                     val items = linkedSetOf("${id.namespace}:$file", "mega_showdown:$file")
                     for (key in listOf("item", "item_id", "items")) items += strings(json.get(key))
-                    val species = strings(json.get("pokemons")).map { it.lowercase().replace(" ", "").replace("-", "") }.toSet()
+                    val species = (strings(json.get("pokemons")) + strings(json.get("pokemon"))).map { it.lowercase().replace(" ", "").replace("-", "") }.toSet()
                     if (species.isNotEmpty()) list += Stone(items, species, applyAspects, revertAspects,
-                        nested(aspectCond?.get("required_aspects")), nested(aspectCond?.get("blacklist_aspects")))
+                        nested(aspectCond?.get("required_aspects")), nested(aspectCond?.get("blacklist_aspects")), kind, heldForm)
                 }.onFailure { CobblemonSanctuary.LOGGER.debug("Skipping Mega Showdown file {}", id, it) }
             }
-        }.onFailure { CobblemonSanctuary.LOGGER.warn("Couldn't read Mega Showdown's mega data", it) }
-        CobblemonSanctuary.LOGGER.info("Sanctuary: found {} Mega Stones from Mega Showdown", list.size)
+        }.onFailure { CobblemonSanctuary.LOGGER.warn("Couldn't read Mega Showdown's {} data", folder, it) }
+        CobblemonSanctuary.LOGGER.info("Sanctuary: found {} Mega Stones, {} Primal Reversions and {} other form changes from Mega Showdown",
+            list.count { it.kind == Kind.MEGA }, list.count { it.kind == Kind.PRIMAL }, list.count { it.kind == Kind.FORM })
         stones = list
         loadedFor = server
         return list
@@ -90,6 +108,10 @@ object MegaCompat {
     fun isMega(pokemon: Pokemon): Boolean =
         pokemon.aspects.any { it.lowercase() in MEGA_ASPECTS } || pokemon.form.name.lowercase().startsWith("mega")
 
+    /** Is the Pokémon in a form it took for a while in the sanctuary (a Mega, a Primal, Sky Forme…)? Its home stays its normal form's. */
+    fun isChanged(pokemon: Pokemon): Boolean =
+        pokemon.uuid in active || runCatching { pokemon.persistentData.contains(SAVED_REVERT) }.getOrDefault(false) || isMega(pokemon)
+
     /**
      * The Mega Evolution this Pokémon can do. In the sanctuary it doesn't need to hold its Mega Stone (unless the
      * config says so); if it holds one, that one is used (Charizard X or Y), otherwise one of its megas at random.
@@ -97,18 +119,20 @@ object MegaCompat {
     private fun stoneFor(server: MinecraftServer, pokemon: Pokemon, random: net.minecraft.util.RandomSource): Stone? {
         val name = pokemon.species.name.lowercase().replace(" ", "").replace("-", "")
         val aspects = pokemon.aspects.map { it.lowercase() }.toSet()
+        val megas = SanctuaryConfig.megaEnabled.get()
+        val forms = SanctuaryConfig.formsEnabled.get()
+        val heldId = pokemon.heldItem().takeIf { !it.isEmpty }?.let { BuiltInRegistries.ITEM.getKey(it.item).toString() }
+        fun holds(st: Stone) = heldId != null && (heldId in st.items || st.items.any { it.substringAfter(':') == heldId.substringAfter(':') })
         val options = load(server).filter { st ->
             name in st.species &&
+                (if (st.kind == Kind.FORM) forms else megas) &&
+                // a form its held item gives it is Mega Showdown's to keep: it isn't changed back and forth here
+                !(st.held && holds(st)) &&
                 (st.required.isEmpty() || st.required.any { group -> group.all { it.lowercase() in aspects } }) &&
                 st.blacklist.none { group -> group.isNotEmpty() && group.all { it.lowercase() in aspects } }
         }
         if (options.isEmpty()) return null
-        val held = pokemon.heldItem()
-        if (!held.isEmpty) {
-            val itemId = BuiltInRegistries.ITEM.getKey(held.item).toString()
-            val path = itemId.substringAfter(':')
-            options.firstOrNull { st -> itemId in st.items || st.items.any { it.substringAfter(':') == path } }?.let { return it }
-        }
+        options.firstOrNull { holds(it) }?.let { return it }
         if (SanctuaryConfig.megaNeedsStone.get()) return null
         return options[random.nextInt(options.size)]
     }
@@ -120,11 +144,11 @@ object MegaCompat {
 
     /** Called when a resident attacks during a play-fight. */
     fun maybeMega(entity: PokemonEntity, s: Sanctuary? = null) {
-        if (!megaShowdownLoaded || !SanctuaryConfig.megaEnabled.get()) return
+        if (!megaShowdownLoaded || !(SanctuaryConfig.megaEnabled.get() || SanctuaryConfig.formsEnabled.get())) return
         val level = entity.level() as? ServerLevel ?: return
         val pokemon = entity.pokemon
         val now = level.gameTime
-        if (pokemon.uuid in active || isMega(pokemon)) return
+        if (isChanged(pokemon)) return
         // one roll per play-fight
         val last = lastRoll[pokemon.uuid]
         if (last != null && now - last < 20L * 60) return
@@ -134,14 +158,27 @@ object MegaCompat {
         val min = SanctuaryConfig.megaMinSeconds.get()
         val max = SanctuaryConfig.megaMaxSeconds.get().coerceAtLeast(min)
         val seconds = min + level.random.nextInt(max - min + 1)
+        val before = pokemon.aspects.toSet()
+        val formBefore = pokemon.form.name
         applyAll(entity, stone.apply)
+        // nothing changed (it was in that form already): no show
+        if (pokemon.aspects.toSet() == before && pokemon.form.name == formBefore) return
         active[pokemon.uuid] = Active(now + seconds * 20L, stone.revert, entity)
+        // remembered on the Pokémon too, so it goes back even after a crash
+        runCatching { pokemon.persistentData.putString(SAVED_REVERT, stone.revert.joinToString("\n")) }
         level.playSound(null, entity.blockPosition(), SoundEvents.BEACON_POWER_SELECT, SoundSource.NEUTRAL, 1f, 1.4f)
         level.sendParticles(ParticleTypes.END_ROD, entity.x, entity.y + entity.bbHeight * 0.6, entity.z, 40, 0.6, 0.8, 0.6, 0.08)
         level.sendParticles(ParticleTypes.FLASH, entity.x, entity.y + entity.bbHeight * 0.6, entity.z, 1, 0.0, 0.0, 0.0, 0.0)
         Effects.play(entity, Effects.CRY)
-        s?.logEvent("${pokemon.getDisplayName(false).string} Mega Evolved during a play-fight!")
-        s?.stat("megas")
+        val who = pokemon.getDisplayName(false).string
+        val formName = pokemon.form.name.replace('_', ' ').replace('-', ' ').split(' ').joinToString(" ") { it.replaceFirstChar { c -> c.uppercase() } }
+        s?.logEvent(when (stone.kind) {
+            Kind.MEGA -> "$who Mega Evolved during a play-fight!"
+            Kind.PRIMAL -> "$who underwent Primal Reversion during a play-fight!"
+            Kind.FORM -> if (formName.isNotBlank() && formName != formBefore && !formName.equals("normal", true)) "$who changed into its $formName form during a play-fight!"
+                else "$who changed form during a play-fight!"
+        })
+        s?.stat(if (stone.kind == Kind.FORM) "forms" else "megas")
     }
 
     /** Ends Mega Evolutions whose time is up. Called every second. */
@@ -152,6 +189,7 @@ object MegaCompat {
             active.remove(id)
             if (a.entity.isRemoved) { revertPokemon(a.entity.pokemon, a.revert); continue }
             applyAll(a.entity, a.revert)
+            runCatching { a.entity.pokemon.persistentData.remove(SAVED_REVERT) }
             (a.entity.level() as? ServerLevel)?.sendParticles(ParticleTypes.END_ROD, a.entity.x, a.entity.y + a.entity.bbHeight * 0.6, a.entity.z, 20, 0.5, 0.6, 0.5, 0.05)
         }
         if (lastRoll.size > 5000) lastRoll.clear()
@@ -159,6 +197,7 @@ object MegaCompat {
 
     private fun revertPokemon(pokemon: Pokemon, revert: List<String>) {
         for (p in revert) runCatching { PokemonProperties.parse(p).apply(pokemon) }
+        runCatching { pokemon.persistentData.remove(SAVED_REVERT) }
     }
 
     /** Before a resident goes back to its PC (despawn, server stop): it shouldn't stay Mega. */
@@ -169,8 +208,12 @@ object MegaCompat {
 
     /** A resident that is still Mega from before a crash goes back to normal when it comes out. */
     fun cleanStale(pokemon: Pokemon) {
-        if (!megaShowdownLoaded || pokemon.uuid in active || !isMega(pokemon)) return
-        revertPokemon(pokemon, listOf("mega_evolution=none"))
+        if (!megaShowdownLoaded || pokemon.uuid in active) return
+        val saved = runCatching { pokemon.persistentData.getString(SAVED_REVERT) }.getOrDefault("")
+        when {
+            saved.isNotEmpty() -> revertPokemon(pokemon, saved.split('\n'))
+            isMega(pokemon) -> revertPokemon(pokemon, listOf("mega_evolution=none"))
+        }
     }
 
     fun revertAll() {

@@ -15,10 +15,12 @@ object TypeLogic {
 
     fun clearCache() = finalTypeCache.clear()
 
-    /** The form used for typing: a Mega (or Primal) keeps the typing of its normal form. */
+    /** The form used for typing: a Mega, a Primal, or a form taken for a while in a play-fight keeps its normal form's typing. */
     private fun baseForm(pokemon: Pokemon): FormData {
         val name = pokemon.form.name.lowercase()
-        return if (name.startsWith("mega") || name == "primal") pokemon.species.standardForm else pokemon.form
+        if (name.startsWith("mega") || name == "primal") return pokemon.species.standardForm
+        if (runCatching { pokemon.persistentData.contains("sanctuary_form_revert") }.getOrDefault(false)) return pokemon.species.standardForm
+        return pokemon.form
     }
 
     /** Current typing, lowercase, in order (a Mega keeps its original typing). */
