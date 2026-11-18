@@ -1555,7 +1555,13 @@ object BiomeDresser {
                 st.block in MOD_SOLID && !nextToBuild(level, p) -> { level.setBlock(p, air, FLAGS); p = p.below() }
                 // anything a player built (players can't build in the sanctuary): it goes too
                 !ValleyBlocks.belongs(st) -> { Trace.removed(st); ValleyBlocks.remove(level, p); p = p.below() }
-                else -> return p
+                // the natural ground (or a lake's water, as always): found
+                isNatural(st) && (st.fluidState.isEmpty || st.`is`(Blocks.WATER)) -> return p
+                // one of the mod's own blocks a player placed (a bed, a nest…): the column is left as it is
+                ValleyBlocks.isMods(st) -> return p
+                // anything else in the way (a lamp, a dead coral, an old decoration) goes, so no column is ever left
+                // unbuilt (players can't build here, so there's nothing of theirs to keep)
+                else -> { Trace.note(x, z, "cleared ${st.block} at ${p.y} to reach the ground"); level.setBlock(p, air, FLAGS); p = p.below() }
             }
         }
         return null
