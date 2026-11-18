@@ -276,7 +276,7 @@ object ZoneLayout {
         private var cached = 0
         /** The ground level the pocket is built at (where the host's ground is at its middle). */
         fun level(s: Sanctuary): Int {
-            val key = s.unlocked.hashCode()
+            val key = s.unlocked.hashCode() * 31 + s.variants.hashCode()
             if (key != levelKey) { cached = BiomeDresser.baseHeight(s, x, z); levelKey = key }
             return cached
         }

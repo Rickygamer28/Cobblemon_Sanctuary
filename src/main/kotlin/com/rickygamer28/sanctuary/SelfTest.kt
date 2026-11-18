@@ -116,8 +116,23 @@ object SelfTest {
                 log("woke up: ${ZoneLayout.HABITATS - FIRST.toSet()} (no room for: ${ZoneLayout.HABITATS - sanctuary.habitats.keys})")
                 stage = 4; stageStart = now; idleSince = -1L
             }
-            else -> {
+            4 -> {
                 log("== after the rest woke up, finished in ${"%.0f".format(secs)} s${if (timedOut) " (TIMED OUT)" else ""}")
+                scan(level, sanctuary)
+                // the owner picks other looks for two habitats (as the Region tab's Look button does)
+                for (zone in listOf("water", "rock")) {
+                    val now0 = BiomeDresser.variantOf(sanctuary, zone)
+                    val next = (now0 + 1) % 3
+                    sanctuary.variants[zone] = next
+                    sanctuary.rebuildZones += zone
+                    sanctuary.landmarks.remove(zone)?.let { if (it != Long.MIN_VALUE) sanctuary.staleLandmarks[zone] = it }
+                    log("look of $zone: $now0 -> $next")
+                }
+                sanctuary.generationDirty = true
+                stage = 5; stageStart = now; idleSince = -1L
+            }
+            else -> {
+                log("== after changing two looks, finished in ${"%.0f".format(secs)} s${if (timedOut) " (TIMED OUT)" else ""}")
                 scan(level, sanctuary)
                 log("total test time ${(now - startedAt) / 20} s")
                 File("selftest-report.txt").writeText(report.toString())
