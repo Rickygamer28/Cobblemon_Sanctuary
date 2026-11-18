@@ -896,7 +896,8 @@ object BiomeDresser {
         val (p, d) = ZoneLayout.pocketAt(s, x, z) ?: return base
         if (!p.live(s)) return base
         val level = p.level(s)
-        val w = smooth((p.r + 4 - d) / 4.0)
+        // (a sub-biome blends into the habitat around it over a wider band)
+        val w = smooth((p.r + 4 - d) / (if (p.sub) 12.0 else 4.0))
         val flat = mix(base.toDouble(), level.toDouble(), w)
         val h = when (p.zone) {
             // ponds and bogs: a level hollow with a pool dug in its middle, the water flush with the ground
@@ -908,7 +909,11 @@ object BiomeDresser {
                 flat + tall * Math.pow(smooth((p.r - d) / p.r), 1.3) * n
             }
             // a custom type's pocket, shaped like its look in small
-            else -> if (CustomTypes.isCustom(p.zone)) {
+            // a sub-biome: its look's own ground, at the level of the habitat around it
+            else -> if (p.sub) {
+                val sh = customShape(s, CustomTypes.look(s, p.zone).terrain, x.toDouble(), z.toDouble(), x.toDouble(), z.toDouble(), (d / p.r).coerceIn(0.0, 1.2))
+                mix(base.toDouble(), level + sh - 1.5, w)
+            } else if (CustomTypes.isCustom(p.zone)) {
                 val k = d / p.r
                 val rise = Math.pow(smooth((p.r - d) / p.r), 1.3)
                 when (CustomTypes.look(s, p.zone).terrain) {
@@ -2681,7 +2686,7 @@ object BiomeDresser {
                     c.chance(0.2) -> c.place(b(Blocks.SHORT_GRASS))
                 }
             }
-            else -> if (CustomTypes.isCustom(p.zone)) custom(c, p.zone, (d / p.r).coerceIn(0.0, 1.0)) else c.ground(hostSoil(), b(Blocks.DIRT))
+            else -> if (CustomTypes.isCustom(p.zone)) custom(c, p.zone, (d / p.r).coerceIn(0.0, 1.0), big = p.sub) else c.ground(hostSoil(), b(Blocks.DIRT))
         }
     }
 
@@ -2691,10 +2696,11 @@ object BiomeDresser {
      * stone with chorus and end rods; Light from bright grass and quartz with white flowers; and so on. Types it
      * doesn't know get the palette closest to their colour.
      */
-    private fun custom(c: Ctx, zone: String, inPocket: Double? = null) {
+    private fun custom(c: Ctx, zone: String, inPocket: Double? = null, big: Boolean = false) {
         val p = CustomTypes.palette(zone)
         val look = CustomTypes.look(c.s, zone)
-        val small = inPocket != null
+        // a pocket is dressed in small; a sub-biome like a habitat
+        val small = inPocket != null && !big
         // how far out it is: 0 in the middle, 1 at the edge (of the habitat, or of the pocket)
         val q = inPocket ?: ZoneLayout.local(c.s, zone, c.x, c.z)?.q ?: 0.5
         val top = b(look.top ?: p.top)
@@ -2712,7 +2718,7 @@ object BiomeDresser {
         if (look.pools != null && q < poolReach && c.slope < 2 && c.noise(6.0, 67) > 0.42) soil = b(look.pools)
         c.natural(soil, b(p.filler), b(p.rock), patch)
         if (c.cliff) return
-        fun room(margin: Int) = if (small) q < 0.65 else c.roomy(margin)
+        fun room(margin: Int) = if (small) q < 0.65 else if (inPocket != null) q < 0.85 && c.roomy(margin) else c.roomy(margin)
         val tip = p.glow?.let { b(it) }?.takeIf { it.`is`(Blocks.AMETHYST_CLUSTER) || it.`is`(Blocks.END_ROD) }
         val rim = look.terrain == CustomTypes.Terrain.HOLLOW || look.terrain == CustomTypes.Terrain.CRATER
         val spires = look.spires?.let { b(it) }

@@ -120,7 +120,7 @@ object SelfTest {
                 log("== after the rest woke up, finished in ${"%.0f".format(secs)} s${if (timedOut) " (TIMED OUT)" else ""}")
                 scan(level, sanctuary)
                 // the owner picks other looks for two habitats (as the Region tab's Look button does)
-                for (zone in listOf("water", "rock", com.rickygamer28.sanctuary.world.ZoneLayout.HUB) + CUSTOM.filter { it in sanctuary.habitats } + CUSTOM_POCKETS) {
+                for (zone in listOf("water", "rock", com.rickygamer28.sanctuary.world.ZoneLayout.HUB) + CUSTOM.filter { it in sanctuary.habitats } + CUSTOM_POCKETS + CUSTOM_SUBS.keys) {
                     val now0 = BiomeDresser.variantOf(sanctuary, zone)
                     // (the town goes to the Old Kanto village, with its koi ponds)
                     val next = if (zone == com.rickygamer28.sanctuary.world.ZoneLayout.HUB) (if (now0 == 1) 2 else 1) else (now0 + 1) % 3
@@ -157,6 +157,8 @@ object SelfTest {
     private val CUSTOM = listOf("blood", "digital")
     /** …and two with only a few Pokémon, each with a pocket in the habitat it lives in (Cosmic in Fairy, Slime in Poison). */
     private val CUSTOM_POCKETS = listOf("cosmic", "slime")
+    /** …and two with a sub-biome: Light in the Fairy meadows (just begun), Eldritch in the Ghost woods (fully grown). */
+    private val CUSTOM_SUBS = mapOf("light" to 0.0, "eldritch" to 1.0)
 
     private fun counts(zones: List<String>): LinkedHashMap<String, Int> {
         val counts = linkedMapOf<String, Int>()
@@ -170,7 +172,7 @@ object SelfTest {
         val counts = counts(ZoneLayout.HABITATS + CUSTOM)
         val newTypes = ZoneLayout.HABITATS.filter { it !in s.unlocked }
         s.typeCounts = counts
-        s.unlocked = linkedSetOf(ZoneLayout.HUB) + ZoneLayout.HABITATS + CUSTOM.filter { it in s.habitats } + CUSTOM_POCKETS
+        s.unlocked = linkedSetOf(ZoneLayout.HUB) + ZoneLayout.HABITATS + CUSTOM.filter { it in s.habitats } + CUSTOM_POCKETS + CUSTOM_SUBS.keys
         s.unlockedChanged = true
         SanctuaryGenerator.redoCaves(s)
         s.rebuildZones += newTypes.filter { z -> ZoneLayout.pockets(s).any { it.zone == z } }
@@ -213,7 +215,10 @@ object SelfTest {
         if (zones.any { it in CUSTOM }) {
             s.customPockets.clear()
             s.customPockets += CUSTOM_POCKETS
-            s.unlocked = s.unlocked + CUSTOM_POCKETS
+            s.customSubs.clear()
+            s.customSubs.putAll(CUSTOM_SUBS)
+            s.unlocked = s.unlocked + CUSTOM_POCKETS + CUSTOM_SUBS.keys
+            log("sub-biomes: " + CUSTOM_SUBS.keys.joinToString { t -> ZoneLayout.customPocket(s, t)?.let { "$t in ${it.host} r${it.r} at (${it.x - s.center.x}, ${it.z - s.center.z})" } ?: "$t (no room)" })
             log("custom pockets: " + CUSTOM_POCKETS.joinToString { t -> ZoneLayout.customPocket(s, t)?.let { "$t in ${it.host} r${it.r} at (${it.x - s.center.x}, ${it.z - s.center.z})" } ?: "$t (no room)" })
         }
     }

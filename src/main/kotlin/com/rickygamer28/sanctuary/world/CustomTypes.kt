@@ -243,8 +243,31 @@ object CustomTypes {
     /** How many Pokémon of a custom type it takes for it to get a habitat of its own. */
     fun minResidents(): Int = runCatching { SanctuaryConfig.customHabitatMin.get() }.getOrDefault(15)
 
-    /** How many it takes for a pocket of its own, inside the habitat it lives in (more than [minResidents]: no pocket). */
+    /** How many it takes for a pocket of its own, inside the habitat it lives in. */
     fun pocketMin(): Int = runCatching { SanctuaryConfig.customPocketMin.get() }.getOrDefault(5)
+
+    /** How many it takes for a sub-biome (a district of its own inside the habitat it lives in). */
+    fun subMin(): Int = runCatching { SanctuaryConfig.customSubMin.get() }.getOrDefault(10)
+
+    /**
+     * How many it takes for a habitat of its own in the ring: at least [minResidents], and a good share of what a
+     * typical habitat has ([counts]: residents per habitat).
+     */
+    fun habitatNeed(counts: Map<String, Int>): Int {
+        val main = ZoneLayout.HABITATS.mapNotNull { counts[it]?.takeIf { n -> n > 0 } }.sorted()
+        val typical = if (main.isEmpty()) 0 else main[main.size / 2]
+        val share = runCatching { SanctuaryConfig.customHabitatShare.get() }.getOrDefault(0.4)
+        return maxOf(minResidents(), kotlin.math.ceil(typical * share).toInt())
+    }
+
+    /** Which stage [type] is at with [n] Pokémon: 0 none, 1 a pocket, 2 a sub-biome, 3 a habitat of its own. */
+    fun stage(s: Sanctuary, type: String, n: Int, counts: Map<String, Int>): Int = when {
+        !wantsOwn(s, type) -> 0
+        n >= habitatNeed(counts) -> 3
+        n >= subMin() -> 2
+        n >= pocketMin() -> 1
+        else -> 0
+    }
 
     /** Where Pokémon of [type] live in [s]: its own habitat if it has one, or the habitat chosen or guessed. */
     fun zoneFor(s: Sanctuary?, type: String): String {
@@ -258,6 +281,9 @@ object CustomTypes {
 
     /** What [type]'s own habitat is called. */
     fun habitatName(type: String): String = NAMES[type.lowercase()] ?: "${typeName(type)} lands"
+
+    /** What [type]'s sub-biome is called (its habitat's name). */
+    fun subName(type: String): String = habitatName(type)
 
     /** What [type]'s pocket is called. */
     fun pocketName(type: String): String = "${typeName(type)} pocket"

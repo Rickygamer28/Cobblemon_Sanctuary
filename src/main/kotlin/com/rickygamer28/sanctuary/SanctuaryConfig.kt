@@ -226,6 +226,14 @@ object SanctuaryConfig {
     val customHabitatMin: ModConfigSpec.IntValue = builder
         .comment("How many Pokémon of a custom type it takes for it to get a habitat of its own.")
         .defineInRange("customHabitatMin", 15, 1, 1000)
+    val customHabitatShare: ModConfigSpec.DoubleValue = builder
+        .comment("…and at least this share of a typical habitat's Pokémon (0.4: 40% as many as the middle habitat has), so a",
+            "custom type only takes a place in the ring when it's really big next to the others.")
+        .defineInRange("customHabitatShare", 0.4, 0.0, 5.0)
+    val customSubMin: ModConfigSpec.IntValue = builder
+        .comment("How many Pokémon of a custom type it takes for a sub-biome: a district of its own inside the habitat it lives",
+            "in, growing with its Pokémon until it becomes a habitat of its own.")
+        .defineInRange("customSubMin", 10, 1, 1000)
     val customPocketMin: ModConfigSpec.IntValue = builder
         .comment("How many Pokémon of a custom type it takes for a small pocket of its own, inside the habitat it lives in",
             "(until it has enough for a whole habitat).")

@@ -365,7 +365,7 @@ object ZoneLayout {
      * patch of flowers, a snowy crag on the mountain… Pokémon of the pocket's habitat can live there, so walking
      * through the region you meet more kinds of Pokémon than just the ones of the habitat you're in.
      */
-    class Pocket(val x: Int, val z: Int, val r: Int, val zone: String, val host: String, val salt: Int) {
+    class Pocket(val x: Int, val z: Int, val r: Int, val zone: String, val host: String, val salt: Int, val sub: Boolean = false) {
         private var levelKey = Int.MIN_VALUE
         private var cached = 0
         /** The ground level the pocket is built at (where the host's ground is at its middle). */
@@ -405,6 +405,7 @@ object ZoneLayout {
         var k = s.layoutSalt.toLong() * 1_000_003L + s.size.radius + s.pocketStyle * 7_000_001L
         for ((zone, hb) in s.habitats) k = k * 31 + zone.hashCode() * 7L + hb.x * 131L + hb.z
         for (t in s.customPockets) k = k * 37 + t.hashCode() + CustomTypes.zoneFor(s, t).hashCode() * 3L
+        for ((t, g) in s.customSubs) k = k * 41 + t.hashCode() + (g * 100).toLong() + CustomTypes.zoneFor(s, t).hashCode() * 5L
         return k
     }
 
@@ -420,6 +421,8 @@ object ZoneLayout {
         val key = pocketKey(s)
         pocketCache[s.id]?.takeIf { it.key == key }?.let { return it }
         val list = ArrayList<Pocket>()
+        // custom types' sub-biomes first (the pockets keep clear of them)
+        if (s.planned && s.habitats.isNotEmpty()) list += subBiomes(s)
         if (s.planned && s.habitats.isNotEmpty()) {
             val random = java.util.Random(s.seed xor (s.layoutSalt * 0x2545F4914F6CDD1DL) xor 0x9067L)
             val newer = s.pocketStyle >= 2
@@ -514,8 +517,54 @@ object ZoneLayout {
         return null
     }
 
-    /** The pocket a custom type has (null if it has none). */
-    fun customPocket(s: Sanctuary, type: String): Pocket? = if (type in s.customPockets) pockets(s).firstOrNull { it.zone == type } else null
+    /** The pocket (or sub-biome) a custom type has (null if it has none). */
+    fun customPocket(s: Sanctuary, type: String): Pocket? =
+        if (type in s.customPockets || type in s.customSubs) pockets(s).firstOrNull { it.zone == type } else null
+
+    /** The habitat [type]'s sub-biome goes in: its home, or (a mountain or the town) the gentlest habitat with room. */
+    private fun subHost(s: Sanctuary, type: String, taken: Map<String, Int>): String? {
+        val home = CustomTypes.zoneFor(s, type)
+        // (not in a mountain, nor in the lake)
+        if (home in s.habitats && home in HABITATS && home !in STEEP && home != "water" && (taken[home] ?: 0) < 2) return home
+        val hb = s.habitats[home]
+        return HABITATS.filter { it in s.habitats && it !in STEEP && it != "water" && (taken[it] ?: 0) < 2 }
+            .minByOrNull { z -> (taken[z] ?: 0) * 10_000 - s.habitats[z]!!.size() + (if (hb != null) distance(s.habitats[z]!!.x, s.habitats[z]!!.z, hb.x, hb.z) * 0.5 else 0.0) }
+    }
+
+    /**
+     * The custom types' sub-biomes: districts in the outer part of the habitat they live in (away from the town and
+     * the landmark), growing with their Pokémon. Two can share a habitat, one on each side.
+     */
+    private fun subBiomes(s: Sanctuary): List<Pocket> {
+        val taken = HashMap<String, Int>()
+        val hostOf = LinkedHashMap<String, String>()
+        for (t in s.customSubs.keys.sorted()) {
+            if (t in s.habitats) continue
+            val host = subHost(s, t, taken) ?: continue
+            hostOf[t] = host
+            taken[host] = (taken[host] ?: 0) + 1
+        }
+        val out = ArrayList<Pocket>()
+        for ((host, types) in hostOf.entries.groupBy({ it.value }, { it.key })) {
+            val hb = s.habitats[host] ?: continue
+            val ux = sin(hb.angle)
+            val uz = -cos(hb.angle)
+            types.forEachIndexed { i, t ->
+                val grow = (s.customSubs[t] ?: 0.0).coerceIn(0.0, 1.0)
+                // a quarter of the habitat's size to start with, up to two fifths
+                var r = min(hb.size() * (0.25 + 0.15 * grow), min(hb.radial, hb.along) * (if (types.size > 1) 0.42 else 0.5))
+                // its middle well out from the habitat's middle (the landmark), inside the border
+                val out1 = max(r + 16.0, hb.radial - r * 0.9 - 4)
+                if (out1 + r > hb.radial + 6) r = ((hb.radial + 6 - 16) / 2).coerceAtLeast(12.0)
+                val radialOff = max(r + 16.0, hb.radial - r * 0.9 - 4)
+                val side = if (types.size > 1) (if (i == 0) -1.0 else 1.0) * hb.along * 0.45 else 0.0
+                val x = hb.x + ux * radialOff + cos(hb.angle) * side
+                val z = hb.z + uz * radialOff + sin(hb.angle) * side
+                out += Pocket(x.toInt(), z.toInt(), r.toInt().coerceAtLeast(12), t, host, 700 + i, sub = true)
+            }
+        }
+        return out
+    }
 
     /** A random spot in one of the living pockets of [zone] (null if it has none). */
     fun pocketPoint(s: Sanctuary, zone: String, random: RandomSource, near: Pair<Int, Int>? = null): Pair<Pocket, Pair<Int, Int>>? {

@@ -213,7 +213,7 @@ object Residents {
             for (t in runCatching { TypeLogic.customTypes(e.pokemon) }.getOrDefault(emptyList()).toSet()) customCounts[t] = (customCounts[t] ?: 0) + 1
         }
         s.customCounts = customCounts
-        val unlocked = linkedSetOf(ZoneLayout.HUB) + counts.keys.filter { it in ring } + s.customPockets
+        val unlocked = linkedSetOf(ZoneLayout.HUB) + counts.keys.filter { it in ring } + s.customPockets + s.customSubs.keys
         val newTypes = unlocked - s.unlocked
         val cavesChange = s.state == SanctuaryState.ACTIVE && s.planned && s.caveStyle >= 2 &&
             com.rickygamer28.sanctuary.world.Caves.MOUNTAINS.any { (it in unlocked) != (it in s.unlocked) }
@@ -242,7 +242,8 @@ object Residents {
     private fun planRegion(s: Sanctuary, counts: Map<String, Int>, customCounts: Map<String, Int> = emptyMap()) {
         if (s.state != SanctuaryState.ACTIVE) return
         // custom types with enough Pokémon (and the owner hasn't sent them to live elsewhere) want a habitat of their own
-        val ownWanted = customCounts.filter { (t, n) -> n >= com.rickygamer28.sanctuary.world.CustomTypes.minResidents() && com.rickygamer28.sanctuary.world.CustomTypes.wantsOwn(s, t) }
+        val need = com.rickygamer28.sanctuary.world.CustomTypes.habitatNeed(counts)
+        val ownWanted = customCounts.filter { (t, n) -> n >= need && com.rickygamer28.sanctuary.world.CustomTypes.wantsOwn(s, t) }
         if (!s.planned) {
             s.pocketStyle = 2
             s.caveStyle = 2
@@ -253,6 +254,17 @@ object Residents {
             s.generationDirty = true
             updatePockets(s, customCounts)
             return
+        }
+        // a custom type's habitat that's small next to the others goes back to being a sub-biome (a little under the
+        // mark, so it doesn't come and go)
+        for (zone in s.habitats.keys.filter { com.rickygamer28.sanctuary.world.CustomTypes.isCustom(it) }) {
+            val n = customCounts[zone] ?: 0
+            if (n >= need * 0.75 && com.rickygamer28.sanctuary.world.CustomTypes.wantsOwn(s, zone)) continue
+            val hb = s.habitats.remove(zone) ?: continue
+            s.rebuildZones += zone
+            s.rebuildZones += "circle:${hb.x},${hb.z},${"%.0f".format(java.util.Locale.ROOT, maxOf(hb.radial, hb.along))}"
+            s.generationDirty = true
+            com.rickygamer28.sanctuary.world.Dens.demolishZone(zone, s)
         }
         for ((zone, n) in ZoneLayout.HABITATS.associateWith { counts[it] ?: 0 } + ownWanted) {
             if (n <= 0 || zone in s.habitats) continue
@@ -304,26 +316,51 @@ object Residents {
     }
 
     /**
-     * Custom types with a few Pokémon (not yet enough for a habitat) get a pocket of their own, inside the habitat
-     * they live in: a little patch built from their palette and look.
+     * Custom types grow in stages: with a few Pokémon a pocket of their own inside the habitat they live in, with more
+     * a sub-biome (a district of that habitat, growing with them), and with lots a habitat of their own in the ring.
      */
     private fun updatePockets(s: Sanctuary, customCounts: Map<String, Int>) {
-        val min = com.rickygamer28.sanctuary.world.CustomTypes.pocketMin()
-        val wanted = customCounts.filter { (t, n) -> n >= min && t !in s.habitats && com.rickygamer28.sanctuary.world.CustomTypes.wantsOwn(s, t) }.keys
-        if (wanted == s.customPockets.toSet()) return
-        val before = ZoneLayout.pockets(s).associate { (it.x to it.z) to it.zone }
-        val added = wanted - s.customPockets
-        val gone = s.customPockets - wanted
-        s.customPockets.clear()
-        s.customPockets += wanted
-        s.unlocked = s.unlocked - gone + wanted
+        val pockets = HashSet<String>()
+        val subs = HashMap<String, Double>()
+        val pocketMin = com.rickygamer28.sanctuary.world.CustomTypes.pocketMin()
+        val subMin = com.rickygamer28.sanctuary.world.CustomTypes.subMin()
+        val need = com.rickygamer28.sanctuary.world.CustomTypes.habitatNeed(s.typeCounts)
+        for ((t, n) in customCounts) {
+            if (t in s.habitats || !com.rickygamer28.sanctuary.world.CustomTypes.wantsOwn(s, t)) continue
+            when {
+                n >= subMin -> {
+                    // how far it's grown towards a habitat of its own (in tenths, so it doesn't rebuild for every Pokémon)
+                    val grow = ((n - subMin).toDouble() / (need - subMin).coerceAtLeast(1)).coerceIn(0.0, 1.0)
+                    subs[t] = kotlin.math.round(grow * 5) / 5.0
+                }
+                n >= pocketMin -> pockets += t
+            }
+        }
+        if (pockets == s.customPockets.toSet() && subs == s.customSubs.toMap()) return
+        val before = ZoneLayout.pockets(s)
+        val addedPockets = pockets - s.customPockets
+        val addedSubs = subs.keys - s.customSubs.keys
+        val gone = (s.customPockets + s.customSubs.keys) - (pockets + subs.keys)
+        s.customPockets.clear(); s.customPockets += pockets
+        s.customSubs.clear(); s.customSubs.putAll(subs)
+        s.unlocked = s.unlocked - gone + pockets + subs.keys
         val after = ZoneLayout.pockets(s)
-        // only the pockets that changed are built again
-        for (p in after) if (before[p.x to p.z] != p.zone) s.rebuildZones += "pocket:${p.x},${p.z}"
+        // only what changed is built again: pockets that changed hands, and sub-biomes that came, went or grew
+        fun sig(p: ZoneLayout.Pocket) = "${p.x},${p.z},${p.r},${p.zone}"
+        val oldSigs = before.map { sig(it) }.toSet()
+        val newSigs = after.map { sig(it) }.toSet()
+        for (p in before + after) {
+            if (sig(p) in oldSigs && sig(p) in newSigs) continue
+            if (p.sub) s.rebuildZones += "circle:${p.x},${p.z},${p.r + 6}" else s.rebuildZones += "pocket:${p.x},${p.z}"
+        }
         s.generationDirty = true
-        for (t in added) {
+        for (t in addedPockets) {
             val p = after.firstOrNull { it.zone == t } ?: continue
             s.logEvent("A little ${com.rickygamer28.sanctuary.world.CustomTypes.pocketName(t)} appeared in the ${zoneName(p.host)}!")
+        }
+        for (t in addedSubs) {
+            val p = after.firstOrNull { it.zone == t } ?: continue
+            s.logEvent("The ${com.rickygamer28.sanctuary.world.CustomTypes.subName(t)} grew into a part of the ${zoneName(p.host)} of its own!")
         }
     }
 

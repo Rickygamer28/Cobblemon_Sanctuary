@@ -143,7 +143,8 @@ object SanctuaryGuis {
                 val pocket = if (custom && !placed) ZoneLayout.customPocket(s, zone) else null
                 val count = if (custom && !placed) s.customCounts[zone] ?: 0 else s.typeCounts[zone] ?: 0
                 it.putString("zone", zone)
-                it.putString("name", if (custom && !placed) com.rickygamer28.sanctuary.world.CustomTypes.typeName(zone) + " type" else Residents.zoneName(zone))
+                it.putString("name", if (custom && !placed) (if (pocket?.sub == true) com.rickygamer28.sanctuary.world.CustomTypes.subName(zone)
+                    else com.rickygamer28.sanctuary.world.CustomTypes.typeName(zone) + " type") else Residents.zoneName(zone))
                 it.putInt("color", typeColor(zone))
                 it.putBoolean("awake", zone in s.unlocked)
                 it.putBoolean("placed", placed)
@@ -157,14 +158,15 @@ object SanctuaryGuis {
                     it.putString("home", home)
                     it.putString("homeName", Residents.zoneName(home))
                     it.putString("choice", com.rickygamer28.sanctuary.world.CustomTypes.choice(s, zone) ?: com.rickygamer28.sanctuary.world.CustomTypes.OWN)
-                    it.putInt("need", com.rickygamer28.sanctuary.world.CustomTypes.minResidents())
+                    it.putInt("need", com.rickygamer28.sanctuary.world.CustomTypes.habitatNeed(s.typeCounts))
+                    it.putInt("subNeed", com.rickygamer28.sanctuary.world.CustomTypes.subMin())
                     it.putInt("typeCount", s.customCounts[zone] ?: 0)
                     it.putBoolean("noRoom", zone in s.noRoomFor)
                     it.putBoolean("ownOn", runCatching { com.rickygamer28.sanctuary.SanctuaryConfig.customTypeBiomes.get() }.getOrDefault(true) &&
                         !com.rickygamer28.sanctuary.world.CustomTypes.townOnly(zone))
                     it.putInt("pocketNeed", com.rickygamer28.sanctuary.world.CustomTypes.pocketMin())
                     it.putBoolean("townOnly", com.rickygamer28.sanctuary.world.CustomTypes.townOnly(zone))
-                    if (pocket != null) { it.putBoolean("pocket", true); it.putString("pocketIn", Residents.zoneName(pocket.host)) }
+                    if (pocket != null) { it.putBoolean("pocket", true); it.putBoolean("sub", pocket.sub); it.putString("pocketIn", Residents.zoneName(pocket.host)) }
                 }
                 // how lively the biome is: its share of the residents, compared with the busiest biome
                 val busiest = (s.typeCounts.values.maxOrNull() ?: 1).coerceAtLeast(1)
@@ -434,7 +436,7 @@ object ScreenActions {
                 // the owner picks a habitat's look: only that habitat (and the strip along its borders) is built again
                 val zone = v.substringBefore(':')
                 val look = v.substringAfter(':').toIntOrNull()
-                val looks = com.rickygamer28.sanctuary.world.Looks.of(zone)?.takeIf { zone == ZoneLayout.HUB || zone in s.habitats || zone in s.customPockets }
+                val looks = com.rickygamer28.sanctuary.world.Looks.of(zone)?.takeIf { zone == ZoneLayout.HUB || zone in s.habitats || zone in s.customPockets || zone in s.customSubs }
                 val now = level.gameTime
                 when {
                     !ownerOnly() -> {}
