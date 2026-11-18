@@ -67,7 +67,11 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
         val ivs: IntArray, val moves: List<String>,
     )
 
-    private class Biome(val zone: String, val name: String, val color: Int, val awake: Boolean, val count: Int, val pct: Int, val placed: Boolean, val types: String)
+    private class Biome(
+        val zone: String, val name: String, val color: Int, val awake: Boolean, val count: Int, val pct: Int, val placed: Boolean, val types: String,
+        /** Its look (which of [looks]), and the looks it can have: name to description. */
+        val look: Int = 0, val looks: List<Pair<String, String>> = emptyList(),
+    )
 
     private class Hit(val x: Int, val y: Int, val w: Int, val h: Int, val action: (Int) -> Unit)
 
@@ -94,6 +98,9 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
     private var tooltip: List<Component>? = null
     /** The crowd setting waiting for the player to confirm the performance warning (-1 = none). */
     private var confirmCrowd = -1
+    /** The habitat whose look is being picked (and the look picked so far), or null. */
+    private var lookZone: String? = null
+    private var lookPick = 0
     private var portrait: ModelWidget? = null
     private var portraitKey: String? = null
     private lateinit var search: EditBox
@@ -135,7 +142,9 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
         val bl = tag.getList("biomes", Tag.TAG_COMPOUND.toInt())
         biomes = (0 until bl.size).map { i ->
             val b = bl.getCompound(i)
-            Biome(b.getString("zone"), b.getString("name"), b.getInt("color"), b.getBoolean("awake"), b.getInt("count"), b.getInt("pct"), b.getBoolean("placed"), b.getString("types"))
+            val looks = strings(b.getList("looks", Tag.TAG_STRING.toInt())).map { it.substringBefore('|') to it.substringAfter('|') }
+            Biome(b.getString("zone"), b.getString("name"), b.getInt("color"), b.getBoolean("awake"), b.getInt("count"), b.getInt("pct"), b.getBoolean("placed"), b.getString("types"),
+                b.getInt("look"), looks)
         }
         if (tag.contains("eggs")) {
             val el = tag.getList("eggs", Tag.TAG_COMPOUND.toInt())
@@ -276,7 +285,48 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
             g.drawCenteredString(font, font.plainSubstrByWidth(msg, tw - 8), tx + tw / 2, ty + 4, toastColor)
         }
         if (confirmCrowd > 0) crowdWarning(g, mouseX, mouseY)
+        if (lookZone != null) lookPicker(g, mouseX, mouseY)
         tooltip?.let { g.renderComponentTooltip(font, it, mouseX, mouseY) }
+    }
+
+    /** Picking a habitat's look (the owner): the looks with a line each; Apply rebuilds only that habitat. */
+    private fun lookPicker(g: GuiGraphics, mx: Int, my: Int) {
+        val b = biomes.firstOrNull { it.zone == lookZone } ?: run { lookZone = null; return }
+        tooltip = null
+        g.pose().pushPose()
+        g.pose().translate(0f, 0f, 400f)
+        g.fill(px, py, px + pw, py + ph, 0xC0000000.toInt())
+        hit(0, 0, width, height) { } // clicks outside the box do nothing
+        val c = opaque(b.color)
+        val bw = min(320, pw - 40)
+        val rowH = 30
+        val bh = 44 + b.looks.size * (rowH + 4) + 40
+        val bx = px + (pw - bw) / 2
+        val by = py + (ph - bh) / 2
+        box(g, bx - 1, by - 1, bw + 2, bh + 2, c)
+        box(g, bx, by, bw, bh, PANEL)
+        g.fill(bx, by, bx + bw, by + 3, c)
+        text(g, "${b.name}: choose its look", bx + 10, by + 12, TEXT, true)
+        text(g, fit("Only this habitat is rebuilt, in a few minutes.", bw - 20), bx + 10, by + 26, SUB)
+        b.looks.forEachIndexed { i, (name, desc) ->
+            val ry = by + 42 + i * (rowH + 4)
+            val chosen = i == lookPick
+            val hover = over(mx, my, bx + 10, ry, bw - 20, rowH)
+            box(g, bx + 10, ry, bw - 20, rowH, if (chosen) mix(c, 0x1A222B, 0.55f) else if (hover) CARD_HOVER else CARD)
+            if (chosen) outline(g, bx + 10, ry, bw - 20, rowH, c)
+            val tag = if (i == b.look) "  (now)" else ""
+            text(g, fit(name + tag, bw - 36), bx + 18, ry + 5, if (chosen) 0xFFFFFFFF.toInt() else TEXT)
+            text(g, fit(desc, bw - 36), bx + 18, ry + 17, SUB)
+            hit(bx + 10, ry, bw - 20, rowH) { lookPick = i }
+        }
+        val half = (bw - 30) / 2
+        val zone = b.zone
+        val pick = lookPick
+        button(g, bx + 10, by + bh - 28, half, 20, "Apply", GOLD, mx, my, enabled = pick != b.look, why = "That's the look it has now") {
+            send("look", "$zone:$pick", page = "biomes"); lookZone = null
+        }
+        button(g, bx + 20 + half, by + bh - 28, half, 20, "Cancel", ACCENT, mx, my, filled = false) { lookZone = null }
+        g.pose().popPose()
     }
 
     /** "Are you sure?" for the bigger crowd settings, for people on slower computers. */
@@ -338,6 +388,7 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
 
     override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
         if (confirmCrowd > 0 && keyCode == 256) { confirmCrowd = -1; return true }
+        if (lookZone != null && keyCode == 256) { lookZone = null; return true }
         if (search.isFocused && keyCode != 256) return search.keyPressed(keyCode, scanCode, modifiers)
         return super.keyPressed(keyCode, scanCode, modifiers)
     }
@@ -1102,12 +1153,21 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
             val sub = when {
                 !b.awake -> "Asleep: needs a ${b.types.ifEmpty { "Normal" }} type"
                 !live -> "No room yet: Reshape to add it to the map"
-                else -> b.types.ifEmpty { "Normal" }
+                else -> b.types.ifEmpty { "Normal" } + (b.looks.getOrNull(b.look)?.let { " · ${it.first}" } ?: "")
             }
-            text(g, fit(sub, lw - 14), lx + 9, by + 17, if (!live && b.awake) GOLD else DIM)
+            val lookRoom = if (data.getBoolean("isOwner") && b.looks.size > 1) font.width("Look") + 20 else 0
+            text(g, fit(sub, lw - 14 - lookRoom), lx + 9, by + 17, if (!live && b.awake) GOLD else DIM)
             if (hover) {
                 tooltip = listOf(Component.literal(b.name).withColor(c), Component.literal("${b.count} Pokémon live here").withColor(SUB), Component.literal("Click to see them").withColor(SUB))
                 hit(lx, by, lw, th) { filterZone = b.zone; goTab("residents") }
+            }
+            // the owner can pick the habitat's look
+            if (data.getBoolean("isOwner") && b.looks.size > 1 && my in gy until gy + gh) {
+                val label = "Look"
+                val bw = font.width(label) + 12
+                val bx = lx + lw - 6 - bw
+                if (over(mx, my, bx, by + 15, bw, 12)) tooltip = listOf(Component.literal("Look: ${b.looks.getOrNull(b.look)?.first ?: "?"}").withColor(c), Component.literal("Click to choose another").withColor(SUB))
+                button(g, bx, by + 15, bw, 12, label, ACCENT, mx, my, filled = false) { lookZone = b.zone; lookPick = b.look }
             }
         }
         g.disableScissor()

@@ -147,6 +147,11 @@ object SanctuaryGuis {
                 val busiest = (s.typeCounts.values.maxOrNull() ?: 1).coerceAtLeast(1)
                 val pct = if (zone == ZoneLayout.HUB) 100 else (count * 100 / busiest).coerceIn(0, 100)
                 it.putInt("pct", pct)
+                // its look, and the looks the owner can choose from
+                com.rickygamer28.sanctuary.world.Looks.ALL[zone]?.let { looks ->
+                    it.putInt("look", com.rickygamer28.sanctuary.world.BiomeDresser.variantOf(s, zone))
+                    it.put("looks", ListTag().also { l -> looks.forEach { (n, d) -> l.add(StringTag.valueOf("$n|$d")) } })
+                }
             })
         })
         // the map of the region (worked out once, kept until the region changes)
@@ -309,6 +314,9 @@ object SanctuaryGuis {
 
 /** Handles the buttons pressed on the Sanctuary screen. */
 object ScreenActions {
+    /** When each sanctuary's habitat look was last changed (a short wait between changes). */
+    private val lookChanged = HashMap<UUID, Long>()
+
     fun handle(player: ServerPlayer, t: CompoundTag) {
         val id = runCatching { UUID.fromString(t.getString("id")) }.getOrNull() ?: return
         val (level, s) = Sanctuaries.find(player.server, id) ?: return SanctuaryGuis.close(player)
@@ -381,6 +389,32 @@ object ScreenActions {
                     }
                 }
                 refresh("home")
+            }
+            "look" -> {
+                // the owner picks a habitat's look: only that habitat (and the strip along its borders) is built again
+                val zone = v.substringBefore(':')
+                val look = v.substringAfter(':').toIntOrNull()
+                val looks = com.rickygamer28.sanctuary.world.Looks.ALL[zone]
+                val now = level.gameTime
+                when {
+                    !ownerOnly() -> {}
+                    looks == null || look == null || look !in looks.indices -> {}
+                    look == com.rickygamer28.sanctuary.world.BiomeDresser.variantOf(s, zone) -> {}
+                    now - (lookChanged[s.id] ?: -100_000L) < 1200 ->
+                        say(player, "A habitat's look was just changed. Wait about a minute before the next change.", ChatFormatting.RED)
+                    else -> {
+                        lookChanged[s.id] = now
+                        s.variants[zone] = look
+                        s.rebuildZones += zone
+                        // its landmark is built again in the new look
+                        s.landmarks.remove(zone)?.let { if (it != Long.MIN_VALUE) s.staleLandmarks[zone] = it }
+                        s.generationDirty = true
+                        com.rickygamer28.sanctuary.ui.RegionMap.forget(s.id)
+                        Sanctuaries.data(level).setDirty()
+                        say(player, "${Residents.zoneName(zone)} is becoming ${looks[look].first}. Only that habitat is being rebuilt.", ChatFormatting.GREEN)
+                    }
+                }
+                refresh("biomes")
             }
             "respawn" -> {
                 if (ownerOnly()) {
