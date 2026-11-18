@@ -292,6 +292,15 @@ object Residents {
             s.generationDirty = true
             com.rickygamer28.sanctuary.world.Dens.demolishZone(zone, s)
         }
+        // and ones that run into a neighbour (laid out by an older version) pull back from it
+        val before = s.habitats.toMap()
+        for (zone in ZoneLayout.separateCustom(s.habitats)) {
+            val hb = before[zone] ?: continue
+            s.rebuildZones += zone
+            s.rebuildZones += "circle:${hb.x},${hb.z},${"%.0f".format(java.util.Locale.ROOT, maxOf(hb.radial, hb.along))}"
+            s.generationDirty = true
+            com.rickygamer28.sanctuary.world.Dens.demolishZone(zone, s)
+        }
     }
 
     /**

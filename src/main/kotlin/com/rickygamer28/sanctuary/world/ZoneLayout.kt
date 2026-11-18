@@ -114,6 +114,62 @@ object ZoneLayout {
         return (0.45 + 0.35 * min(1.0, count / typical.coerceAtLeast(1.0))).coerceIn(0.45, 0.8)
     }
 
+    /** How far a habitat reaches from its middle towards (x, z) (its shape is an oval, turned its way). */
+    private fun reach(hb: Habitat, x: Double, z: Double): Double {
+        val dx = x - hb.x
+        val dz = z - hb.z
+        val len = sqrt(dx * dx + dz * dz)
+        if (len < 1e-6) return min(hb.radial, hb.along)
+        val c = (dx * sin(hb.angle) - dz * cos(hb.angle)) / len
+        val sn = (dx * -cos(hb.angle) - dz * sin(hb.angle)) / len
+        return 1.0 / sqrt((c / hb.radial) * (c / hb.radial) + (sn / hb.along) * (sn / hb.along))
+    }
+
+    /**
+     * Custom types' habitats that run into a neighbour shrink until there's meadow between them (room for the
+     * routes and a clean border): side by side in the ring, a few small slices could overlap. Returns the
+     * habitats that shrank.
+     */
+    fun separateCustom(habitats: MutableMap<String, Habitat>): Set<String> {
+        val changed = HashSet<String>()
+        val gap = 14.0
+        repeat(4) {
+            var moved = false
+            val keys = habitats.keys.toList()
+            for (a in keys.indices) for (b in a + 1 until keys.size) {
+                val za = keys[a]
+                val zb = keys[b]
+                val ca = CustomTypes.isCustom(za)
+                val cb = CustomTypes.isCustom(zb)
+                if (!ca && !cb) continue
+                val ha = habitats[za]!!
+                val hb = habitats[zb]!!
+                val d = sqrt(((ha.x - hb.x) * (ha.x - hb.x) + (ha.z - hb.z) * (ha.z - hb.z)).toDouble())
+                val ra = reach(ha, hb.x.toDouble(), hb.z.toDouble())
+                val rb = reach(hb, ha.x.toDouble(), ha.z.toDouble())
+                if (ra + rb + gap <= d) continue
+                // the custom ones give way (both, when both are)
+                val room = (d - gap).coerceAtLeast(30.0)
+                val k = when {
+                    ca && cb -> room / (ra + rb)
+                    ca -> ((room - rb) / ra).coerceAtLeast(0.0)
+                    else -> ((room - ra) / rb).coerceAtLeast(0.0)
+                }.coerceIn(0.3, 1.0)
+                fun shrink(z: String, h: Habitat) {
+                    val radial = (h.radial * k).coerceAtLeast(16.0)
+                    val along = (h.along * k).coerceAtLeast(16.0)
+                    habitats[z] = Habitat(h.x, h.z, radial, along, h.angle)
+                    changed += z
+                    moved = true
+                }
+                if (ca) shrink(za, ha)
+                if (cb) shrink(zb, hb)
+            }
+            if (!moved) return changed
+        }
+        return changed
+    }
+
     /** The size a habitat that's fitted in later gets (before the room around it): busier ones a bit bigger. */
     private fun fittedSize(s: Sanctuary, count: Int): Double {
         val h = inner(s)
@@ -167,6 +223,7 @@ object ZoneLayout {
             val along = chord.coerceIn(radial * 0.6, radial * 1.6)
             out[zone] = Habitat((s.center.x + sin(theta) * d).toInt(), (s.center.z - cos(theta) * d).toInt(), radial, along, theta)
         }
+        separateCustom(out)
         return out
     }
 
