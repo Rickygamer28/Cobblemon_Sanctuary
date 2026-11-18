@@ -431,6 +431,8 @@ object Residents {
     fun spawn(level: ServerLevel, s: Sanctuary, rt: SanctuaryRuntime, e: RosterEntry, at: BlockPos?, players: List<ServerPlayer> = emptyList()): LiveResident? {
         val pokemon = e.pokemon
         if (pokemon.tetheringId != null || pokemon.entity != null) return null
+        // (species whose models crash the game stay in the PC)
+        if (hidden(pokemon)) return null
         val ring = ZoneLayout.ring(s)
         val home = TypeLogic.homeZone(pokemon, s.residents[pokemon.uuid], ring, s)
         val swimmer = TypeLogic.waterOnly(pokemon)
@@ -641,6 +643,12 @@ object Residents {
 
     fun surface(level: ServerLevel, x: Int, z: Int): BlockPos =
         BlockPos(x, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z), z)
+
+    /** Is the Pokémon one of the config's hidden species (a model that crashes the game)? */
+    fun hidden(pokemon: com.cobblemon.mod.common.pokemon.Pokemon): Boolean = runCatching {
+        val name = pokemon.species.resourceIdentifier.path.lowercase()
+        SanctuaryConfig.hiddenSpecies.get().any { it.trim().lowercase().substringAfter(':') == name }
+    }.getOrDefault(false)
 
     fun zoneName(zone: String?): String = when (zone) {
         null -> "skies"

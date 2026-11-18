@@ -89,6 +89,8 @@ object SanctuaryCommand {
         for (sp in com.cobblemon.mod.common.api.pokemon.PokemonSpecies.implemented) {
             // (Gravelmon's placeholder "billboard" Pokémon without a model are left out)
             if ("not_modeled" in sp.labels) continue
+            // (and ones whose models crash the game)
+            if (runCatching { SanctuaryConfig.hiddenSpecies.get().any { it.trim().lowercase().substringAfter(':') == sp.resourceIdentifier.path.lowercase() } }.getOrDefault(false)) continue
             val list = listOf(sp.standardForm) + if (forms) sp.forms.filter { it.name != sp.standardForm.name && !battleForm(it.name) && it.aspects.isNotEmpty() } else emptyList()
             for (f in list.distinctBy { it.name }) runCatching {
                 val p = sp.create(30)

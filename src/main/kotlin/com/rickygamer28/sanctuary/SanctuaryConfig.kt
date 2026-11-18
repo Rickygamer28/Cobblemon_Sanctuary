@@ -164,6 +164,10 @@ object SanctuaryConfig {
     val megaNeedsStone: ModConfigSpec.BooleanValue = builder
         .comment("Only residents holding their Mega Stone (or Red / Blue Orb, Gracidea…) can change in the sanctuary.")
         .define("megaNeedsStone", false)
+    val hiddenSpecies: ModConfigSpec.ConfigValue<List<String>> = builder
+        .comment("Pokémon that never come out in the sanctuary (they stay in the PC): for ones whose model crashes the game,",
+            "like Gravelmon's Arkhaos (its model asks for an animation its files don't have). Species names, e.g. \"arkhaos\".")
+        .defineListAllowEmpty("hiddenSpecies", listOf("arkhaos"), { "" }, { it is String })
     val formsEnabled: ModConfigSpec.BooleanValue = builder
         .comment("Let residents change form for a while during play-fights, as Mega Showdown's items would (Shaymin's Sky Forme,",
             "Aegislash's Blade Forme, Darmanitan's Zen Mode…). Primal Groudon and Kyogre follow megaEnabled. With megaNeedsStone,",
