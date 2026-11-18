@@ -317,6 +317,7 @@ object SanctuaryGenerator {
             }
             val atLandmark = Landmarks.near(s, x, z)
             val inDen = Dens.covers(s, x, z)
+            if (!atLandmark && !inDen && dryCoral(level, s, x, z) && mayCut(s, idx)) { s.dressed.clear(idx); Trace.rebuild("dry coral removed", x, z); s.generationDirty = true }
             // anything a player built (they can't build here): taken away, top down; if that leaves a hole in the
             // ground, the column is built again
             if (playerBlocks(level, s, x, z) && !atLandmark && !inDen && mayCut(s, idx)) { s.dressed.clear(idx); Trace.rebuild("player blocks removed", x, z); s.generationDirty = true }
@@ -412,6 +413,28 @@ object SanctuaryGenerator {
         }
         repairCursor[s.id] = i
         return true
+    }
+
+    /**
+     * Coral left out of the water (the lake moved, or shrank): it dies and stays as dark blocks in the beach or the
+     * grass. It's taken away; returns true if it was in the ground itself (the column is then built again).
+     */
+    private fun dryCoral(level: ServerLevel, s: Sanctuary, x: Int, z: Int): Boolean {
+        val top = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z) - 1
+        val target = BiomeDresser.targetHeight(s, x, z, ZoneLayout.ring())
+        var inGround = false
+        for (y in top downTo maxOf(level.minBuildHeight + 1, minOf(top, target) - 3)) {
+            val p = BlockPos(x, y, z)
+            val st = level.getBlockState(p)
+            if (!BiomeDresser.isCoral(st)) continue
+            // under water, with water over it: a living reef, left be
+            val wet = net.minecraft.core.Direction.entries.any { d -> level.getFluidState(p.relative(d)).`is`(net.minecraft.tags.FluidTags.WATER) }
+            if (wet && !st.block.descriptionId.contains("dead_")) continue
+            Trace.note(x, z, "dry coral removed at $y")
+            level.setBlock(p, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), net.minecraft.world.level.block.Block.UPDATE_CLIENTS)
+            if (y <= target) inGround = true
+        }
+        return inGround
     }
 
     /** Removes what players built in this column. Returns true if the ground itself had some (a hole to fill). */

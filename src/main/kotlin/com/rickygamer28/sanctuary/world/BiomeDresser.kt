@@ -116,6 +116,13 @@ object BiomeDresser {
 
     fun forgetPending(id: java.util.UUID) { pendingFeatures.remove(id) }
 
+    /** Coral, alive or dead (blocks, plants, fans): the lake's decoration, never part of the ground. */
+    fun isCoral(st: BlockState): Boolean {
+        if (st.`is`(BlockTags.CORAL_BLOCKS) || st.`is`(BlockTags.CORALS) || st.`is`(BlockTags.WALL_CORALS)) return true
+        val id = BuiltInRegistries.BLOCK.getKey(st.block)
+        return id.namespace == "minecraft" && id.path.startsWith("dead_") && id.path.contains("coral")
+    }
+
     /**
      * Wipes a column clean before it's built again: everything but the bare ground goes (trees, giant mushrooms,
      * plants, water, lava, lamps, rocks set on the ground, anything built), from its top down to well under the
@@ -132,7 +139,7 @@ object BiomeDresser {
             val st = level.getBlockState(p)
             if (st.isAir || ValleyBlocks.isMods(st)) continue
             if (mine != null && p.asLong() in mine) continue
-            if (isNatural(st) && st.fluidState.isEmpty) continue // the ground: shaped next
+            if (isNatural(st) && st.fluidState.isEmpty && !isCoral(st)) continue // the ground: shaped next (coral goes with the water)
             ValleyBlocks.remove(level, p)
             n++
         }
@@ -1519,6 +1526,8 @@ object BiomeDresser {
             when {
                 st.isAir -> p = p.below()
                 mine != null && p.asLong() in mine -> p = p.below() // placed by a neighbour in this pass: keep it, look under it
+                // coral (alive, or dead once its water's gone) sits on the lake bed: it isn't the ground
+                isCoral(st) -> { level.setBlock(p, air, FLAGS); p = p.below() }
                 st.`is`(BlockTags.LEAVES) -> {
                     // placed leaves with no wood anywhere near (the canopy of a landmark that was taken down)
                     if (!naturalLeaf(st) && (mine == null || p.asLong() !in mine) && !leavesReachWood(level, p)) { level.setBlock(p, air, FLAGS); p = p.below(); continue }
