@@ -67,6 +67,13 @@ object SanctuaryGenerator {
     /** Where the nature wave (trees, plants…) and the extras wave (resident spots) have got to. */
     private val natureCursors = HashMap<UUID, Int>()
     private val extrasCursors = HashMap<UUID, Int>()
+    /**
+     * The columns already rebuilt for the habitats being rebuilt now (a look change, a habitat waking up…). A pass
+     * that starts over (a den was taken down, a landmark moved) mustn't clear and rebuild them all over again: with
+     * a few dens about, that went on and on and the rest never got built.
+     */
+    private val redone = HashMap<UUID, java.util.BitSet>()
+
     /** Where the first wave (clearing away everything that isn't terrain) has got to. */
     private val clearCursors = HashMap<UUID, Int>()
     /** Columns set aside because their chunks weren't loaded yet (column index, and since when). */
@@ -75,7 +82,7 @@ object SanctuaryGenerator {
     private val missedUnloaded = HashMap<UUID, Boolean>()
     private val recheckMeadow = HashSet<UUID>()
 
-    fun forget(id: UUID) { cuts.remove(id); clearCursors.remove(id); natureCursors.remove(id); extrasCursors.remove(id); BiomeDresser.forgetPending(id); deferred.remove(id); com.rickygamer28.sanctuary.ui.RegionMap.forget(id); Caves.forget(id); grounded.remove(id); recheckMeadow.remove(id); cursors.remove(id); retryAt.remove(id); missedUnloaded.remove(id); requested.remove(id); waiting.remove(id); BiomePainter.forget(id) }
+    fun forget(id: UUID) { redone.remove(id); cuts.remove(id); clearCursors.remove(id); natureCursors.remove(id); extrasCursors.remove(id); BiomeDresser.forgetPending(id); deferred.remove(id); com.rickygamer28.sanctuary.ui.RegionMap.forget(id); Caves.forget(id); grounded.remove(id); recheckMeadow.remove(id); cursors.remove(id); retryAt.remove(id); missedUnloaded.remove(id); requested.remove(id); waiting.remove(id); BiomePainter.forget(id) }
 
     // ------------------------------------------------------------------ loading the chunks it builds in
     // Building only where players happen to have chunks loaded (their render distance) split the valley into
@@ -888,6 +895,9 @@ object SanctuaryGenerator {
                 val touched = hit != null && (hit.zone in s.rebuildZones || (hit.neighbour in s.rebuildZones && hit.edgeDistance < 26) ||
                     (pocket != null && (pocket.zone in s.rebuildZones || pocket.host in s.rebuildZones)))
                 if (!touched || meadowDone) continue
+                val done = redone.getOrPut(s.id) { java.util.BitSet() }
+                if (done.get(idx)) continue // rebuilt already in this rebuild
+                done.set(idx)
                 s.dressed.clear(idx)
                 s.wipe.set(idx)
             }
@@ -907,6 +917,8 @@ object SanctuaryGenerator {
         }
         // ---- the waves that follow the land: nature, then the residents' spots
         val landDone = i >= total && queue.isEmpty()
+        // the habitats being rebuilt are done (every column touched once): a pass that starts over won't redo them
+        if (landDone && s.rebuildZones.isNotEmpty()) { s.rebuildZones.clear(); redone.remove(s.id) }
         val waiting = queue.mapTo(HashSet()) { it.first }
         /** The land of column [idx] is final (built, or passed and nothing left to do there). */
         fun landFinal(idx: Int) = landDone || s.dressed.get(idx) || (idx < i && idx !in waiting)
