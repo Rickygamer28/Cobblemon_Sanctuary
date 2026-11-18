@@ -69,11 +69,14 @@ object ValleyBlocks {
         if (st.`is`(BlockTags.LEAVES) || st.`is`(BlockTags.LOGS) || st.`is`(BlockTags.FLOWERS) || st.`is`(BlockTags.SAPLINGS) ||
             st.`is`(BlockTags.CORALS) || st.`is`(BlockTags.CORAL_BLOCKS) || st.`is`(BlockTags.WALL_CORALS)) return true
         if (BiomeDresser.isNatural(st) || BiomeDresser.isClutter(st) || BiomeDresser.isModSolid(st) || BiomeDresser.isCobblemonDecor(st)) return true
+        // the lake's coral that died (out of the water)
+        val id = BuiltInRegistries.BLOCK.getKey(st.block)
+        if (id.namespace == "minecraft" && id.path.startsWith("dead_") && id.path.contains("coral")) return true
         return isMods(st)
     }
 
     /** Is [st] one of the mod's own blocks (the core, beds, balls, troughs, nests…)? */
-    fun isMods(st: BlockState): Boolean = BuiltInRegistries.BLOCK.getKey(st.block).namespace == CobblemonSanctuary.MODID
+    fun isMods(st: BlockState): Boolean = BuiltInRegistries.BLOCK.getKey(st.block).namespace == CobblemonSanctuary.MOD_ID
 
     /** Takes away a block a player built: anything it held is dropped where it stood. */
     fun remove(level: ServerLevel, p: BlockPos) {
