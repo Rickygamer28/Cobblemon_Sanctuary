@@ -93,6 +93,9 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
     private var detailId: UUID? = null
     private var detailTab = "info"
     private var filterZone: String? = null
+    /** The type the residents are filtered by (null: all), and whether its picker is open. */
+    private var filterType: String? = null
+    private var typePicker = false
     private var mineOnly = false
     private var scroll = 0.0
     private var maxScroll = 0.0
@@ -308,6 +311,7 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
         }
         if (confirmCrowd > 0) crowdWarning(g, mouseX, mouseY)
         if (lookZone != null) lookPicker(g, mouseX, mouseY)
+        if (typePicker && tab == "residents") typeFilterPicker(g, mouseX, mouseY)
         if (homeType != null) homePicker(g, mouseX, mouseY)
         tooltip?.let { g.renderComponentTooltip(font, it, mouseX, mouseY) }
     }
@@ -457,6 +461,7 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
     override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
         if (confirmCrowd > 0 && keyCode == 256) { confirmCrowd = -1; return true }
         if (lookZone != null && keyCode == 256) { lookZone = null; return true }
+        if (typePicker && keyCode == 256) { typePicker = false; return true }
         if (homeType != null && keyCode == 256) { homeType = null; return true }
         if (search.isFocused && keyCode != 256) return search.keyPressed(keyCode, scanCode, modifiers)
         return super.keyPressed(keyCode, scanCode, modifiers)
@@ -557,6 +562,50 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
     private fun color(zone: String): Int = biomes.firstOrNull { it.zone == zone }?.color ?: 0x9AB8D8
     private fun zoneName(zone: String): String = biomes.firstOrNull { it.zone == zone }?.name ?: if (zone.isEmpty()) "Skies" else zone.replaceFirstChar { it.uppercase() }
     private fun typeLabel(t: String) = t.replaceFirstChar { it.uppercase() }
+    /** A type's colour and name as its mod gives them (Gravelmon's and Lost Lore's too). */
+    private fun typeColor(t: String): Int = runCatching { com.cobblemon.mod.common.api.types.ElementalTypes.get(t)?.hue }.getOrNull() ?: 0xA8A878
+    private fun typeName(t: String): String = runCatching { com.cobblemon.mod.common.api.types.ElementalTypes.get(t)?.displayName?.string }.getOrNull() ?: typeLabel(t)
+
+    /** Picking a type to filter the residents by: every type that someone has, with how many. */
+    private fun typeFilterPicker(g: GuiGraphics, mx: Int, my: Int) {
+        tooltip = null
+        g.pose().pushPose()
+        g.pose().translate(0f, 0f, 400f)
+        g.fill(px, py, px + pw, py + ph, 0xC0000000.toInt())
+        hit(0, 0, width, height) { typePicker = false }
+        val standard = listOf("normal", "fire", "water", "grass", "electric", "ice", "fighting", "poison", "ground", "flying",
+            "psychic", "bug", "rock", "ghost", "dragon", "dark", "steel", "fairy")
+        val counts = HashMap<String, Int>()
+        mons.forEach { m -> m.types.forEach { t -> counts[t] = (counts[t] ?: 0) + 1 } }
+        val types = counts.keys.sortedWith(compareBy({ standard.indexOf(it).let { i -> if (i < 0) 99 else i } }, { it }))
+        val options = listOf<String?>(null) + types
+        val cols = 4
+        val bw = min(400, pw - 30)
+        val colW = (bw - 20 - (cols - 1) * 6) / cols
+        val rowH = 18
+        val rows = (options.size + cols - 1) / cols
+        val bh = 34 + rows * (rowH + 4) + 6
+        val bx = px + (pw - bw) / 2
+        val by = py + (ph - bh) / 2
+        box(g, bx - 1, by - 1, bw + 2, bh + 2, ACCENT)
+        box(g, bx, by, bw, bh, PANEL)
+        hit(bx, by, bw, bh) { }
+        text(g, "Show residents of the type…", bx + 10, by + 12, TEXT, true)
+        options.forEachIndexed { i, t ->
+            val rx = bx + 10 + (i % cols) * (colW + 6)
+            val ry = by + 30 + (i / cols) * (rowH + 4)
+            val c = t?.let { opaque(typeColor(it)) } ?: SUB
+            val chosen = t == filterType
+            val hover = over(mx, my, rx, ry, colW, rowH)
+            box(g, rx, ry, colW, rowH, if (chosen) mix(c, 0x1A222B, 0.55f) else if (hover) CARD_HOVER else CARD)
+            g.fill(rx + 1, ry + 1, rx + 4, ry + rowH - 1, c)
+            if (chosen) outline(g, rx, ry, colW, rowH, c)
+            val label = if (t == null) "All (${mons.size})" else "${typeName(t)} (${counts[t]})"
+            text(g, fit(label, colW - 12), rx + 8, ry + 5, if (chosen) 0xFFFFFFFF.toInt() else TEXT)
+            hit(rx, ry, colW, rowH) { filterType = t; typePicker = false; scroll = 0.0 }
+        }
+        g.pose().popPose()
+    }
 
     // ------------------------------------------------------------------ frame
 
@@ -813,7 +862,7 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
     private fun filtered(): List<Mon> {
         val q = search.value.trim().lowercase()
         return mons.filter { m ->
-            (filterZone == null || m.home == filterZone) && (!mineOnly || m.mine) &&
+            (filterZone == null || m.home == filterZone) && (!mineOnly || m.mine) && (filterType == null || filterType in m.types) &&
                 (q.isEmpty() || m.name.lowercase().contains(q) || m.species.path.contains(q) || m.types.any { it.contains(q) })
         }
     }
@@ -839,6 +888,14 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
         if (over(mx, my, fx, y - 2, fw, 18)) tooltip = listOf(Component.literal("Left click: next biome"), Component.literal("Right click: previous"))
         val mx2 = fx + fw + 6
         button(g, mx2, y - 2, 64, 18, if (mineOnly) "✔ Mine" else "Mine only", if (mineOnly) ACCENT else SUB, mx, my, filled = false) { mineOnly = !mineOnly; scroll = 0.0 }
+        // the type filter: click to pick a type, right click to show all again
+        val tx = mx2 + 70
+        val tLabel = "Type: " + (filterType?.let { typeName(it) } ?: "All")
+        val tw = font.width(tLabel) + 14
+        button(g, tx, y - 2, tw, 18, tLabel, filterType?.let { opaque(typeColor(it)) } ?: SUB, mx, my, filled = false) { b ->
+            if (b == 1) { filterType = null; scroll = 0.0 } else typePicker = true
+        }
+        if (over(mx, my, tx, y - 2, tw, 18)) tooltip = listOf(Component.literal("Left click: pick a type"), Component.literal("Right click: all types"))
         val list = filtered()
         val count = "${list.size} Pokémon"
         text(g, count, x + w - font.width(count), y + 3, DIM)
