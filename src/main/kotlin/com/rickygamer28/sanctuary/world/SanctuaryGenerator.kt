@@ -67,13 +67,15 @@ object SanctuaryGenerator {
     /** Where the nature wave (trees, plants…) and the extras wave (resident spots) have got to. */
     private val natureCursors = HashMap<UUID, Int>()
     private val extrasCursors = HashMap<UUID, Int>()
+    /** Where the first wave (clearing away everything that isn't terrain) has got to. */
+    private val clearCursors = HashMap<UUID, Int>()
     /** Columns set aside because their chunks weren't loaded yet (column index, and since when). */
     private val deferred = HashMap<UUID, ArrayDeque<Pair<Int, Long>>>()
     private val retryAt = HashMap<UUID, Long>()
     private val missedUnloaded = HashMap<UUID, Boolean>()
     private val recheckMeadow = HashSet<UUID>()
 
-    fun forget(id: UUID) { cuts.remove(id); natureCursors.remove(id); extrasCursors.remove(id); BiomeDresser.forgetPending(id); deferred.remove(id); com.rickygamer28.sanctuary.ui.RegionMap.forget(id); Caves.forget(id); grounded.remove(id); recheckMeadow.remove(id); cursors.remove(id); retryAt.remove(id); missedUnloaded.remove(id); requested.remove(id); waiting.remove(id); BiomePainter.forget(id) }
+    fun forget(id: UUID) { cuts.remove(id); clearCursors.remove(id); natureCursors.remove(id); extrasCursors.remove(id); BiomeDresser.forgetPending(id); deferred.remove(id); com.rickygamer28.sanctuary.ui.RegionMap.forget(id); Caves.forget(id); grounded.remove(id); recheckMeadow.remove(id); cursors.remove(id); retryAt.remove(id); missedUnloaded.remove(id); requested.remove(id); waiting.remove(id); BiomePainter.forget(id) }
 
     // ------------------------------------------------------------------ loading the chunks it builds in
     // Building only where players happen to have chunks loaded (their render distance) split the valley into
@@ -200,8 +202,8 @@ object SanctuaryGenerator {
     /** Progress of the current building sweep, 0..100, or null when not building. */
     fun progress(s: Sanctuary): Int? {
         val c = cursors[s.id] ?: return if (s.generationDirty) 0 else null
-        val all = c.toLong() + (natureCursors[s.id] ?: 0) + (extrasCursors[s.id] ?: 0)
-        return (all * 100L / (3L * total(s).coerceAtLeast(1))).toInt().coerceAtMost(99)
+        val all = c.toLong() + (clearCursors[s.id] ?: total(s)) + (natureCursors[s.id] ?: 0) + (extrasCursors[s.id] ?: 0)
+        return (all * 100L / (4L * total(s).coerceAtLeast(1))).toInt().coerceAtMost(99)
     }
 
     /** How fast the builder is getting through the valley: [cursor, time (ms), columns per second]. */
@@ -522,8 +524,16 @@ object SanctuaryGenerator {
             }
         }
         val top = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z) - 1
-        var y = top
         val air = net.minecraft.world.level.block.Blocks.AIR.defaultBlockState()
+        // over the lake (the ground under the water line, and no pond of its own here), no water stands above the
+        // lake's surface: left from an older lake or a den, it's taken away even with water all round it
+        if (BiomeDresser.targetHeight(s, x, z, ZoneLayout.ring()) < BiomeDresser.WATER_Y && BiomeDresser.pondLevel(s, x, z) == null && Caves.at(s, x, z) == null) {
+            for (yy in top downTo BiomeDresser.WATER_Y + 1) {
+                val p = BlockPos(x, yy, z)
+                if (level.getBlockState(p).`is`(net.minecraft.world.level.block.Blocks.WATER)) { Trace.note(x, z, "water above the lake removed at $yy"); level.setBlock(p, air, net.minecraft.world.level.block.Block.UPDATE_CLIENTS) }
+            }
+        }
+        var y = top
         while (y > BiomeDresser.WATER_Y) {
             val p = BlockPos(x, y, z)
             val st = level.getBlockState(p)
@@ -702,6 +712,7 @@ object SanctuaryGenerator {
             s.needsCheck = false
             scheduleCheck(s.id)
             cursors[s.id] = 0
+            clearCursors[s.id] = 0
             natureCursors[s.id] = 0
             extrasCursors[s.id] = 0
             deferred.remove(s.id)
@@ -730,6 +741,8 @@ object SanctuaryGenerator {
             val hit = if (inside) ZoneLayout.locate(s, x, z, ring) else null
             if (inside && hit == null) return
             val asleep = inside && hit!!.zone !in s.unlocked && dist <= radius - 1.6
+            // a den on this ground or next to it comes down first (it would be left broken by the new land)
+            Dens.clearAround(s, x, z)
             // after a Reshape (or Repair here): the column is wiped clean first
             if (s.wipe.get(idx)) { BiomeDresser.wipeColumn(level, s, x, z); s.wipe.clear(idx) }
             val ok = try {
@@ -772,10 +785,38 @@ object SanctuaryGenerator {
                 }
             }
         }
+        // ---- wave 1: clearing. Every column marked to be built again (after a Reshape, Repair here, a den taken
+        // down…) is wiped of everything that isn't terrain (trees, mushrooms, plants, water, lava, dens, lamps,
+        // rocks, leftovers): the land wave only builds where the clearing all around it is done
+        var w = clearCursors[s.id] ?: total
+        run {
+            var n = 0
+            while (w < total) {
+                if ((++n and 15) == 0 && System.nanoTime() > deadline) break
+                if (!s.wipe.get(w)) { val nx = s.wipe.nextSetBit(w); w = if (nx < 0 || nx > total) total else nx; continue }
+                val x = s.center.x + ColumnOrder.dx[w]
+                val z = s.center.z + ColumnOrder.dz[w]
+                when (chunksReady(level, s, x, z, now)) {
+                    false -> break
+                    null -> { w++; continue }
+                    true -> {}
+                }
+                BiomeDresser.wipeColumn(level, s, x, z)
+                s.wipe.clear(w)
+                w++
+            }
+        }
+        clearCursors[s.id] = w
+        val clearDone = w >= total
         val landDeadline = if (i - (natureCursors[s.id] ?: 0) > 4000) started + (deadline - started) / 2 else deadline
         while (budget > 0 && i < total) {
             scanned++
             if ((scanned and 31) == 0 && System.nanoTime() > landDeadline) break
+            // (the clearing must be done 12 blocks all round first, so nothing of the old valley reaches in)
+            if (!clearDone) {
+                val d = sqrt((ColumnOrder.dx[i] * ColumnOrder.dx[i] + ColumnOrder.dz[i] * ColumnOrder.dz[i]).toDouble())
+                if (w < ColumnOrder.countWithin(Math.ceil(d).toInt() + 12)) break
+            }
             val idx = i++
             val meadowDone = s.meadow.get(idx)
             val redo = s.rebuildZones.isNotEmpty()
@@ -868,7 +909,8 @@ object SanctuaryGenerator {
             usedMillis = usedMillis * 0.8 + (System.nanoTime() - started) / 1_000_000.0 * 0.2
         }
         if (now % 20L == 0L) trackPace(s)
-        if (i >= total && queue.isEmpty() && (natureCursors[s.id] ?: 0) >= total && (extrasCursors[s.id] ?: 0) >= total) {
+        if (i >= total && queue.isEmpty() && clearDone && (natureCursors[s.id] ?: 0) >= total && (extrasCursors[s.id] ?: 0) >= total) {
+            clearCursors.remove(s.id)
             natureCursors.remove(s.id)
             extrasCursors.remove(s.id)
             BiomeDresser.beginHeights(s)

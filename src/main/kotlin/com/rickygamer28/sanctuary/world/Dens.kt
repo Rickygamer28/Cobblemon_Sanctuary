@@ -152,6 +152,36 @@ object Dens {
     private class Cover(val key: Long, val cells: Map<Long, List<BlockPos>>)
     private val covers = HashMap<java.util.UUID, Cover>()
 
+    /** How far a den (its mound, its way in and the ground in front) reaches from its centre. */
+    const val REACH = R + 4
+
+    /**
+     * The ground at (x, z) is about to be built again: any den on it or next to it is taken down first, and its
+     * whole spot is wiped and rebuilt with the land around it (a new den goes up later on the finished ground).
+     * A den left standing while the land around it changed came out broken: its roof hanging over its hollow,
+     * slices of its mound in the air, old water inside.
+     */
+    fun clearAround(s: Sanctuary, x: Int, z: Int) {
+        if (!covers(s, x, z)) return
+        val hit = s.dens.keys.filter { k -> BlockPos.of(k).let { abs(it.x - x) <= REACH && abs(it.z - z) <= REACH } }
+        for (k in hit) demolish(s, k)
+    }
+
+    private fun demolish(s: Sanctuary, key: Long) {
+        val c = BlockPos.of(key)
+        s.dens.remove(key)
+        for (dx in -REACH..REACH) for (dz in -REACH..REACH) {
+            val idx = ColumnOrder.indexOf(c.x + dx - s.center.x, c.z + dz - s.center.z)
+            if (idx < 0) continue
+            s.dressed.clear(idx); s.meadow.clear(idx); s.wipe.set(idx)
+        }
+        Trace.rebuild("den taken down", c.x, c.z)
+        s.generationDirty = true
+    }
+
+    /** Every den goes (and its spot is rebuilt): for valleys whose dens may have come out broken. */
+    fun demolishAll(s: Sanctuary) { for (k in s.dens.keys.toList()) demolish(s, k) }
+
     /** Is (x, z) on a den or in front of its way in? (The valley's builder leaves those columns alone.) */
     fun covers(s: Sanctuary, x: Int, z: Int): Boolean {
         if (s.dens.isEmpty()) return false

@@ -433,8 +433,11 @@ class Sanctuary(
             // (17: the mountain always covers the caves; the Cave & mountain habitat and its borders are rebuilt)
             // (18: lakes, ponds and pools were filled in by mistake in 1.7.4–1.8.0; the watery habitats are rebuilt)
             // (19: the lake's swampy mangrove-delta look became a rocky coast; the lake is rebuilt)
-            val onlyWater = version == 9 || version == 15 || version == 16 || version == 17 || version == 18 || version == 19
+            // (20: dens were left standing while the ground around them was rebuilt, and came out broken; they're
+            // taken down and their spots rebuilt, below)
+            val onlyWater = version == 9 || version == 15 || version == 16 || version == 17 || version == 18 || version == 19 || version == 20
             if (onlyWater) when (version) {
+                20 -> {}
                 16, 17 -> s.rebuildZones += "rock"
                 18 -> s.rebuildZones += listOf("water", "poison", "fairy", "ground", "ice")
                 else -> s.rebuildZones += "water"
@@ -516,6 +519,7 @@ class Sanctuary(
             }
             val vars = t.getCompound("Variants")
             vars.allKeys.forEach { k -> s.variants[k] = vars.getInt(k) }
+            if (version in 1..20 && s.dens.isNotEmpty()) com.rickygamer28.sanctuary.world.Dens.demolishAll(s)
             return s
         }
     }
