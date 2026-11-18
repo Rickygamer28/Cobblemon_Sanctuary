@@ -1761,6 +1761,10 @@ object BiomeDresser {
         val d = c.hit.dist
         val ringPath = d in (hubR - 7.0)..(hubR - 4.0)
         val spoke = (abs(dx) <= 1 || abs(dz) <= 1) && d > 6 && d < hubR - 3
+        when (c.variant) {
+            1 -> { kantoHub(c, dx, dz, d, hubR, ringPath, spoke); return }
+            2 -> { parkHub(c, dx, dz, d, hubR, ringPath, spoke); return }
+        }
         when {
             d <= 6.5 -> { // plaza
                 c.ground(
@@ -1791,6 +1795,129 @@ object BiomeDresser {
                 }
             }
         }
+    }
+
+    /** The Core in the middle of the plaza (every town look has it). */
+    private fun core(c: Ctx, dx: Int, dz: Int) {
+        if (dx == 0 && dz == 0) c.level.setBlock(c.above, ModContent.SANCTUARY_CORE.get().defaultBlockState(), 3)
+    }
+
+    /** A stone lantern: a wall post, the lantern, and a stone cap over it. */
+    private fun stoneLantern(c: Ctx) {
+        c.place(b(Blocks.STONE_BRICK_WALL), 1)
+        c.place(b(Blocks.LANTERN), 2)
+        c.place(b(Blocks.STONE_BRICK_SLAB), 3)
+    }
+
+    /**
+     * Old Kanto village: gravel paths with stepping stones, stone lanterns, koi ponds with lily pads, bamboo groves
+     * and cherry trees, and a red wooden gate on each path into the plaza.
+     */
+    private fun kantoHub(c: Ctx, dx: Int, dz: Int, d: Double, hubR: Int, ringPath: Boolean, spoke: Boolean) {
+        val gateRing = (abs(dz) == 9 && abs(dx) <= 3) || (abs(dx) == 9 && abs(dz) <= 3)
+        when {
+            d <= 6.5 -> { // a raked gravel court with a stone centre
+                c.ground(if (d < 2.5) b(Blocks.CHISELED_STONE_BRICKS) else if (d > 5.5) b(Blocks.MOSSY_STONE_BRICKS) else b(Blocks.GRAVEL), b(Blocks.STONE))
+                core(c, dx, dz)
+                if (d in 5.5..6.5 && Math.floorMod(dx * 3 + dz * 5, 7) == 0) stoneLantern(c)
+            }
+            d > hubR + 1 -> meadow(c)
+            ringPath || spoke -> {
+                // gravel with stepping stones down the middle
+                val middle = if (spoke) (abs(dx) == 0 || abs(dz) == 0) else d in (hubR - 6.0)..(hubR - 5.0)
+                c.ground(if (middle && Math.floorMod(dx + dz, 3) == 0) b(Blocks.STONE_BRICKS) else b(Blocks.GRAVEL), b(Blocks.STONE))
+                if (gateRing) toriiPart(c, dx, dz)
+            }
+            else -> {
+                // koi ponds
+                val pond = c.noise(16.0, 43) > 0.74 && d > 10 && d < hubR - 9
+                if (pond) {
+                    c.pool(b(Blocks.CLAY))
+                    if (c.chance(0.12)) c.place(b(Blocks.LILY_PAD), 1)
+                    return
+                }
+                c.ground(if (c.noise(9.0, 44) > 0.7) b(Blocks.MOSS_BLOCK) else b(Blocks.GRASS_BLOCK), b(Blocks.DIRT))
+                if (gateRing) { toriiPart(c, dx, dz); return }
+                val nearPath = d in (hubR - 8.5)..(hubR - 7.5) || d in (hubR - 3.5)..(hubR - 2.5)
+                when {
+                    nearPath && Math.floorMod(dx * 7 + dz * 13, 23) == 0 -> stoneLantern(c)
+                    !nearPath && d > 11 && d < hubR - 10 && c.grid(17, 45) && c.roomy() -> c.feature(TreeFeatures.CHERRY)
+                    c.noise(11.0, 46) > 0.72 && !nearPath -> c.column(b(Blocks.BAMBOO), 3 + c.random.nextInt(5))
+                    c.grid(13, 47) && c.roomy() -> c.boulder(b(Blocks.MOSSY_COBBLESTONE), b(Blocks.STONE), 1)
+                    c.noise(7.0, 48) > 0.74 && c.chance(0.5) -> c.place(c.patch(3.0, 49, b(Blocks.LILY_OF_THE_VALLEY), b(Blocks.PINK_TULIP), b(Blocks.AZURE_BLUET)))
+                    c.chance(0.2) -> c.place(if (c.chance(0.3)) b(Blocks.FERN) else b(Blocks.SHORT_GRASS))
+                }
+            }
+        }
+    }
+
+    /** One column of a red wooden gate standing across a path into the plaza (two posts, two beams). */
+    private fun toriiPart(c: Ctx, dx: Int, dz: Int) {
+        val across = if (abs(dz) == 9) abs(dx) else abs(dz)
+        val post = b(Blocks.STRIPPED_MANGROVE_LOG)
+        val beam = b(Blocks.MANGROVE_PLANKS)
+        val top = b(Blocks.DARK_OAK_PLANKS)
+        when (across) {
+            2 -> { c.column(post, 4); c.place(beam, 5); c.place(top, 6) }
+            0, 1 -> { c.place(beam, 4); c.place(top, 6) }
+            3 -> c.place(top, 6)
+        }
+    }
+
+    /**
+     * Park & gardens: pale stone walkways with benches along them, low hedges of azalea, borders of tulips,
+     * fountains, rows of birches and dark lamp posts.
+     */
+    private fun parkHub(c: Ctx, dx: Int, dz: Int, d: Double, hubR: Int, ringPath: Boolean, spoke: Boolean) {
+        when {
+            d <= 6.5 -> { // a paved square with a ring of water round the Core's dais
+                when {
+                    d < 2.5 -> c.ground(b(Blocks.CHISELED_STONE_BRICKS), b(Blocks.STONE))
+                    d < 3.6 -> { c.ground(b(Blocks.STONE_BRICKS), b(Blocks.STONE)); c.pool(b(Blocks.STONE_BRICKS)) }
+                    else -> c.ground(if (Math.floorMod(dx + dz, 2) == 0) b(Blocks.POLISHED_DIORITE) else b(Blocks.SMOOTH_STONE), b(Blocks.STONE))
+                }
+                core(c, dx, dz)
+                if (d in 5.5..6.5 && Math.floorMod(dx * 3 + dz * 5, 7) == 0) c.lampPost(b(Blocks.POLISHED_BLACKSTONE_WALL), b(Blocks.LANTERN), 3)
+            }
+            d > hubR + 1 -> meadow(c)
+            ringPath || spoke -> {
+                val edge = if (spoke) (abs(dx) == 1 || abs(dz) == 1) else (d < hubR - 6.5 || d > hubR - 4.5)
+                c.ground(if (edge) b(Blocks.SMOOTH_STONE) else b(Blocks.POLISHED_DIORITE), b(Blocks.STONE))
+            }
+            else -> {
+                c.ground(b(Blocks.GRASS_BLOCK), b(Blocks.DIRT))
+                val hedge = d in (hubR - 8.5)..(hubR - 7.5) || d in (hubR - 3.5)..(hubR - 2.5)
+                val border = d in (hubR - 9.5)..(hubR - 8.5) || d in (hubR - 2.5)..(hubR - 1.5)
+                // fountains: round basins with a lantern on a pillar in the middle
+                val fx = Math.floorMod(dx, 24) - 12
+                val fz = Math.floorMod(dz, 24) - 12
+                val fd = sqrt((fx * fx + fz * fz).toDouble())
+                val fountainHere = d > 12 && d < hubR - 11 && Noise.hash(c.s.seed + 51, Math.floorDiv(dx, 24), Math.floorDiv(dz, 24)) > 0.45
+                when {
+                    fountainHere && fd < 0.8 -> { c.column(b(Blocks.STONE_BRICKS), 2); c.place(b(Blocks.LANTERN), 3) }
+                    fountainHere && fd < 2.6 -> { c.pool(b(Blocks.STONE_BRICKS)) }
+                    fountainHere && fd < 3.4 -> c.place(b(Blocks.STONE_BRICK_SLAB))
+                    // low hedges along the walkways, with gaps (and a bench in some)
+                    hedge -> {
+                        val gap = Math.floorMod(dx * 5 + dz * 3, 11) == 0
+                        if (!gap) c.place(if (c.noise(5.0, 52) > 0.6) b(Blocks.FLOWERING_AZALEA) else b(Blocks.AZALEA))
+                        else if (Math.floorMod(dx + dz, 2) == 0) c.place(b(Blocks.OAK_STAIRS).setValue(net.minecraft.world.level.block.StairBlock.FACING, outward(dx, dz, d < hubR - 5)))
+                    }
+                    border -> c.place(c.patch(4.0, 53, b(Blocks.RED_TULIP), b(Blocks.ORANGE_TULIP), b(Blocks.WHITE_TULIP), b(Blocks.PINK_TULIP), b(Blocks.ALLIUM)))
+                    d > 11 && d < hubR - 10 && c.grid(14, 54) && c.roomy() -> c.feature(TreeFeatures.BIRCH)
+                    Math.floorMod(dx * 7 + dz * 13, 37) == 0 && d > 9 -> c.lampPost(b(Blocks.POLISHED_BLACKSTONE_WALL), b(Blocks.LANTERN), 2)
+                    c.chance(0.12) -> c.place(b(Blocks.SHORT_GRASS))
+                }
+            }
+        }
+    }
+
+    /** Which way a bench at (dx, dz) faces: towards the walkway beside it. */
+    private fun outward(dx: Int, dz: Int, inward: Boolean): Direction {
+        val d = if (abs(dx) > abs(dz)) (if (dx > 0) Direction.EAST else Direction.WEST) else (if (dz > 0) Direction.SOUTH else Direction.NORTH)
+        // a stair's back is on its facing side: inside the ring path the back is towards the town's middle (the seat
+        // looks out at the walkway), outside it the other way
+        return if (inward) d.opposite else d
     }
 
     /**

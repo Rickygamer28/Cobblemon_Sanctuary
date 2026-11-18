@@ -120,7 +120,7 @@ object SelfTest {
                 log("== after the rest woke up, finished in ${"%.0f".format(secs)} s${if (timedOut) " (TIMED OUT)" else ""}")
                 scan(level, sanctuary)
                 // the owner picks other looks for two habitats (as the Region tab's Look button does)
-                for (zone in listOf("water", "rock")) {
+                for (zone in listOf("water", "rock", com.rickygamer28.sanctuary.world.ZoneLayout.HUB)) {
                     val now0 = BiomeDresser.variantOf(sanctuary, zone)
                     val next = (now0 + 1) % 3
                     sanctuary.variants[zone] = next

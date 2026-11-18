@@ -377,7 +377,7 @@ class Sanctuary(
 
     companion object {
         /** Bump to make existing sanctuaries rebuild their biomes after a generator change. */
-        const val DATA_VERSION = 20
+        const val DATA_VERSION = 21
 
         /** 2: the region map (town, habitats, meadows and routes) instead of a ring of type biomes. */
         const val LAYOUT_VERSION = 2
@@ -435,6 +435,7 @@ class Sanctuary(
             // (19: the lake's swampy mangrove-delta look became a rocky coast; the lake is rebuilt)
             // (20: dens were left standing while the ground around them was rebuilt, and came out broken; they're
             // taken down and their spots rebuilt, below)
+            // (21: the town got two more looks; valleys made before keep the classic town square)
             val onlyWater = version == 9 || version == 15 || version == 16 || version == 17 || version == 18 || version == 19 || version == 20
             if (onlyWater) when (version) {
                 20 -> {}
@@ -520,6 +521,7 @@ class Sanctuary(
             val vars = t.getCompound("Variants")
             vars.allKeys.forEach { k -> s.variants[k] = vars.getInt(k) }
             if (version in 1..20 && s.dens.isNotEmpty()) com.rickygamer28.sanctuary.world.Dens.demolishAll(s)
+            if (version in 1..20) s.variants[com.rickygamer28.sanctuary.world.ZoneLayout.HUB] = 0
             return s
         }
     }

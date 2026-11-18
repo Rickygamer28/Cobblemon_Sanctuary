@@ -2,10 +2,15 @@ package com.rickygamer28.sanctuary.world
 
 /**
  * The looks each habitat can have (in the order the builder numbers them), with a line about each, for the owner
- * to pick from on the Region tab. Town & meadows has one look, so it isn't listed.
+ * to pick from on the Region tab.
  */
 object Looks {
     val ALL: Map<String, List<Pair<String, String>>> = mapOf(
+        ZoneLayout.HUB to listOf(
+            "Town square" to "Paths, lamp posts, flower beds and big shade trees",
+            "Old Kanto village" to "Gravel paths, stone lanterns, koi ponds, bamboo and red gates",
+            "Park & gardens" to "Pale walkways, hedges, benches, tulips and fountains",
+        ),
         "water" to listOf(
             "Clear lake" to "A clear lake with sandy beaches and islands",
             "Turquoise lagoon" to "Warm shallows with coral and palm-lined shores",
