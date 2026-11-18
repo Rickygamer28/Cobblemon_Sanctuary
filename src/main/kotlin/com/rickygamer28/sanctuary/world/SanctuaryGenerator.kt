@@ -500,6 +500,19 @@ object SanctuaryGenerator {
      * Plants and crystals left hanging in the air after the ground under them was lowered (they have no collision,
      * so older versions didn't see them) are removed, and Cobblemon crystal clusters on the ground stand upright.
      */
+    /** "circle:x,z,r" in the zones to rebuild: the land a habitat gave back when it shrank. */
+    private fun inRebuildCircle(s: Sanctuary, x: Int, z: Int): Boolean {
+        for (k in s.rebuildZones) {
+            if (!k.startsWith("circle:")) continue
+            val v = k.removePrefix("circle:").split(',').mapNotNull { it.toDoubleOrNull() }
+            if (v.size < 3) continue
+            val dx = x - v[0]
+            val dz = z - v[1]
+            if (dx * dx + dz * dz <= (v[2] + 28) * (v[2] + 28)) return true
+        }
+        return false
+    }
+
     private fun looseBlocks(level: ServerLevel, x: Int, z: Int) {
         val ground = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1
         val top = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z) - 1
@@ -893,7 +906,8 @@ object SanctuaryGenerator {
                 // only the biomes being rebuilt (and the strip next to them, whose shape blends with them)
                 val pocket = if (hit != null) ZoneLayout.pocketAt(s, x, z)?.first else null
                 val touched = hit != null && (hit.zone in s.rebuildZones || (hit.neighbour in s.rebuildZones && hit.edgeDistance < 26) ||
-                    (pocket != null && (pocket.zone in s.rebuildZones || pocket.host in s.rebuildZones || "pocket:${pocket.x},${pocket.z}" in s.rebuildZones)))
+                    (pocket != null && (pocket.zone in s.rebuildZones || pocket.host in s.rebuildZones || "pocket:${pocket.x},${pocket.z}" in s.rebuildZones)) ||
+                    inRebuildCircle(s, x, z))
                 if (!touched || meadowDone) continue
                 val done = redone.getOrPut(s.id) { java.util.BitSet() }
                 if (done.get(idx)) continue // rebuilt already in this rebuild

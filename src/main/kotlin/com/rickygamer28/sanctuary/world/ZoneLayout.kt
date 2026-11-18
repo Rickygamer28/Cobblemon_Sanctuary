@@ -104,6 +104,26 @@ object ZoneLayout {
     private fun inner(s: Sanctuary) = s.size.hubRadius + 4.0
     private fun outer(s: Sanctuary) = s.size.radius - 8.0
 
+    /**
+     * How big a custom type's habitat is next to a usual one: by its Pokémon against a typical habitat's (the
+     * middle of the busy ones), from 45% up to 80% at most. It shouldn't take land from the busy habitats.
+     */
+    fun customScale(counts: Map<String, Int>, count: Int): Double {
+        val main = HABITATS.mapNotNull { counts[it]?.takeIf { n -> n > 0 } }.sorted()
+        val typical = if (main.isEmpty()) count.toDouble() else main[main.size / 2].toDouble()
+        return (0.45 + 0.35 * min(1.0, count / typical.coerceAtLeast(1.0))).coerceIn(0.45, 0.8)
+    }
+
+    /** The size a habitat that's fitted in later gets (before the room around it): busier ones a bit bigger. */
+    private fun fittedSize(s: Sanctuary, count: Int): Double {
+        val h = inner(s)
+        val r = outer(s)
+        return sqrt(PI * (r * r - h * h) * 0.74 / HABITATS.size * Math.pow(count.coerceAtLeast(1).toDouble(), 0.3) / PI)
+    }
+
+    /** The size a custom type's habitat should have now (to shrink one laid out bigger, by an older version). */
+    fun customSize(s: Sanctuary, counts: Map<String, Int>, count: Int): Double = fittedSize(s, count) * customScale(counts, count)
+
     /** Lays out the habitats for [counts] (residents per habitat): busier habitats get more room. */
     fun plan(s: Sanctuary, counts: Map<String, Int>): Map<String, Habitat> {
         // custom types with a habitat of their own sit right after the habitat that suits them best (Shadow after
@@ -128,10 +148,12 @@ object ZoneLayout {
         // slices), leaving meadows with the routes between them
         val awakeWeights = awake.map { Math.pow((counts[it] ?: 1).toDouble(), 0.55) }
         val reserve = awakeWeights.average() * 0.6
-        val weights = zones.map { z -> if ((counts[z] ?: 0) > 0) Math.pow(counts[z]!!.toDouble(), 0.55) else reserve }
+        // (a custom type's habitat is smaller: a narrower slice, and not as deep)
+        val scales = zones.map { z -> if (CustomTypes.isCustom(z)) customScale(counts, counts[z] ?: 1) else 1.0 }
+        val weights = zones.mapIndexed { i, z -> (if ((counts[z] ?: 0) > 0) Math.pow(counts[z]!!.toDouble(), 0.55) else reserve) * (if (scales[i] < 1) scales[i] * 0.7 else 1.0) }
         val total = weights.sum()
         val minShare = min(0.06, 1.0 / zones.size)
-        val shares = weights.map { max(it / total, minShare) }.let { sh -> val t = sh.sum(); sh.map { it / t } }
+        val shares = weights.mapIndexed { i, w -> if (scales[i] < 1) w / total else max(w / total, minShare) }.let { sh -> val t = sh.sum(); sh.map { it / t } }
         var angle = random.nextDouble() * 2 * PI
         val out = LinkedHashMap<String, Habitat>()
         val most = shares.max()
@@ -139,7 +161,7 @@ object ZoneLayout {
             val slice = shares[i] * 2 * PI
             val theta = angle + slice / 2 + (random.nextDouble() - 0.5) * slice * 0.15
             angle += slice
-            val radial = (band / 2 * (0.84 + 0.1 * shares[i] / most)).coerceAtLeast(22.0)
+            val radial = (band / 2 * (0.84 + 0.1 * shares[i] / most) * scales[i]).coerceAtLeast(22.0)
             val d = h + band / 2 + (random.nextDouble() - 0.5) * max(0.0, band - 2 * radial)
             val chord = d * sin(min(slice / 2, PI / 2)) * 1.1 + 6
             val along = chord.coerceIn(radial * 0.6, radial * 1.6)
@@ -182,9 +204,10 @@ object ZoneLayout {
             }
         }
         val b = best ?: return null
-        val want = sqrt(PI * (r * r - h * h) * 0.74 / HABITATS.size * Math.pow(count.coerceAtLeast(1).toDouble(), 0.3) / PI)
+        val custom = CustomTypes.isCustom(zone)
+        val want = fittedSize(s, count) * (if (custom) customScale(s.typeCounts, count) else 1.0)
         val size = min(bestRoom * 0.95, want)
-        if (size < 26) return null
+        if (size < (if (custom) 22 else 26)) return null
         return Habitat(b.x, b.z, size, size, b.angle)
     }
 

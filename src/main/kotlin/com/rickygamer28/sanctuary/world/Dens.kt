@@ -182,6 +182,9 @@ object Dens {
     /** Every den goes (and its spot is rebuilt): for valleys whose dens may have come out broken. */
     fun demolishAll(s: Sanctuary) { for (k in s.dens.keys.toList()) demolish(s, k) }
 
+    /** The dens of [zone] go (when its habitat changes shape): new ones go up on the finished ground. */
+    fun demolishZone(zone: String, s: Sanctuary) { for ((k, v) in s.dens.entries.toList()) if (v.substringBefore(':') == zone) demolish(s, k) }
+
     /** Is (x, z) on a den or in front of its way in? (The valley's builder leaves those columns alone.) */
     fun covers(s: Sanctuary, x: Int, z: Int): Boolean {
         if (s.dens.isEmpty()) return false

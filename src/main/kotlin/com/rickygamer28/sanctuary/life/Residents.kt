@@ -270,7 +270,28 @@ object Residents {
             s.generationDirty = true
             s.logEvent("A new habitat appeared in the valley: the ${zoneName(zone)}!")
         }
+        shrinkCustom(s, customCounts)
         updatePockets(s, customCounts)
+    }
+
+    /**
+     * A custom type's habitat laid out bigger than its Pokémon need (by an older version) shrinks where it is; the
+     * land it gives back becomes meadow again.
+     */
+    private fun shrinkCustom(s: Sanctuary, customCounts: Map<String, Int>) {
+        for ((zone, hb) in s.habitats.entries.toList()) {
+            if (!com.rickygamer28.sanctuary.world.CustomTypes.isCustom(zone)) continue
+            val n = customCounts[zone] ?: continue
+            val want = ZoneLayout.customSize(s, s.typeCounts, n).coerceAtLeast(22.0)
+            if (hb.size() <= want * 1.15) continue
+            // keeping its shape (longer one way than the other) and where it is
+            val k = want / hb.size()
+            s.habitats[zone] = ZoneLayout.Habitat(hb.x, hb.z, hb.radial * k, hb.along * k, hb.angle)
+            s.rebuildZones += zone
+            s.rebuildZones += "circle:${hb.x},${hb.z},${"%.0f".format(java.util.Locale.ROOT, maxOf(hb.radial, hb.along))}"
+            s.generationDirty = true
+            com.rickygamer28.sanctuary.world.Dens.demolishZone(zone, s)
+        }
     }
 
     /**
