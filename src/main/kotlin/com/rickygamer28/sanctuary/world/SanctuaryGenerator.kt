@@ -809,15 +809,11 @@ object SanctuaryGenerator {
         }
         clearCursors[s.id] = w
         clearDone = w >= total
-        val landDeadline = if (i - (natureCursors[s.id] ?: 0) > 4000) started + (deadline - started) / 2 else deadline
-        while (budget > 0 && i < total) {
+        // ---- wave 2: the land, once the clearing has gone over the whole valley (each wave covers the whole
+        // valley before the next one starts: clear, then land, then nature, then the residents' spots)
+        while (clearDone && budget > 0 && i < total) {
             scanned++
-            if ((scanned and 31) == 0 && System.nanoTime() > landDeadline) break
-            // (the clearing must be done 12 blocks all round first, so nothing of the old valley reaches in)
-            if (!clearDone) {
-                val d = sqrt((ColumnOrder.dx[i] * ColumnOrder.dx[i] + ColumnOrder.dz[i] * ColumnOrder.dz[i]).toDouble())
-                if (w < ColumnOrder.countWithin(Math.ceil(d).toInt() + 12)) break
-            }
+            if ((scanned and 31) == 0 && System.nanoTime() > deadline) break
             val idx = i++
             val meadowDone = s.meadow.get(idx)
             val redo = s.rebuildZones.isNotEmpty()
@@ -900,10 +896,11 @@ object SanctuaryGenerator {
             }
             return c
         }
-        val j = wave(natureCursors[s.id] ?: 0, BiomeDresser.Phase.NATURE, s.decorated, ::landFinal, landDone, 9)
+        // ---- wave 3: nature, once the land is done everywhere; wave 4: the residents' spots, once nature is
+        val j = if (landDone) wave(natureCursors[s.id] ?: 0, BiomeDresser.Phase.NATURE, s.decorated, ::landFinal, true, 9) else (natureCursors[s.id] ?: 0)
         natureCursors[s.id] = j
         val natureDone = landDone && j >= total
-        val k = wave(extrasCursors[s.id] ?: 0, BiomeDresser.Phase.EXTRAS, s.furnished, { idx -> s.decorated.get(idx) || idx < j }, natureDone, 7)
+        val k = if (natureDone) wave(extrasCursors[s.id] ?: 0, BiomeDresser.Phase.EXTRAS, s.furnished, { idx -> s.decorated.get(idx) || idx < j }, true, 7) else (extrasCursors[s.id] ?: 0)
         extrasCursors[s.id] = k
         } finally {
             BiomeDresser.endHeights()
