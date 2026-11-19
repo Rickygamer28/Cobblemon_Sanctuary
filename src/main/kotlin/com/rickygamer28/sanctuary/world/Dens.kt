@@ -41,6 +41,15 @@ object Dens {
     )
     private val CUSTOM = Style(Blocks.STONE, Blocks.COBBLESTONE, Blocks.STONE)
 
+    /** A custom type's dens, from its palette: its rock, its filler, its ground on top, and a glow or a plant up there. */
+    private fun customStyle(zone: String): Style {
+        val p = CustomTypes.palette(zone)
+        val glow = p.glow?.takeIf { it == Blocks.END_ROD || it == Blocks.SOUL_LANTERN || it == Blocks.LANTERN || it == Blocks.AMETHYST_CLUSTER }
+        return Style(p.rock, p.filler, p.top, deco = glow ?: p.plants.firstOrNull())
+    }
+
+    private fun styleOf(zone: String): Style = STYLES[zone] ?: if (CustomTypes.isCustom(zone)) customStyle(zone) else CUSTOM
+
     private const val GRID = 36
     private const val CAP = 600
     private const val FLAGS = Block.UPDATE_CLIENTS
@@ -131,7 +140,8 @@ object Dens {
             Math.floorMod(z, GRID) != (Noise.hash(s.seed + salt + 1, cx, cz) * GRID).toInt()) return
         if (s.dens.size >= CAP || !SanctuaryConfig.dens.get()) return
         val hit = ZoneLayout.locate(s, x, z, ring) ?: return
-        val zone = hit.zone
+        // (inside a custom type's sub-biome, the den is that type's)
+        val zone = ZoneLayout.pocketAt(s, x, z)?.takeIf { it.first.sub && it.first.live(s) && it.second < it.first.r - 5 }?.first?.zone ?: hit.zone
         if (zone != ZoneLayout.HUB && zone !in s.unlocked) return
         val center = BlockPos(x, groundAt(level, x, z), z)
         if (s.dens.containsKey(center.asLong())) return
@@ -143,7 +153,7 @@ object Dens {
         if (!roomFor(level, s, center, ring)) return
         val random = net.minecraft.util.RandomSource.create(s.seed xor center.asLong())
         val dir = entrance(level, center, random) ?: return
-        build(level, center, STYLES[zone] ?: CUSTOM, dir, random)
+        build(level, center, styleOf(zone), dir, random)
         s.dens[center.asLong()] = encode(zone, dir)
     }
 
@@ -249,7 +259,7 @@ object Dens {
             if (!roomFor(level, s, d.center, ring, old)) { s.dens[d.center.asLong()] = encode(d.zone, d.dir).removeSuffix(":big") + ":small"; continue }
             val dir = if ((R..R + 3).all { i -> val p = d.center.relative(d.dir, i); abs(groundAt(level, p.x, p.z) - d.center.y) <= 1 }) d.dir
                 else entrance(level, d.center, random) ?: d.dir
-            build(level, d.center, STYLES[d.zone] ?: CUSTOM, dir, random)
+            build(level, d.center, styleOf(d.zone), dir, random)
             s.dens[d.center.asLong()] = encode(d.zone, dir)
         }
     }

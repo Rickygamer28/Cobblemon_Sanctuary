@@ -649,7 +649,7 @@ object ZoneLayout {
 
     /** The middle of a habitat (where its landmark stands). */
     fun anchor(s: Sanctuary, zone: String, ring: List<String> = HABITATS): Pair<Int, Int> {
-        val hb = s.habitats[zone] ?: return s.center.x to s.center.z
+        val hb = s.habitats[zone] ?: return customPocket(s, zone)?.takeIf { it.sub }?.let { it.x to it.z } ?: (s.center.x to s.center.z)
         return hb.x to hb.z
     }
 

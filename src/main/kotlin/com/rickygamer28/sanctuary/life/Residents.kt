@@ -337,6 +337,8 @@ object Residents {
         for (p in before + after) {
             if (sig(p) in oldSigs && sig(p) in newSigs) continue
             if (p.sub) s.rebuildZones += "circle:${p.x},${p.z},${p.r + 6}" else s.rebuildZones += "pocket:${p.x},${p.z}"
+            // (a sub-biome that moved or grew: its dens go up again on the new ground)
+            if (p.sub) com.rickygamer28.sanctuary.world.Dens.demolishZone(p.zone, s)
             s.generationDirty = true
         }
         return after

@@ -39,7 +39,15 @@ object Landmarks {
         "fire" to "the Eternal Flame", "ground" to "an ancient pyramid", "rock" to "a stone arch", "fighting" to "a dojo arena",
         "dragon" to "the Dragon's Spire", "dark" to "a shadow obelisk", "ghost" to "a haunted tower", "poison" to "a giant mushroom grove",
         "psychic" to "an amethyst spire", "steel" to "an old radio tower", "electric" to "a power line", "ice" to "a frozen spire",
+        // the custom types'
+        "shadow" to "a shadow gate", "crystal" to "a crystal geode", "cosmic" to "a fallen meteorite", "light" to "a sun pillar",
+        "digital" to "a crashed satellite", "nuclear" to "an old reactor", "plastic" to "a toy tower", "slime" to "a slime mound",
+        "sound" to "a great bell", "wind" to "a windmill", "blood" to "a crimson altar", "eldritch" to "a sculk portal",
     )
+
+    /** The zones with a landmark: the habitats in the ring, and the custom types' sub-biomes (in their middle). */
+    private fun landmarkZones(s: Sanctuary, ring: List<String>): List<String> =
+        ring + s.customSubs.keys.filter { it !in ring && ZoneLayout.customPocket(s, it)?.let { p -> p.sub && p.live(s) } == true }
 
     /** Stored for a biome whose landmark is part of the terrain itself (the volcano): nothing to protect. */
     const val NONE = Long.MIN_VALUE
@@ -63,7 +71,7 @@ object Landmarks {
     fun tick(level: ServerLevel, s: Sanctuary) {
         val ring = ZoneLayout.ring(s)
         if (s.staleLandmarks.isNotEmpty()) return
-        for (zone in ring) {
+        for (zone in landmarkZones(s, ring)) {
             if (zone !in s.unlocked || s.landmarks.containsKey(zone) || s.staleLandmarks.containsKey(zone)) continue
             val (ax, az) = ZoneLayout.anchor(s, zone, ring)
             if (!loadedAround(level, ax, az, RADIUS + 2)) continue
@@ -110,7 +118,7 @@ object Landmarks {
             val (ax, az) = ZoneLayout.anchor(s, zone, ring)
             val dx = (p.x - ax).toDouble()
             val dz = (p.z - az).toDouble()
-            if (!stale && zone in ring && dx * dx + dz * dz <= 12.0 * 12.0) continue
+            if (!stale && zone in landmarkZones(s, ring) && dx * dx + dz * dz <= 12.0 * 12.0) continue
             val r = RADIUS + 2
             if (!loadedAround(level, p.x, p.z, r)) continue
             // take down everything built above the landmark's floor, and turn the floor back into plain ground
@@ -219,8 +227,197 @@ object Landmarks {
             "steel" -> radioTower(c)
             "electric" -> powerLine(c)
             "ice" -> frozenSpire(c)
-            else -> c.spike(2.5, 9) { b(Blocks.AMETHYST_BLOCK) }
+            "shadow" -> shadowGate(c)
+            "crystal" -> crystalGeode(c)
+            "cosmic" -> meteorite(c)
+            "light" -> sunPillar(c)
+            "digital" -> satellite(c)
+            "nuclear" -> reactor(c)
+            "plastic" -> toyTower(c)
+            "slime" -> slimeMound(c)
+            "sound" -> greatBell(c)
+            "wind" -> windmill(c)
+            "blood" -> crimsonAltar(c)
+            "eldritch" -> sculkPortal(c)
+            // a type this doesn't know: a crystal spike in its palette's colours
+            else -> {
+                val p = CustomTypes.palette(zone)
+                c.clear(4, 12)
+                c.floor(3, { _, _ -> b(p.top) }, b(p.filler))
+                c.spike(2.5, 9) { dy -> if (dy % 3 == 0) b(p.rock) else b(p.crystal) }
+            }
         }
+    }
+
+    // ------------------------------------------------------------------ the custom types' landmarks
+
+    private fun shadowGate(c: B) {
+        c.clear(6, 12)
+        c.floor(5, { dx, dz -> if ((dx + dz) % 3 == 0) b(Blocks.SOUL_SOIL) else b(Blocks.BLACKSTONE) }, b(Blocks.BLACKSTONE))
+        for (side in listOf(-3, 3)) {
+            for (dx in 0..1) for (dz in 0..1) c.column(side + dx - (if (side > 0) 1 else 0), dz, 1, 8, b(Blocks.POLISHED_BLACKSTONE_BRICKS))
+            c.set(side, 9, 0, b(Blocks.SOUL_LANTERN))
+        }
+        for (dx in -4..4) for (dz in 0..1) c.set(dx, 8, dz, b(Blocks.POLISHED_BLACKSTONE))
+        // the gate: crying obsidian in the gap
+        for (dx in -1..1) for (dy in 1..7) c.set(dx, dy, 0, b(Blocks.CRYING_OBSIDIAN))
+        for (dx in -1..1) c.set(dx, 7, 1, b(Blocks.POLISHED_BLACKSTONE_BRICKS))
+        for ((dx, dz) in listOf(-2 to 3, 2 to 3, -2 to -2, 2 to -2, 0 to 4, 0 to -3)) c.soft(dx, 1, dz, b(Blocks.WITHER_ROSE))
+    }
+
+    private fun crystalGeode(c: B) {
+        c.clear(7, 12)
+        c.floor(6, { _, _ -> b(Blocks.CALCITE) }, b(Blocks.SMOOTH_BASALT))
+        // a half-buried shell: smooth basalt, calcite, amethyst inside, open on one side
+        val r = 5.5
+        for (dx in -6..6) for (dy in 0..6) for (dz in -6..6) {
+            val d = sqrt((dx * dx + dy * dy * 1.2 + dz * dz).toDouble())
+            if (d > r + 0.5) continue
+            if (dz <= -3 && abs(dx) <= 2 && dy in 1..3) { c.set(dx, dy, dz, b(Blocks.AIR)); continue }
+            when {
+                d > r - 0.5 -> c.set(dx, dy, dz, b(Blocks.SMOOTH_BASALT))
+                d > r - 1.5 -> c.set(dx, dy, dz, b(Blocks.CALCITE))
+                d > r - 2.5 -> c.set(dx, dy, dz, b(Blocks.AMETHYST_BLOCK))
+                dy >= 1 -> c.set(dx, dy, dz, b(Blocks.AIR))
+            }
+        }
+        for ((dx, dz) in listOf(1 to 1, -1 to 2, 2 to -1, -2 to 0, 0 to 2)) c.soft(dx, 1, dz, b(Blocks.AMETHYST_CLUSTER))
+        c.set(0, 0, 0, b(Blocks.AMETHYST_BLOCK))
+    }
+
+    private fun meteorite(c: B) {
+        c.clear(7, 10)
+        // a scorched little crater
+        c.floor(6, { dx, dz -> if (dx * dx + dz * dz <= 12) b(Blocks.BLACKSTONE) else b(Blocks.END_STONE) }, b(Blocks.END_STONE))
+        for (dx in -6..6) for (dz in -6..6) {
+            val d = dx * dx + dz * dz
+            if (d in 22..36) c.soft(dx, 1, dz, b(if ((dx + dz) % 2 == 0) Blocks.END_STONE else Blocks.BLACKSTONE))
+        }
+        // the rock itself, half sunk in
+        for (dx in -3..3) for (dy in 0..4) for (dz in -3..3) {
+            val d = dx * dx + (dy - 1) * (dy - 1) * 1.3 + dz * dz
+            if (d <= 9.5) c.set(dx, dy, dz, b(if (c.random.nextInt(4) == 0) Blocks.CRYING_OBSIDIAN else Blocks.OBSIDIAN))
+        }
+        for ((dx, dy, dz) in listOf(Triple(3, 2, 1), Triple(-2, 4, 1), Triple(1, 5, -1), Triple(-3, 2, -2), Triple(0, 3, 3))) c.soft(dx, dy, dz, b(Blocks.END_ROD))
+    }
+
+    private fun sunPillar(c: B) {
+        c.clear(6, 14)
+        c.floor(5, { dx, dz -> if (dx * dx + dz * dz <= 9) b(Blocks.QUARTZ_BLOCK) else b(Blocks.GRASS_BLOCK) }, b(Blocks.DIRT))
+        for (dx in -3..3) for (dz in -3..3) { val d = dx * dx + dz * dz; if (d in 5..9) c.set(dx, 1, dz, b(Blocks.QUARTZ_SLAB)) }
+        for (dx in -1..1) for (dz in -1..1) if (dx * dx + dz * dz <= 1) c.column(dx, dz, 1, 2, b(Blocks.QUARTZ_BLOCK))
+        c.column(0, 0, 3, 8, b(Blocks.QUARTZ_PILLAR))
+        c.set(0, 11, 0, b(Blocks.PEARLESCENT_FROGLIGHT))
+        for (dx in -5..5) for (dz in -5..5) { val d = dx * dx + dz * dz; if (d in 14..26 && c.random.nextInt(2) == 0)
+            c.soft(dx, 1, dz, b(listOf(Blocks.OXEYE_DAISY, Blocks.LILY_OF_THE_VALLEY, Blocks.WHITE_TULIP)[c.random.nextInt(3)])) }
+    }
+
+    private fun satellite(c: B) {
+        c.clear(7, 9)
+        c.floor(6, { dx, dz -> if ((dx * 7 + dz * 3) % 5 == 0) b(Blocks.COARSE_DIRT) else b(Blocks.CYAN_TERRACOTTA) }, b(Blocks.DIRT))
+        // the body, tipped over and half sunk
+        for (dx in -1..1) for (dz in -2..2) for (dy in 0..2) if (!(dy == 2 && abs(dz) == 2)) c.set(dx, dy, dz, b(Blocks.IRON_BLOCK))
+        c.set(0, 3, 0, b(Blocks.REDSTONE_LAMP))
+        // the solar wings
+        for (side in listOf(-1, 1)) for (i in 2..5) for (dz in -1..1) {
+            c.set(side * i, 1, dz, b(Blocks.DAYLIGHT_DETECTOR))
+            if (i == 2) c.set(side * i, 0, dz, b(Blocks.IRON_BLOCK)) else c.set(side * i, 0, dz, b(Blocks.POLISHED_ANDESITE))
+        }
+        c.column(0, 2, 3, 3, b(Blocks.IRON_BARS)); c.set(0, 6, 2, b(Blocks.LIGHTNING_ROD))
+    }
+
+    private fun reactor(c: B) {
+        c.clear(6, 10)
+        c.floor(5, { dx, dz -> if (dx * dx + dz * dz <= 6) b(Blocks.POLISHED_ANDESITE) else b(Blocks.MOSS_BLOCK) }, b(Blocks.STONE))
+        for (dx in -3..3) for (dz in -3..3) {
+            val d = dx * dx + dz * dz
+            if (d in 6..10) for (dy in 1..5) c.set(dx, dy, dz, b(if (dy == 3) Blocks.IRON_BLOCK else Blocks.SMOOTH_STONE))
+            if (d in 6..10 && c.random.nextInt(3) == 0) c.soft(dx, 6, dz, b(Blocks.MOSS_CARPET))
+        }
+        for (dx in -1..1) for (dz in -1..1) for (dy in 1..3) c.set(dx, dy, dz, b(Blocks.VERDANT_FROGLIGHT))
+        for (dx in -1..1) for (dz in -1..1) c.set(dx, 4, dz, b(Blocks.LIME_STAINED_GLASS))
+    }
+
+    private fun toyTower(c: B) {
+        c.clear(6, 14)
+        c.floor(5, { dx, dz -> if ((dx + dz) % 2 == 0) b(Blocks.PINK_TERRACOTTA) else b(Blocks.WHITE_TERRACOTTA) }, b(Blocks.WHITE_TERRACOTTA))
+        val colours = listOf(Blocks.RED_CONCRETE, Blocks.YELLOW_CONCRETE, Blocks.LIGHT_BLUE_CONCRETE, Blocks.LIME_CONCRETE)
+        // 2×2×2 blocks stacked, each nudged a little: a leaning tower
+        var ox = 0
+        for (level in 0..4) {
+            val col = colours[level % 4]
+            for (dx in 0..1) for (dz in 0..1) for (dy in 0..1) c.set(ox + dx - 1, 1 + level * 2 + dy, dz - 1, b(col))
+            if (level % 2 == 1) ox++
+        }
+        // and a few that fell off
+        for ((i, p) in listOf(4 to -3, -4 to 2, 3 to 4).withIndex()) for (dx in 0..1) for (dz in 0..1) c.set(p.first + dx, 1, p.second + dz, b(colours[(i + 1) % 4]))
+    }
+
+    private fun slimeMound(c: B) {
+        c.clear(6, 9)
+        c.floor(5, { dx, dz -> if ((dx * dx + dz * dz) % 4 == 0) b(Blocks.MOSS_BLOCK) else b(Blocks.MUD) }, b(Blocks.MUD))
+        for (dx in -3..3) for (dy in 0..5) for (dz in -3..3) {
+            val wob = (c.random.nextDouble() - 0.5) * 1.2
+            val d = dx * dx + dy * dy * 0.9 + dz * dz
+            if (d <= 11 + wob) c.set(dx, dy + 1, dz, b(Blocks.SLIME_BLOCK))
+        }
+        c.set(0, 2, 0, b(Blocks.OCHRE_FROGLIGHT)); c.set(1, 1, 0, b(Blocks.OCHRE_FROGLIGHT))
+    }
+
+    private fun greatBell(c: B) {
+        c.clear(5, 12)
+        c.floor(4, { dx, dz -> if ((dx + dz) % 2 == 0) b(Blocks.POLISHED_TUFF) else b(Blocks.TUFF_BRICKS) }, b(Blocks.TUFF))
+        // the frame
+        for (side in listOf(-3, 3)) c.column(side, 0, 1, 9, b(Blocks.TUFF_BRICK_WALL))
+        for (dx in -3..3) c.set(dx, 10, 0, b(Blocks.POLISHED_TUFF))
+        c.set(0, 9, 0, b(Blocks.CHAIN))
+        // a big bell of copper, open at the bottom, with a real bell under it to ring
+        for (dy in 0..3) {
+            val r = if (dy == 0) 0 else dy
+            for (dx in -r..r) for (dz in -r..r) if (abs(dx) == r || abs(dz) == r) c.set(dx, 8 - dy, dz, b(Blocks.CUT_COPPER))
+            if (dy == 0) c.set(0, 8, 0, b(Blocks.CUT_COPPER))
+        }
+        c.set(0, 1, 0, b(Blocks.BELL))
+        for ((dx, dz) in listOf(2 to 2, -2 to 2, 2 to -2, -2 to -2)) c.soft(dx, 1, dz, b(Blocks.AMETHYST_CLUSTER))
+    }
+
+    private fun windmill(c: B) {
+        c.clear(7, 18)
+        c.floor(4, { _, _ -> b(Blocks.GRASS_BLOCK) }, b(Blocks.DIRT))
+        for (dx in -2..2) for (dz in -2..2) if (abs(dx) == 2 || abs(dz) == 2) c.column(dx, dz, 1, 9, b(Blocks.SPRUCE_PLANKS))
+        for (dx in -2..2) for (dz in -2..2) c.set(dx, 10, dz, b(Blocks.SPRUCE_PLANKS))
+        for (dx in -1..1) for (dz in -1..1) c.set(dx, 11, dz, b(Blocks.SPRUCE_PLANKS))
+        c.set(0, 1, -2, b(Blocks.AIR)); c.set(0, 2, -2, b(Blocks.AIR))
+        // the sails, a cross of white wool on the front, held by a hub
+        c.set(0, 8, -3, b(Blocks.SPRUCE_LOG))
+        for (i in 1..6) {
+            c.set(i, 8, -4, b(Blocks.WHITE_WOOL)); c.set(-i, 8, -4, b(Blocks.WHITE_WOOL))
+            c.set(0, 8 + i, -4, b(Blocks.WHITE_WOOL))
+            if (8 - i >= 3) c.set(0, 8 - i, -4, b(Blocks.WHITE_WOOL))
+        }
+        c.set(0, 8, -4, b(Blocks.SPRUCE_LOG))
+    }
+
+    private fun crimsonAltar(c: B) {
+        c.clear(6, 10)
+        c.floor(5, { _, _ -> b(Blocks.CRIMSON_NYLIUM) }, b(Blocks.NETHERRACK))
+        for (dx in -3..3) for (dz in -3..3) if (abs(dx) <= 3 && abs(dz) <= 3) c.set(dx, 1, dz, b(Blocks.RED_NETHER_BRICKS))
+        for (dx in -2..2) for (dz in -2..2) c.set(dx, 2, dz, b(Blocks.RED_NETHER_BRICKS))
+        for ((dx, dz) in listOf(3 to 3, -3 to 3, 3 to -3, -3 to -3)) { c.column(dx, dz, 2, 4, b(Blocks.NETHER_WART_BLOCK)); c.set(dx, 6, dz, b(Blocks.SHROOMLIGHT)) }
+        c.set(0, 3, 0, b(Blocks.SHROOMLIGHT))
+        for (dx in -5..5) for (dz in -5..5) { val d = dx * dx + dz * dz; if (d in 18..30 && c.random.nextInt(2) == 0) c.soft(dx, 1, dz, b(Blocks.CRIMSON_ROOTS)) }
+    }
+
+    private fun sculkPortal(c: B) {
+        c.clear(7, 12)
+        c.floor(6, { dx, dz -> if ((dx * dx + dz * dz) < 20 || c.random.nextInt(3) == 0) b(Blocks.SCULK) else b(Blocks.DEEPSLATE_TILES) }, b(Blocks.DEEPSLATE))
+        // an ancient-city frame: deepslate tiles (decoration only; no shriekers)
+        for (dx in -4..4) for (dy in 1..8) {
+            val edge = abs(dx) >= 3 || dy >= 7
+            if (edge) c.set(dx, dy, 0, b(if (abs(dx) == 4 || dy == 8) Blocks.DEEPSLATE_TILES else Blocks.POLISHED_DEEPSLATE))
+        }
+        for (dx in listOf(-4, 4)) c.set(dx, 9, 0, b(Blocks.SOUL_LANTERN))
+        for ((dx, dz) in listOf(-3 to 3, 3 to -3, 2 to 3)) c.set(dx, 1, dz, b(Blocks.SCULK_CATALYST))
     }
 
     private fun palmIsland(c: B) {
