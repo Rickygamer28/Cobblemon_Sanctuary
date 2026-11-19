@@ -966,8 +966,11 @@ object BiomeDresser {
             }
             CustomTypes.Terrain.FLAT -> 1.4 + f(s, xd, zd, 40.0, 74, 2) * 0.4
         }
+        // where a route runs through, the ground eases down into a gentle pass (no staircase up a plateau or a crater's rim)
+        val rd = routeDistance(s, xd.toInt(), zd.toInt())
+        val eased = if (rd < 12) 1.5 + (h - 1.5) * (1 - 0.9 * smooth((12 - rd) / 9.0)) else h
         // (no lakes in them)
-        return h.coerceAtLeast(0.6)
+        return eased.coerceAtLeast(0.6)
     }
 
     /** Target height without pockets (a pocket is built at the height its surroundings have here). */
