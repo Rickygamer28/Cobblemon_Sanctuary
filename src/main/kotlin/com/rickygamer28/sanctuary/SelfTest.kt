@@ -352,6 +352,20 @@ object SelfTest {
                 if (st.`is`(BlockTags.LEAVES) || st.`is`(BlockTags.LOGS) && hit.zone != "water") continue
                 find("thing standing in the lake").add(s, x, yy, z, st.block.name.string); break
             }
+            // a route that climbs in steps (more than a block from one route column to the next)
+            if (BiomeDresser.routeDistance(s, x, z) < 1.3 && target >= water + 1) {
+                for (d in Direction.Plane.HORIZONTAL) {
+                    val nx = x + d.stepX
+                    val nz = z + d.stepZ
+                    if (BiomeDresser.routeDistance(s, nx, nz) >= 1.3) continue
+                    val nt = BiomeDresser.targetHeight(s, nx, nz, ZoneLayout.HABITATS)
+                    if (nt - target >= 2) {
+                        val pk = ZoneLayout.pocketAt(s, x, z)?.let { "${it.first.zone}${if (it.first.sub) "(sub)" else ""} d=${"%.0f".format(it.second)}/r${it.first.r}" } ?: "-"
+                        find("steep route").add(s, x, target, z, "$target->$nt toward ${ZoneLayout.locate(s, nx, nz)?.zone}; pocket $pk")
+                        break
+                    }
+                }
+            }
             // a lone pillar of ground
             if (ground >= target + 3 && !decorOnly) {
                 var lower = 0
