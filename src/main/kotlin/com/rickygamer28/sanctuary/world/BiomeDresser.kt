@@ -904,7 +904,10 @@ object BiomeDresser {
         if (r.dist >= ROUTE_BANK) return h
         val graded = routeProfile(s, r.zone, ring)?.at(r.along) ?: return h
         val w = smooth((ROUTE_BANK - r.dist) / (ROUTE_BANK - 1.5))
-        return mix(h.toDouble(), graded, w).roundToInt().coerceAtLeast(WATER_Y + 1)
+        var v = mix(h.toDouble(), graded, w).roundToInt().coerceAtLeast(WATER_Y + 1)
+        // (a cutting stops well above a cave under it, never opening it to the sky; a cave mouth is left as it is)
+        if (v < h) Caves.at(s, x, z)?.let { c -> v = if (c.mouth) h else max(v, min(h, c.ceil + 4)) }
+        return v
     }
 
     /** How far either side of a route the ground is eased towards its grade. */
