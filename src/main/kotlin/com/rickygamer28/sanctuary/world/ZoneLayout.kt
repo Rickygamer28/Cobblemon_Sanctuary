@@ -522,70 +522,66 @@ object ZoneLayout {
         if (type in s.customPockets || type in s.customSubs) pockets(s).firstOrNull { it.zone == type } else null
 
     /**
-     * The habitat [type]'s sub-biome goes in: the one the owner picked for it (a mountain too), or its home; when that's
-     * the town or the lake (or it's full), the gentlest habitat with room nearby.
+     * The habitats [type]'s sub-biome can go in, best first: the one the owner picked for it (a mountain too), or its
+     * home; then (the town, the lake, or no room) the gentle habitats, nearest first.
      */
-    private fun subHost(s: Sanctuary, type: String, taken: Map<String, Int>): String? {
+    private fun subHosts(s: Sanctuary, type: String): List<String> {
         val home = CustomTypes.zoneFor(s, type)
-        val picked = CustomTypes.choice(s, type)?.takeIf { it in HABITATS }
-        if (picked != null && picked != "water" && picked in s.habitats && (taken[picked] ?: 0) < 2) return picked
-        if (home in s.habitats && home in HABITATS && home !in STEEP && home != "water" && (taken[home] ?: 0) < 2) return home
-        val hb = s.habitats[home]
-        return HABITATS.filter { it in s.habitats && it !in STEEP && it != "water" && (taken[it] ?: 0) < 2 }
-            .minByOrNull { z -> (taken[z] ?: 0) * 10_000 - s.habitats[z]!!.size() + (if (hb != null) distance(s.habitats[z]!!.x, s.habitats[z]!!.z, hb.x, hb.z) * 0.5 else 0.0) }
+        val picked = CustomTypes.choice(s, type)?.takeIf { it in HABITATS && it != "water" && it in s.habitats }
+        val first = picked ?: home.takeIf { it in s.habitats && it in HABITATS && it !in STEEP && it != "water" }
+        val hb = s.habitats[first ?: home]
+        val gentle = HABITATS.filter { it in s.habitats && it !in STEEP && it != "water" && it != first }
+            .sortedBy { z -> if (hb != null) distance(s.habitats[z]!!.x, s.habitats[z]!!.z, hb.x, hb.z) - s.habitats[z]!!.size() * 0.3 else -s.habitats[z]!!.size() }
+        return listOfNotNull(first) + gentle
     }
 
     /**
      * The custom types' sub-biomes: districts on the sides of the habitat they're in, towards the front (near the
-     * town and the routes, away from the landmark in the middle and, on a mountain, from the high ground and the
-     * caves), growing with their Pokémon. Two can share a habitat, one on each side.
+     * town and the routes, away from the landmark in the middle and, on a mountain, from the high ground), clear of
+     * the caves, growing with their Pokémon. Two can share a habitat, one on each side.
      */
     private fun subBiomes(s: Sanctuary): List<Pocket> {
-        val taken = HashMap<String, Int>()
-        val hostOf = LinkedHashMap<String, String>()
-        for (t in s.customSubs.keys.sorted()) {
-            if (t in s.habitats) continue
-            val host = subHost(s, t, taken) ?: continue
-            hostOf[t] = host
-            taken[host] = (taken[host] ?: 0) + 1
-        }
         val out = ArrayList<Pocket>()
-        for ((host, types) in hostOf.entries.groupBy({ it.value }, { it.key })) {
-            val hb = s.habitats[host] ?: continue
-            val ux = sin(hb.angle)
-            val uz = -cos(hb.angle)
-            val steep = host in STEEP
-            val usedSides = HashSet<Int>()
-            types.forEachIndexed { i, t ->
-                val grow = (s.customSubs[t] ?: 0.0).coerceIn(0.0, 1.0)
+        // (which sides of each habitat are taken)
+        val sides = HashMap<String, MutableSet<Int>>()
+        for ((n, t) in s.customSubs.keys.sorted().withIndex()) {
+            if (t in s.habitats) continue
+            val grow = (s.customSubs[t] ?: 0.0).coerceIn(0.0, 1.0)
+            var placed: Pocket? = null
+            for (host in subHosts(s, t)) {
+                val used = sides.getOrPut(host) { HashSet() }
+                if (used.size >= 2) continue
+                val hb = s.habitats[host] ?: continue
+                val ux = sin(hb.angle)
+                val uz = -cos(hb.angle)
+                val steep = host in STEEP
                 // a quarter of the habitat's size to start with, up to two fifths
                 val full = min(hb.size() * (0.25 + 0.15 * grow), min(hb.radial, hb.along) * 0.5)
-                // a spot on one side, a little towards the town (on a mountain, further down its front)
-                fun spot(side: Int, r: Double): Pair<Double, Double> {
-                    val lateral = (hb.along - r * 0.9 - 4).coerceAtLeast(r + 14.0)
-                    val radialOff = -hb.radial * (if (steep) 0.3 else 0.12)
-                    return (hb.x + ux * radialOff + cos(hb.angle) * lateral * side) to (hb.z + uz * radialOff + sin(hb.angle) * lateral * side)
-                }
-                // clear of the caves and their mouths, all the way round
+                // clear of the caves and their mouths, all the way round, and of the other sub-biomes
                 fun clear(x: Double, z: Double, r: Double): Boolean = (0..8).all { k ->
                     val px = if (k == 8) x else x + cos(k * PI / 4) * r * 0.85
                     val pz = if (k == 8) z else z + sin(k * PI / 4) * r * 0.85
                     Caves.cover(s, px.toInt(), pz.toInt()) < 0.3 && Caves.apron(s, px.toInt(), pz.toInt(), only = null) <= 0.0
-                }
-                var placed: Pocket? = null
-                for (r in listOf(full, full * 0.75, full * 0.55)) {
-                    for (side in (if (i == 0) listOf(-1, 1) else listOf(1, -1))) {
-                        if (side in usedSides) continue
-                        val (x, z) = spot(side, r)
-                        if (!clear(x, z, r)) continue
-                        placed = Pocket(x.toInt(), z.toInt(), r.toInt().coerceAtLeast(12), t, host, 700 + i, sub = true)
-                        usedSides += side
-                        break
+                } && out.none { distance(it.x, it.z, x.toInt(), z.toInt()) < it.r + r + 10 }
+                // a side, a little towards the town (on a mountain further down its front), then other spots along that side
+                val fronts = if (steep) listOf(-0.3, -0.12, 0.08, 0.25) else listOf(-0.12, 0.05, -0.3)
+                search@ for (r in listOf(full, full * 0.75, full * 0.55, full * 0.4).map { it.coerceAtLeast(12.0) }.distinct()) {
+                    for (side in listOf(-1, 1).let { if (n % 2 == 1) it.reversed() else it }) {
+                        if (side in used) continue
+                        for (front in fronts) for (reach in listOf(1.0, 0.75)) {
+                            val lateral = ((hb.along - r * 0.9 - 4) * reach).coerceAtLeast(r + 14.0)
+                            val x = hb.x + ux * hb.radial * front + cos(hb.angle) * lateral * side
+                            val z = hb.z + uz * hb.radial * front + sin(hb.angle) * lateral * side
+                            if (!clear(x, z, r)) continue
+                            placed = Pocket(x.toInt(), z.toInt(), r.toInt(), t, host, 700 + n, sub = true)
+                            used += side
+                            break@search
+                        }
                     }
-                    if (placed != null) break
                 }
-                placed?.let { out += it }
+                if (placed != null) break
             }
+            placed?.let { out += it }
         }
         return out
     }
