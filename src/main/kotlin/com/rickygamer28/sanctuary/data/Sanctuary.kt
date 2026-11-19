@@ -213,6 +213,8 @@ class Sanctuary(
     val customPockets: MutableSet<String> = sortedSetOf()
     /** Custom types with a sub-biome inside a habitat, and how far it has grown (0..1, towards a habitat of its own). */
     val customSubs: MutableMap<String, Double> = sortedMapOf()
+    /** Which shape the custom types' ground was last built with (an update that changes it builds them again once). */
+    var customTerrain = 0
     /** How many residents each custom type has (worked out with the roster; not saved). */
     var customCounts: Map<String, Int> = emptyMap()
     /** Custom types that are ready for a habitat of their own but found no room (until the next Reshape; not saved). */
@@ -356,6 +358,7 @@ class Sanctuary(
         t.put("CustomHomes", homes)
         t.put("CustomPockets", ListTag().also { l -> customPockets.forEach { l.add(StringTag.valueOf(it)) } })
         t.put("CustomSubs", CompoundTag().also { c -> customSubs.forEach { (k, v) -> c.putDouble(k, v) } })
+        t.putInt("CustomTerrain", customTerrain)
         val eggList = ListTag()
         eggs.values.forEach { eggList.add(it.save()) }
         t.put("Eggs", eggList)
@@ -546,6 +549,7 @@ class Sanctuary(
             homes.allKeys.forEach { k -> s.customHomes[k] = homes.getString(k) }
             t.getList("CustomPockets", 8).forEach { s.customPockets += it.asString }
             t.getCompound("CustomSubs").let { c -> c.allKeys.forEach { k -> s.customSubs[k] = c.getDouble(k) } }
+            s.customTerrain = t.getInt("CustomTerrain")
             if (version in 1..20 && s.dens.isNotEmpty()) com.rickygamer28.sanctuary.world.Dens.demolishAll(s)
             if (version in 1..20) s.variants[com.rickygamer28.sanctuary.world.ZoneLayout.HUB] = 0
             return s

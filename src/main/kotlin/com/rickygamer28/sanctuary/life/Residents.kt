@@ -110,6 +110,8 @@ class SanctuaryRuntime(val id: UUID) {
 }
 
 object Residents {
+    /** The custom types' ground shape now (see Sanctuary.customTerrain). */
+    private const val CUSTOM_TERRAIN = 2
     private val runtimes = HashMap<UUID, SanctuaryRuntime>()
 
     fun runtime(s: Sanctuary): SanctuaryRuntime = runtimes.getOrPut(s.id) { SanctuaryRuntime(s.id) }
@@ -284,6 +286,14 @@ object Residents {
         }
         shrinkCustom(s, customCounts)
         updatePockets(s, customCounts)
+        // the custom types' ground got a new shape (gentle passes where the routes run): built again, once
+        if (s.customTerrain < CUSTOM_TERRAIN) {
+            s.customTerrain = CUSTOM_TERRAIN
+            for (zone in s.habitats.keys) if (com.rickygamer28.sanctuary.world.CustomTypes.isCustom(zone)) s.rebuildZones += zone
+            for (p in ZoneLayout.pockets(s)) if (com.rickygamer28.sanctuary.world.CustomTypes.isCustom(p.zone))
+                s.rebuildZones += if (p.sub) "circle:${p.x},${p.z},${p.r + 6}" else "pocket:${p.x},${p.z}"
+            s.generationDirty = true
+        }
     }
 
     /**
