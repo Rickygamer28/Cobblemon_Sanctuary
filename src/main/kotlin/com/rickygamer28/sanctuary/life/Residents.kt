@@ -107,6 +107,11 @@ class SanctuaryRuntime(val id: UUID) {
     val scenes = ArrayList<Scene>()
     var anchors: Map<String, Pair<Int, Int>> = emptyMap()
     var outlineUntil = 0L
+    /** The roster being counted by type, a slice a second on big rosters (null when it's done), and how far it got. */
+    var counting: List<RosterEntry>? = null
+    var countedTo = 0
+    val countsSoFar = HashMap<String, Int>()
+    val customSoFar = HashMap<String, Int>()
 }
 
 object Residents {
@@ -125,7 +130,7 @@ object Residents {
         val players = playersNear(level, s)
 
         if (s.state == SanctuaryState.PREVIEW) {
-            if (now % 100L == 0L) refreshRoster(level, s, rt, now)
+            if (now % 100L == 0L) refreshRoster(level, s, rt, now) else if (now % 20L == 0L && rt.counting != null) countSlice(level, s, rt, COUNT_SLICE)
             return
         }
 
@@ -141,7 +146,9 @@ object Residents {
         LoadGuard.building = SanctuaryGenerator.isGrowing(s)
         LoadGuard.tick(level.server, now)
 
-        if (rt.rosterDirty || now - rt.rosterAt > 200) refreshRoster(level, s, rt, now)
+        // (a big roster is counted a slice a second rather than all at once)
+        if (rt.counting != null && !rt.rosterDirty) countSlice(level, s, rt, COUNT_SLICE)
+        else if (rt.rosterDirty || now - rt.rosterAt > 200) refreshRoster(level, s, rt, now)
         cleanUp(rt)
         Gathering.tick(level, s, rt, now)
         Growth.tick(level, s, rt, now)
@@ -205,15 +212,36 @@ object Residents {
             Sanctuaries.data(level).setDirty()
         }
 
-        val ring = ZoneLayout.zonesOf(s)
-        val counts = HashMap<String, Int>()
-        // custom types (other mods'): how many Pokémon each has, for giving it a habitat of its own
-        val customCounts = HashMap<String, Int>()
-        for (e in list) {
+        // counting them by type: all at once for a usual roster, a slice a second for a big one
+        rt.counting = list
+        rt.countedTo = 0
+        rt.countsSoFar.clear()
+        rt.customSoFar.clear()
+        countSlice(level, s, rt, if (list.size <= COUNT_SLICE * 2) Int.MAX_VALUE else COUNT_SLICE)
+    }
+
+    /** Residents counted by type per second, on a big roster. */
+    private const val COUNT_SLICE = 300
+
+    /** Counts the next [budget] residents by type; when all are counted, the habitats are updated. */
+    private fun countSlice(level: ServerLevel, s: Sanctuary, rt: SanctuaryRuntime, budget: Int) {
+        val list = rt.counting ?: return
+        val end = if (budget == Int.MAX_VALUE) list.size else minOf(list.size, rt.countedTo + budget)
+        for (i in rt.countedTo until end) {
+            val e = list[i]
             val types = runCatching { TypeLogic.zoneTypes(e.pokemon, s) }.getOrDefault(emptyList())
-            for (t in types.toSet()) counts[t] = (counts[t] ?: 0) + 1
-            for (t in runCatching { TypeLogic.customTypes(e.pokemon) }.getOrDefault(emptyList()).toSet()) customCounts[t] = (customCounts[t] ?: 0) + 1
+            for (t in types.toSet()) rt.countsSoFar[t] = (rt.countsSoFar[t] ?: 0) + 1
+            // custom types (other mods'): how many Pokémon each has, for giving it a place of its own
+            for (t in runCatching { TypeLogic.customTypes(e.pokemon) }.getOrDefault(emptyList()).toSet()) rt.customSoFar[t] = (rt.customSoFar[t] ?: 0) + 1
         }
+        rt.countedTo = end
+        if (end < list.size) return
+        rt.counting = null
+        countsDone(level, s, rt, list, HashMap(rt.countsSoFar), HashMap(rt.customSoFar))
+    }
+
+    private fun countsDone(level: ServerLevel, s: Sanctuary, rt: SanctuaryRuntime, list: List<RosterEntry>, counts: HashMap<String, Int>, customCounts: HashMap<String, Int>) {
+        val ring = ZoneLayout.zonesOf(s)
         s.customCounts = customCounts
         val unlocked = linkedSetOf(ZoneLayout.HUB) + counts.keys.filter { it in ring } + s.customPockets + s.customSubs.keys
         val newTypes = unlocked - s.unlocked

@@ -67,7 +67,10 @@ object SanctuaryGuis {
 
     fun send(player: ServerPlayer, s: Sanctuary, page: String, pokemon: UUID? = null, open: Boolean = false) {
         val rt = Residents.runtime(s)
-        SanctuaryDimension.level(player.server)?.let { if (rt.roster.isEmpty() || page != "resident") Residents.refreshRoster(it, s, rt, it.gameTime) }
+        // (the roster is fresh enough if it was read in the last couple of seconds, or is still being counted)
+        SanctuaryDimension.level(player.server)?.let {
+            if (rt.roster.isEmpty() || (page != "resident" && rt.counting == null && it.gameTime - rt.rosterAt > 40)) Residents.refreshRoster(it, s, rt, it.gameTime)
+        }
         val t = CompoundTag()
         t.putBoolean("open", open)
         t.putString("page", page)
