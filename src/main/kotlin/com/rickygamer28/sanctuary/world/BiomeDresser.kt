@@ -892,7 +892,76 @@ object BiomeDresser {
         return h
     }
 
+    /**
+     * The height, with the routes graded: a route follows a smoothed line of the ground along it (never more than a
+     * block's step from one block to the next), cutting through high ground and banking up over dips, with gentle
+     * shoulders either side. Not over the lake.
+     */
     private fun computeHeight(s: Sanctuary, x: Int, z: Int, ring: List<String>): Int {
+        val h = shapedHeight(s, x, z, ring)
+        if (h < WATER_Y + 1) return h
+        val r = routeAt(s, x, z) ?: return h
+        if (r.dist >= ROUTE_BANK) return h
+        val graded = routeProfile(s, r.zone, ring)?.at(r.along) ?: return h
+        val w = smooth((ROUTE_BANK - r.dist) / (ROUTE_BANK - 1.5))
+        return mix(h.toDouble(), graded, w).roundToInt().coerceAtLeast(WATER_Y + 1)
+    }
+
+    /** How far either side of a route the ground is eased towards its grade. */
+    private const val ROUTE_BANK = 6.0
+
+    /** A route's graded heights, a block apart from its start. */
+    private class RouteProfile(val start: Double, val h: DoubleArray) {
+        fun at(along: Double): Double? {
+            if (h.isEmpty()) return null
+            val t = (along - start).coerceIn(0.0, (h.size - 1).toDouble())
+            val i = t.toInt().coerceAtMost(h.size - 2).coerceAtLeast(0)
+            return if (h.size == 1) h[0] else h[i] + (h[(i + 1).coerceAtMost(h.size - 1)] - h[i]) * (t - i)
+        }
+    }
+
+    private val routeProfiles = HashMap<String, RouteProfile>()
+    private var routeProfileKey = Long.MIN_VALUE
+
+    private fun routeProfile(s: Sanctuary, zone: String, ring: List<String>): RouteProfile? {
+        var k = s.id.hashCode() * 31L + s.layoutSalt * 1_000_003L + s.size.radius * 31L + s.unlocked.hashCode() * 7L + s.center.hashCode() +
+            s.looksKey() * 13L + s.landmarks.hashCode() * 3L + s.customSubs.hashCode() * 5L + s.customPockets.hashCode() * 11L +
+            (if (SanctuaryConfig.reshapeTerrain.get()) 1 else 0) + (if (SanctuaryConfig.caves.get()) 2 else 0)
+        for ((z, hb) in s.habitats) k = k * 31 + z.hashCode() + hb.x * 131L + hb.z * 17L + (hb.radial * 7).toLong() + (hb.along * 3).toLong()
+        if (k != routeProfileKey) { routeProfiles.clear(); routeProfileKey = k }
+        routeProfiles[zone]?.let { return it }
+        val hb = s.habitats[zone] ?: return null
+        val l = routeLine(s, zone, hb)
+        val n = (l.end - l.start).toInt() + 1
+        if (n < 2) return null
+        // the ground along the route's middle line (the lake counts as its shore's height)
+        val raw = DoubleArray(n) { i ->
+            val a = l.start + i
+            val b = bend(s, l, a)
+            val x = s.center.x + l.ux * a + l.uz * b
+            val z = s.center.z + l.uz * a - l.ux * b
+            max(shapedHeight(s, x.roundToInt(), z.roundToInt(), ring).toDouble(), WATER_Y + 1.0)
+        }
+        // smoothed over ±10 blocks, then no steeper than one block up in two
+        val win = 10
+        val g = DoubleArray(n) { i ->
+            var sum = 0.0
+            var c = 0
+            for (j in (i - win).coerceAtLeast(0)..(i + win).coerceAtMost(n - 1)) { sum += raw[j]; c++ }
+            sum / c
+        }
+        // (the start keeps the town's height and the end the landmark's: the route arrives level with them)
+        g[0] = raw[0]
+        g[n - 1] = raw[n - 1]
+        val grade = 0.55
+        repeat(2) {
+            for (i in 1 until n) g[i] = g[i].coerceIn(g[i - 1] - grade, g[i - 1] + grade)
+            for (i in n - 2 downTo 0) g[i] = g[i].coerceIn(g[i + 1] - grade, g[i + 1] + grade)
+        }
+        return RouteProfile(l.start, g).also { routeProfiles[zone] = it }
+    }
+
+    private fun shapedHeight(s: Sanctuary, x: Int, z: Int, ring: List<String>): Int {
         val base = baseHeight(s, x, z, ring)
         val (p, d) = ZoneLayout.pocketAt(s, x, z) ?: return base
         if (!p.live(s)) return base
@@ -1434,30 +1503,43 @@ object BiomeDresser {
         routeDistance(s, x, z) < 1.3
 
     /** How far (x, z) is from the nearest route (a large number when there's none nearby). */
-    fun routeDistance(s: Sanctuary, x: Int, z: Int): Double {
-        var best = 99.0
+    fun routeDistance(s: Sanctuary, x: Int, z: Int): Double = routeAt(s, x, z)?.dist ?: 99.0
+
+    /** The nearest route to (x, z): which habitat it leads to, how far along it from the middle, and how far off it. */
+    class RouteHit(val zone: String, val along: Double, val dist: Double)
+
+    /** Where a route runs: its line from the middle of the valley out to its habitat's landmark, bent by noise. */
+    private class RouteLine(val ux: Double, val uz: Double, val start: Double, val end: Double, val i: Int, val anchorDist: Double)
+
+    private fun routeLine(s: Sanctuary, zone: String, hb: ZoneLayout.Habitat): RouteLine {
+        // the route ends at the landmark (which stays where it was built)
+        val mark = s.landmarks[zone]?.takeIf { it != Landmarks.NONE && zone != "fire" }?.let { BlockPos.of(it) }
+        val ax = mark?.x ?: hb.x
+        val az = mark?.z ?: hb.z
+        val adx = (ax - s.center.x).toDouble()
+        val adz = (az - s.center.z).toDouble()
+        val anchorDist = sqrt(adx * adx + adz * adz)
+        val len = anchorDist.coerceAtLeast(1.0)
+        val i = ZoneLayout.HABITATS.indexOf(zone).let { if (it >= 0) it else 40 + (zone.hashCode() and 63) }
+        return RouteLine(adx / len, adz / len, s.size.hubRadius - 5.0, anchorDist - 3, i, anchorDist)
+    }
+
+    /** How far the route bends off its straight line [along] it. */
+    private fun bend(s: Sanctuary, l: RouteLine, along: Double): Double =
+        (Noise.value(s.seed + 909 + l.i, along / 26.0, 0.5) - 0.5) * 22 * smooth((along - s.size.hubRadius) / 20.0) * smooth((l.anchorDist - along) / 14.0)
+
+    fun routeAt(s: Sanctuary, x: Int, z: Int): RouteHit? {
+        var best: RouteHit? = null
         for ((zone, hb) in s.habitats) {
             if (zone !in s.unlocked) continue
-            // the route ends at the landmark (which stays where it was built)
-            val mark = s.landmarks[zone]?.takeIf { it != Landmarks.NONE && zone != "fire" }?.let { BlockPos.of(it) }
-            val ax = mark?.x ?: hb.x
-            val az = mark?.z ?: hb.z
-            val adx = (ax - s.center.x).toDouble()
-            val adz = (az - s.center.z).toDouble()
-            // up a volcano, the route ends at its foot
-            val anchorDist = sqrt(adx * adx + adz * adz)
-            val len = anchorDist.coerceAtLeast(1.0)
-            val ux = adx / len
-            val uz = adz / len
+            val l = routeLine(s, zone, hb)
             val px = (x - s.center.x).toDouble()
             val pz = (z - s.center.z).toDouble()
-            val along = px * ux + pz * uz
-            if (along < s.size.hubRadius - 5 || along > anchorDist - 3) continue
-            val side = px * uz - pz * ux
-            // bent by noise so the route winds
-            val i = ZoneLayout.HABITATS.indexOf(zone).let { if (it >= 0) it else 40 + (zone.hashCode() and 63) }
-            val bend = (Noise.value(s.seed + 909 + i, along / 26.0, 0.5) - 0.5) * 22 * smooth((along - s.size.hubRadius) / 20.0) * smooth((anchorDist - along) / 14.0)
-            best = min(best, abs(side - bend))
+            val along = px * l.ux + pz * l.uz
+            if (along < l.start || along > l.end) continue
+            val side = px * l.uz - pz * l.ux
+            val d = abs(side - bend(s, l, along))
+            if (best == null || d < best.dist) best = RouteHit(zone, along, d)
         }
         return best
     }
