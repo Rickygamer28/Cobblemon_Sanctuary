@@ -49,6 +49,9 @@ object Behaviour {
     fun tickSecond(level: ServerLevel, s: Sanctuary, rt: SanctuaryRuntime, now: Long) {
         val random = level.random
         val residents = rt.live.values.toList()
+        // where the players are (once a second, not once per resident)
+        val seers = level.players().map { it.x to it.z }
+        fun seen(x: Double, z: Double) = seers.any { (px, pz) -> (x - px) * (x - px) + (z - pz) * (z - pz) < 48.0 * 48.0 }
 
         for (r in residents) {
             val e = r.entity
@@ -107,6 +110,9 @@ object Behaviour {
 
             if (Residents.isSleeping(e)) continue
             if (PropVisits.shyness(level, s, rt, r, now)) continue
+            // away from the players, residents pick somewhere new to walk half as often (finding a way there is the
+            // costly part); everything they do together (play-fights, meetings, flocks, routines) goes on as usual
+            if (!seen(e.x, e.z) && random.nextInt(2) == 0) continue
 
             // wander off for a while: into a neighbouring habitat or out over the meadows and routes
             if (wander(level, s, r, now)) continue
