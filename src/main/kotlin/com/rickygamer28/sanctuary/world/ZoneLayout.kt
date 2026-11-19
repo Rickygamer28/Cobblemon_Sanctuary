@@ -561,11 +561,11 @@ object ZoneLayout {
                 // mouths and (off the mountains, where it may dig a hollow) of the caves, and of the other sub-biomes
                 fun clear(x: Double, z: Double, r: Double): Boolean = (0..16).all { k ->
                     val far = k >= 8
-                    val a = (k % 8) * PI / 4
-                    val px = (if (k == 16) x else x + cos(a) * r * (if (far) 1.1 else 0.85)).toInt()
-                    val pz = (if (k == 16) z else z + sin(a) * r * (if (far) 1.1 else 0.85)).toInt()
+                    val a = (k % 8) * PI / 4 + (if (far) PI / 8 else 0.0)
+                    val px = (if (k == 16) x else x + cos(a) * r * (if (far) 1.0 else 0.8)).toInt()
+                    val pz = (if (k == 16) z else z + sin(a) * r * (if (far) 1.0 else 0.8)).toInt()
                     val hit = locate(s, px, pz)
-                    hit != null && hit.zone == host && hit.edgeDistance > 4 &&
+                    hit != null && hit.zone == host && (!far || hit.edgeDistance > 1) &&
                         (far || (Caves.apron(s, px, pz, only = null) <= 0.0 && (steep || Caves.cover(s, px, pz) < 0.3)))
                 } && out.none { distance(it.x, it.z, x.toInt(), z.toInt()) < it.r + r + 10 }
                 // a side, a little towards the town (on a mountain further down its front), then other spots along that side
@@ -573,8 +573,9 @@ object ZoneLayout {
                 search@ for (r in listOf(full, full * 0.75, full * 0.55, full * 0.4).map { it.coerceAtLeast(12.0) }.distinct()) {
                     for (side in listOf(-1, 1).let { if (n % 2 == 1) it.reversed() else it }) {
                         if (side in used) continue
-                        for (front in fronts) for (reach in listOf(1.0, 0.75)) {
-                            val lateral = ((hb.along - r * 0.9 - 4) * reach).coerceAtLeast(r + 14.0)
+                        for (front in fronts) for (reach in listOf(1.0, 0.8, 0.6)) {
+                            // (well inside its border, which wobbles; and clear of the landmark in the middle)
+                            val lateral = ((hb.along - r * 1.1 - 10) * reach).coerceAtLeast(r + 12.0)
                             val x = hb.x + ux * hb.radial * front + cos(hb.angle) * lateral * side
                             val z = hb.z + uz * hb.radial * front + sin(hb.angle) * lateral * side
                             if (!clear(x, z, r)) continue
