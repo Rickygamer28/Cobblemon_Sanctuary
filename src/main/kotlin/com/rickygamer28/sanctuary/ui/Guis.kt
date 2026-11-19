@@ -63,10 +63,79 @@ object SanctuaryGuis {
 
     fun openResident(player: ServerPlayer, s: Sanctuary, pokemon: UUID) = send(player, s, "resident", pokemon, open = true)
 
+    // ------------------------------------------------------------------ the residents list, a window at a time
+
+    /** What a player's Residents tab shows: filters, search, and where in the list they are. */
+    class ListQuery(val offset: Int = 0, val zone: String = "", val type: String = "", val mine: Boolean = false, val q: String = "")
+
+    private val queries = HashMap<UUID, ListQuery>()
+
+    fun setQuery(player: ServerPlayer, v: String) {
+        val p = v.split('\t')
+        queries[player.uuid] = ListQuery(p.getOrNull(0)?.toIntOrNull() ?: 0, p.getOrNull(1) ?: "", p.getOrNull(2) ?: "", p.getOrNull(3) == "1", p.getOrNull(4)?.lowercase()?.trim() ?: "")
+    }
+
+    /** A resident, ready for filtering and sorting (made once per roster read). */
+    private class Row(val e: com.rickygamer28.sanctuary.life.RosterEntry, val name: String, val species: String, val home: String, val types: List<String>)
+
+    private val rows = HashMap<UUID, Pair<Long, List<Row>>>()
+
+    private fun rowsOf(s: Sanctuary, rt: com.rickygamer28.sanctuary.life.SanctuaryRuntime, ring: List<String>): List<Row> {
+        rows[s.id]?.takeIf { it.first == rt.rosterAt }?.let { return it.second }
+        val list = rt.roster.map { e ->
+            val pk = e.pokemon
+            Row(e, (pk.nickname?.string ?: pk.species.name).lowercase(), pk.species.resourceIdentifier.path,
+                runCatching { TypeLogic.homeZone(pk, s.residents[pk.uuid], ring, s) }.getOrNull() ?: "",
+                runCatching { TypeLogic.currentTypes(pk) }.getOrDefault(emptyList()))
+        }.sortedWith(compareBy({ it.home }, { it.name }))
+        rows[s.id] = rt.rosterAt to list
+        return list
+    }
+
+    /** How many residents are sent at a time; the screen asks for the next stretch as it's scrolled. */
+    private const val WINDOW = 150
+
+    private fun residentsWindow(player: ServerPlayer, s: Sanctuary, rt: com.rickygamer28.sanctuary.life.SanctuaryRuntime, ring: List<String>, t: CompoundTag) {
+        val q = queries[player.uuid] ?: ListQuery()
+        val all = rowsOf(s, rt, ring)
+        val shown = all.filter { r ->
+            (q.zone.isEmpty() || r.home == q.zone) && (!q.mine || r.e.pokemon.getOwnerUUID() == player.uuid) && (q.type.isEmpty() || q.type in r.types) &&
+                (q.q.isEmpty() || r.name.contains(q.q) || r.species.contains(q.q) || r.types.any { it.contains(q.q) })
+        }
+        val from = q.offset.coerceIn(0, maxOf(0, shown.size - 1))
+        t.putInt("monsTotal", shown.size)
+        t.putInt("monsAll", all.size)
+        t.putInt("monsFrom", from)
+        t.putString("monsKey", "${q.zone}\t${q.type}\t${q.mine}\t${q.q}")
+        // (what the filters offer: every home and every type, with how many)
+        t.put("monsZones", CompoundTag().also { c -> all.groupingBy { it.home }.eachCount().forEach { (k, n) -> c.putInt(k, n) } })
+        t.put("monsTypes", CompoundTag().also { c -> all.flatMap { it.types }.groupingBy { it }.eachCount().forEach { (k, n) -> c.putInt(k, n) } })
+        t.put("mons", ListTag().also { list ->
+            for (r in shown.subList(from, minOf(shown.size, from + WINDOW))) {
+                val pk = r.e.pokemon
+                list.add(CompoundTag().also {
+                    it.putUUID("u", pk.uuid)
+                    it.putString("sp", pk.species.resourceIdentifier.toString())
+                    it.put("as", ListTag().also { a -> pk.aspects.forEach { x -> a.add(StringTag.valueOf(x)) } })
+                    it.putString("n", json(player, pk.getDisplayName(false)))
+                    it.putInt("l", pk.level)
+                    it.putString("h", r.home)
+                    it.putBoolean("o", rt.live.containsKey(pk.uuid))
+                    it.putBoolean("m", pk.getOwnerUUID() == player.uuid)
+                    it.putBoolean("sh", pk.shiny)
+                    it.putString("tr", r.e.ownerName)
+                    it.put("t", ListTag().also { l -> r.types.forEach { x -> l.add(StringTag.valueOf(x)) } })
+                })
+            }
+        })
+    }
+
     fun close(player: ServerPlayer) = SanctuaryNet.send(player, CompoundTag().also { it.putBoolean("close", true) })
 
     fun send(player: ServerPlayer, s: Sanctuary, page: String, pokemon: UUID? = null, open: Boolean = false) {
         val rt = Residents.runtime(s)
+        // (a freshly opened screen starts with no filters)
+        if (open) queries.remove(player.uuid)
         // (the roster is fresh enough if it was read in the last couple of seconds, or is still being counted)
         SanctuaryDimension.level(player.server)?.let {
             if (rt.roster.isEmpty() || (page != "resident" && rt.counting == null && it.gameTime - rt.rosterAt > 40)) Residents.refreshRoster(it, s, rt, it.gameTime)
@@ -200,26 +269,7 @@ object SanctuaryGuis {
         t.putBoolean("eggsOn", com.rickygamer28.sanctuary.SanctuaryConfig.eggsEnabled.get())
         t.put("eggs", eggs(player, s, ring))
 
-        if (page == "residents") {
-            t.put("mons", ListTag().also { list ->
-                for (e in rt.roster.take(2000)) {
-                    val pk = e.pokemon
-                    list.add(CompoundTag().also {
-                        it.putUUID("u", pk.uuid)
-                        it.putString("sp", pk.species.resourceIdentifier.toString())
-                        it.put("as", ListTag().also { a -> pk.aspects.forEach { x -> a.add(StringTag.valueOf(x)) } })
-                        it.putString("n", json(player, pk.getDisplayName(false)))
-                        it.putInt("l", pk.level)
-                        it.putString("h", TypeLogic.homeZone(pk, s.residents[pk.uuid], ring, s) ?: "")
-                        it.putBoolean("o", rt.live.containsKey(pk.uuid))
-                        it.putBoolean("m", pk.getOwnerUUID() == player.uuid)
-                        it.putBoolean("sh", pk.shiny)
-                        it.putString("tr", e.ownerName)
-                        it.put("t", ListTag().also { l -> TypeLogic.currentTypes(pk).forEach { x -> l.add(StringTag.valueOf(x)) } })
-                    })
-                }
-            })
-        }
+        if (page == "residents") residentsWindow(player, s, rt, ring, t)
         if (page == "resident" && pokemon != null) {
             val pk = rt.live[pokemon]?.pokemon ?: Residents.findRoster(rt, pokemon)?.pokemon
             if (pk != null) t.put("mon", detail(player, s, pk, ring))
@@ -358,6 +408,8 @@ object ScreenActions {
 
         when (t.getString("a")) {
             "view" -> refresh()
+            // the Residents tab's filters, search and scroll position: the matching stretch of the list
+            "list" -> { SanctuaryGuis.setQuery(player, v); refresh("residents") }
             "size" -> {
                 if (ownerOnly() && s.state == SanctuaryState.PREVIEW) runCatching { SanctuarySize.valueOf(v) }.getOrNull()?.let { Sanctuaries.setSize(s, player, it) }
                 refresh("create")

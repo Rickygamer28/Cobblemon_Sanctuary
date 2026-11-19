@@ -87,7 +87,17 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
     private var data: CompoundTag = initial
     val sanctuaryId: String = initial.getString("id")
     private var tab: String = initial.getString("page").let { if (it == "members" || it.isEmpty()) "home" else it }
+    /** The stretch of the (filtered, sorted) residents list the server sent: from [monsFrom], of [monsTotal] matching. */
     private var mons: List<Mon> = emptyList()
+    private var monsFrom = 0
+    private var monsTotal = 0
+    private var monsAll = 0
+    private var monsLoaded = false
+    private var monsZones: Map<String, Int> = emptyMap()
+    private var monsTypes: Map<String, Int> = emptyMap()
+    /** The last stretch asked for (so it's asked once), and when the search was last typed in. */
+    private var monsAsked = ""
+    private var searchTypedAt = -1
     private var biomes: List<Biome> = emptyList()
     private var eggs: List<Egg> = emptyList()
     private var confirmDiscard: UUID? = null
@@ -162,7 +172,13 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
                 val sp = ResourceLocation.tryParse(m.getString("sp")) ?: return@mapNotNull null
                 Mon(m.getUUID("u"), sp, strings(m.getList("as", Tag.TAG_STRING.toInt())).toSet(), text(m.getString("n")), m.getInt("l"),
                     m.getString("h"), m.getBoolean("o"), m.getBoolean("m"), m.getBoolean("sh"), m.getString("tr"), strings(m.getList("t", Tag.TAG_STRING.toInt())))
-            }.sortedWith(compareBy({ it.home }, { it.name }))
+            }
+            monsFrom = tag.getInt("monsFrom")
+            monsTotal = tag.getInt("monsTotal")
+            monsAll = tag.getInt("monsAll")
+            monsLoaded = true
+            monsZones = tag.getCompound("monsZones").let { c -> c.allKeys.associateWith { c.getInt(it) } }
+            monsTypes = tag.getCompound("monsTypes").let { c -> c.allKeys.associateWith { c.getInt(it) } }
         }
         val bl = tag.getList("biomes", Tag.TAG_COMPOUND.toInt())
         biomes = (0 until bl.size).map { i ->
@@ -230,7 +246,7 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
         tab = next
         scroll = 0.0
         when (next) {
-            "residents" -> send("view", page = "residents")
+            "residents" -> { monsAsked = ""; askList(0) }
             "resident" -> detailId?.let { send("view", pokemon = it, page = "resident") }
             else -> send("view", page = next)
         }
@@ -259,7 +275,7 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
         search.setBordered(false)
         search.setTextColor(TEXT)
         search.value = old
-        search.setResponder { scroll = 0.0 }
+        search.setResponder { scroll = 0.0; searchTypedAt = ticks }
         addWidget(search)
         portrait = null
         portraitKey = null
@@ -267,6 +283,8 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
 
     override fun tick() {
         ticks++
+        // (the search is sent a moment after typing stops)
+        if (searchTypedAt >= 0 && ticks - searchTypedAt >= 5) { searchTypedAt = -1; if (tab == "residents") askList(0) }
         if (toastTicks > 0) toastTicks--
         if (ticks % 100 == 0 && (tab == "home" || tab == "resident")) {
             if (tab == "resident") detailId?.let { send("view", pokemon = it, page = "resident") } else send("view", page = "home")
@@ -583,7 +601,7 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
         val standard = listOf("normal", "fire", "water", "grass", "electric", "ice", "fighting", "poison", "ground", "flying",
             "psychic", "bug", "rock", "ghost", "dragon", "dark", "steel", "fairy")
         val counts = HashMap<String, Int>()
-        mons.forEach { m -> m.types.forEach { t -> counts[t] = (counts[t] ?: 0) + 1 } }
+        counts.putAll(monsTypes)
         val types = counts.keys.sortedWith(compareBy({ standard.indexOf(it).let { i -> if (i < 0) 99 else i } }, { it }))
         val options = listOf<String?>(null) + types
         val cols = 4
@@ -607,9 +625,9 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
             box(g, rx, ry, colW, rowH, if (chosen) mix(c, 0x1A222B, 0.55f) else if (hover) CARD_HOVER else CARD)
             g.fill(rx + 1, ry + 1, rx + 4, ry + rowH - 1, c)
             if (chosen) outline(g, rx, ry, colW, rowH, c)
-            val label = if (t == null) "All (${mons.size})" else "${typeName(t)} (${counts[t]})"
+            val label = if (t == null) "All ($monsAll)" else "${typeName(t)} (${counts[t]})"
             text(g, fit(label, colW - 12), rx + 8, ry + 5, if (chosen) 0xFFFFFFFF.toInt() else TEXT)
-            hit(rx, ry, colW, rowH) { filterType = t; typePicker = false; scroll = 0.0 }
+            hit(rx, ry, colW, rowH) { filterType = t; typePicker = false; filtersChanged() }
         }
         g.pose().popPose()
     }
@@ -866,13 +884,17 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
 
     // ------------------------------------------------------------------ residents
 
-    private fun filtered(): List<Mon> {
-        val q = search.value.trim().lowercase()
-        return mons.filter { m ->
-            (filterZone == null || m.home == filterZone) && (!mineOnly || m.mine) && (filterType == null || filterType in m.types) &&
-                (q.isEmpty() || m.name.lowercase().contains(q) || m.species.path.contains(q) || m.types.any { it.contains(q) })
-        }
+    /** Asks the server for the residents matching the filters and search, from [offset] in the list. */
+    private fun askList(offset: Int) {
+        val q = if (this::search.isInitialized) search.value.replace('\t', ' ') else ""
+        val v = "$offset\t${filterZone ?: ""}\t${filterType ?: ""}\t${if (mineOnly) 1 else 0}\t$q"
+        if (v == monsAsked) return
+        monsAsked = v
+        send("list", v, page = "residents")
     }
+
+    /** The filters changed: back to the top of the list. */
+    private fun filtersChanged() { scroll = 0.0; askList(0) }
 
     private fun residentsPage(g: GuiGraphics, x: Int, y: Int, w: Int, h: Int, mx: Int, my: Int) {
         // search field background
@@ -881,7 +903,7 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
         search.x = x + 2
         search.y = y + 3
         // filter
-        val zones = mons.map { it.home }.distinct().sortedBy { z -> biomes.indexOfFirst { it.zone == z }.let { if (it < 0) 999 else it } }
+        val zones = monsZones.keys.sortedBy { z -> biomes.indexOfFirst { it.zone == z }.let { if (it < 0) 999 else it } }
         val fx = x + 132
         val fLabel = "Biome: " + (filterZone?.let { zoneName(it) } ?: "All")
         val fw = font.width(fLabel) + 14
@@ -890,21 +912,20 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
             val all = listOf<String?>(null) + zones
             val i = all.indexOf(filterZone)
             filterZone = all[Math.floorMod(i + if (b == 1) -1 else 1, all.size)]
-            scroll = 0.0
+            filtersChanged()
         }
         if (over(mx, my, fx, y - 2, fw, 18)) tooltip = listOf(Component.literal("Left click: next biome"), Component.literal("Right click: previous"))
         val mx2 = fx + fw + 6
-        button(g, mx2, y - 2, 64, 18, if (mineOnly) "✔ Mine" else "Mine only", if (mineOnly) ACCENT else SUB, mx, my, filled = false) { mineOnly = !mineOnly; scroll = 0.0 }
+        button(g, mx2, y - 2, 64, 18, if (mineOnly) "✔ Mine" else "Mine only", if (mineOnly) ACCENT else SUB, mx, my, filled = false) { mineOnly = !mineOnly; filtersChanged() }
         // the type filter: click to pick a type, right click to show all again
         val tx = mx2 + 70
         val tLabel = "Type: " + (filterType?.let { typeName(it) } ?: "All")
         val tw = font.width(tLabel) + 14
         button(g, tx, y - 2, tw, 18, tLabel, filterType?.let { opaque(typeColor(it)) } ?: SUB, mx, my, filled = false) { b ->
-            if (b == 1) { filterType = null; scroll = 0.0 } else typePicker = true
+            if (b == 1) { filterType = null; filtersChanged() } else typePicker = true
         }
         if (over(mx, my, tx, y - 2, tw, 18)) tooltip = listOf(Component.literal("Left click: pick a type"), Component.literal("Right click: all types"))
-        val list = filtered()
-        val count = "${list.size} Pokémon"
+        val count = "$monsTotal Pokémon"
         text(g, count, x + w - font.width(count), y + 3, DIM)
 
         // grid
@@ -915,25 +936,32 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
         val cardH = 60
         val gap = 5
         val cols = max(1, (w + gap) / (cardW + gap))
-        val rows = (list.size + cols - 1) / cols
+        val rows = (monsTotal + cols - 1) / cols
         val used = cols * cardW + (cols - 1) * gap
         val ox = gx + (w - used) / 2
         maxScroll = max(0.0, rows * (cardH + gap) - gap - gh.toDouble())
         scroll = scroll.coerceIn(0.0, maxScroll)
-        if (mons.isEmpty()) {
+        if (!monsLoaded) {
             g.drawCenteredString(font, "Loading…", x + w / 2, gy + 40, DIM)
             return
         }
-        if (list.isEmpty()) g.drawCenteredString(font, "No Pokémon match.", x + w / 2, gy + 40, DIM)
+        if (monsTotal == 0) g.drawCenteredString(font, "No Pokémon match.", x + w / 2, gy + 40, DIM)
         g.enableScissor(gx - 2, gy, gx + w + 2, gy + gh)
         val first = (scroll / (cardH + gap)).toInt() * cols
-        for (i in first until list.size) {
+        var missing = false
+        for (i in first until monsTotal) {
             val row = i / cols
             val col = i % cols
             val cx = ox + col * (cardW + gap)
             val cy = gy + row * (cardH + gap) - scroll.toInt()
             if (cy > gy + gh) break
-            val m = list[i]
+            // (a stretch not here yet: an empty card while it's asked for)
+            val m = mons.getOrNull(i - monsFrom)?.takeIf { i >= monsFrom }
+            if (m == null) {
+                box(g, cx, cy, cardW, cardH, CARD)
+                missing = true
+                continue
+            }
             val hover = over(mx, my, cx, cy, cardW, cardH) && my in gy until gy + gh
             box(g, cx, cy, cardW, cardH, if (hover) CARD_HOVER else CARD)
             g.fill(cx + 1, cy, cx + cardW - 1, cy + 2, opaque(color(m.home)))
@@ -956,6 +984,8 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
         }
         g.disableScissor()
         scrollbar(g, gx + w + 4, gy, gh)
+        // scrolled past what's here: ask for the stretch around where the list is now
+        if (missing) askList(maxOf(0, first - cols * 3))
     }
 
     private fun scrollbar(g: GuiGraphics, x: Int, y: Int, h: Int) {
@@ -1305,7 +1335,7 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
             text(g, fit(sub, lw - 14 - lookRoom), lx + 9, by + 17, if (homeless) SUB else if (!live && b.awake) GOLD else DIM)
             if (hover) {
                 tooltip = listOf(Component.literal(b.name).withColor(c), Component.literal("${b.count} Pokémon live here").withColor(SUB), Component.literal("Click to see them").withColor(SUB))
-                hit(lx, by, lw, th) { filterZone = b.zone; goTab("residents") }
+                hit(lx, by, lw, th) { filterZone = b.zone; if (tab == "residents") filtersChanged() else { monsAsked = ""; goTab("residents") } }
             }
             // the owner can pick the habitat's look
             if (data.getBoolean("isOwner") && b.looks.size > 1 && my in gy until gy + gh) {
