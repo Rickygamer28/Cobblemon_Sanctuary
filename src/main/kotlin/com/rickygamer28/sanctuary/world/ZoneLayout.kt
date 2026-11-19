@@ -4,6 +4,7 @@ import com.cobblemon.mod.common.api.types.ElementalTypes
 import com.rickygamer28.sanctuary.data.Sanctuary
 import net.minecraft.util.RandomSource
 import kotlin.math.PI
+import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.min
@@ -568,22 +569,37 @@ object ZoneLayout {
                     hit != null && hit.zone == host && (!far || hit.edgeDistance > 1) &&
                         (far || (Caves.apron(s, px, pz, only = null) <= 0.0 && (steep || Caves.cover(s, px, pz) < 0.3)))
                 } && out.none { distance(it.x, it.z, x.toInt(), z.toInt()) < it.r + r + 10 }
-                // a side, a little towards the town (on a mountain further down its front), then other spots along that side
-                val fronts = if (steep) listOf(-0.3, -0.12, 0.08, 0.25) else listOf(-0.12, 0.05, -0.3)
+                // every spot in the habitat where it fits, on a grid; the best is on a side, towards the town (and, on a
+                // mountain, low on its front), and away from the landmark in the middle
                 search@ for (r in listOf(full, full * 0.75, full * 0.55, full * 0.4).map { it.coerceAtLeast(12.0) }.distinct()) {
-                    for (side in listOf(-1, 1).let { if (n % 2 == 1) it.reversed() else it }) {
-                        if (side in used) continue
-                        for (front in fronts) for (reach in listOf(1.0, 0.8, 0.6)) {
-                            // (well inside its border, which wobbles; and clear of the landmark in the middle)
-                            val lateral = ((hb.along - r * 1.1 - 10) * reach).coerceAtLeast(r + 12.0)
-                            val x = hb.x + ux * hb.radial * front + cos(hb.angle) * lateral * side
-                            val z = hb.z + uz * hb.radial * front + sin(hb.angle) * lateral * side
+                    var best: Pair<Double, Double>? = null
+                    var bestScore = Double.MAX_VALUE
+                    val reachOut = max(hb.radial, hb.along)
+                    var gx = -reachOut
+                    while (gx <= reachOut) {
+                        var gz = -reachOut
+                        while (gz <= reachOut) {
+                            val x = hb.x + gx
+                            val z = hb.z + gz
+                            gz += 5.0
+                            val radial = gx * ux + gz * uz
+                            val lateral = gx * cos(hb.angle) + gz * sin(hb.angle)
+                            if (sqrt(gx * gx + gz * gz) < r + 12) continue
+                            // (the other side from a sub-biome already here)
+                            if (used.isNotEmpty() && (if (lateral >= 0) 1 else -1) in used) continue
+                            val score = radial / hb.radial * (if (steep) 2.0 else 1.0) - abs(lateral) / hb.along * 0.6
+                            if (score >= bestScore) continue
                             if (!clear(x, z, r)) continue
-                            placed = Pocket(x.toInt(), z.toInt(), r.toInt(), t, host, 700 + n, sub = true)
-                            used += side
-                            break@search
+                            best = x to z
+                            bestScore = score
                         }
+                        gx += 5.0
                     }
+                    val (bx, bz) = best ?: continue
+                    val lateralOf = (bx - hb.x) * cos(hb.angle) + (bz - hb.z) * sin(hb.angle)
+                    placed = Pocket(bx.toInt(), bz.toInt(), r.toInt(), t, host, 700 + n, sub = true)
+                    used += if (lateralOf >= 0) 1 else -1
+                    break@search
                 }
                 if (placed != null) break
             }
