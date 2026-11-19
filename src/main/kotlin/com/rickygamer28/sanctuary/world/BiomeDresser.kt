@@ -645,6 +645,7 @@ object BiomeDresser {
 
     /** Height the habitats settle to at their edges, close to the meadows' own height, so borders stay soft. */
     private const val EDGE_LEVEL = 1.0
+    private val MOUNTAINS = setOf("ice", "rock", "dragon", "fire")
 
     /**
      * Height of a zone above the flat ground at (x, z), before blending. Each habitat is one natural landform shaped
@@ -912,7 +913,9 @@ object BiomeDresser {
             // a sub-biome: its look's own ground, at the level of the habitat around it
             else -> if (p.sub) {
                 val sh = customShape(s, CustomTypes.look(s, p.zone).terrain, x.toDouble(), z.toDouble(), x.toDouble(), z.toDouble(), (d / p.r).coerceIn(0.0, 1.2))
-                mix(base.toDouble(), level + sh - 1.5, w)
+                val v = mix(base.toDouble(), level + sh - 1.5, w)
+                // (on a mountain it only builds up, never digging down towards the caves under it)
+                if (p.host in MOUNTAINS) max(base.toDouble(), v) else v
             } else if (CustomTypes.isCustom(p.zone)) {
                 val k = d / p.r
                 val rise = Math.pow(smooth((p.r - d) / p.r), 1.3)

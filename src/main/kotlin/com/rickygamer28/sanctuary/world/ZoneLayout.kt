@@ -557,11 +557,16 @@ object ZoneLayout {
                 val steep = host in STEEP
                 // a quarter of the habitat's size to start with, up to two fifths
                 val full = min(hb.size() * (0.25 + 0.15 * grow), min(hb.radial, hb.along) * 0.5)
-                // clear of the caves and their mouths, all the way round, and of the other sub-biomes
-                fun clear(x: Double, z: Double, r: Double): Boolean = (0..8).all { k ->
-                    val px = if (k == 8) x else x + cos(k * PI / 4) * r * 0.85
-                    val pz = if (k == 8) z else z + sin(k * PI / 4) * r * 0.85
-                    Caves.cover(s, px.toInt(), pz.toInt()) < 0.3 && Caves.apron(s, px.toInt(), pz.toInt(), only = null) <= 0.0
+                // inside its habitat all the way round (not spilling into the lake or the next habitat), clear of the cave
+                // mouths and (off the mountains, where it may dig a hollow) of the caves, and of the other sub-biomes
+                fun clear(x: Double, z: Double, r: Double): Boolean = (0..16).all { k ->
+                    val far = k >= 8
+                    val a = (k % 8) * PI / 4
+                    val px = (if (k == 16) x else x + cos(a) * r * (if (far) 1.1 else 0.85)).toInt()
+                    val pz = (if (k == 16) z else z + sin(a) * r * (if (far) 1.1 else 0.85)).toInt()
+                    val hit = locate(s, px, pz)
+                    hit != null && hit.zone == host && hit.edgeDistance > 4 &&
+                        (far || (Caves.apron(s, px, pz, only = null) <= 0.0 && (steep || Caves.cover(s, px, pz) < 0.3)))
                 } && out.none { distance(it.x, it.z, x.toInt(), z.toInt()) < it.r + r + 10 }
                 // a side, a little towards the town (on a mountain further down its front), then other spots along that side
                 val fronts = if (steep) listOf(-0.3, -0.12, 0.08, 0.25) else listOf(-0.12, 0.05, -0.3)
