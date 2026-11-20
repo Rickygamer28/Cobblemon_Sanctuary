@@ -2,7 +2,6 @@ package com.rickygamer28.sanctuary.life
 
 import com.cobblemon.mod.common.api.pokemon.evolution.Evolution
 import com.cobblemon.mod.common.pokemon.Pokemon
-import com.cobblemon.mod.common.pokemon.evolution.requirements.LevelRequirement
 import com.cobblemon.mod.common.pokemon.evolution.variants.LevelUpEvolution
 import com.rickygamer28.sanctuary.Sanctuaries
 import com.rickygamer28.sanctuary.SanctuaryConfig
@@ -55,6 +54,15 @@ object Evolving {
         return levelUps(pk).firstOrNull { e -> runCatching { e.test(pk) }.getOrDefault(false) }
     }
 
+    /** The level an evolution needs (read from its level requirement, wherever this Cobblemon keeps that class). */
+    private fun minLevel(e: Evolution): Int? = runCatching {
+        e.requirements.firstOrNull { it.javaClass.simpleName == "LevelRequirement" }?.let { req ->
+            val f = req.javaClass.declaredFields.firstOrNull { it.name == "minLevel" } ?: return@let null
+            f.isAccessible = true
+            (f.get(req) as? Number)?.toInt()
+        }
+    }.getOrNull()
+
     private fun resultName(e: Evolution): String =
         runCatching { e.result.species }.getOrNull()?.substringAfter(':')?.replaceFirstChar { it.uppercase() } ?: "its next form"
 
@@ -67,7 +75,7 @@ object Evolving {
         if (!SanctuaryConfig.evolveInSanctuary.get()) return "Doesn't evolve in the sanctuary on this server"
         val e = evos.first()
         val name = resultName(e)
-        val lv = runCatching { e.requirements.filterIsInstance<LevelRequirement>().firstOrNull()?.minLevel }.getOrNull()
+        val lv: Int? = minLevel(e)
         val need = SanctuaryConfig.evolveFriendship.get()
         return when {
             evos.any { runCatching { it.test(pk) }.getOrDefault(false) } && pk.friendship >= need -> "About to evolve into $name!"
