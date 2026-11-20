@@ -141,7 +141,7 @@ object RouteDecor {
     /** Lantern posts around every landmark. */
     private fun lights(level: ServerLevel, s: Sanctuary) {
         for ((zone, packed) in s.landmarks) {
-            if (packed == Landmarks.NONE || zone in s.litLandmarks) continue
+            if (packed == Landmarks.NONE || zone in s.litLandmarks || TownBuildings.isBuilding(zone)) continue
             val c = BlockPos.of(packed)
             if (!level.hasChunk((c.x - 8) shr 4, (c.z - 8) shr 4) || !level.hasChunk((c.x + 8) shr 4, (c.z + 8) shr 4)) continue
             val lantern = if (zone == "ghost" || zone == "dark" || zone == "shadow" || zone == "eldritch") Blocks.SOUL_LANTERN else Blocks.LANTERN

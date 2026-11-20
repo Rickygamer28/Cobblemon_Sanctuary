@@ -120,10 +120,13 @@ object SelfTest {
                 log("== after the rest woke up, finished in ${"%.0f".format(secs)} s${if (timedOut) " (TIMED OUT)" else ""}")
                 scan(level, sanctuary)
                 // the owner picks other looks for two habitats (as the Region tab's Look button does)
-                for (zone in listOf("water", "rock", com.rickygamer28.sanctuary.world.ZoneLayout.HUB) + CUSTOM.filter { it in sanctuary.habitats } + CUSTOM_POCKETS + CUSTOM_SUBS.keys) {
-                    val now0 = BiomeDresser.variantOf(sanctuary, zone)
+                // (and the fourth look for a few, with the Valley Heart full)
+                val fourth = listOf("water", "rock", "ground", "fairy", "ghost", "poison")
+                for (zone in fourth + com.rickygamer28.sanctuary.world.ZoneLayout.HUB + CUSTOM.filter { it in sanctuary.habitats } + CUSTOM_POCKETS + CUSTOM_SUBS.keys) {
+                    val now0 = BiomeDresser.lookOf(sanctuary, zone)
                     // (the town goes to the Old Kanto village, with its koi ponds)
-                    val next = if (zone == com.rickygamer28.sanctuary.world.ZoneLayout.HUB) (if (now0 == 1) 2 else 1) else (now0 + 1) % 3
+                    val next = if (zone == com.rickygamer28.sanctuary.world.ZoneLayout.HUB) (if (now0 == 1) 2 else 1) else if (zone in fourth) com.rickygamer28.sanctuary.world.Remix.INDEX else (now0 + 1) % 3
+                    if (zone == com.rickygamer28.sanctuary.world.ZoneLayout.HUB) com.rickygamer28.sanctuary.world.TownBuildings.rebuildAll(sanctuary)
                     sanctuary.variants[zone] = next
                     sanctuary.rebuildZones += zone
                     sanctuary.landmarks.remove(zone)?.let { if (it != Long.MIN_VALUE) sanctuary.staleLandmarks[zone] = it }
@@ -405,7 +408,7 @@ object SelfTest {
             if (ax != 0 || az != 0) log("last '$why' at (${ax - s.center.x}, ${az - s.center.z}): ${Trace.of(ax, az)}")
         }
         log("removed as players' blocks so far: ${Trace.removedBlocks}")
-        log("scanned $columns columns ($unloaded loaded from disk); ${s.landmarks.count { it.value != Landmarks.NONE }} landmarks, $dens dens, ${ZoneLayout.pockets(s).count { it.live(s) }} pockets, ${s.decor.size} route decorations (${s.decor.values.groupingBy { it }.eachCount()}), ${s.litLandmarks.size} lit landmarks")
+        log("scanned $columns columns ($unloaded loaded from disk); ${s.landmarks.count { it.value != Landmarks.NONE }} landmarks, $dens dens, ${ZoneLayout.pockets(s).count { it.live(s) }} pockets, ${s.decor.size} route decorations (${s.decor.values.groupingBy { it }.eachCount()}), ${s.litLandmarks.size} lit landmarks, town buildings ${s.landmarks.keys.filter { it.startsWith("building:") }}")
         if (f.isEmpty()) log("  no problems found")
         for (finding in f.values) {
             log("  ${finding.name}: ${finding.count}")

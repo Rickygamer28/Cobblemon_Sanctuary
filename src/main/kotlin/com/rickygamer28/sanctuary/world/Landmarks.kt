@@ -114,6 +114,8 @@ object Landmarks {
         val candidates = s.staleLandmarks.entries.map { Triple(it.key, it.value, true) } + s.landmarks.entries.map { Triple(it.key, it.value, false) }
         for ((zone, packed, stale) in candidates) {
             if (packed == NONE) { if (stale) s.staleLandmarks.remove(zone); continue }
+            // the town's buildings stay where they are (they're taken down only when the town is rebuilt)
+            if (!stale && TownBuildings.isBuilding(zone)) continue
             val p = BlockPos.of(packed)
             val (ax, az) = ZoneLayout.anchor(s, zone, ring)
             val dx = (p.x - ax).toDouble()

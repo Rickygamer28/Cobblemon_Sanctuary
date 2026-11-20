@@ -72,6 +72,8 @@ object ValleyBlocks {
     /** Is [st] something the valley itself has (or one of the mod's own blocks)? */
     fun belongs(st: BlockState): Boolean {
         if (st.isAir || st.block in OURS) return true
+        // the Valley Heart's route decorations, fourth looks and town buildings
+        if (st.block in Props.DECOR_BLOCKS || st.block in Remix.BLOCKS || st.block in TownBuildings.BLOCKS) return true
         if (st.`is`(BlockTags.LEAVES) || st.`is`(BlockTags.LOGS) || st.`is`(BlockTags.FLOWERS) || st.`is`(BlockTags.SAPLINGS) ||
             st.`is`(BlockTags.CORALS) || st.`is`(BlockTags.CORAL_BLOCKS) || st.`is`(BlockTags.WALL_CORALS)) return true
         if (BiomeDresser.isNatural(st) || BiomeDresser.isClutter(st) || BiomeDresser.isModSolid(st) || BiomeDresser.isCobblemonDecor(st)) return true

@@ -213,6 +213,9 @@ object BiomeDresser {
         val slope: Int = 0,
     ) {
         val above: BlockPos get() = surface.above()
+        /** The habitat's fourth look, if it's wearing it: other blocks and trees on the same land. */
+        var remix: Remix? = null
+        private fun mix(st: BlockState): BlockState = remix?.swap(st) ?: st
         val x get() = surface.x
         val z get() = surface.z
         val y get() = surface.y
@@ -227,7 +230,7 @@ object BiomeDresser {
 
         /** Things are being placed now (not just ground shaped). */
         val placing get() = decorating
-        fun top(state: BlockState) { if (shaping) level.setBlock(surface, state, FLAGS) }
+        fun top(state: BlockState) { if (shaping) level.setBlock(surface, mix(state), FLAGS) }
         /** Fills below the top, deep enough to cover any exposed cliff side. */
         fun filler(state: BlockState, minDepth: Int = 3) {
             if (!shaping) return
@@ -235,7 +238,7 @@ object BiomeDresser {
             for (i in 1..max(minDepth, exposure)) {
                 val p = surface.below(i)
                 if (!isNatural(level.getBlockState(p))) continue
-                var st = state
+                var st = mix(state)
                 // soil only a few blocks deep; below it, rock
                 if (i > 3 && (st.`is`(Blocks.DIRT) || st.`is`(Blocks.GRASS_BLOCK) || st.`is`(Blocks.MUD) || st.`is`(Blocks.PODZOL) || st.`is`(Blocks.ROOTED_DIRT))) st = b(Blocks.STONE)
                 // tall cliffs show layers
@@ -275,11 +278,13 @@ object BiomeDresser {
             top(topOverride ?: bands[Math.floorMod(y, bands.size)])
             for (i in 1..max(3, exposure)) {
                 val p = surface.below(i)
-                if (isNatural(level.getBlockState(p))) level.setBlock(p, bands[Math.floorMod(y - i, bands.size)], FLAGS)
+                if (isNatural(level.getBlockState(p))) level.setBlock(p, mix(bands[Math.floorMod(y - i, bands.size)]), FLAGS)
             }
         }
-        fun at(pos: BlockPos, state: BlockState) {
+        fun at(pos: BlockPos, original: BlockState) {
             if (!decorating) return
+            val state = mix(original)
+            if (state.isAir) return
             val cur = level.getBlockState(pos)
             if (cur.isAir || (cur.canBeReplaced() && cur.fluidState.isEmpty)) {
                 level.setBlock(pos, state, FLAGS)
@@ -293,7 +298,8 @@ object BiomeDresser {
          * Places a vanilla feature. For features that aren't trees (giant mushrooms, ice spikes, mossy rocks),
          * [protectRadius] marks what it built around the spot so neighbouring columns don't cut it off.
          */
-        fun feature(key: ResourceKey<ConfiguredFeature<*, *>>, protectRadius: Int = 0, protectHeight: Int = 16) {
+        fun feature(original: ResourceKey<ConfiguredFeature<*, *>>, protectRadius: Int = 0, protectHeight: Int = 16) {
+            val key = remix?.tree(original) ?: original
             // the ground around isn't at its final height yet (old higher ground would clip the tree, lower ground
             // would be filled up through it): plant it later, once it is
             if (!decorating || Dens.covers(s, x, z)) return
@@ -303,7 +309,8 @@ object BiomeDresser {
             }
             placeFeature(level, s, key, surface, random, protectRadius, protectHeight)
         }
-        fun placeNow(key: ResourceKey<ConfiguredFeature<*, *>>, protectRadius: Int = 0, protectHeight: Int = 16) {
+        fun placeNow(original: ResourceKey<ConfiguredFeature<*, *>>, protectRadius: Int = 0, protectHeight: Int = 16) {
+            val key = remix?.tree(original) ?: original
             runCatching {
                 level.registryAccess().registryOrThrow(Registries.CONFIGURED_FEATURE).getHolder(key).ifPresent {
                     it.value().place(level, level.chunkSource.generator, random, above)
@@ -486,7 +493,7 @@ object BiomeDresser {
         Blocks.MUD_BRICKS, Blocks.POLISHED_BLACKSTONE_BRICKS, Blocks.POLISHED_BLACKSTONE, Blocks.POLISHED_DEEPSLATE,
         Blocks.DEEPSLATE_BRICKS, Blocks.CUT_SANDSTONE, Blocks.CHISELED_SANDSTONE, Blocks.POLISHED_DIORITE,
         Blocks.BRAIN_CORAL_BLOCK, Blocks.TUBE_CORAL_BLOCK, Blocks.FIRE_CORAL_BLOCK, Blocks.HORN_CORAL_BLOCK, Blocks.BUBBLE_CORAL_BLOCK,
-    ) + Props.GROUND_BLOCKS
+    ) + Props.GROUND_BLOCKS + Remix.GROUND
 
     /**
      * Small decorations the sanctuary places (lamp posts, gravestones, dummies, rods, chimneys…). When the valley is
@@ -1120,8 +1127,13 @@ object BiomeDresser {
 
     // ================================================================== main entry
 
-    fun variantOf(s: Sanctuary, zone: String): Int =
+    /** The look the owner chose for [zone] (0..2, or 3 for the fourth look). */
+    fun lookOf(s: Sanctuary, zone: String): Int =
         s.variants.getOrPut(zone) { (Noise.hash(s.seed, zone.hashCode(), 7) * 3).toInt().coerceIn(0, 2) }
+
+    /** The look whose land [zone] is built with (the fourth look keeps another look's land). */
+    fun variantOf(s: Sanctuary, zone: String): Int =
+        lookOf(s, zone).let { if (it == Remix.INDEX) Remix.ALL[zone]?.base ?: 0 else it }
 
     private fun key(name: String): ResourceKey<Biome> =
         ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath("cobblemon_sanctuary", name))
@@ -1440,7 +1452,7 @@ object BiomeDresser {
         val nature = phase == Phase.ALL || phase == Phase.NATURE
         val extras = phase == Phase.ALL || phase == Phase.EXTRAS
         val (exp, slope) = around(s, x, z, target, ring)
-        val ctx = Ctx(level, s, surface, randomFor(s, x, z), variantOf(s, zone), hit, exp, slope)
+        val ctx = Ctx(level, s, surface, randomFor(s, x, z), variantOf(s, zone), hit, exp, slope).also { it.remix = Remix.of(s, zone) }
         // a winding route from the town out to the habitat's landmark
         if (target >= WATER_Y + 1 && hit.dist > s.size.hubRadius - 4 && onRoute(s, hit, x, z, ring)) {
             val (top, fill) = routeBlocks(zone, variantOf(s, zone))
@@ -1461,7 +1473,7 @@ object BiomeDresser {
         val pocket = ZoneLayout.pocketAt(s, x, z)?.takeIf { it.first.live(s) && it.second <= it.first.r + 1.5 }
         if (pocket != null) {
             val (p, d) = pocket
-            val pc = Ctx(level, s, surface, ctx.random, variantOf(s, p.zone), hit, exp, slope)
+            val pc = Ctx(level, s, surface, ctx.random, variantOf(s, p.zone), hit, exp, slope).also { it.remix = Remix.of(s, p.zone) }
             if (phase != Phase.EXTRAS) pocket(pc, p, d)
             if (nature) cobblemonDecor(Ctx(level, s, surface, randomFor(s, x + 7919, z), variantOf(s, p.zone), hit, exp, slope), p.zone, target)
             if (extras) withPhase(Phase.ALL) { Props.place(pc, p.zone, ring) { px, pz -> pathAt(s, px, pz, ring) } }
@@ -1495,6 +1507,8 @@ object BiomeDresser {
             "ice" -> ice(ctx)
             else -> custom(ctx, zone)
         }
+        // the fourth look's own trees, here and there
+        ctx.remix?.let { r -> r.extra?.let { e -> if (phase != Phase.EXTRAS && ctx.roomy() && !ctx.cliff && ctx.grid(r.extraEvery, 4242)) ctx.feature(e) } }
         // Cobblemon's plants and crystals (with their own randomness, so the dresser's choices are the same in every wave)
         if (nature) cobblemonDecor(Ctx(level, s, surface, randomFor(s, x + 7919, z), variantOf(s, zone), hit, exp, slope), zone, target)
         // a spot residents like to visit: a log, a rock, a pool, a campfire…

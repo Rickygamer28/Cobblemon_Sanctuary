@@ -39,6 +39,8 @@ object Gathering {
         val random = level.random
         val ring = ZoneLayout.ring(s)
         val finds = (roster.size / 40).coerceIn(1, 4) + Requests.basketExtraFinds(s)
+        // the berry market: someone always brings a berry
+        if (com.rickygamer28.sanctuary.world.TownBuildings.built(s, "market") && "berries" !in s.basketOff) randomFromTag(BERRIES, level)?.let { add(s, it) }
         gift(level, s, rt)
         var reported = false
         repeat(finds) {

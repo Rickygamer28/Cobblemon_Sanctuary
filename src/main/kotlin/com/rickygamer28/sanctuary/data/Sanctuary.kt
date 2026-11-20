@@ -287,6 +287,7 @@ class Sanctuary(
         decor.clear()
         decorDone.clear()
         litLandmarks.clear()
+        com.rickygamer28.sanctuary.world.TownBuildings.rebuildAll(this)
         needsCheck = true
         generationDirty = true
     }

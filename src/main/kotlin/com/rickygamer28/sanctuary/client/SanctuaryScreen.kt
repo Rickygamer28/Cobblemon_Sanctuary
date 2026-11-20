@@ -80,6 +80,8 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
         val townOnly: Boolean = false,
         /** Its pocket is a sub-biome (a district of the habitat), and how many it takes for one. */
         val sub: Boolean = false, val subNeed: Int = 10,
+        /** Looks from this one on wait for the Valley Heart. */
+        val lockFrom: Int = 99
     )
 
     private class Hit(val x: Int, val y: Int, val w: Int, val h: Int, val action: (Int) -> Unit)
@@ -188,7 +190,8 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
                 b.getInt("look"), looks, b.getBoolean("custom"), b.getString("home"), b.getString("homeName"), b.getString("choice").ifEmpty { "own" },
                 b.getInt("need"), b.getInt("typeCount"), b.getBoolean("noRoom"), !b.contains("ownOn") || b.getBoolean("ownOn"),
                 b.getBoolean("pocket"), b.getString("pocketIn"), if (b.contains("pocketNeed")) b.getInt("pocketNeed") else 5, b.getBoolean("townOnly"),
-                b.getBoolean("sub"), if (b.contains("subNeed")) b.getInt("subNeed") else 10)
+                b.getBoolean("sub"), if (b.contains("subNeed")) b.getInt("subNeed") else 10,
+                lockFrom = if (b.contains("lockFrom")) b.getInt("lockFrom") else 99)
         }
         if (tag.contains("eggs")) {
             val el = tag.getList("eggs", Tag.TAG_COMPOUND.toInt())
@@ -363,9 +366,11 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
             box(g, bx + 10, ry, bw - 20, rowH, if (chosen) mix(c, 0x1A222B, 0.55f) else if (hover) CARD_HOVER else CARD)
             if (chosen) outline(g, bx + 10, ry, bw - 20, rowH, c)
             val tag = if (i == b.look) "  (now)" else ""
-            text(g, fit(name + tag, bw - 36), bx + 18, ry + 5, if (chosen) 0xFFFFFFFF.toInt() else TEXT)
-            text(g, fit(desc, bw - 36), bx + 18, ry + 17, SUB)
-            hit(bx + 10, ry, bw - 20, rowH) { lookPick = i }
+            val locked = i >= b.lockFrom
+            text(g, fit(name + tag, bw - 36), bx + 18, ry + 5, if (locked) DIM else if (chosen) 0xFFFFFFFF.toInt() else TEXT)
+            text(g, fit(if (locked) "♥ Unlocks at Valley Heart level 7" else desc, bw - 36), bx + 18, ry + 17, if (locked) 0xFFF07CB4.toInt() else SUB)
+            if (locked && hover) tooltip = listOf(Component.literal(desc))
+            if (!locked) hit(bx + 10, ry, bw - 20, rowH) { lookPick = i }
         }
         val half = (bw - 30) / 2
         val zone = b.zone

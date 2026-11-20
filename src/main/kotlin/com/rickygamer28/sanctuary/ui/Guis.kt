@@ -273,8 +273,11 @@ object SanctuaryGuis {
                 it.putInt("pct", pct)
                 // its look, and the looks the owner can choose from
                 com.rickygamer28.sanctuary.world.Looks.of(zone)?.takeIf { placed || pocket != null }?.let { looks ->
-                    it.putInt("look", com.rickygamer28.sanctuary.world.BiomeDresser.variantOf(s, zone))
+                    it.putInt("look", com.rickygamer28.sanctuary.world.BiomeDresser.lookOf(s, zone))
                     it.put("looks", ListTag().also { l -> looks.forEach { (n, d) -> l.add(StringTag.valueOf("$n|$d")) } })
+                    // the fourth look waits for the Valley Heart
+                    if (looks.size > com.rickygamer28.sanctuary.world.Remix.INDEX && com.rickygamer28.sanctuary.life.Requests.level(s) < com.rickygamer28.sanctuary.life.Requests.LOOKS_LEVEL)
+                        it.putInt("lockFrom", com.rickygamer28.sanctuary.world.Remix.INDEX)
                 }
             })
         })
@@ -539,7 +542,9 @@ object ScreenActions {
                 when {
                     !ownerOnly() -> {}
                     looks == null || look == null || look !in looks.indices -> {}
-                    look == com.rickygamer28.sanctuary.world.BiomeDresser.variantOf(s, zone) -> {}
+                    look == com.rickygamer28.sanctuary.world.BiomeDresser.lookOf(s, zone) -> {}
+                    look >= com.rickygamer28.sanctuary.world.Remix.INDEX && com.rickygamer28.sanctuary.life.Requests.level(s) < com.rickygamer28.sanctuary.life.Requests.LOOKS_LEVEL ->
+                        say(player, "That look unlocks at Valley Heart level ${com.rickygamer28.sanctuary.life.Requests.LOOKS_LEVEL}.", ChatFormatting.RED)
                     now - (lookChanged[s.id] ?: -100_000L) < 1200 ->
                         say(player, "A habitat's look was just changed. Wait about a minute before the next change.", ChatFormatting.RED)
                     else -> {
@@ -548,6 +553,8 @@ object ScreenActions {
                         s.rebuildZones += zone
                         // its landmark is built again in the new look
                         s.landmarks.remove(zone)?.let { if (it != Long.MIN_VALUE) s.staleLandmarks[zone] = it }
+                        // the town's buildings are put up again on its new ground
+                        if (zone == ZoneLayout.HUB) com.rickygamer28.sanctuary.world.TownBuildings.rebuildAll(s)
                         s.generationDirty = true
                         com.rickygamer28.sanctuary.ui.RegionMap.forget(s.id)
                         Sanctuaries.data(level).setDirty()

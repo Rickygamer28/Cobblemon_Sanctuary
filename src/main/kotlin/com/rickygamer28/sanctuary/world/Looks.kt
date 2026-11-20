@@ -69,5 +69,5 @@ object Looks {
     )
 
     /** The looks [zone] can have (custom types' habitats share three), or null. */
-    fun of(zone: String): List<Pair<String, String>>? = ALL[zone] ?: if (CustomTypes.isCustom(zone)) CustomTypes.looksOf(zone).map { it.name to it.desc } else null
+    fun of(zone: String): List<Pair<String, String>>? = ALL[zone]?.let { base -> base + listOfNotNull(Remix.ALL[zone]?.let { it.name to it.desc }) } ?: if (CustomTypes.isCustom(zone)) CustomTypes.looksOf(zone).map { it.name to it.desc } else null
 }
