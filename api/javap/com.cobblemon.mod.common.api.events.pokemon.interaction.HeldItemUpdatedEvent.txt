@@ -1,0 +1,26 @@
+public final class com.cobblemon.mod.common.api.events.pokemon.interaction.HeldItemUpdatedEvent extends com.cobblemon.mod.common.api.events.Cancelable {
+  private final net.minecraft.world.entity.LivingEntity cause;
+  private final com.cobblemon.mod.common.pokemon.Pokemon pokemon;
+  private final net.minecraft.world.item.ItemStack originalStack;
+  private final boolean decrement;
+  private final net.minecraft.world.item.ItemStack oldItem;
+  private final net.minecraft.world.item.ItemStack newItem;
+  public com.cobblemon.mod.common.api.events.pokemon.interaction.HeldItemUpdatedEvent(net.minecraft.world.entity.LivingEntity, com.cobblemon.mod.common.pokemon.Pokemon, net.minecraft.world.item.ItemStack, boolean, net.minecraft.world.item.ItemStack, net.minecraft.world.item.ItemStack);
+  public final net.minecraft.world.entity.LivingEntity getCause();
+  public final com.cobblemon.mod.common.pokemon.Pokemon getPokemon();
+  public final net.minecraft.world.item.ItemStack getOriginalStack();
+  public final boolean getDecrement();
+  public final net.minecraft.world.item.ItemStack getOldItem();
+  public final net.minecraft.world.item.ItemStack getNewItem();
+  public final net.minecraft.world.entity.LivingEntity component1();
+  public final com.cobblemon.mod.common.pokemon.Pokemon component2();
+  public final net.minecraft.world.item.ItemStack component3();
+  public final boolean component4();
+  public final net.minecraft.world.item.ItemStack component5();
+  public final net.minecraft.world.item.ItemStack component6();
+  public final com.cobblemon.mod.common.api.events.pokemon.interaction.HeldItemUpdatedEvent copy(net.minecraft.world.entity.LivingEntity, com.cobblemon.mod.common.pokemon.Pokemon, net.minecraft.world.item.ItemStack, boolean, net.minecraft.world.item.ItemStack, net.minecraft.world.item.ItemStack);
+  public static com.cobblemon.mod.common.api.events.pokemon.interaction.HeldItemUpdatedEvent copy$default(com.cobblemon.mod.common.api.events.pokemon.interaction.HeldItemUpdatedEvent, net.minecraft.world.entity.LivingEntity, com.cobblemon.mod.common.pokemon.Pokemon, net.minecraft.world.item.ItemStack, boolean, net.minecraft.world.item.ItemStack, net.minecraft.world.item.ItemStack, int, java.lang.Object);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+}

@@ -1,0 +1,15 @@
+public final class com.cobblemon.mod.common.client.render.models.blockbench.animation.BimanualSwingAnimation extends com.cobblemon.mod.common.client.render.models.blockbench.animation.PoseAnimation {
+  private final float swingPeriodMultiplier;
+  private final float amplitudeMultiplier;
+  private final com.cobblemon.mod.common.client.render.models.blockbench.pose.Bone leftArm;
+  private final com.cobblemon.mod.common.client.render.models.blockbench.pose.Bone rightArm;
+  public com.cobblemon.mod.common.client.render.models.blockbench.animation.BimanualSwingAnimation(float, float, com.cobblemon.mod.common.client.render.models.blockbench.pose.Bone, com.cobblemon.mod.common.client.render.models.blockbench.pose.Bone);
+  public com.cobblemon.mod.common.client.render.models.blockbench.animation.BimanualSwingAnimation(float, float, com.cobblemon.mod.common.client.render.models.blockbench.pose.Bone, com.cobblemon.mod.common.client.render.models.blockbench.pose.Bone, int, kotlin.jvm.internal.DefaultConstructorMarker);
+  public final float getSwingPeriodMultiplier();
+  public final float getAmplitudeMultiplier();
+  public final com.cobblemon.mod.common.client.render.models.blockbench.pose.Bone getLeftArm();
+  public final com.cobblemon.mod.common.client.render.models.blockbench.pose.Bone getRightArm();
+  public com.cobblemon.mod.common.client.render.models.blockbench.animation.BimanualSwingAnimation(com.cobblemon.mod.common.client.render.models.blockbench.frame.BimanualFrame, float, float);
+  public com.cobblemon.mod.common.client.render.models.blockbench.animation.BimanualSwingAnimation(com.cobblemon.mod.common.client.render.models.blockbench.frame.BimanualFrame, float, float, int, kotlin.jvm.internal.DefaultConstructorMarker);
+  protected void setupAnim(com.cobblemon.mod.common.client.render.models.blockbench.repository.RenderContext, com.cobblemon.mod.common.client.render.models.blockbench.PosableModel, com.cobblemon.mod.common.client.render.models.blockbench.PosableState, float, float, float, float, float, float);
+}

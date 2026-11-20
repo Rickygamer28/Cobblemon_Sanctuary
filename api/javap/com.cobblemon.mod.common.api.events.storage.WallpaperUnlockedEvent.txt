@@ -1,0 +1,26 @@
+public final class com.cobblemon.mod.common.api.events.storage.WallpaperUnlockedEvent extends com.cobblemon.mod.common.api.events.Cancelable {
+  private final com.cobblemon.mod.common.api.storage.pc.PCStore pc;
+  private final com.cobblemon.mod.common.api.storage.pc.UnlockablePCWallpaper wallpaper;
+  private boolean shouldNotify;
+  private final java.util.List<net.minecraft.server.level.ServerPlayer> players;
+  private final java.util.Map<java.lang.String, kotlin.jvm.functions.Function1<com.bedrockk.molang.runtime.MoParams, com.bedrockk.molang.runtime.value.MoValue>> functions;
+  public com.cobblemon.mod.common.api.events.storage.WallpaperUnlockedEvent(com.cobblemon.mod.common.api.storage.pc.PCStore, com.cobblemon.mod.common.api.storage.pc.UnlockablePCWallpaper, boolean);
+  public final com.cobblemon.mod.common.api.storage.pc.PCStore getPc();
+  public final com.cobblemon.mod.common.api.storage.pc.UnlockablePCWallpaper getWallpaper();
+  public final boolean getShouldNotify();
+  public final void setShouldNotify(boolean);
+  public final net.minecraft.server.level.ServerPlayer getPlayer();
+  public final java.util.List<net.minecraft.server.level.ServerPlayer> getPlayers();
+  public final java.util.Map<java.lang.String, com.bedrockk.molang.runtime.value.MoValue> getContext();
+  public final java.util.Map<java.lang.String, kotlin.jvm.functions.Function1<com.bedrockk.molang.runtime.MoParams, com.bedrockk.molang.runtime.value.MoValue>> getFunctions();
+  public final com.cobblemon.mod.common.api.storage.pc.PCStore component1();
+  public final com.cobblemon.mod.common.api.storage.pc.UnlockablePCWallpaper component2();
+  public final boolean component3();
+  public final com.cobblemon.mod.common.api.events.storage.WallpaperUnlockedEvent copy(com.cobblemon.mod.common.api.storage.pc.PCStore, com.cobblemon.mod.common.api.storage.pc.UnlockablePCWallpaper, boolean);
+  public static com.cobblemon.mod.common.api.events.storage.WallpaperUnlockedEvent copy$default(com.cobblemon.mod.common.api.events.storage.WallpaperUnlockedEvent, com.cobblemon.mod.common.api.storage.pc.PCStore, com.cobblemon.mod.common.api.storage.pc.UnlockablePCWallpaper, boolean, int, java.lang.Object);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+  private static final com.bedrockk.molang.runtime.value.MoValue _get_context_$lambda$0(net.minecraft.server.level.ServerPlayer);
+  private static final com.bedrockk.molang.runtime.value.DoubleValue functions$lambda$0(com.cobblemon.mod.common.api.events.storage.WallpaperUnlockedEvent, com.bedrockk.molang.runtime.MoParams);
+}

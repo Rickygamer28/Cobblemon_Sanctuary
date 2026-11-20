@@ -1,0 +1,15 @@
+public final class com.cobblemon.mod.common.entity.ai.LookInDirectionTask extends net.minecraft.world.entity.ai.behavior.Behavior<net.minecraft.world.entity.LivingEntity> {
+  private final com.bedrockk.molang.Expression shouldLock;
+  private final com.bedrockk.molang.Expression yaw;
+  private final com.bedrockk.molang.Expression pitch;
+  public com.cobblemon.mod.common.entity.ai.LookInDirectionTask(com.bedrockk.molang.Expression, com.bedrockk.molang.Expression, com.bedrockk.molang.Expression);
+  public com.cobblemon.mod.common.entity.ai.LookInDirectionTask(com.bedrockk.molang.Expression, com.bedrockk.molang.Expression, com.bedrockk.molang.Expression, int, kotlin.jvm.internal.DefaultConstructorMarker);
+  public final com.bedrockk.molang.Expression getShouldLock();
+  public final com.bedrockk.molang.Expression getYaw();
+  public final com.bedrockk.molang.Expression getPitch();
+  protected boolean canStillUse(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity, long);
+  protected boolean checkExtraStartConditions(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity);
+  protected void stop(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity, long);
+  protected void tick(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity, long);
+  public com.cobblemon.mod.common.entity.ai.LookInDirectionTask();
+}

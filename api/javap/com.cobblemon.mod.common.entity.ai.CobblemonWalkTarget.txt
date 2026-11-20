@@ -1,0 +1,10 @@
+public final class com.cobblemon.mod.common.entity.ai.CobblemonWalkTarget extends net.minecraft.world.entity.ai.memory.WalkTarget {
+  private final kotlin.jvm.functions.Function1<net.minecraft.world.level.pathfinder.PathType, java.lang.Boolean> nodeTypeFilter;
+  private final kotlin.jvm.functions.Function1<net.minecraft.world.level.pathfinder.PathType, java.lang.Boolean> destinationNodeTypeFilter;
+  public com.cobblemon.mod.common.entity.ai.CobblemonWalkTarget(net.minecraft.core.BlockPos, float, int, kotlin.jvm.functions.Function1<? super net.minecraft.world.level.pathfinder.PathType, java.lang.Boolean>, kotlin.jvm.functions.Function1<? super net.minecraft.world.level.pathfinder.PathType, java.lang.Boolean>);
+  public com.cobblemon.mod.common.entity.ai.CobblemonWalkTarget(net.minecraft.core.BlockPos, float, int, kotlin.jvm.functions.Function1, kotlin.jvm.functions.Function1, int, kotlin.jvm.internal.DefaultConstructorMarker);
+  public final kotlin.jvm.functions.Function1<net.minecraft.world.level.pathfinder.PathType, java.lang.Boolean> getNodeTypeFilter();
+  public final kotlin.jvm.functions.Function1<net.minecraft.world.level.pathfinder.PathType, java.lang.Boolean> getDestinationNodeTypeFilter();
+  private static final boolean _init_$lambda$0(net.minecraft.world.level.pathfinder.PathType);
+  private static final boolean _init_$lambda$1(net.minecraft.world.level.pathfinder.PathType);
+}

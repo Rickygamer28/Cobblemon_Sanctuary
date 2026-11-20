@@ -1,0 +1,3 @@
+public final class com.cobblemon.mod.common.util.MapExtensionsKt {
+  public static final <A, B> void removeIf(java.util.Map<A, B>, kotlin.jvm.functions.Function1<? super java.util.Map$Entry<? extends A, ? extends B>, java.lang.Boolean>);
+}

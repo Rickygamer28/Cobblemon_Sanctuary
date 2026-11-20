@@ -1,0 +1,32 @@
+final class com.cobblemon.mod.common.api.pokemon.evolution.EvolutionDisplay$Companion$CODEC$1$1 extends kotlin.jvm.internal.PropertyReference1Impl {
+  public static final com.cobblemon.mod.common.api.pokemon.evolution.EvolutionDisplay$Companion$CODEC$1$1 INSTANCE;
+  com.cobblemon.mod.common.api.pokemon.evolution.EvolutionDisplay$Companion$CODEC$1$1();
+  public java.lang.Object get(java.lang.Object);
+  static {};
+}
+final class com.cobblemon.mod.common.api.pokemon.evolution.EvolutionDisplay$Companion$CODEC$1$2 extends kotlin.jvm.internal.PropertyReference1Impl {
+  public static final com.cobblemon.mod.common.api.pokemon.evolution.EvolutionDisplay$Companion$CODEC$1$2 INSTANCE;
+  com.cobblemon.mod.common.api.pokemon.evolution.EvolutionDisplay$Companion$CODEC$1$2();
+  public java.lang.Object get(java.lang.Object);
+  static {};
+}
+public final class com.cobblemon.mod.common.api.pokemon.evolution.EvolutionDisplay$Companion {
+  static final com.cobblemon.mod.common.api.pokemon.evolution.EvolutionDisplay$Companion $$INSTANCE;
+  private static final com.mojang.serialization.Codec<com.cobblemon.mod.common.api.pokemon.evolution.EvolutionDisplay> CODEC;
+  private com.cobblemon.mod.common.api.pokemon.evolution.EvolutionDisplay$Companion();
+  public final com.mojang.serialization.Codec<com.cobblemon.mod.common.api.pokemon.evolution.EvolutionDisplay> getCODEC();
+  public static void getCODEC$annotations();
+  private static final com.mojang.datafixers.kinds.App CODEC$lambda$0(com.mojang.serialization.codecs.RecordCodecBuilder$Instance);
+  private static final java.lang.String CODEC$lambda$0$0(kotlin.reflect.KProperty1, com.cobblemon.mod.common.api.pokemon.evolution.EvolutionDisplay);
+  private static final com.cobblemon.mod.common.pokemon.Species CODEC$lambda$0$1(kotlin.reflect.KProperty1, com.cobblemon.mod.common.api.pokemon.evolution.EvolutionDisplay);
+  private static final java.util.List CODEC$lambda$0$2(com.cobblemon.mod.common.api.pokemon.evolution.EvolutionDisplay);
+  private static final com.cobblemon.mod.common.api.pokemon.evolution.EvolutionDisplay CODEC$lambda$0$3(java.lang.String, com.cobblemon.mod.common.pokemon.Species, java.util.List);
+  static {};
+}
+public interface com.cobblemon.mod.common.api.pokemon.evolution.EvolutionDisplay extends com.cobblemon.mod.common.api.pokemon.evolution.EvolutionLike {
+  public static final com.cobblemon.mod.common.api.pokemon.evolution.EvolutionDisplay$Companion Companion;
+  public abstract com.cobblemon.mod.common.pokemon.Species getSpecies();
+  public abstract java.util.Set<java.lang.String> getAspects();
+  public static com.mojang.serialization.Codec<com.cobblemon.mod.common.api.pokemon.evolution.EvolutionDisplay> getCODEC();
+  static {};
+}

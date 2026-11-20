@@ -1,0 +1,13 @@
+public final class com.cobblemon.mod.common.api.storage.player.PlayerInstancedDataStoreType {
+  private final net.minecraft.resources.ResourceLocation id;
+  private final kotlin.jvm.functions.Function1<net.minecraft.network.RegistryFriendlyByteBuf, com.cobblemon.mod.common.net.messages.client.SetClientPlayerDataPacket> decoder;
+  private final kotlin.jvm.functions.Function1<com.cobblemon.mod.common.api.storage.player.client.ClientInstancedPlayerData, kotlin.Unit> afterDecodeAction;
+  private final kotlin.jvm.functions.Function1<com.cobblemon.mod.common.api.storage.player.client.ClientInstancedPlayerData, kotlin.Unit> incrementalAfterDecodeAction;
+  public com.cobblemon.mod.common.api.storage.player.PlayerInstancedDataStoreType(net.minecraft.resources.ResourceLocation, kotlin.jvm.functions.Function1<? super net.minecraft.network.RegistryFriendlyByteBuf, com.cobblemon.mod.common.net.messages.client.SetClientPlayerDataPacket>, kotlin.jvm.functions.Function1<? super com.cobblemon.mod.common.api.storage.player.client.ClientInstancedPlayerData, kotlin.Unit>, kotlin.jvm.functions.Function1<? super com.cobblemon.mod.common.api.storage.player.client.ClientInstancedPlayerData, kotlin.Unit>);
+  public com.cobblemon.mod.common.api.storage.player.PlayerInstancedDataStoreType(net.minecraft.resources.ResourceLocation, kotlin.jvm.functions.Function1, kotlin.jvm.functions.Function1, kotlin.jvm.functions.Function1, int, kotlin.jvm.internal.DefaultConstructorMarker);
+  public final net.minecraft.resources.ResourceLocation getId();
+  public final kotlin.jvm.functions.Function1<net.minecraft.network.RegistryFriendlyByteBuf, com.cobblemon.mod.common.net.messages.client.SetClientPlayerDataPacket> getDecoder();
+  public final kotlin.jvm.functions.Function1<com.cobblemon.mod.common.api.storage.player.client.ClientInstancedPlayerData, kotlin.Unit> getAfterDecodeAction();
+  public final kotlin.jvm.functions.Function1<com.cobblemon.mod.common.api.storage.player.client.ClientInstancedPlayerData, kotlin.Unit> getIncrementalAfterDecodeAction();
+  private static final kotlin.Unit _init_$lambda$0(com.cobblemon.mod.common.api.storage.player.client.ClientInstancedPlayerData);
+}

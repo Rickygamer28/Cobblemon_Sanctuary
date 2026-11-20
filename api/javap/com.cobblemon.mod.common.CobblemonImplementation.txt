@@ -1,0 +1,31 @@
+public interface com.cobblemon.mod.common.CobblemonImplementation {
+  public abstract com.cobblemon.mod.common.ModAPI getModAPI();
+  public abstract com.cobblemon.mod.common.NetworkManager getNetworkManager();
+  public abstract com.cobblemon.mod.common.Environment environment();
+  public abstract boolean isModInstalled(java.lang.String);
+  public abstract void registerPermissionValidator();
+  public abstract void registerSoundEvents();
+  public abstract void registerDataComponents();
+  public abstract void registerEntityDataSerializers();
+  public abstract void registerItems();
+  public abstract void registerBlocks();
+  public abstract void registerEntityTypes();
+  public abstract void registerEntityAttributes();
+  public abstract void registerBlockEntityTypes();
+  public abstract void registerPoiTypes();
+  public abstract void registerVillagers();
+  public abstract void registerRecipeSerializers();
+  public abstract void registerRecipeTypes();
+  public abstract void registerWorldGenFeatures();
+  public abstract void registerParticles();
+  public abstract void registerMenu();
+  public abstract void registerEntitySubPredicates();
+  public abstract void registerMobEffects();
+  public abstract void addFeatureToWorldGen(net.minecraft.resources.ResourceKey<net.minecraft.world.level.levelgen.placement.PlacedFeature>, net.minecraft.world.level.levelgen.GenerationStep$Decoration, net.minecraft.tags.TagKey<net.minecraft.world.level.biome.Biome>);
+  public abstract <A extends com.mojang.brigadier.arguments.ArgumentType<?>, T extends net.minecraft.commands.synchronization.ArgumentTypeInfo$Template<A>> void registerCommandArgument(net.minecraft.resources.ResourceLocation, kotlin.reflect.KClass<A>, net.minecraft.commands.synchronization.ArgumentTypeInfo<A, T>);
+  public abstract <T extends net.minecraft.world.level.GameRules$Value<T>> net.minecraft.world.level.GameRules$Key<T> registerGameRule(java.lang.String, net.minecraft.world.level.GameRules$Category, net.minecraft.world.level.GameRules$Type<T>);
+  public abstract void registerCriteria();
+  public abstract void registerResourceReloader(net.minecraft.resources.ResourceLocation, net.minecraft.server.packs.PackType, java.util.Collection<net.minecraft.resources.ResourceLocation>, kotlin.jvm.functions.Function1<? super net.minecraft.core.HolderLookup$Provider, ? extends net.minecraft.server.packs.resources.PreparableReloadListener>);
+  public abstract net.minecraft.server.MinecraftServer server();
+  public abstract void registerCompostable(net.minecraft.world.level.ItemLike, float);
+}

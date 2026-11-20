@@ -1,0 +1,19 @@
+public final class com.cobblemon.mod.common.client.render.models.blockbench.animation.QuadrupedWalkAnimation extends com.cobblemon.mod.common.client.render.models.blockbench.animation.PoseAnimation {
+  private final com.cobblemon.mod.common.client.render.models.blockbench.pose.Bone legFrontLeft;
+  private final com.cobblemon.mod.common.client.render.models.blockbench.pose.Bone legFrontRight;
+  private final com.cobblemon.mod.common.client.render.models.blockbench.pose.Bone legBackLeft;
+  private final com.cobblemon.mod.common.client.render.models.blockbench.pose.Bone legBackRight;
+  private final float periodMultiplier;
+  private final float amplitudeMultiplier;
+  public com.cobblemon.mod.common.client.render.models.blockbench.animation.QuadrupedWalkAnimation(com.cobblemon.mod.common.client.render.models.blockbench.pose.Bone, com.cobblemon.mod.common.client.render.models.blockbench.pose.Bone, com.cobblemon.mod.common.client.render.models.blockbench.pose.Bone, com.cobblemon.mod.common.client.render.models.blockbench.pose.Bone, float, float);
+  public com.cobblemon.mod.common.client.render.models.blockbench.animation.QuadrupedWalkAnimation(com.cobblemon.mod.common.client.render.models.blockbench.pose.Bone, com.cobblemon.mod.common.client.render.models.blockbench.pose.Bone, com.cobblemon.mod.common.client.render.models.blockbench.pose.Bone, com.cobblemon.mod.common.client.render.models.blockbench.pose.Bone, float, float, int, kotlin.jvm.internal.DefaultConstructorMarker);
+  public final com.cobblemon.mod.common.client.render.models.blockbench.pose.Bone getLegFrontLeft();
+  public final com.cobblemon.mod.common.client.render.models.blockbench.pose.Bone getLegFrontRight();
+  public final com.cobblemon.mod.common.client.render.models.blockbench.pose.Bone getLegBackLeft();
+  public final com.cobblemon.mod.common.client.render.models.blockbench.pose.Bone getLegBackRight();
+  public final float getPeriodMultiplier();
+  public final float getAmplitudeMultiplier();
+  public com.cobblemon.mod.common.client.render.models.blockbench.animation.QuadrupedWalkAnimation(com.cobblemon.mod.common.client.render.models.blockbench.frame.QuadrupedFrame, float, float);
+  public com.cobblemon.mod.common.client.render.models.blockbench.animation.QuadrupedWalkAnimation(com.cobblemon.mod.common.client.render.models.blockbench.frame.QuadrupedFrame, float, float, int, kotlin.jvm.internal.DefaultConstructorMarker);
+  protected void setupAnim(com.cobblemon.mod.common.client.render.models.blockbench.repository.RenderContext, com.cobblemon.mod.common.client.render.models.blockbench.PosableModel, com.cobblemon.mod.common.client.render.models.blockbench.PosableState, float, float, float, float, float, float);
+}

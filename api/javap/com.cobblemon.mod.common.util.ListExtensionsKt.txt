@@ -1,0 +1,4 @@
+public final class com.cobblemon.mod.common.util.ListExtensionsKt {
+  public static final <T> java.util.List<T> random(java.util.List<? extends T>, int);
+  public static final <T> java.util.List<T> randomNoCopy(java.util.List<? extends T>, int);
+}

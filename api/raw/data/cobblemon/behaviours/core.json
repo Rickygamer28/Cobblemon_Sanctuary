@@ -1,0 +1,1 @@
+{"configurations":[{"activity":"core","tasksByPriority":{"0":["follow_walk_target"]},"type":"add_tasks_to_activity"},{"activity":"idle","tasksByPriority":{"0":["look_at_target"]},"type":"add_tasks_to_activity"}],"description":"cobblemon.behaviour.core.desc","name":"cobblemon.behaviour.core.name"}

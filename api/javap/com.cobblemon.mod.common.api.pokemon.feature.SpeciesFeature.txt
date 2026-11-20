@@ -1,0 +1,7 @@
+public interface com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeature {
+  public abstract java.lang.String getName();
+  public abstract net.minecraft.nbt.CompoundTag saveToNBT(net.minecraft.nbt.CompoundTag);
+  public abstract com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeature loadFromNBT(net.minecraft.nbt.CompoundTag);
+  public abstract com.google.gson.JsonObject saveToJSON(com.google.gson.JsonObject);
+  public abstract com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeature loadFromJSON(com.google.gson.JsonObject);
+}

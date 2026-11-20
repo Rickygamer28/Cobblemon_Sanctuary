@@ -1,0 +1,9 @@
+public final class com.cobblemon.mod.common.pokemon.evolution.adapters.CobblemonPreEvolutionAdapter implements com.google.gson.JsonDeserializer<com.cobblemon.mod.common.api.pokemon.evolution.PreEvolution>, com.google.gson.JsonSerializer<com.cobblemon.mod.common.api.pokemon.evolution.PreEvolution> {
+  public static final com.cobblemon.mod.common.pokemon.evolution.adapters.CobblemonPreEvolutionAdapter INSTANCE;
+  private com.cobblemon.mod.common.pokemon.evolution.adapters.CobblemonPreEvolutionAdapter();
+  public com.cobblemon.mod.common.api.pokemon.evolution.PreEvolution deserialize(com.google.gson.JsonElement, java.lang.reflect.Type, com.google.gson.JsonDeserializationContext);
+  public com.google.gson.JsonElement serialize(com.cobblemon.mod.common.api.pokemon.evolution.PreEvolution, java.lang.reflect.Type, com.google.gson.JsonSerializationContext);
+  public java.lang.Object deserialize(com.google.gson.JsonElement, java.lang.reflect.Type, com.google.gson.JsonDeserializationContext);
+  public com.google.gson.JsonElement serialize(java.lang.Object, java.lang.reflect.Type, com.google.gson.JsonSerializationContext);
+  static {};
+}

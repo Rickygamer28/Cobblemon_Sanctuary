@@ -1,0 +1,6 @@
+public final class com.cobblemon.mod.common.pokemon.ai.TagObtainableItemCondition implements com.cobblemon.mod.common.pokemon.ai.ObtainableItemCondition {
+  private final net.minecraft.tags.TagKey<net.minecraft.world.item.Item> tagKey;
+  public com.cobblemon.mod.common.pokemon.ai.TagObtainableItemCondition(net.minecraft.tags.TagKey<net.minecraft.world.item.Item>);
+  public java.lang.String toString();
+  public boolean isItemObtainable(net.minecraft.core.RegistryAccess, net.minecraft.world.item.ItemStack);
+}

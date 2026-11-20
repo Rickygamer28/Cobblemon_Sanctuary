@@ -1,0 +1,42 @@
+public final class com.cobblemon.mod.common.api.pokemon.PokemonPropertyExtractor$Companion {
+  static final com.cobblemon.mod.common.api.pokemon.PokemonPropertyExtractor$Companion $$INSTANCE;
+  private com.cobblemon.mod.common.api.pokemon.PokemonPropertyExtractor$Companion();
+  public final com.cobblemon.mod.common.api.pokemon.PokemonPropertyExtractor add(com.cobblemon.mod.common.api.pokemon.PokemonPropertyExtractor);
+  static {};
+}
+public interface com.cobblemon.mod.common.api.pokemon.PokemonPropertyExtractor {
+  public static final com.cobblemon.mod.common.api.pokemon.PokemonPropertyExtractor$Companion Companion;
+  public static final java.util.List<com.cobblemon.mod.common.api.pokemon.PokemonPropertyExtractor> ALL;
+  public static final com.cobblemon.mod.common.api.pokemon.PokemonPropertyExtractor SPECIES;
+  public static final com.cobblemon.mod.common.api.pokemon.PokemonPropertyExtractor FORM;
+  public static final com.cobblemon.mod.common.api.pokemon.PokemonPropertyExtractor SHINY;
+  public static final com.cobblemon.mod.common.api.pokemon.PokemonPropertyExtractor ASPECTS;
+  public static final com.cobblemon.mod.common.api.pokemon.PokemonPropertyExtractor LEVEL;
+  public static final com.cobblemon.mod.common.api.pokemon.PokemonPropertyExtractor GENDER;
+  public static final com.cobblemon.mod.common.api.pokemon.PokemonPropertyExtractor FRIENDSHIP;
+  public static final com.cobblemon.mod.common.api.pokemon.PokemonPropertyExtractor POKEBALL;
+  public static final com.cobblemon.mod.common.api.pokemon.PokemonPropertyExtractor NATURE;
+  public static final com.cobblemon.mod.common.api.pokemon.PokemonPropertyExtractor ABILITY;
+  public static final com.cobblemon.mod.common.api.pokemon.PokemonPropertyExtractor NICKNAME;
+  public static final com.cobblemon.mod.common.api.pokemon.PokemonPropertyExtractor STATUS;
+  public static final com.cobblemon.mod.common.api.pokemon.PokemonPropertyExtractor IVS;
+  public static final com.cobblemon.mod.common.api.pokemon.PokemonPropertyExtractor EVS;
+  public static final java.util.List<com.cobblemon.mod.common.api.pokemon.PokemonPropertyExtractor> ILLUSION;
+  public static final java.util.List<com.cobblemon.mod.common.api.pokemon.PokemonPropertyExtractor> TRANSFORM;
+  public abstract void invoke(com.cobblemon.mod.common.pokemon.Pokemon, com.cobblemon.mod.common.api.pokemon.PokemonProperties);
+  private static void SPECIES$lambda$0(com.cobblemon.mod.common.pokemon.Pokemon, com.cobblemon.mod.common.api.pokemon.PokemonProperties);
+  private static void FORM$lambda$0(com.cobblemon.mod.common.pokemon.Pokemon, com.cobblemon.mod.common.api.pokemon.PokemonProperties);
+  private static void SHINY$lambda$0(com.cobblemon.mod.common.pokemon.Pokemon, com.cobblemon.mod.common.api.pokemon.PokemonProperties);
+  private static void ASPECTS$lambda$0(com.cobblemon.mod.common.pokemon.Pokemon, com.cobblemon.mod.common.api.pokemon.PokemonProperties);
+  private static void LEVEL$lambda$0(com.cobblemon.mod.common.pokemon.Pokemon, com.cobblemon.mod.common.api.pokemon.PokemonProperties);
+  private static void GENDER$lambda$0(com.cobblemon.mod.common.pokemon.Pokemon, com.cobblemon.mod.common.api.pokemon.PokemonProperties);
+  private static void FRIENDSHIP$lambda$0(com.cobblemon.mod.common.pokemon.Pokemon, com.cobblemon.mod.common.api.pokemon.PokemonProperties);
+  private static void POKEBALL$lambda$0(com.cobblemon.mod.common.pokemon.Pokemon, com.cobblemon.mod.common.api.pokemon.PokemonProperties);
+  private static void NATURE$lambda$0(com.cobblemon.mod.common.pokemon.Pokemon, com.cobblemon.mod.common.api.pokemon.PokemonProperties);
+  private static void ABILITY$lambda$0(com.cobblemon.mod.common.pokemon.Pokemon, com.cobblemon.mod.common.api.pokemon.PokemonProperties);
+  private static void NICKNAME$lambda$0(com.cobblemon.mod.common.pokemon.Pokemon, com.cobblemon.mod.common.api.pokemon.PokemonProperties);
+  private static void STATUS$lambda$0(com.cobblemon.mod.common.pokemon.Pokemon, com.cobblemon.mod.common.api.pokemon.PokemonProperties);
+  private static void IVS$lambda$0(com.cobblemon.mod.common.pokemon.Pokemon, com.cobblemon.mod.common.api.pokemon.PokemonProperties);
+  private static void EVS$lambda$0(com.cobblemon.mod.common.pokemon.Pokemon, com.cobblemon.mod.common.api.pokemon.PokemonProperties);
+  static {};
+}

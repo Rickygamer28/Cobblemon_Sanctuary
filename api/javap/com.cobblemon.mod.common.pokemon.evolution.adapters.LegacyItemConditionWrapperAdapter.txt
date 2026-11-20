@@ -1,0 +1,32 @@
+public final class com.cobblemon.mod.common.pokemon.evolution.adapters.LegacyItemConditionWrapperAdapter$Companion {
+  private com.cobblemon.mod.common.pokemon.evolution.adapters.LegacyItemConditionWrapperAdapter$Companion();
+  public com.cobblemon.mod.common.pokemon.evolution.adapters.LegacyItemConditionWrapperAdapter$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.pokemon.evolution.adapters.LegacyItemConditionWrapperAdapter implements com.google.gson.JsonDeserializer<net.minecraft.advancements.critereon.ItemPredicate>, com.google.gson.JsonSerializer<net.minecraft.advancements.critereon.ItemPredicate> {
+  public static final com.cobblemon.mod.common.pokemon.evolution.adapters.LegacyItemConditionWrapperAdapter$Companion Companion;
+  private final net.minecraft.core.HolderLookup$Provider registryAccess;
+  private final com.cobblemon.mod.common.util.adapters.CodecBackedAdapter<net.minecraft.advancements.critereon.ItemPredicate> codecAdapter;
+  private static final java.lang.String TAG_PREFIX;
+  private static final java.lang.String LEGACY_ITEM;
+  private static final java.lang.String LEGACY_NBT;
+  public com.cobblemon.mod.common.pokemon.evolution.adapters.LegacyItemConditionWrapperAdapter(net.minecraft.core.HolderLookup$Provider);
+  public com.cobblemon.mod.common.pokemon.evolution.adapters.LegacyItemConditionWrapperAdapter(net.minecraft.core.HolderLookup$Provider, int, kotlin.jvm.internal.DefaultConstructorMarker);
+  public final net.minecraft.core.HolderLookup$Provider getRegistryAccess();
+  public net.minecraft.advancements.critereon.ItemPredicate deserialize(com.google.gson.JsonElement, java.lang.reflect.Type, com.google.gson.JsonDeserializationContext);
+  public com.google.gson.JsonElement serialize(net.minecraft.advancements.critereon.ItemPredicate, java.lang.reflect.Type, com.google.gson.JsonSerializationContext);
+  private final net.minecraft.advancements.critereon.ItemPredicate$Builder createBuilderForItem(java.lang.String);
+  private static final net.minecraft.advancements.critereon.ItemPredicate$Builder createBuilderForItem$lambda$0(boolean, com.cobblemon.mod.common.pokemon.evolution.adapters.LegacyItemConditionWrapperAdapter, net.minecraft.advancements.critereon.ItemPredicate$Builder, net.minecraft.resources.ResourceLocation);
+  private static final net.minecraft.advancements.critereon.ItemPredicate$Builder createBuilderForItem$lambda$0$0(net.minecraft.advancements.critereon.ItemPredicate$Builder, net.minecraft.tags.TagKey, net.minecraft.core.HolderLookup$RegistryLookup);
+  private static final net.minecraft.advancements.critereon.ItemPredicate$Builder createBuilderForItem$lambda$0$1(kotlin.jvm.functions.Function1, java.lang.Object);
+  private static final net.minecraft.advancements.critereon.ItemPredicate$Builder createBuilderForItem$lambda$0$2(net.minecraft.advancements.critereon.ItemPredicate$Builder);
+  private static final net.minecraft.advancements.critereon.ItemPredicate$Builder createBuilderForItem$lambda$0$3(net.minecraft.advancements.critereon.ItemPredicate$Builder, net.minecraft.world.item.Item);
+  private static final net.minecraft.advancements.critereon.ItemPredicate$Builder createBuilderForItem$lambda$0$4(kotlin.jvm.functions.Function1, java.lang.Object);
+  private static final net.minecraft.advancements.critereon.ItemPredicate$Builder createBuilderForItem$lambda$0$5(net.minecraft.advancements.critereon.ItemPredicate$Builder);
+  private static final net.minecraft.advancements.critereon.ItemPredicate$Builder createBuilderForItem$lambda$1(kotlin.jvm.functions.Function1, java.lang.Object);
+  private static final net.minecraft.advancements.critereon.ItemPredicate$Builder createBuilderForItem$lambda$2(net.minecraft.advancements.critereon.ItemPredicate$Builder, com.mojang.serialization.DataResult$Error);
+  private static final net.minecraft.advancements.critereon.ItemPredicate$Builder createBuilderForItem$lambda$3(kotlin.jvm.functions.Function1, java.lang.Object);
+  public com.cobblemon.mod.common.pokemon.evolution.adapters.LegacyItemConditionWrapperAdapter();
+  public java.lang.Object deserialize(com.google.gson.JsonElement, java.lang.reflect.Type, com.google.gson.JsonDeserializationContext);
+  public com.google.gson.JsonElement serialize(java.lang.Object, java.lang.reflect.Type, com.google.gson.JsonSerializationContext);
+  static {};
+}

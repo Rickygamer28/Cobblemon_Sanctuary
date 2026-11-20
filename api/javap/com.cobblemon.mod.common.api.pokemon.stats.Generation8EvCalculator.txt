@@ -1,0 +1,8 @@
+public final class com.cobblemon.mod.common.api.pokemon.stats.Generation8EvCalculator implements com.cobblemon.mod.common.api.pokemon.stats.EvCalculator {
+  public static final com.cobblemon.mod.common.api.pokemon.stats.Generation8EvCalculator INSTANCE;
+  private static final java.util.Map<com.cobblemon.mod.common.api.pokemon.stats.Stats, net.minecraft.tags.TagKey<net.minecraft.world.item.Item>> powerItems;
+  private com.cobblemon.mod.common.api.pokemon.stats.Generation8EvCalculator();
+  public java.util.Map<com.cobblemon.mod.common.api.pokemon.stats.Stat, java.lang.Integer> calculate(com.cobblemon.mod.common.battles.pokemon.BattlePokemon, com.cobblemon.mod.common.battles.pokemon.BattlePokemon);
+  public java.util.Map<com.cobblemon.mod.common.api.pokemon.stats.Stat, java.lang.Integer> calculate(com.cobblemon.mod.common.battles.pokemon.BattlePokemon);
+  static {};
+}

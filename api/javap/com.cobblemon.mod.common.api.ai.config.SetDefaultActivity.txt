@@ -1,0 +1,9 @@
+public final class com.cobblemon.mod.common.api.ai.config.SetDefaultActivity implements com.cobblemon.mod.common.api.ai.config.BehaviourConfig {
+  private final net.minecraft.world.entity.schedule.Activity activity;
+  public com.cobblemon.mod.common.api.ai.config.SetDefaultActivity();
+  public final net.minecraft.world.entity.schedule.Activity getActivity();
+  public java.util.List<com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable> getVariables(net.minecraft.world.entity.LivingEntity, com.cobblemon.mod.common.api.ai.BehaviourConfigurationContext);
+  public void configure(net.minecraft.world.entity.LivingEntity, com.cobblemon.mod.common.api.ai.BehaviourConfigurationContext);
+  public boolean checkCondition(com.cobblemon.mod.common.api.ai.BehaviourConfigurationContext, com.mojang.datafixers.util.Either<com.bedrockk.molang.Expression, com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable>);
+  public void preconfigure(net.minecraft.world.entity.LivingEntity, com.cobblemon.mod.common.api.ai.BehaviourConfigurationContext);
+}

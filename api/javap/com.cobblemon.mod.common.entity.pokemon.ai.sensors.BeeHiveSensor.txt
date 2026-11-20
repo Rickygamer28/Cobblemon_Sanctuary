@@ -1,0 +1,28 @@
+public final class com.cobblemon.mod.common.entity.pokemon.ai.sensors.BeeHiveSensor$EntriesMappings {
+  public static final kotlin.enums.EnumEntries<net.minecraft.core.Direction> entries$0;
+  static {};
+}
+final class com.cobblemon.mod.common.entity.pokemon.ai.sensors.BeeHiveSensor$findNearbyHivesWithSpace$1 extends kotlin.jvm.internal.FunctionReferenceImpl implements kotlin.jvm.functions.Function1<net.minecraft.world.entity.ai.village.poi.PoiRecord, net.minecraft.core.BlockPos> {
+  public static final com.cobblemon.mod.common.entity.pokemon.ai.sensors.BeeHiveSensor$findNearbyHivesWithSpace$1 INSTANCE;
+  com.cobblemon.mod.common.entity.pokemon.ai.sensors.BeeHiveSensor$findNearbyHivesWithSpace$1();
+  public final net.minecraft.core.BlockPos invoke(net.minecraft.world.entity.ai.village.poi.PoiRecord);
+  public java.lang.Object invoke(java.lang.Object);
+  static {};
+}
+public final class com.cobblemon.mod.common.entity.pokemon.ai.sensors.BeeHiveSensor extends net.minecraft.world.entity.ai.sensing.Sensor<com.cobblemon.mod.common.entity.pokemon.PokemonEntity> {
+  public com.cobblemon.mod.common.entity.pokemon.ai.sensors.BeeHiveSensor();
+  public java.util.Set<net.minecraft.world.entity.ai.memory.MemoryModuleType<? extends java.lang.Object>> requires();
+  protected void doTick(net.minecraft.server.level.ServerLevel, com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+  private final boolean isValidHive(net.minecraft.world.level.block.state.BlockState);
+  private final boolean isHiveBlock(net.minecraft.world.level.block.state.BlockState);
+  private final boolean hasReachableAdjacentSide(net.minecraft.server.level.ServerLevel, net.minecraft.core.BlockPos);
+  private final java.util.List<net.minecraft.core.BlockPos> findNearbyHivesWithSpace(com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+  private final boolean doesHiveHaveSpace(net.minecraft.core.BlockPos, net.minecraft.world.level.Level);
+  private static final boolean findNearbyHivesWithSpace$lambda$0(net.minecraft.core.Holder);
+  private static final net.minecraft.core.BlockPos findNearbyHivesWithSpace$lambda$1(kotlin.jvm.functions.Function1, java.lang.Object);
+  private static final boolean findNearbyHivesWithSpace$lambda$2(com.cobblemon.mod.common.entity.pokemon.ai.sensors.BeeHiveSensor, com.cobblemon.mod.common.entity.pokemon.PokemonEntity, net.minecraft.core.BlockPos);
+  private static final boolean findNearbyHivesWithSpace$lambda$3(kotlin.jvm.functions.Function1, java.lang.Object);
+  private static final int findNearbyHivesWithSpace$lambda$4(net.minecraft.core.BlockPos, net.minecraft.core.BlockPos, net.minecraft.core.BlockPos);
+  private static final int findNearbyHivesWithSpace$lambda$5(kotlin.jvm.functions.Function2, java.lang.Object, java.lang.Object);
+  public void doTick(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity);
+}

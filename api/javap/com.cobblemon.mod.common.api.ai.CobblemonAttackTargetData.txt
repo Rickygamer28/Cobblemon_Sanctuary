@@ -1,0 +1,24 @@
+public final class com.cobblemon.mod.common.api.ai.CobblemonAttackTargetData {
+  private com.bedrockk.molang.Expression shouldContinue;
+  private int hitsUntilDisengage;
+  private kotlin.jvm.functions.Function1<? super net.minecraft.world.entity.Entity, kotlin.Unit> disengageAction;
+  private final com.cobblemon.mod.common.api.molang.ObjectValue<com.cobblemon.mod.common.api.ai.CobblemonAttackTargetData> struct;
+  public com.cobblemon.mod.common.api.ai.CobblemonAttackTargetData(com.bedrockk.molang.Expression, int, kotlin.jvm.functions.Function1<? super net.minecraft.world.entity.Entity, kotlin.Unit>);
+  public com.cobblemon.mod.common.api.ai.CobblemonAttackTargetData(com.bedrockk.molang.Expression, int, kotlin.jvm.functions.Function1, int, kotlin.jvm.internal.DefaultConstructorMarker);
+  public final com.bedrockk.molang.Expression getShouldContinue();
+  public final void setShouldContinue(com.bedrockk.molang.Expression);
+  public final int getHitsUntilDisengage();
+  public final void setHitsUntilDisengage(int);
+  public final kotlin.jvm.functions.Function1<net.minecraft.world.entity.Entity, kotlin.Unit> getDisengageAction();
+  public final void setDisengageAction(kotlin.jvm.functions.Function1<? super net.minecraft.world.entity.Entity, kotlin.Unit>);
+  public final com.cobblemon.mod.common.api.molang.ObjectValue<com.cobblemon.mod.common.api.ai.CobblemonAttackTargetData> getStruct();
+  private static final kotlin.Unit _init_$lambda$0(net.minecraft.world.entity.Entity);
+  private static final java.lang.Object struct$lambda$0$0(com.cobblemon.mod.common.api.ai.CobblemonAttackTargetData, com.bedrockk.molang.runtime.MoParams);
+  private static final java.lang.Object struct$lambda$0$1(com.cobblemon.mod.common.api.ai.CobblemonAttackTargetData, com.bedrockk.molang.runtime.MoParams);
+  private static final java.lang.Object struct$lambda$0$2(com.cobblemon.mod.common.api.ai.CobblemonAttackTargetData, com.bedrockk.molang.runtime.MoParams);
+  private static final kotlin.Unit struct$lambda$0$2$1(com.cobblemon.mod.common.api.molang.ExpressionLike, net.minecraft.world.entity.Entity);
+  private static final java.lang.Object struct$lambda$0$2$1$0(net.minecraft.world.entity.Entity, com.bedrockk.molang.runtime.MoParams);
+  private static final kotlin.Unit struct$lambda$0$3(com.cobblemon.mod.common.api.ai.CobblemonAttackTargetData, com.bedrockk.molang.runtime.MoParams);
+  private static final kotlin.Unit struct$lambda$0$3$0(net.minecraft.world.entity.Entity);
+  public com.cobblemon.mod.common.api.ai.CobblemonAttackTargetData();
+}

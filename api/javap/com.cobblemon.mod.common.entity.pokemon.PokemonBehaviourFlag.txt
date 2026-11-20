@@ -1,0 +1,16 @@
+public final class com.cobblemon.mod.common.entity.pokemon.PokemonBehaviourFlag extends java.lang.Enum<com.cobblemon.mod.common.entity.pokemon.PokemonBehaviourFlag> {
+  private final int bit;
+  public static final com.cobblemon.mod.common.entity.pokemon.PokemonBehaviourFlag LOOKING;
+  public static final com.cobblemon.mod.common.entity.pokemon.PokemonBehaviourFlag EXCITED;
+  public static final com.cobblemon.mod.common.entity.pokemon.PokemonBehaviourFlag FLYING;
+  public static final com.cobblemon.mod.common.entity.pokemon.PokemonBehaviourFlag PASTURE_CONFLICT;
+  private static final com.cobblemon.mod.common.entity.pokemon.PokemonBehaviourFlag[] $VALUES;
+  private static final kotlin.enums.EnumEntries $ENTRIES;
+  private com.cobblemon.mod.common.entity.pokemon.PokemonBehaviourFlag();
+  public final int getBit();
+  public static com.cobblemon.mod.common.entity.pokemon.PokemonBehaviourFlag[] values();
+  public static com.cobblemon.mod.common.entity.pokemon.PokemonBehaviourFlag valueOf(java.lang.String);
+  public static kotlin.enums.EnumEntries<com.cobblemon.mod.common.entity.pokemon.PokemonBehaviourFlag> getEntries();
+  private static final com.cobblemon.mod.common.entity.pokemon.PokemonBehaviourFlag[] $values();
+  static {};
+}

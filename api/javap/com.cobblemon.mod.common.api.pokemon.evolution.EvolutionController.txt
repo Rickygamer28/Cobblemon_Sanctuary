@@ -1,0 +1,8 @@
+public interface com.cobblemon.mod.common.api.pokemon.evolution.EvolutionController<T extends com.cobblemon.mod.common.api.pokemon.evolution.EvolutionLike, I extends com.cobblemon.mod.common.api.pokemon.evolution.PreProcessor> extends java.util.Set<T>, kotlin.jvm.internal.markers.KMutableSet {
+  public abstract com.cobblemon.mod.common.pokemon.Pokemon pokemon();
+  public abstract void start(T);
+  public abstract java.util.Collection<com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgress<?>> progress();
+  public abstract <P extends com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgress<?>> P trackProgress(P);
+  public abstract <P extends com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgress<?>> P progressFirstOrCreate(kotlin.jvm.functions.Function1<? super com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgress<?>, java.lang.Boolean>, kotlin.jvm.functions.Function0<? extends P>);
+  public abstract I asIntermediate();
+}

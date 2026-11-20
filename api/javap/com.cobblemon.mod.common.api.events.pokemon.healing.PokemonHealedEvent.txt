@@ -1,0 +1,17 @@
+public final class com.cobblemon.mod.common.api.events.pokemon.healing.PokemonHealedEvent extends com.cobblemon.mod.common.api.events.Cancelable {
+  private final com.cobblemon.mod.common.pokemon.Pokemon pokemon;
+  private int amount;
+  private final com.cobblemon.mod.common.api.item.HealingSource source;
+  private final java.util.Map<java.lang.String, com.bedrockk.molang.runtime.value.MoValue> context;
+  private final java.util.Map<java.lang.String, kotlin.jvm.functions.Function1<com.bedrockk.molang.runtime.MoParams, com.bedrockk.molang.runtime.value.MoValue>> functions;
+  public com.cobblemon.mod.common.api.events.pokemon.healing.PokemonHealedEvent(com.cobblemon.mod.common.pokemon.Pokemon, int, com.cobblemon.mod.common.api.item.HealingSource);
+  public com.cobblemon.mod.common.api.events.pokemon.healing.PokemonHealedEvent(com.cobblemon.mod.common.pokemon.Pokemon, int, com.cobblemon.mod.common.api.item.HealingSource, int, kotlin.jvm.internal.DefaultConstructorMarker);
+  public final com.cobblemon.mod.common.pokemon.Pokemon getPokemon();
+  public final int getAmount();
+  public final void setAmount(int);
+  public final com.cobblemon.mod.common.api.item.HealingSource getSource();
+  public final boolean isFullHeal();
+  public final boolean isHealed();
+  public final java.util.Map<java.lang.String, com.bedrockk.molang.runtime.value.MoValue> getContext();
+  public final java.util.Map<java.lang.String, kotlin.jvm.functions.Function1<com.bedrockk.molang.runtime.MoParams, com.bedrockk.molang.runtime.value.MoValue>> getFunctions();
+}

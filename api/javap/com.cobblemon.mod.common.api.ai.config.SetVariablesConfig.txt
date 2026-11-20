@@ -1,0 +1,10 @@
+public final class com.cobblemon.mod.common.api.ai.config.SetVariablesConfig implements com.cobblemon.mod.common.api.ai.config.BehaviourConfig {
+  private java.util.Map<java.lang.String, com.cobblemon.mod.common.api.molang.ExpressionLike> variableValues;
+  public com.cobblemon.mod.common.api.ai.config.SetVariablesConfig();
+  public final java.util.Map<java.lang.String, com.cobblemon.mod.common.api.molang.ExpressionLike> getVariableValues();
+  public final void setVariableValues(java.util.Map<java.lang.String, com.cobblemon.mod.common.api.molang.ExpressionLike>);
+  public java.util.List<com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable> getVariables(net.minecraft.world.entity.LivingEntity, com.cobblemon.mod.common.api.ai.BehaviourConfigurationContext);
+  public void configure(net.minecraft.world.entity.LivingEntity, com.cobblemon.mod.common.api.ai.BehaviourConfigurationContext);
+  public boolean checkCondition(com.cobblemon.mod.common.api.ai.BehaviourConfigurationContext, com.mojang.datafixers.util.Either<com.bedrockk.molang.Expression, com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable>);
+  public void preconfigure(net.minecraft.world.entity.LivingEntity, com.cobblemon.mod.common.api.ai.BehaviourConfigurationContext);
+}

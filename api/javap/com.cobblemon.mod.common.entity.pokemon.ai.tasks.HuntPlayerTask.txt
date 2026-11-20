@@ -1,0 +1,31 @@
+public final class com.cobblemon.mod.common.entity.pokemon.ai.tasks.HuntPlayerTask$Companion {
+  private com.cobblemon.mod.common.entity.pokemon.ai.tasks.HuntPlayerTask$Companion();
+  public com.cobblemon.mod.common.entity.pokemon.ai.tasks.HuntPlayerTask$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.entity.pokemon.ai.tasks.HuntPlayerTask extends net.minecraft.world.entity.ai.behavior.Behavior<net.minecraft.world.entity.LivingEntity> {
+  public static final com.cobblemon.mod.common.entity.pokemon.ai.tasks.HuntPlayerTask$Companion Companion;
+  private java.util.Optional<net.minecraft.world.entity.LivingEntity> targetEntity;
+  private java.util.Optional<net.minecraft.core.BlockPos> lastKnownLocation;
+  private boolean searching;
+  private int searchTime;
+  private static final int MAX_SEARCH_DURATION;
+  private static final int SEARCH_RADIUS;
+  private static final double ATTACK_RANGE;
+  private static final float WALK_SPEED;
+  public com.cobblemon.mod.common.entity.pokemon.ai.tasks.HuntPlayerTask();
+  protected boolean checkExtraStartConditions(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity);
+  protected boolean canStillUse(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity, long);
+  private final java.util.Optional<net.minecraft.world.entity.LivingEntity> findPlayer(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity);
+  protected void start(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity, long);
+  private final void addLookWalkTargets(net.minecraft.world.entity.LivingEntity);
+  protected void stop(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity, long);
+  protected void tick(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity, long);
+  private final void startSearching(net.minecraft.world.entity.LivingEntity);
+  private final void performSearch(net.minecraft.world.entity.LivingEntity);
+  public final void onEntityHeard(net.minecraft.world.entity.LivingEntity, net.minecraft.core.BlockPos);
+  private static final kotlin.Unit addLookWalkTargets$lambda$0(net.minecraft.world.entity.LivingEntity, net.minecraft.world.entity.LivingEntity);
+  private static final void addLookWalkTargets$lambda$1(kotlin.jvm.functions.Function1, java.lang.Object);
+  private static final kotlin.Unit performSearch$lambda$0(com.cobblemon.mod.common.entity.pokemon.ai.tasks.HuntPlayerTask, net.minecraft.world.entity.LivingEntity, net.minecraft.core.BlockPos);
+  private static final void performSearch$lambda$1(kotlin.jvm.functions.Function1, java.lang.Object);
+  static {};
+}

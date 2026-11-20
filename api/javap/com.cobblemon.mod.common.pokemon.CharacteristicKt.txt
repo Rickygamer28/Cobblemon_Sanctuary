@@ -1,0 +1,3 @@
+public final class com.cobblemon.mod.common.pokemon.CharacteristicKt {
+  public static final int CHARACTERISTIC_MODULUS;
+}

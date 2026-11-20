@@ -1,0 +1,12 @@
+public final class com.cobblemon.mod.common.entity.pokemon.ai.sensors.DefendOwnerSensor extends net.minecraft.world.entity.ai.sensing.Sensor<com.cobblemon.mod.common.entity.pokemon.PokemonEntity> {
+  public com.cobblemon.mod.common.entity.pokemon.ai.sensors.DefendOwnerSensor();
+  public java.util.Set<net.minecraft.world.entity.ai.memory.MemoryModuleType<net.minecraft.world.entity.LivingEntity>> requires();
+  protected void doTick(net.minecraft.server.level.ServerLevel, com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+  private final void setNearestAttacker(com.cobblemon.mod.common.entity.pokemon.PokemonEntity, net.minecraft.world.entity.ai.memory.NearestVisibleLivingEntities, net.minecraft.world.entity.LivingEntity);
+  private static final kotlin.Unit doTick$lambda$0(com.cobblemon.mod.common.entity.pokemon.ai.sensors.DefendOwnerSensor, com.cobblemon.mod.common.entity.pokemon.PokemonEntity, net.minecraft.world.entity.LivingEntity, net.minecraft.world.entity.ai.memory.NearestVisibleLivingEntities);
+  private static final void doTick$lambda$1(kotlin.jvm.functions.Function1, java.lang.Object);
+  private static final boolean setNearestAttacker$lambda$0(net.minecraft.world.entity.LivingEntity, net.minecraft.world.entity.LivingEntity);
+  private static final net.minecraft.world.entity.LivingEntity setNearestAttacker$lambda$1(net.minecraft.world.entity.LivingEntity);
+  private static final net.minecraft.world.entity.LivingEntity setNearestAttacker$lambda$2(kotlin.jvm.functions.Function1, java.lang.Object);
+  public void doTick(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity);
+}

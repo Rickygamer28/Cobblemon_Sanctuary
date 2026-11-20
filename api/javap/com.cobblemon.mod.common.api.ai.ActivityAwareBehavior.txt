@@ -1,0 +1,11 @@
+public abstract class com.cobblemon.mod.common.api.ai.ActivityAwareBehavior<E extends net.minecraft.world.entity.LivingEntity> extends net.minecraft.world.entity.ai.behavior.Behavior<E> {
+  private final java.util.Set<net.minecraft.world.entity.schedule.Activity> activities;
+  public com.cobblemon.mod.common.api.ai.ActivityAwareBehavior(java.util.Map<net.minecraft.world.entity.ai.memory.MemoryModuleType<?>, ? extends net.minecraft.world.entity.ai.memory.MemoryStatus>);
+  public com.cobblemon.mod.common.api.ai.ActivityAwareBehavior(java.util.Map<net.minecraft.world.entity.ai.memory.MemoryModuleType<?>, ? extends net.minecraft.world.entity.ai.memory.MemoryStatus>, int);
+  public com.cobblemon.mod.common.api.ai.ActivityAwareBehavior(java.util.Map<net.minecraft.world.entity.ai.memory.MemoryModuleType<?>, ? extends net.minecraft.world.entity.ai.memory.MemoryStatus>, int, int);
+  public final java.util.Set<net.minecraft.world.entity.schedule.Activity> getActivities();
+  public final boolean isStillDoingActivity(E);
+  protected boolean canStillUse(net.minecraft.server.level.ServerLevel, E, long);
+  public void onInterrupted(net.minecraft.server.level.ServerLevel, E, long);
+  protected void stop(net.minecraft.server.level.ServerLevel, E, long);
+}

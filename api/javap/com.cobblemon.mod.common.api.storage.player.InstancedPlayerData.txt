@@ -1,0 +1,9 @@
+public final class com.cobblemon.mod.common.api.storage.player.InstancedPlayerData$DefaultImpls {
+  public static void initialize(com.cobblemon.mod.common.api.storage.player.InstancedPlayerData);
+}
+public interface com.cobblemon.mod.common.api.storage.player.InstancedPlayerData {
+  public abstract java.util.UUID getUuid();
+  public default void initialize();
+  public abstract com.cobblemon.mod.common.api.storage.player.client.ClientInstancedPlayerData toClientData();
+  public static void access$initialize$jd(com.cobblemon.mod.common.api.storage.player.InstancedPlayerData);
+}

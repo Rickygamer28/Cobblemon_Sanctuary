@@ -1,0 +1,17 @@
+public final class com.cobblemon.mod.common.entity.pokemon.ai.tasks.HarvestSweetBerryBushTask$Companion {
+  private com.cobblemon.mod.common.entity.pokemon.ai.tasks.HarvestSweetBerryBushTask$Companion();
+  public com.cobblemon.mod.common.entity.pokemon.ai.tasks.HarvestSweetBerryBushTask$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.entity.pokemon.ai.tasks.HarvestSweetBerryBushTask extends net.minecraft.world.entity.ai.behavior.Behavior<net.minecraft.world.entity.LivingEntity> {
+  public static final com.cobblemon.mod.common.entity.pokemon.ai.tasks.HarvestSweetBerryBushTask$Companion Companion;
+  private int startTime;
+  public static final int WAIT_TIME;
+  public com.cobblemon.mod.common.entity.pokemon.ai.tasks.HarvestSweetBerryBushTask();
+  public final int getStartTime();
+  public final void setStartTime(int);
+  protected boolean canStillUse(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity, long);
+  protected boolean checkExtraStartConditions(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity);
+  protected void tick(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity, long);
+  protected void start(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity, long);
+  static {};
+}

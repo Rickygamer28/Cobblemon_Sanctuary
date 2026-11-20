@@ -1,0 +1,40 @@
+final class com.cobblemon.mod.common.api.interaction.PokemonInteractionSet$Companion$decode$interactions$1 extends kotlin.jvm.internal.FunctionReferenceImpl implements kotlin.jvm.functions.Function1<net.minecraft.network.FriendlyByteBuf, com.cobblemon.mod.common.api.interaction.PokemonInteraction> {
+  com.cobblemon.mod.common.api.interaction.PokemonInteractionSet$Companion$decode$interactions$1(java.lang.Object);
+  public final com.cobblemon.mod.common.api.interaction.PokemonInteraction invoke(net.minecraft.network.FriendlyByteBuf);
+  public java.lang.Object invoke(java.lang.Object);
+}
+final class com.cobblemon.mod.common.api.interaction.PokemonInteractionSet$Companion$decode$requirements$1 extends kotlin.jvm.internal.FunctionReferenceImpl implements kotlin.jvm.functions.Function1<net.minecraft.network.FriendlyByteBuf, com.cobblemon.mod.common.api.pokemon.requirement.Requirement> {
+  com.cobblemon.mod.common.api.interaction.PokemonInteractionSet$Companion$decode$requirements$1(java.lang.Object);
+  public final com.cobblemon.mod.common.api.pokemon.requirement.Requirement invoke(net.minecraft.network.FriendlyByteBuf);
+  public java.lang.Object invoke(java.lang.Object);
+}
+public final class com.cobblemon.mod.common.api.interaction.PokemonInteractionSet$Companion {
+  private com.cobblemon.mod.common.api.interaction.PokemonInteractionSet$Companion();
+  public final com.cobblemon.mod.common.api.interaction.PokemonInteractionSet decode(net.minecraft.network.FriendlyByteBuf);
+  private static final com.cobblemon.mod.common.api.pokemon.requirement.Requirement decode$lambda$0(kotlin.jvm.functions.Function1, java.lang.Object);
+  private static final com.cobblemon.mod.common.api.interaction.PokemonInteraction decode$lambda$1(kotlin.jvm.functions.Function1, java.lang.Object);
+  public com.cobblemon.mod.common.api.interaction.PokemonInteractionSet$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.api.interaction.PokemonInteractionSet {
+  public static final com.cobblemon.mod.common.api.interaction.PokemonInteractionSet$Companion Companion;
+  private final java.util.List<com.cobblemon.mod.common.api.pokemon.requirement.Requirement> requirements;
+  private final java.util.List<com.cobblemon.mod.common.api.interaction.PokemonInteraction> interactions;
+  public com.cobblemon.mod.common.api.interaction.PokemonInteractionSet(java.util.List<? extends com.cobblemon.mod.common.api.pokemon.requirement.Requirement>, java.util.List<com.cobblemon.mod.common.api.interaction.PokemonInteraction>);
+  public com.cobblemon.mod.common.api.interaction.PokemonInteractionSet(java.util.List, java.util.List, int, kotlin.jvm.internal.DefaultConstructorMarker);
+  public final java.util.List<com.cobblemon.mod.common.api.pokemon.requirement.Requirement> getRequirements();
+  public final java.util.List<com.cobblemon.mod.common.api.interaction.PokemonInteraction> getInteractions();
+  public final void encode(net.minecraft.network.FriendlyByteBuf);
+  public final java.util.List<com.cobblemon.mod.common.api.pokemon.requirement.Requirement> component1();
+  public final java.util.List<com.cobblemon.mod.common.api.interaction.PokemonInteraction> component2();
+  public final com.cobblemon.mod.common.api.interaction.PokemonInteractionSet copy(java.util.List<? extends com.cobblemon.mod.common.api.pokemon.requirement.Requirement>, java.util.List<com.cobblemon.mod.common.api.interaction.PokemonInteraction>);
+  public static com.cobblemon.mod.common.api.interaction.PokemonInteractionSet copy$default(com.cobblemon.mod.common.api.interaction.PokemonInteractionSet, java.util.List, java.util.List, int, java.lang.Object);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+  private static final kotlin.Unit encode$lambda$0(net.minecraft.network.FriendlyByteBuf, com.cobblemon.mod.common.api.pokemon.requirement.Requirement);
+  private static final void encode$lambda$1(kotlin.jvm.functions.Function2, java.lang.Object, com.cobblemon.mod.common.api.pokemon.requirement.Requirement);
+  private static final kotlin.Unit encode$lambda$2(net.minecraft.network.FriendlyByteBuf, com.cobblemon.mod.common.api.interaction.PokemonInteraction);
+  private static final void encode$lambda$3(kotlin.jvm.functions.Function2, java.lang.Object, com.cobblemon.mod.common.api.interaction.PokemonInteraction);
+  public com.cobblemon.mod.common.api.interaction.PokemonInteractionSet();
+  static {};
+}

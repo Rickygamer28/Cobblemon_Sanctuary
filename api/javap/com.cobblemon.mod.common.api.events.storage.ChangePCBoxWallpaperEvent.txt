@@ -1,0 +1,36 @@
+public final class com.cobblemon.mod.common.api.events.storage.ChangePCBoxWallpaperEvent$Post implements com.cobblemon.mod.common.api.events.storage.ChangePCBoxWallpaperEvent {
+  private final net.minecraft.server.level.ServerPlayer player;
+  private final com.cobblemon.mod.common.api.storage.pc.PCBox box;
+  private final net.minecraft.resources.ResourceLocation wallpaper;
+  private final net.minecraft.resources.ResourceLocation altWallpaper;
+  private final java.util.Map<java.lang.String, com.bedrockk.molang.runtime.value.MoValue> context;
+  public com.cobblemon.mod.common.api.events.storage.ChangePCBoxWallpaperEvent$Post(net.minecraft.server.level.ServerPlayer, com.cobblemon.mod.common.api.storage.pc.PCBox, net.minecraft.resources.ResourceLocation, net.minecraft.resources.ResourceLocation);
+  public net.minecraft.server.level.ServerPlayer getPlayer();
+  public com.cobblemon.mod.common.api.storage.pc.PCBox getBox();
+  public net.minecraft.resources.ResourceLocation getWallpaper();
+  public net.minecraft.resources.ResourceLocation getAltWallpaper();
+  public final java.util.Map<java.lang.String, com.bedrockk.molang.runtime.value.MoValue> getContext();
+}
+public final class com.cobblemon.mod.common.api.events.storage.ChangePCBoxWallpaperEvent$Pre extends com.cobblemon.mod.common.api.events.Cancelable implements com.cobblemon.mod.common.api.events.storage.ChangePCBoxWallpaperEvent {
+  private final net.minecraft.server.level.ServerPlayer player;
+  private final com.cobblemon.mod.common.api.storage.pc.PCBox box;
+  private net.minecraft.resources.ResourceLocation wallpaper;
+  private net.minecraft.resources.ResourceLocation altWallpaper;
+  private final java.util.Map<java.lang.String, com.bedrockk.molang.runtime.value.MoValue> context;
+  private final java.util.Map<java.lang.String, kotlin.jvm.functions.Function1<com.bedrockk.molang.runtime.MoParams, com.bedrockk.molang.runtime.value.MoValue>> functions;
+  public com.cobblemon.mod.common.api.events.storage.ChangePCBoxWallpaperEvent$Pre(net.minecraft.server.level.ServerPlayer, com.cobblemon.mod.common.api.storage.pc.PCBox, net.minecraft.resources.ResourceLocation, net.minecraft.resources.ResourceLocation);
+  public net.minecraft.server.level.ServerPlayer getPlayer();
+  public com.cobblemon.mod.common.api.storage.pc.PCBox getBox();
+  public net.minecraft.resources.ResourceLocation getWallpaper();
+  public void setWallpaper(net.minecraft.resources.ResourceLocation);
+  public net.minecraft.resources.ResourceLocation getAltWallpaper();
+  public void setAltWallpaper(net.minecraft.resources.ResourceLocation);
+  public final java.util.Map<java.lang.String, com.bedrockk.molang.runtime.value.MoValue> getContext();
+  public final java.util.Map<java.lang.String, kotlin.jvm.functions.Function1<com.bedrockk.molang.runtime.MoParams, com.bedrockk.molang.runtime.value.MoValue>> getFunctions();
+}
+public interface com.cobblemon.mod.common.api.events.storage.ChangePCBoxWallpaperEvent {
+  public abstract net.minecraft.server.level.ServerPlayer getPlayer();
+  public abstract com.cobblemon.mod.common.api.storage.pc.PCBox getBox();
+  public abstract net.minecraft.resources.ResourceLocation getWallpaper();
+  public abstract net.minecraft.resources.ResourceLocation getAltWallpaper();
+}

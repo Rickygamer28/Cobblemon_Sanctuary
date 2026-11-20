@@ -1,0 +1,12 @@
+public final class com.cobblemon.mod.common.client.render.models.blockbench.animation.RotationFunctionPoseAnimation extends com.cobblemon.mod.common.client.render.models.blockbench.animation.PoseAnimation {
+  private final net.minecraft.client.model.geom.ModelPart part;
+  private final kotlin.jvm.functions.Function1<java.lang.Float, java.lang.Float> function;
+  private final int axis;
+  private final kotlin.jvm.functions.Function3<com.cobblemon.mod.common.client.render.models.blockbench.PosableState, java.lang.Float, java.lang.Float, java.lang.Float> timeVariable;
+  public com.cobblemon.mod.common.client.render.models.blockbench.animation.RotationFunctionPoseAnimation(net.minecraft.client.model.geom.ModelPart, kotlin.jvm.functions.Function1<? super java.lang.Float, java.lang.Float>, int, kotlin.jvm.functions.Function3<? super com.cobblemon.mod.common.client.render.models.blockbench.PosableState, ? super java.lang.Float, ? super java.lang.Float, java.lang.Float>);
+  public final net.minecraft.client.model.geom.ModelPart getPart();
+  public final kotlin.jvm.functions.Function1<java.lang.Float, java.lang.Float> getFunction();
+  public final int getAxis();
+  public final kotlin.jvm.functions.Function3<com.cobblemon.mod.common.client.render.models.blockbench.PosableState, java.lang.Float, java.lang.Float, java.lang.Float> getTimeVariable();
+  protected void setupAnim(com.cobblemon.mod.common.client.render.models.blockbench.repository.RenderContext, com.cobblemon.mod.common.client.render.models.blockbench.PosableModel, com.cobblemon.mod.common.client.render.models.blockbench.PosableState, float, float, float, float, float, float);
+}

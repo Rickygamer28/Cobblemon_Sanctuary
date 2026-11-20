@@ -1,0 +1,22 @@
+public final class com.cobblemon.mod.common.api.pokemon.helditem.HeldItemManager$Companion {
+  static final com.cobblemon.mod.common.api.pokemon.helditem.HeldItemManager$Companion $$INSTANCE;
+  private static final com.cobblemon.mod.common.api.pokemon.helditem.HeldItemManager EMPTY;
+  private com.cobblemon.mod.common.api.pokemon.helditem.HeldItemManager$Companion();
+  public final com.cobblemon.mod.common.api.pokemon.helditem.HeldItemManager getEMPTY();
+  static {};
+}
+public final class com.cobblemon.mod.common.api.pokemon.helditem.HeldItemManager$DefaultImpls {
+  public static boolean shouldConsumeItem(com.cobblemon.mod.common.api.pokemon.helditem.HeldItemManager, com.cobblemon.mod.common.battles.pokemon.BattlePokemon, com.cobblemon.mod.common.api.battles.model.PokemonBattle, java.lang.String);
+}
+public interface com.cobblemon.mod.common.api.pokemon.helditem.HeldItemManager {
+  public static final com.cobblemon.mod.common.api.pokemon.helditem.HeldItemManager$Companion Companion;
+  public abstract java.lang.String showdownId(com.cobblemon.mod.common.battles.pokemon.BattlePokemon);
+  public abstract net.minecraft.network.chat.Component nameOf(java.lang.String);
+  public abstract void handleStartInstruction(com.cobblemon.mod.common.battles.pokemon.BattlePokemon, com.cobblemon.mod.common.api.battles.model.PokemonBattle, com.cobblemon.mod.common.api.battles.interpreter.BattleMessage);
+  public abstract void handleEndInstruction(com.cobblemon.mod.common.battles.pokemon.BattlePokemon, com.cobblemon.mod.common.api.battles.model.PokemonBattle, com.cobblemon.mod.common.api.battles.interpreter.BattleMessage);
+  public abstract void give(com.cobblemon.mod.common.battles.pokemon.BattlePokemon, java.lang.String);
+  public abstract void take(com.cobblemon.mod.common.battles.pokemon.BattlePokemon, java.lang.String);
+  public default boolean shouldConsumeItem(com.cobblemon.mod.common.battles.pokemon.BattlePokemon, com.cobblemon.mod.common.api.battles.model.PokemonBattle, java.lang.String);
+  public static boolean access$shouldConsumeItem$jd(com.cobblemon.mod.common.api.pokemon.helditem.HeldItemManager, com.cobblemon.mod.common.battles.pokemon.BattlePokemon, com.cobblemon.mod.common.api.battles.model.PokemonBattle, java.lang.String);
+  static {};
+}

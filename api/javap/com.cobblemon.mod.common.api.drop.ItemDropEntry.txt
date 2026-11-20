@@ -1,0 +1,34 @@
+public class com.cobblemon.mod.common.api.drop.ItemDropEntry implements com.cobblemon.mod.common.api.drop.DropEntry {
+  private float percentage;
+  private int quantity;
+  private kotlin.ranges.IntRange quantityRange;
+  private int maxSelectableTimes;
+  private final com.cobblemon.mod.common.api.drop.ItemDropMethod dropMethod;
+  private net.minecraft.resources.ResourceLocation item;
+  private final com.google.gson.JsonElement components;
+  public com.cobblemon.mod.common.api.drop.ItemDropEntry();
+  public float getPercentage();
+  public void setPercentage(float);
+  public int getQuantity();
+  public void setQuantity(int);
+  public kotlin.ranges.IntRange getQuantityRange();
+  public void setQuantityRange(kotlin.ranges.IntRange);
+  public int getMaxSelectableTimes();
+  public void setMaxSelectableTimes(int);
+  public com.cobblemon.mod.common.api.drop.ItemDropMethod getDropMethod();
+  public net.minecraft.resources.ResourceLocation getItem();
+  public void setItem(net.minecraft.resources.ResourceLocation);
+  public com.google.gson.JsonElement getComponents();
+  public void drop(net.minecraft.world.entity.LivingEntity, net.minecraft.server.level.ServerLevel, net.minecraft.world.phys.Vec3, net.minecraft.server.level.ServerPlayer);
+  public final void encode(net.minecraft.network.RegistryFriendlyByteBuf);
+  public final com.cobblemon.mod.common.api.drop.ItemDropEntry decode(net.minecraft.network.RegistryFriendlyByteBuf);
+  public boolean canDrop(com.cobblemon.mod.common.pokemon.Pokemon);
+  private static final kotlin.Unit drop$lambda$1(net.minecraft.world.item.ItemStack, net.minecraft.core.component.DataComponentPatch);
+  private static final void drop$lambda$2(kotlin.jvm.functions.Function1, java.lang.Object);
+  private static final kotlin.Unit drop$lambda$3(net.minecraft.world.item.Item, com.mojang.serialization.DataResult$Error);
+  private static final void drop$lambda$4(kotlin.jvm.functions.Function1, java.lang.Object);
+  private static final kotlin.Unit encode$lambda$0(net.minecraft.network.RegistryFriendlyByteBuf, net.minecraft.network.FriendlyByteBuf, kotlin.ranges.IntRange);
+  private static final void encode$lambda$1(kotlin.jvm.functions.Function2, java.lang.Object, kotlin.ranges.IntRange);
+  private static final kotlin.ranges.IntRange decode$lambda$0(net.minecraft.network.RegistryFriendlyByteBuf, net.minecraft.network.FriendlyByteBuf);
+  private static final kotlin.ranges.IntRange decode$lambda$1(kotlin.jvm.functions.Function1, java.lang.Object);
+}

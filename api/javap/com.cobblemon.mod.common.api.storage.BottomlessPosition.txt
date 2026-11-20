@@ -1,0 +1,5 @@
+public final class com.cobblemon.mod.common.api.storage.BottomlessPosition implements com.cobblemon.mod.common.api.storage.StorePosition {
+  private final int currentIndex;
+  public com.cobblemon.mod.common.api.storage.BottomlessPosition(int);
+  public final int getCurrentIndex();
+}

@@ -1,0 +1,59 @@
+final class com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatures$getFeatures$1 extends kotlin.jvm.internal.FunctionReferenceImpl implements kotlin.jvm.functions.Function1<java.lang.String, com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatureProvider<? extends com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeature>> {
+  com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatures$getFeatures$1(java.lang.Object);
+  public final com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatureProvider<? extends com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeature> invoke(java.lang.String);
+  public java.lang.Object invoke(java.lang.Object);
+}
+final class com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatures$getFeaturesFor$assignedFeatures$1 extends kotlin.jvm.internal.FunctionReferenceImpl implements kotlin.jvm.functions.Function1<java.lang.String, com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatureProvider<? extends com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeature>> {
+  com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatures$getFeaturesFor$assignedFeatures$1(java.lang.Object);
+  public final com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatureProvider<? extends com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeature> invoke(java.lang.String);
+  public java.lang.Object invoke(java.lang.Object);
+}
+final class com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatures$getFeaturesFor$mentionedFeatures$1 extends kotlin.jvm.internal.FunctionReferenceImpl implements kotlin.jvm.functions.Function1<java.lang.String, com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatureProvider<? extends com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeature>> {
+  com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatures$getFeaturesFor$mentionedFeatures$1(java.lang.Object);
+  public final com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatureProvider<? extends com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeature> invoke(java.lang.String);
+  public java.lang.Object invoke(java.lang.Object);
+}
+final class com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatures$reload$2 extends kotlin.jvm.internal.FunctionReferenceImpl implements kotlin.jvm.functions.Function2<net.minecraft.resources.ResourceLocation, com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatureProvider<?>, kotlin.Unit> {
+  com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatures$reload$2(java.lang.Object);
+  public final void invoke(net.minecraft.resources.ResourceLocation, com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatureProvider<?>);
+  public java.lang.Object invoke(java.lang.Object, java.lang.Object);
+}
+public final class com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatures implements com.cobblemon.mod.common.api.data.JsonDataRegistry<com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatureProvider<?>> {
+  public static final com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatures INSTANCE;
+  private static final net.minecraft.resources.ResourceLocation id;
+  private static final net.minecraft.server.packs.PackType type;
+  private static final com.cobblemon.mod.common.api.reactive.SimpleObservable<com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatures> observable;
+  private static final java.util.Map<java.lang.String, java.lang.Class<? extends com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatureProvider<?>>> types;
+  private static final java.util.Map<java.lang.String, com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatureProvider<?>> codeFeatures;
+  private static final java.util.Map<java.lang.String, com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatureProvider<?>> resourceFeatures;
+  private static final com.google.gson.Gson gson;
+  private static final com.google.gson.reflect.TypeToken<com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatureProvider<?>> typeToken;
+  private static final java.lang.String resourcePath;
+  private com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatures();
+  public net.minecraft.resources.ResourceLocation getId();
+  public net.minecraft.server.packs.PackType getType();
+  public com.cobblemon.mod.common.api.reactive.SimpleObservable<com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatures> getObservable();
+  public final java.util.Map<java.lang.String, java.lang.Class<? extends com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatureProvider<?>>> getTypes();
+  public com.google.gson.Gson getGson();
+  public com.google.gson.reflect.TypeToken<com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatureProvider<?>> getTypeToken();
+  public java.lang.String getResourcePath();
+  public void sync(net.minecraft.server.level.ServerPlayer);
+  public void reload(java.util.Map<net.minecraft.resources.ResourceLocation, ? extends com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatureProvider<?>>);
+  public static final com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatureProvider<?> getCodeFeature(java.lang.String);
+  public static final com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatureProvider<?> getResourceFeature(java.lang.String);
+  public static final com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatureProvider<? extends com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeature> getFeature(java.lang.String);
+  public final void loadOnClient(java.util.Collection<? extends java.util.Map$Entry<java.lang.String, ? extends com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatureProvider<?>>>);
+  public static final java.util.List<com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatureProvider<? extends com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeature>> getFeatures();
+  public static final java.util.List<com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatureProvider<?>> getFeaturesFor(com.cobblemon.mod.common.pokemon.Species);
+  private final void register(java.lang.String, com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatureProvider<?>, boolean);
+  public static final void register(java.lang.String, com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatureProvider<?>);
+  public static final void registerType(java.lang.String, java.lang.Class<? extends com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatureProvider<?>>);
+  private final void registerFromAssets(net.minecraft.resources.ResourceLocation, com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatureProvider<?>);
+  public static final void unregister(java.lang.String);
+  public void reload(net.minecraft.server.packs.resources.ResourceManager);
+  public com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatureProvider<?> parse(java.io.BufferedReader, net.minecraft.resources.ResourceLocation);
+  private static final void reload$lambda$0(kotlin.jvm.functions.Function2, java.lang.Object, java.lang.Object);
+  public java.lang.Object parse(java.io.BufferedReader, net.minecraft.resources.ResourceLocation);
+  public static final void access$registerFromAssets(com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatures, net.minecraft.resources.ResourceLocation, com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatureProvider);
+  static {};
+}

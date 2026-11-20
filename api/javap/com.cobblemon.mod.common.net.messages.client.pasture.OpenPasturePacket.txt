@@ -1,0 +1,77 @@
+public final class com.cobblemon.mod.common.net.messages.client.pasture.OpenPasturePacket$Companion {
+  private com.cobblemon.mod.common.net.messages.client.pasture.OpenPasturePacket$Companion();
+  public final net.minecraft.resources.ResourceLocation getID();
+  public final com.cobblemon.mod.common.net.messages.client.pasture.OpenPasturePacket decode(net.minecraft.network.RegistryFriendlyByteBuf);
+  public com.cobblemon.mod.common.net.messages.client.pasture.OpenPasturePacket$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.net.messages.client.pasture.OpenPasturePacket$PasturePokemonDataDTO$Companion {
+  private com.cobblemon.mod.common.net.messages.client.pasture.OpenPasturePacket$PasturePokemonDataDTO$Companion();
+  public final com.cobblemon.mod.common.net.messages.client.pasture.OpenPasturePacket$PasturePokemonDataDTO decode(net.minecraft.network.RegistryFriendlyByteBuf);
+  private static final java.lang.String decode$lambda$0(net.minecraft.network.FriendlyByteBuf);
+  private static final java.lang.String decode$lambda$1(kotlin.jvm.functions.Function1, java.lang.Object);
+  private static final java.lang.String decode$lambda$2(net.minecraft.network.FriendlyByteBuf);
+  private static final java.lang.String decode$lambda$3(kotlin.jvm.functions.Function1, java.lang.Object);
+  private static final com.cobblemon.mod.common.entity.pokemon.PokemonBehaviourFlag decode$lambda$4(net.minecraft.network.FriendlyByteBuf);
+  private static final com.cobblemon.mod.common.entity.pokemon.PokemonBehaviourFlag decode$lambda$5(kotlin.jvm.functions.Function1, java.lang.Object);
+  public com.cobblemon.mod.common.net.messages.client.pasture.OpenPasturePacket$PasturePokemonDataDTO$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.net.messages.client.pasture.OpenPasturePacket$PasturePokemonDataDTO {
+  public static final com.cobblemon.mod.common.net.messages.client.pasture.OpenPasturePacket$PasturePokemonDataDTO$Companion Companion;
+  private final java.util.UUID pokemonId;
+  private final java.util.UUID playerId;
+  private final net.minecraft.network.chat.Component displayName;
+  private final java.lang.String ownerName;
+  private final net.minecraft.resources.ResourceLocation species;
+  private final java.util.Set<java.lang.String> aspects;
+  private final net.minecraft.world.item.ItemStack heldItem;
+  private final int level;
+  private final boolean entityKnown;
+  private java.util.Set<? extends com.cobblemon.mod.common.entity.pokemon.PokemonBehaviourFlag> behaviourFlags;
+  public com.cobblemon.mod.common.net.messages.client.pasture.OpenPasturePacket$PasturePokemonDataDTO(java.util.UUID, java.util.UUID, net.minecraft.network.chat.Component, java.lang.String, net.minecraft.resources.ResourceLocation, java.util.Set<java.lang.String>, net.minecraft.world.item.ItemStack, int, boolean, java.util.Set<? extends com.cobblemon.mod.common.entity.pokemon.PokemonBehaviourFlag>);
+  public com.cobblemon.mod.common.net.messages.client.pasture.OpenPasturePacket$PasturePokemonDataDTO(java.util.UUID, java.util.UUID, net.minecraft.network.chat.Component, java.lang.String, net.minecraft.resources.ResourceLocation, java.util.Set, net.minecraft.world.item.ItemStack, int, boolean, java.util.Set, int, kotlin.jvm.internal.DefaultConstructorMarker);
+  public final java.util.UUID getPokemonId();
+  public final java.util.UUID getPlayerId();
+  public final net.minecraft.network.chat.Component getDisplayName();
+  public final java.lang.String getOwnerName();
+  public final net.minecraft.resources.ResourceLocation getSpecies();
+  public final java.util.Set<java.lang.String> getAspects();
+  public final net.minecraft.world.item.ItemStack getHeldItem();
+  public final int getLevel();
+  public final boolean getEntityKnown();
+  public final java.util.Set<com.cobblemon.mod.common.entity.pokemon.PokemonBehaviourFlag> getBehaviourFlags();
+  public final void setBehaviourFlags(java.util.Set<? extends com.cobblemon.mod.common.entity.pokemon.PokemonBehaviourFlag>);
+  public final void encode(net.minecraft.network.RegistryFriendlyByteBuf);
+  private static final kotlin.Unit encode$lambda$0(net.minecraft.network.RegistryFriendlyByteBuf, net.minecraft.network.FriendlyByteBuf, java.lang.String);
+  private static final void encode$lambda$1(kotlin.jvm.functions.Function2, java.lang.Object, java.lang.String);
+  private static final kotlin.Unit encode$lambda$2(net.minecraft.network.RegistryFriendlyByteBuf, net.minecraft.network.FriendlyByteBuf, java.lang.String);
+  private static final void encode$lambda$3(kotlin.jvm.functions.Function2, java.lang.Object, java.lang.String);
+  private static final kotlin.Unit encode$lambda$4(net.minecraft.network.RegistryFriendlyByteBuf, net.minecraft.network.FriendlyByteBuf, com.cobblemon.mod.common.entity.pokemon.PokemonBehaviourFlag);
+  private static final void encode$lambda$5(kotlin.jvm.functions.Function2, java.lang.Object, com.cobblemon.mod.common.entity.pokemon.PokemonBehaviourFlag);
+  static {};
+}
+public final class com.cobblemon.mod.common.net.messages.client.pasture.OpenPasturePacket implements com.cobblemon.mod.common.api.net.NetworkPacket<com.cobblemon.mod.common.net.messages.client.pasture.OpenPasturePacket> {
+  public static final com.cobblemon.mod.common.net.messages.client.pasture.OpenPasturePacket$Companion Companion;
+  private final java.util.UUID pcId;
+  private final java.util.UUID pastureId;
+  private final int limit;
+  private final java.util.List<com.cobblemon.mod.common.net.messages.client.pasture.OpenPasturePacket$PasturePokemonDataDTO> tetheredPokemon;
+  private final com.cobblemon.mod.common.api.pasture.PasturePermissions permissions;
+  private final net.minecraft.resources.ResourceLocation id;
+  private static final net.minecraft.resources.ResourceLocation ID;
+  public com.cobblemon.mod.common.net.messages.client.pasture.OpenPasturePacket(java.util.UUID, java.util.UUID, int, java.util.List<com.cobblemon.mod.common.net.messages.client.pasture.OpenPasturePacket$PasturePokemonDataDTO>, com.cobblemon.mod.common.api.pasture.PasturePermissions);
+  public final java.util.UUID getPcId();
+  public final java.util.UUID getPastureId();
+  public final int getLimit();
+  public final java.util.List<com.cobblemon.mod.common.net.messages.client.pasture.OpenPasturePacket$PasturePokemonDataDTO> getTetheredPokemon();
+  public final com.cobblemon.mod.common.api.pasture.PasturePermissions getPermissions();
+  public net.minecraft.resources.ResourceLocation getId();
+  public void encode(net.minecraft.network.RegistryFriendlyByteBuf);
+  public void sendToPlayer(net.minecraft.server.level.ServerPlayer);
+  public void sendToPlayers(java.lang.Iterable<? extends net.minecraft.server.level.ServerPlayer>);
+  public void sendToAllPlayers();
+  public void sendToServer();
+  public void sendToPlayersAround(double, double, double, double, net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level>, kotlin.jvm.functions.Function1<? super net.minecraft.server.level.ServerPlayer, java.lang.Boolean>);
+  public net.minecraft.network.protocol.common.custom.CustomPacketPayload$Type<com.cobblemon.mod.common.net.messages.client.pasture.OpenPasturePacket> type();
+  public static final net.minecraft.resources.ResourceLocation access$getID$cp();
+  static {};
+}

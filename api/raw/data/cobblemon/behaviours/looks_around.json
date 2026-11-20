@@ -1,0 +1,1 @@
+{"configurations":[{"activity":"minecraft:idle","tasksByPriority":{"0":[{"condition":true,"type":"cobblemon:look_at_entities"},{"condition":"q.entity.is_npc","type":"cobblemon:look_at_speaker"}]},"type":"cobblemon:add_tasks_to_activity"}],"description":"cobblemon.behaviour.looks_around.desc","name":"cobblemon.behaviour.looks_around.name"}

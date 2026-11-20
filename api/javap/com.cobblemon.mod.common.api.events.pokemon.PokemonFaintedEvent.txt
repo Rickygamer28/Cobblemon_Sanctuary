@@ -1,0 +1,17 @@
+public final class com.cobblemon.mod.common.api.events.pokemon.PokemonFaintedEvent {
+  private final com.cobblemon.mod.common.pokemon.Pokemon pokemon;
+  private int faintedTimer;
+  private final java.util.Map<java.lang.String, com.bedrockk.molang.runtime.value.MoValue> context;
+  public com.cobblemon.mod.common.api.events.pokemon.PokemonFaintedEvent(com.cobblemon.mod.common.pokemon.Pokemon, int);
+  public final com.cobblemon.mod.common.pokemon.Pokemon getPokemon();
+  public final int getFaintedTimer();
+  public final void setFaintedTimer(int);
+  public final java.util.Map<java.lang.String, com.bedrockk.molang.runtime.value.MoValue> getContext();
+  public final com.cobblemon.mod.common.pokemon.Pokemon component1();
+  public final int component2();
+  public final com.cobblemon.mod.common.api.events.pokemon.PokemonFaintedEvent copy(com.cobblemon.mod.common.pokemon.Pokemon, int);
+  public static com.cobblemon.mod.common.api.events.pokemon.PokemonFaintedEvent copy$default(com.cobblemon.mod.common.api.events.pokemon.PokemonFaintedEvent, com.cobblemon.mod.common.pokemon.Pokemon, int, int, java.lang.Object);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+}

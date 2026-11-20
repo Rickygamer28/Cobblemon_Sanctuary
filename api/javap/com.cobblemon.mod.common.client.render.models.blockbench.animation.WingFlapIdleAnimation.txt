@@ -1,0 +1,17 @@
+public final class com.cobblemon.mod.common.client.render.models.blockbench.animation.WingFlapIdleAnimation extends com.cobblemon.mod.common.client.render.models.blockbench.animation.PoseAnimation {
+  private final com.cobblemon.mod.common.client.render.models.blockbench.pose.Bone leftWing;
+  private final com.cobblemon.mod.common.client.render.models.blockbench.pose.Bone rightWing;
+  private final kotlin.jvm.functions.Function1<java.lang.Float, java.lang.Float> rotation;
+  private final kotlin.jvm.functions.Function3<com.cobblemon.mod.common.client.render.models.blockbench.PosableState, java.lang.Float, java.lang.Float, java.lang.Float> timeVariable;
+  private final int axis;
+  public com.cobblemon.mod.common.client.render.models.blockbench.animation.WingFlapIdleAnimation(com.cobblemon.mod.common.client.render.models.blockbench.pose.Bone, com.cobblemon.mod.common.client.render.models.blockbench.pose.Bone, kotlin.jvm.functions.Function1<? super java.lang.Float, java.lang.Float>, kotlin.jvm.functions.Function3<? super com.cobblemon.mod.common.client.render.models.blockbench.PosableState, ? super java.lang.Float, ? super java.lang.Float, java.lang.Float>, int);
+  public com.cobblemon.mod.common.client.render.models.blockbench.animation.WingFlapIdleAnimation(com.cobblemon.mod.common.client.render.models.blockbench.pose.Bone, com.cobblemon.mod.common.client.render.models.blockbench.pose.Bone, kotlin.jvm.functions.Function1, kotlin.jvm.functions.Function3, int, int, kotlin.jvm.internal.DefaultConstructorMarker);
+  public final com.cobblemon.mod.common.client.render.models.blockbench.pose.Bone getLeftWing();
+  public final com.cobblemon.mod.common.client.render.models.blockbench.pose.Bone getRightWing();
+  public final kotlin.jvm.functions.Function1<java.lang.Float, java.lang.Float> getRotation();
+  public final kotlin.jvm.functions.Function3<com.cobblemon.mod.common.client.render.models.blockbench.PosableState, java.lang.Float, java.lang.Float, java.lang.Float> getTimeVariable();
+  public final int getAxis();
+  public com.cobblemon.mod.common.client.render.models.blockbench.animation.WingFlapIdleAnimation(com.cobblemon.mod.common.client.render.models.blockbench.frame.BiWingedFrame, kotlin.jvm.functions.Function1<? super java.lang.Float, java.lang.Float>, kotlin.jvm.functions.Function3<? super com.cobblemon.mod.common.client.render.models.blockbench.PosableState, ? super java.lang.Float, ? super java.lang.Float, java.lang.Float>, int);
+  protected void setupAnim(com.cobblemon.mod.common.client.render.models.blockbench.repository.RenderContext, com.cobblemon.mod.common.client.render.models.blockbench.PosableModel, com.cobblemon.mod.common.client.render.models.blockbench.PosableState, float, float, float, float, float, float);
+  private static final float _init_$lambda$0(com.cobblemon.mod.common.client.render.models.blockbench.PosableState, float, float);
+}

@@ -1,0 +1,20 @@
+public final class com.cobblemon.mod.common.entity.pokemon.ai.sensors.PokemonItemSensor$Companion {
+  private com.cobblemon.mod.common.entity.pokemon.ai.sensors.PokemonItemSensor$Companion();
+  public com.cobblemon.mod.common.entity.pokemon.ai.sensors.PokemonItemSensor$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.entity.pokemon.ai.sensors.PokemonItemSensor extends net.minecraft.world.entity.ai.sensing.Sensor<com.cobblemon.mod.common.entity.pokemon.PokemonEntity> {
+  public static final com.cobblemon.mod.common.entity.pokemon.ai.sensors.PokemonItemSensor$Companion Companion;
+  private final double width;
+  private final double height;
+  private final double maxTravelDistance;
+  public static final java.lang.String PICKUP_ITEMS;
+  public com.cobblemon.mod.common.entity.pokemon.ai.sensors.PokemonItemSensor(double, double, double);
+  public com.cobblemon.mod.common.entity.pokemon.ai.sensors.PokemonItemSensor(double, double, double, int, kotlin.jvm.internal.DefaultConstructorMarker);
+  public java.util.Set<net.minecraft.world.entity.ai.memory.MemoryModuleType<?>> requires();
+  protected void doTick(net.minecraft.server.level.ServerLevel, com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+  private static final boolean doTick$lambda$1(java.util.List, com.cobblemon.mod.common.entity.pokemon.PokemonEntity, int, com.cobblemon.mod.common.entity.pokemon.ai.sensors.PokemonItemSensor, net.minecraft.world.entity.item.ItemEntity);
+  private static final boolean doTick$lambda$2(kotlin.jvm.functions.Function1, java.lang.Object);
+  public com.cobblemon.mod.common.entity.pokemon.ai.sensors.PokemonItemSensor();
+  public void doTick(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity);
+  static {};
+}

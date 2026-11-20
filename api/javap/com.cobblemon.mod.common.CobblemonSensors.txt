@@ -1,0 +1,22 @@
+public final class com.cobblemon.mod.common.CobblemonSensors {
+  public static final com.cobblemon.mod.common.CobblemonSensors INSTANCE;
+  private static final java.util.Map<java.lang.String, net.minecraft.world.entity.ai.sensing.SensorType<?>> sensors;
+  public static final net.minecraft.world.entity.ai.sensing.SensorType<com.cobblemon.mod.common.entity.sensor.NPCBattlingSensor> NPC_BATTLING;
+  public static final net.minecraft.world.entity.ai.sensing.SensorType<com.cobblemon.mod.common.entity.sensor.BattlingPokemonSensor> BATTLING_POKEMON;
+  public static final net.minecraft.world.entity.ai.sensing.SensorType<com.cobblemon.mod.common.entity.pokemon.ai.sensors.DrowsySensor> POKEMON_DROWSY;
+  public static final net.minecraft.world.entity.ai.sensing.SensorType<com.cobblemon.mod.common.entity.pokemon.ai.sensors.PokemonAdultSensor> POKEMON_ADULT;
+  public static final net.minecraft.world.entity.ai.sensing.SensorType<com.cobblemon.mod.common.pokemon.ai.PokemonDisturbancesSensor> POKEMON_DISTURBANCE;
+  public static final net.minecraft.world.entity.ai.sensing.SensorType<com.cobblemon.mod.common.entity.pokemon.ai.sensors.DefendOwnerSensor> POKEMON_DEFEND_OWNER;
+  public static final net.minecraft.world.entity.ai.sensing.SensorType<com.cobblemon.mod.common.entity.pokemon.ai.sensors.AlphaLevelMatchingSensor> ALPHA_LEVEL_MATCHING;
+  public static final net.minecraft.world.entity.ai.sensing.SensorType<com.cobblemon.mod.common.entity.pokemon.ai.sensors.PokemonGrowableCropSensor> NEARBY_GROWABLE_CROPS;
+  public static final net.minecraft.world.entity.ai.sensing.SensorType<com.cobblemon.mod.common.entity.pokemon.ai.sensors.BeeHiveSensor> NEARBY_BEE_HIVE;
+  public static final net.minecraft.world.entity.ai.sensing.SensorType<com.cobblemon.mod.common.entity.pokemon.ai.sensors.FlowerSensor> NEARBY_FLOWER;
+  public static final net.minecraft.world.entity.ai.sensing.SensorType<com.cobblemon.mod.common.entity.pokemon.ai.sensors.SweetBerryBushSensor> NEARBY_SWEET_BERRY_BUSH;
+  public static final net.minecraft.world.entity.ai.sensing.SensorType<com.cobblemon.mod.common.entity.pokemon.ai.sensors.PokemonItemSensor> POKEMON_NEARBY_WANTED_ITEM;
+  public static final net.minecraft.world.entity.ai.sensing.SensorType<com.cobblemon.mod.common.entity.pokemon.ai.sensors.SacLeavesSensor> NEARBY_SACC_LEAVES;
+  private com.cobblemon.mod.common.CobblemonSensors();
+  public final java.util.Map<java.lang.String, net.minecraft.world.entity.ai.sensing.SensorType<?>> getSensors();
+  public static final <E extends net.minecraft.world.entity.Entity, U extends net.minecraft.world.entity.ai.sensing.Sensor<E>> net.minecraft.world.entity.ai.sensing.SensorType<U> register(java.lang.String, java.util.function.Supplier<U>);
+  private static final com.cobblemon.mod.common.entity.pokemon.ai.sensors.PokemonItemSensor POKEMON_NEARBY_WANTED_ITEM$lambda$0();
+  static {};
+}

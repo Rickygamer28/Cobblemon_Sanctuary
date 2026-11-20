@@ -1,0 +1,33 @@
+public final class com.cobblemon.mod.common.entity.pokemon.effects.TransformEffect$Companion {
+  private com.cobblemon.mod.common.entity.pokemon.effects.TransformEffect$Companion();
+  public final java.lang.String getID();
+  public com.cobblemon.mod.common.entity.pokemon.effects.TransformEffect$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.entity.pokemon.effects.TransformEffect extends com.cobblemon.mod.common.entity.pokemon.effects.BattleEffect implements com.cobblemon.mod.common.api.entity.pokemon.MocKEffect {
+  public static final com.cobblemon.mod.common.entity.pokemon.effects.TransformEffect$Companion Companion;
+  private com.cobblemon.mod.common.api.pokemon.PokemonProperties mock;
+  private float scale;
+  private final boolean doCry;
+  private static final java.lang.String ID;
+  public com.cobblemon.mod.common.entity.pokemon.effects.TransformEffect(com.cobblemon.mod.common.api.pokemon.PokemonProperties, float, boolean);
+  public com.cobblemon.mod.common.entity.pokemon.effects.TransformEffect(com.cobblemon.mod.common.api.pokemon.PokemonProperties, float, boolean, int, kotlin.jvm.internal.DefaultConstructorMarker);
+  public com.cobblemon.mod.common.api.pokemon.PokemonProperties getMock();
+  public void setMock(com.cobblemon.mod.common.api.pokemon.PokemonProperties);
+  public float getScale();
+  public void setScale(float);
+  public final boolean getDoCry();
+  public com.cobblemon.mod.common.entity.pokemon.effects.TransformEffect(com.cobblemon.mod.common.pokemon.Pokemon, boolean);
+  public com.cobblemon.mod.common.entity.pokemon.effects.TransformEffect(com.cobblemon.mod.common.pokemon.Pokemon, boolean, int, kotlin.jvm.internal.DefaultConstructorMarker);
+  protected void apply(com.cobblemon.mod.common.entity.pokemon.PokemonEntity, java.util.concurrent.CompletableFuture<com.cobblemon.mod.common.entity.pokemon.PokemonEntity>);
+  protected void revert(com.cobblemon.mod.common.entity.pokemon.PokemonEntity, java.util.concurrent.CompletableFuture<com.cobblemon.mod.common.entity.pokemon.PokemonEntity>);
+  public net.minecraft.nbt.CompoundTag saveToNbt(net.minecraft.core.HolderLookup$Provider);
+  public void loadFromNBT(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);
+  public com.cobblemon.mod.common.pokemon.Species getExposedSpecies();
+  public com.cobblemon.mod.common.pokemon.FormData getExposedForm();
+  public com.cobblemon.mod.common.pokeball.PokeBall getExposedBall();
+  private static final kotlin.Unit apply$lambda$0(com.cobblemon.mod.common.entity.pokemon.effects.TransformEffect, com.cobblemon.mod.common.entity.pokemon.PokemonEntity, java.util.concurrent.CompletableFuture);
+  private static final kotlin.Unit revert$lambda$0(com.cobblemon.mod.common.entity.pokemon.PokemonEntity, java.util.concurrent.CompletableFuture);
+  public com.cobblemon.mod.common.entity.pokemon.effects.TransformEffect();
+  public static final java.lang.String access$getID$cp();
+  static {};
+}

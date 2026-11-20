@@ -1,0 +1,14 @@
+public final class com.cobblemon.mod.common.pokemon.ai.ToleratedHerdLeader {
+  private com.cobblemon.mod.common.api.pokemon.PokemonProperties pokemon;
+  private final int tier;
+  private final boolean ignoresLevel;
+  private final kotlin.ranges.IntRange followDistance;
+  public com.cobblemon.mod.common.pokemon.ai.ToleratedHerdLeader(com.cobblemon.mod.common.api.pokemon.PokemonProperties, int, boolean, kotlin.ranges.IntRange);
+  public com.cobblemon.mod.common.pokemon.ai.ToleratedHerdLeader(com.cobblemon.mod.common.api.pokemon.PokemonProperties, int, boolean, kotlin.ranges.IntRange, int, kotlin.jvm.internal.DefaultConstructorMarker);
+  public final com.cobblemon.mod.common.api.pokemon.PokemonProperties getPokemon();
+  public final void setPokemon(com.cobblemon.mod.common.api.pokemon.PokemonProperties);
+  public final int getTier();
+  public final boolean getIgnoresLevel();
+  public final kotlin.ranges.IntRange getFollowDistance();
+  public final void initialize();
+}

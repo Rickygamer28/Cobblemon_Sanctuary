@@ -1,0 +1,59 @@
+public final class com.cobblemon.mod.common.pokemon.evolution.controller.ClientEvolutionController$Companion {
+  private com.cobblemon.mod.common.pokemon.evolution.controller.ClientEvolutionController$Companion();
+  public final com.mojang.serialization.Codec<com.cobblemon.mod.common.pokemon.evolution.controller.ClientEvolutionController$Intermediate> getCODEC();
+  public static void getCODEC$annotations();
+  public com.cobblemon.mod.common.pokemon.evolution.controller.ClientEvolutionController$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.pokemon.evolution.controller.ClientEvolutionController$Intermediate implements com.cobblemon.mod.common.api.pokemon.evolution.PreProcessor {
+  private final java.util.Set<com.cobblemon.mod.common.api.pokemon.evolution.EvolutionDisplay> evolutions;
+  public com.cobblemon.mod.common.pokemon.evolution.controller.ClientEvolutionController$Intermediate(java.util.Set<? extends com.cobblemon.mod.common.api.pokemon.evolution.EvolutionDisplay>);
+  public final java.util.Set<com.cobblemon.mod.common.api.pokemon.evolution.EvolutionDisplay> getEvolutions();
+  public com.cobblemon.mod.common.pokemon.evolution.controller.ClientEvolutionController create(com.cobblemon.mod.common.pokemon.Pokemon);
+  public final java.util.Set<com.cobblemon.mod.common.api.pokemon.evolution.EvolutionDisplay> component1();
+  public final com.cobblemon.mod.common.pokemon.evolution.controller.ClientEvolutionController$Intermediate copy(java.util.Set<? extends com.cobblemon.mod.common.api.pokemon.evolution.EvolutionDisplay>);
+  public static com.cobblemon.mod.common.pokemon.evolution.controller.ClientEvolutionController$Intermediate copy$default(com.cobblemon.mod.common.pokemon.evolution.controller.ClientEvolutionController$Intermediate, java.util.Set, int, java.lang.Object);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+  public com.cobblemon.mod.common.api.pokemon.evolution.EvolutionController create(com.cobblemon.mod.common.pokemon.Pokemon);
+}
+public final class com.cobblemon.mod.common.pokemon.evolution.controller.ClientEvolutionController implements com.cobblemon.mod.common.api.pokemon.evolution.EvolutionController<com.cobblemon.mod.common.api.pokemon.evolution.EvolutionDisplay, com.cobblemon.mod.common.pokemon.evolution.controller.ClientEvolutionController$Intermediate> {
+  public static final com.cobblemon.mod.common.pokemon.evolution.controller.ClientEvolutionController$Companion Companion;
+  private final com.cobblemon.mod.common.pokemon.Pokemon pokemon;
+  private final java.util.Set<com.cobblemon.mod.common.api.pokemon.evolution.EvolutionDisplay> evolutions;
+  private static final com.mojang.serialization.Codec<com.cobblemon.mod.common.pokemon.evolution.controller.ClientEvolutionController$Intermediate> CODEC;
+  public com.cobblemon.mod.common.pokemon.evolution.controller.ClientEvolutionController(com.cobblemon.mod.common.pokemon.Pokemon, java.util.Set<? extends com.cobblemon.mod.common.api.pokemon.evolution.EvolutionDisplay>);
+  public int getSize();
+  public com.cobblemon.mod.common.pokemon.Pokemon pokemon();
+  public void start(com.cobblemon.mod.common.api.pokemon.evolution.EvolutionDisplay);
+  public java.util.Collection<com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgress<?>> progress();
+  public <P extends com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgress<?>> P trackProgress(P);
+  public <P extends com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgress<?>> P progressFirstOrCreate(kotlin.jvm.functions.Function1<? super com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgress<?>, java.lang.Boolean>, kotlin.jvm.functions.Function0<? extends P>);
+  public boolean add(com.cobblemon.mod.common.api.pokemon.evolution.EvolutionDisplay);
+  public boolean addAll(java.util.Collection<? extends com.cobblemon.mod.common.api.pokemon.evolution.EvolutionDisplay>);
+  public void clear();
+  public java.util.Iterator<com.cobblemon.mod.common.api.pokemon.evolution.EvolutionDisplay> iterator();
+  public boolean remove(com.cobblemon.mod.common.api.pokemon.evolution.EvolutionDisplay);
+  public boolean removeAll(java.util.Collection<?>);
+  public boolean retainAll(java.util.Collection<?>);
+  public boolean contains(com.cobblemon.mod.common.api.pokemon.evolution.EvolutionDisplay);
+  public boolean containsAll(java.util.Collection<?>);
+  public boolean isEmpty();
+  public com.cobblemon.mod.common.pokemon.evolution.controller.ClientEvolutionController$Intermediate asIntermediate();
+  public final void sendPlayerNotification();
+  private static final com.cobblemon.mod.common.pokemon.evolution.controller.ClientEvolutionController$Intermediate CODEC$lambda$0(java.util.List);
+  private static final com.cobblemon.mod.common.pokemon.evolution.controller.ClientEvolutionController$Intermediate CODEC$lambda$1(kotlin.jvm.functions.Function1, java.lang.Object);
+  private static final java.util.List CODEC$lambda$2(com.cobblemon.mod.common.pokemon.evolution.controller.ClientEvolutionController$Intermediate);
+  private static final java.util.List CODEC$lambda$3(kotlin.jvm.functions.Function1, java.lang.Object);
+  public static final com.mojang.serialization.Codec<com.cobblemon.mod.common.pokemon.evolution.controller.ClientEvolutionController$Intermediate> getCODEC();
+  public final int size();
+  public void start(com.cobblemon.mod.common.api.pokemon.evolution.EvolutionLike);
+  public boolean add(java.lang.Object);
+  public final boolean remove(java.lang.Object);
+  public final boolean contains(java.lang.Object);
+  public com.cobblemon.mod.common.api.pokemon.evolution.PreProcessor asIntermediate();
+  public static final com.mojang.serialization.Codec access$getCODEC$cp();
+  public <T> T[] toArray(T[]);
+  public java.lang.Object[] toArray();
+  static {};
+}

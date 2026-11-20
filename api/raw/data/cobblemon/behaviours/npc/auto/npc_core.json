@@ -1,0 +1,1 @@
+{"configurations":[{"activity":"minecraft:idle","tasksByPriority":{"0":[{"script":"q.entity.get_wander_control_memory.reset()","type":"cobblemon:run_script"}]},"type":"add_tasks_to_activity"}],"visible":false}

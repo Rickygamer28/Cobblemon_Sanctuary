@@ -1,0 +1,5 @@
+public final class com.cobblemon.mod.common.api.events.entity.PokemonEntitySaveToWorldEvent extends com.cobblemon.mod.common.api.events.Cancelable {
+  private final com.cobblemon.mod.common.entity.pokemon.PokemonEntity pokemonEntity;
+  public com.cobblemon.mod.common.api.events.entity.PokemonEntitySaveToWorldEvent(com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+  public final com.cobblemon.mod.common.entity.pokemon.PokemonEntity getPokemonEntity();
+}

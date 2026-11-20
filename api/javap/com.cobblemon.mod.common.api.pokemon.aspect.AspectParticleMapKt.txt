@@ -1,0 +1,5 @@
+public final class com.cobblemon.mod.common.api.pokemon.aspect.AspectParticleMapKt {
+  private static final java.util.Map<java.lang.String, com.cobblemon.mod.common.api.pokemon.aspect.ParticleData> aspectParticleMap;
+  public static final java.util.Map<java.lang.String, com.cobblemon.mod.common.api.pokemon.aspect.ParticleData> getAspectParticleMap();
+  static {};
+}

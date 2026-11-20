@@ -1,0 +1,32 @@
+public final class com.cobblemon.mod.common.pokemon.ai.SwimBehaviour {
+  private final boolean avoidsWater;
+  private final boolean canSwimInWater;
+  private final com.bedrockk.molang.Expression swimSpeed;
+  private final boolean canBreatheUnderwater;
+  private final boolean canWalkOnWater;
+  private final boolean canSwimInLava;
+  private final boolean canBreatheUnderlava;
+  private final boolean canWalkOnLava;
+  private final transient com.cobblemon.mod.common.api.molang.ObjectValue<com.cobblemon.mod.common.pokemon.ai.SwimBehaviour> struct;
+  public com.cobblemon.mod.common.pokemon.ai.SwimBehaviour();
+  public final boolean getAvoidsWater();
+  public final boolean getCanSwimInWater();
+  public final com.bedrockk.molang.Expression getSwimSpeed();
+  public final boolean getCanBreatheUnderwater();
+  public final boolean getCanWalkOnWater();
+  public final boolean getCanSwimInLava();
+  public final boolean getCanBreatheUnderlava();
+  public final boolean getCanWalkOnLava();
+  public final boolean canWalkOnFluid(net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid>);
+  public final boolean canBreatheUnderFluid(net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid>);
+  public final boolean canSwimInFluid(net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid>);
+  public final com.cobblemon.mod.common.api.molang.ObjectValue<com.cobblemon.mod.common.pokemon.ai.SwimBehaviour> getStruct();
+  private static final java.lang.Object struct$lambda$0$0(com.cobblemon.mod.common.pokemon.ai.SwimBehaviour, com.bedrockk.molang.runtime.MoParams);
+  private static final java.lang.Object struct$lambda$0$1(com.cobblemon.mod.common.pokemon.ai.SwimBehaviour, com.bedrockk.molang.runtime.MoParams);
+  private static final java.lang.Object struct$lambda$0$2(com.cobblemon.mod.common.pokemon.ai.SwimBehaviour, com.bedrockk.molang.runtime.MoParams);
+  private static final java.lang.Object struct$lambda$0$3(com.cobblemon.mod.common.pokemon.ai.SwimBehaviour, com.bedrockk.molang.runtime.MoParams);
+  private static final java.lang.Object struct$lambda$0$4(com.cobblemon.mod.common.pokemon.ai.SwimBehaviour, com.bedrockk.molang.runtime.MoParams);
+  private static final java.lang.Object struct$lambda$0$5(com.cobblemon.mod.common.pokemon.ai.SwimBehaviour, com.bedrockk.molang.runtime.MoParams);
+  private static final java.lang.Object struct$lambda$0$6(com.cobblemon.mod.common.pokemon.ai.SwimBehaviour, com.bedrockk.molang.runtime.MoParams);
+  private static final java.lang.Object struct$lambda$0$7(com.cobblemon.mod.common.pokemon.ai.SwimBehaviour, com.bedrockk.molang.runtime.MoParams);
+}

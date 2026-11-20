@@ -1,0 +1,9 @@
+public final class com.cobblemon.mod.common.api.storage.pc.search.PokemonFilter$DefaultImpls {
+  public static com.cobblemon.mod.common.api.storage.pc.search.PokemonFilter inverted(com.cobblemon.mod.common.api.storage.pc.search.PokemonFilter);
+}
+public interface com.cobblemon.mod.common.api.storage.pc.search.PokemonFilter {
+  public abstract boolean test(com.cobblemon.mod.common.pokemon.Pokemon);
+  public default com.cobblemon.mod.common.api.storage.pc.search.PokemonFilter inverted();
+  private static boolean inverted$lambda$0(com.cobblemon.mod.common.api.storage.pc.search.PokemonFilter, com.cobblemon.mod.common.pokemon.Pokemon);
+  public static com.cobblemon.mod.common.api.storage.pc.search.PokemonFilter access$inverted$jd(com.cobblemon.mod.common.api.storage.pc.search.PokemonFilter);
+}

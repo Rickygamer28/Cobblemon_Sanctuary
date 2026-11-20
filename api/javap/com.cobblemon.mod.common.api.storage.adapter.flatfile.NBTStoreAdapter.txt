@@ -1,0 +1,8 @@
+public class com.cobblemon.mod.common.api.storage.adapter.flatfile.NBTStoreAdapter extends com.cobblemon.mod.common.api.storage.adapter.flatfile.OneToOneFileStoreAdapter<net.minecraft.nbt.CompoundTag> {
+  public com.cobblemon.mod.common.api.storage.adapter.flatfile.NBTStoreAdapter(java.lang.String, boolean, boolean);
+  public <E extends com.cobblemon.mod.common.api.storage.StorePosition, T extends com.cobblemon.mod.common.api.storage.PokemonStore<E>> net.minecraft.nbt.CompoundTag serialize(T, net.minecraft.core.RegistryAccess);
+  public void save(java.io.File, net.minecraft.nbt.CompoundTag);
+  public <E, T extends com.cobblemon.mod.common.api.storage.PokemonStore<E>> T load(java.io.File, java.lang.Class<? extends T>, java.util.UUID, net.minecraft.core.RegistryAccess);
+  public java.lang.Object serialize(com.cobblemon.mod.common.api.storage.PokemonStore, net.minecraft.core.RegistryAccess);
+  public void save(java.io.File, java.lang.Object);
+}

@@ -1,0 +1,25 @@
+public final class com.cobblemon.mod.common.api.ai.config.BehaviourConfig$Companion {
+  static final com.cobblemon.mod.common.api.ai.config.BehaviourConfig$Companion $$INSTANCE;
+  private static final java.util.Map<net.minecraft.resources.ResourceLocation, java.lang.Class<? extends com.cobblemon.mod.common.api.ai.config.BehaviourConfig>> types;
+  private com.cobblemon.mod.common.api.ai.config.BehaviourConfig$Companion();
+  public final java.util.Map<net.minecraft.resources.ResourceLocation, java.lang.Class<? extends com.cobblemon.mod.common.api.ai.config.BehaviourConfig>> getTypes();
+  static {};
+}
+public final class com.cobblemon.mod.common.api.ai.config.BehaviourConfig$DefaultImpls {
+  public static boolean checkCondition(com.cobblemon.mod.common.api.ai.config.BehaviourConfig, com.cobblemon.mod.common.api.ai.BehaviourConfigurationContext, com.mojang.datafixers.util.Either<com.bedrockk.molang.Expression, com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable>);
+  public static void preconfigure(com.cobblemon.mod.common.api.ai.config.BehaviourConfig, net.minecraft.world.entity.LivingEntity, com.cobblemon.mod.common.api.ai.BehaviourConfigurationContext);
+}
+public interface com.cobblemon.mod.common.api.ai.config.BehaviourConfig {
+  public static final com.cobblemon.mod.common.api.ai.config.BehaviourConfig$Companion Companion;
+  public default boolean checkCondition(com.cobblemon.mod.common.api.ai.BehaviourConfigurationContext, com.mojang.datafixers.util.Either<com.bedrockk.molang.Expression, com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable>);
+  public abstract java.util.List<com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable> getVariables(net.minecraft.world.entity.LivingEntity, com.cobblemon.mod.common.api.ai.BehaviourConfigurationContext);
+  public default void preconfigure(net.minecraft.world.entity.LivingEntity, com.cobblemon.mod.common.api.ai.BehaviourConfigurationContext);
+  public abstract void configure(net.minecraft.world.entity.LivingEntity, com.cobblemon.mod.common.api.ai.BehaviourConfigurationContext);
+  private static com.bedrockk.molang.Expression checkCondition$lambda$0(com.bedrockk.molang.Expression);
+  private static com.bedrockk.molang.Expression checkCondition$lambda$1(kotlin.jvm.functions.Function1, java.lang.Object);
+  private static com.bedrockk.molang.Expression checkCondition$lambda$2(com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable);
+  private static com.bedrockk.molang.Expression checkCondition$lambda$3(kotlin.jvm.functions.Function1, java.lang.Object);
+  public static boolean access$checkCondition$jd(com.cobblemon.mod.common.api.ai.config.BehaviourConfig, com.cobblemon.mod.common.api.ai.BehaviourConfigurationContext, com.mojang.datafixers.util.Either);
+  public static void access$preconfigure$jd(com.cobblemon.mod.common.api.ai.config.BehaviourConfig, net.minecraft.world.entity.LivingEntity, com.cobblemon.mod.common.api.ai.BehaviourConfigurationContext);
+  static {};
+}

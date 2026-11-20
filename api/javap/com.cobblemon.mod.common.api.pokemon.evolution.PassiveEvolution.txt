@@ -1,0 +1,20 @@
+public final class com.cobblemon.mod.common.api.pokemon.evolution.PassiveEvolution$DefaultImpls {
+  public static boolean attemptEvolution(com.cobblemon.mod.common.api.pokemon.evolution.PassiveEvolution, com.cobblemon.mod.common.pokemon.Pokemon);
+  public static boolean test(com.cobblemon.mod.common.api.pokemon.evolution.PassiveEvolution, com.cobblemon.mod.common.pokemon.Pokemon);
+  public static boolean evolve(com.cobblemon.mod.common.api.pokemon.evolution.PassiveEvolution, com.cobblemon.mod.common.pokemon.Pokemon);
+  public static boolean shed(com.cobblemon.mod.common.api.pokemon.evolution.PassiveEvolution, com.cobblemon.mod.common.pokemon.Pokemon);
+  public static void forceEvolve(com.cobblemon.mod.common.api.pokemon.evolution.PassiveEvolution, com.cobblemon.mod.common.pokemon.Pokemon);
+  public static void evolutionMethod(com.cobblemon.mod.common.api.pokemon.evolution.PassiveEvolution, com.cobblemon.mod.common.pokemon.Pokemon);
+  public static void applyTo(com.cobblemon.mod.common.api.pokemon.evolution.PassiveEvolution, com.cobblemon.mod.common.pokemon.Pokemon);
+}
+public interface com.cobblemon.mod.common.api.pokemon.evolution.PassiveEvolution extends com.cobblemon.mod.common.api.pokemon.evolution.Evolution {
+  public default boolean attemptEvolution(com.cobblemon.mod.common.pokemon.Pokemon);
+  public abstract boolean getPermanent();
+  public static boolean access$attemptEvolution$jd(com.cobblemon.mod.common.api.pokemon.evolution.PassiveEvolution, com.cobblemon.mod.common.pokemon.Pokemon);
+  public static boolean access$test$jd(com.cobblemon.mod.common.api.pokemon.evolution.PassiveEvolution, com.cobblemon.mod.common.pokemon.Pokemon);
+  public static boolean access$evolve$jd(com.cobblemon.mod.common.api.pokemon.evolution.PassiveEvolution, com.cobblemon.mod.common.pokemon.Pokemon);
+  public static boolean access$shed$jd(com.cobblemon.mod.common.api.pokemon.evolution.PassiveEvolution, com.cobblemon.mod.common.pokemon.Pokemon);
+  public static void access$forceEvolve$jd(com.cobblemon.mod.common.api.pokemon.evolution.PassiveEvolution, com.cobblemon.mod.common.pokemon.Pokemon);
+  public static void access$evolutionMethod$jd(com.cobblemon.mod.common.api.pokemon.evolution.PassiveEvolution, com.cobblemon.mod.common.pokemon.Pokemon);
+  public static void access$applyTo$jd(com.cobblemon.mod.common.api.pokemon.evolution.PassiveEvolution, com.cobblemon.mod.common.pokemon.Pokemon);
+}

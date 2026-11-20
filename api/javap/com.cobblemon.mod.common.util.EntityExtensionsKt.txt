@@ -1,0 +1,32 @@
+public final class com.cobblemon.mod.common.util.EntityExtensionsKt {
+  public static final com.mojang.serialization.Dynamic<net.minecraft.nbt.Tag> makeEmptyBrainDynamic(net.minecraft.world.entity.Entity);
+  public static final net.minecraft.network.chat.Component effectiveName(net.minecraft.world.entity.Entity);
+  public static final boolean hasMemory(net.minecraft.world.entity.LivingEntity, net.minecraft.resources.ResourceLocation);
+  public static final boolean hasMemory(net.minecraft.world.entity.LivingEntity, net.minecraft.tags.TagKey<net.minecraft.world.entity.ai.memory.MemoryModuleType<?>>);
+  public static final boolean hasMemoryFromString(net.minecraft.world.entity.LivingEntity, java.lang.String);
+  public static final void jitterDropItem(net.minecraft.world.entity.LivingEntity, net.minecraft.world.entity.item.ItemEntity);
+  public static final boolean isDoingActivity(net.minecraft.world.entity.LivingEntity, net.minecraft.resources.ResourceLocation);
+  public static final boolean isDoingActivity(net.minecraft.world.entity.LivingEntity, net.minecraft.tags.TagKey<net.minecraft.world.entity.schedule.Activity>);
+  public static final boolean isDoingActivityFromString(net.minecraft.world.entity.LivingEntity, java.lang.String);
+  private static final int getPosScore(net.minecraft.world.level.Level, net.minecraft.world.entity.Entity, net.minecraft.world.phys.AABB, net.minecraft.core.BlockPos);
+  private static final net.minecraft.core.BlockPos findBestBlockPosBFS(net.minecraft.world.entity.Entity, net.minecraft.world.phys.Vec3, net.minecraft.world.level.Level, int);
+  static net.minecraft.core.BlockPos findBestBlockPosBFS$default(net.minecraft.world.entity.Entity, net.minecraft.world.phys.Vec3, net.minecraft.world.level.Level, int, int, java.lang.Object);
+  public static final boolean setPositionSafely(net.minecraft.world.entity.Entity, net.minecraft.world.phys.Vec3);
+  public static final boolean isDusk(net.minecraft.world.entity.Entity);
+  public static final boolean isStandingOn(net.minecraft.world.entity.Entity, java.util.Set<java.lang.String>, int);
+  public static boolean isStandingOn$default(net.minecraft.world.entity.Entity, java.util.Set, int, int, java.lang.Object);
+  public static final double distanceTo(net.minecraft.world.entity.Entity, net.minecraft.core.BlockPos);
+  public static final net.minecraft.core.BlockPos closestPosition(net.minecraft.world.entity.Entity, java.lang.Iterable<? extends net.minecraft.core.BlockPos>, kotlin.jvm.functions.Function1<? super net.minecraft.core.BlockPos, java.lang.Boolean>);
+  public static net.minecraft.core.BlockPos closestPosition$default(net.minecraft.world.entity.Entity, java.lang.Iterable, kotlin.jvm.functions.Function1, int, java.lang.Object);
+  public static final boolean getIsSubmerged(net.minecraft.world.entity.Entity);
+  public static final <T> void update(net.minecraft.network.syncher.SynchedEntityData, net.minecraft.network.syncher.EntityDataAccessor<T>, kotlin.jvm.functions.Function1<? super T, ? extends T>);
+  private static final java.lang.Boolean hasMemoryFromString$lambda$0(net.minecraft.world.entity.LivingEntity, net.minecraft.resources.ResourceLocation);
+  private static final java.lang.Boolean hasMemoryFromString$lambda$1(kotlin.jvm.functions.Function1, java.lang.Object);
+  private static final java.lang.Boolean hasMemoryFromString$lambda$2(net.minecraft.world.entity.LivingEntity, net.minecraft.tags.TagKey);
+  private static final java.lang.Boolean hasMemoryFromString$lambda$3(kotlin.jvm.functions.Function1, java.lang.Object);
+  private static final java.lang.Boolean isDoingActivityFromString$lambda$0(net.minecraft.world.entity.LivingEntity, net.minecraft.resources.ResourceLocation);
+  private static final java.lang.Boolean isDoingActivityFromString$lambda$1(kotlin.jvm.functions.Function1, java.lang.Object);
+  private static final java.lang.Boolean isDoingActivityFromString$lambda$2(net.minecraft.world.entity.LivingEntity, net.minecraft.tags.TagKey);
+  private static final java.lang.Boolean isDoingActivityFromString$lambda$3(kotlin.jvm.functions.Function1, java.lang.Object);
+  private static final boolean closestPosition$lambda$0(net.minecraft.core.BlockPos);
+}

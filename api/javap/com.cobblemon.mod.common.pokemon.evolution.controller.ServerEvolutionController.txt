@@ -1,0 +1,73 @@
+public final class com.cobblemon.mod.common.pokemon.evolution.controller.ServerEvolutionController$Companion {
+  private com.cobblemon.mod.common.pokemon.evolution.controller.ServerEvolutionController$Companion();
+  public final com.mojang.serialization.Codec<com.cobblemon.mod.common.pokemon.evolution.controller.ServerEvolutionController$Intermediate> getCODEC();
+  public static void getCODEC$annotations();
+  public com.cobblemon.mod.common.pokemon.evolution.controller.ServerEvolutionController$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.pokemon.evolution.controller.ServerEvolutionController$Intermediate implements com.cobblemon.mod.common.api.pokemon.evolution.PreProcessor {
+  private final java.util.Set<java.lang.String> evolutionIds;
+  private final java.util.Set<com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgress<?>> progress;
+  public com.cobblemon.mod.common.pokemon.evolution.controller.ServerEvolutionController$Intermediate(java.util.Set<java.lang.String>, java.util.Set<? extends com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgress<?>>);
+  public final java.util.Set<java.lang.String> getEvolutionIds();
+  public final java.util.Set<com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgress<?>> getProgress();
+  public com.cobblemon.mod.common.pokemon.evolution.controller.ServerEvolutionController create(com.cobblemon.mod.common.pokemon.Pokemon);
+  public final java.util.Set<java.lang.String> component1();
+  public final java.util.Set<com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgress<?>> component2();
+  public final com.cobblemon.mod.common.pokemon.evolution.controller.ServerEvolutionController$Intermediate copy(java.util.Set<java.lang.String>, java.util.Set<? extends com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgress<?>>);
+  public static com.cobblemon.mod.common.pokemon.evolution.controller.ServerEvolutionController$Intermediate copy$default(com.cobblemon.mod.common.pokemon.evolution.controller.ServerEvolutionController$Intermediate, java.util.Set, java.util.Set, int, java.lang.Object);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+  public com.cobblemon.mod.common.api.pokemon.evolution.EvolutionController create(com.cobblemon.mod.common.pokemon.Pokemon);
+}
+public final class com.cobblemon.mod.common.pokemon.evolution.controller.ServerEvolutionController implements com.cobblemon.mod.common.api.pokemon.evolution.EvolutionController<com.cobblemon.mod.common.api.pokemon.evolution.Evolution, com.cobblemon.mod.common.pokemon.evolution.controller.ServerEvolutionController$Intermediate> {
+  public static final com.cobblemon.mod.common.pokemon.evolution.controller.ServerEvolutionController$Companion Companion;
+  private final com.cobblemon.mod.common.pokemon.Pokemon pokemon;
+  private final java.util.HashSet<com.cobblemon.mod.common.api.pokemon.evolution.Evolution> evolutions;
+  private final java.util.Set<com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgress<?>> progress;
+  private final java.util.Set<java.lang.String> evolutionIds;
+  private static final java.lang.String PENDING;
+  private static final java.lang.String PROGRESS;
+  public static final java.lang.String ID_KEY;
+  private static final com.mojang.serialization.Codec<com.cobblemon.mod.common.pokemon.evolution.controller.ServerEvolutionController$Intermediate> CODEC;
+  public com.cobblemon.mod.common.pokemon.evolution.controller.ServerEvolutionController(com.cobblemon.mod.common.pokemon.Pokemon, java.util.Set<java.lang.String>, java.util.Set<? extends com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgress<?>>);
+  public int getSize();
+  public com.cobblemon.mod.common.pokemon.Pokemon pokemon();
+  public void start(com.cobblemon.mod.common.api.pokemon.evolution.Evolution);
+  public java.util.Collection<com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgress<?>> progress();
+  public <P extends com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgress<?>> P trackProgress(P);
+  public <P extends com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgress<?>> P progressFirstOrCreate(kotlin.jvm.functions.Function1<? super com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgress<?>, java.lang.Boolean>, kotlin.jvm.functions.Function0<? extends P>);
+  public boolean add(com.cobblemon.mod.common.api.pokemon.evolution.Evolution);
+  public final boolean silentAdd(com.cobblemon.mod.common.api.pokemon.evolution.Evolution);
+  public boolean addAll(java.util.Collection<? extends com.cobblemon.mod.common.api.pokemon.evolution.Evolution>);
+  public void clear();
+  public boolean contains(com.cobblemon.mod.common.api.pokemon.evolution.Evolution);
+  public boolean containsAll(java.util.Collection<?>);
+  public boolean isEmpty();
+  public java.util.Iterator<com.cobblemon.mod.common.api.pokemon.evolution.Evolution> iterator();
+  public boolean remove(com.cobblemon.mod.common.api.pokemon.evolution.Evolution);
+  public boolean removeAll(java.util.Collection<?>);
+  public boolean retainAll(java.util.Collection<?>);
+  public com.cobblemon.mod.common.pokemon.evolution.controller.ServerEvolutionController$Intermediate asIntermediate();
+  private final com.cobblemon.mod.common.api.pokemon.evolution.Evolution findEvolutionFromId(java.lang.String);
+  private static final boolean _init_$lambda$0(com.cobblemon.mod.common.pokemon.evolution.controller.ServerEvolutionController, com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgress);
+  private static final boolean _init_$lambda$1(kotlin.jvm.functions.Function1, java.lang.Object);
+  private static final boolean _init_$lambda$3(java.util.Set, java.lang.String);
+  private static final boolean _init_$lambda$4(kotlin.jvm.functions.Function1, java.lang.Object);
+  private static final com.cobblemon.mod.common.pokemon.Pokemon clear$lambda$0(com.cobblemon.mod.common.pokemon.Pokemon);
+  private static final com.mojang.datafixers.kinds.App CODEC$lambda$0(com.mojang.serialization.codecs.RecordCodecBuilder$Instance);
+  private static final java.util.List CODEC$lambda$0$0(com.cobblemon.mod.common.pokemon.evolution.controller.ServerEvolutionController$Intermediate);
+  private static final java.util.List CODEC$lambda$0$1(com.cobblemon.mod.common.pokemon.evolution.controller.ServerEvolutionController$Intermediate);
+  private static final com.cobblemon.mod.common.pokemon.evolution.controller.ServerEvolutionController$Intermediate CODEC$lambda$0$2(java.util.List, java.util.List);
+  public static final com.mojang.serialization.Codec<com.cobblemon.mod.common.pokemon.evolution.controller.ServerEvolutionController$Intermediate> getCODEC();
+  public final int size();
+  public void start(com.cobblemon.mod.common.api.pokemon.evolution.EvolutionLike);
+  public boolean add(java.lang.Object);
+  public final boolean contains(java.lang.Object);
+  public final boolean remove(java.lang.Object);
+  public com.cobblemon.mod.common.api.pokemon.evolution.PreProcessor asIntermediate();
+  public static final com.mojang.serialization.Codec access$getCODEC$cp();
+  public <T> T[] toArray(T[]);
+  public java.lang.Object[] toArray();
+  static {};
+}

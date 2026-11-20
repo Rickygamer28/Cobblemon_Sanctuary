@@ -1,0 +1,34 @@
+public final class com.cobblemon.mod.common.api.interaction.PokemonInteraction$Companion {
+  private com.cobblemon.mod.common.api.interaction.PokemonInteraction$Companion();
+  public final com.cobblemon.mod.common.api.interaction.PokemonInteraction decode(net.minecraft.network.FriendlyByteBuf);
+  private static final com.cobblemon.mod.common.api.pokemon.requirement.Requirement decode$lambda$0(net.minecraft.network.FriendlyByteBuf);
+  private static final com.cobblemon.mod.common.api.pokemon.requirement.Requirement decode$lambda$1(kotlin.jvm.functions.Function1, java.lang.Object);
+  public com.cobblemon.mod.common.api.interaction.PokemonInteraction$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.api.interaction.PokemonInteraction {
+  public static final com.cobblemon.mod.common.api.interaction.PokemonInteraction$Companion Companion;
+  private final java.util.List<com.cobblemon.mod.common.api.pokemon.requirement.Requirement> requirements;
+  private final java.util.List<com.cobblemon.mod.common.api.interaction.InteractionEffect> effects;
+  private final com.cobblemon.mod.common.api.molang.ExpressionLike cooldown;
+  public net.minecraft.resources.ResourceLocation grouping;
+  public com.cobblemon.mod.common.api.interaction.PokemonInteraction(java.util.List<? extends com.cobblemon.mod.common.api.pokemon.requirement.Requirement>, java.util.List<? extends com.cobblemon.mod.common.api.interaction.InteractionEffect>, com.cobblemon.mod.common.api.molang.ExpressionLike);
+  public com.cobblemon.mod.common.api.interaction.PokemonInteraction(java.util.List, java.util.List, com.cobblemon.mod.common.api.molang.ExpressionLike, int, kotlin.jvm.internal.DefaultConstructorMarker);
+  public final java.util.List<com.cobblemon.mod.common.api.pokemon.requirement.Requirement> getRequirements();
+  public final java.util.List<com.cobblemon.mod.common.api.interaction.InteractionEffect> getEffects();
+  public final com.cobblemon.mod.common.api.molang.ExpressionLike getCooldown();
+  public final net.minecraft.resources.ResourceLocation getGrouping();
+  public final void setGrouping(net.minecraft.resources.ResourceLocation);
+  public final void encode(net.minecraft.network.FriendlyByteBuf);
+  public final java.util.List<com.cobblemon.mod.common.api.pokemon.requirement.Requirement> component1();
+  public final java.util.List<com.cobblemon.mod.common.api.interaction.InteractionEffect> component2();
+  public final com.cobblemon.mod.common.api.molang.ExpressionLike component3();
+  public final com.cobblemon.mod.common.api.interaction.PokemonInteraction copy(java.util.List<? extends com.cobblemon.mod.common.api.pokemon.requirement.Requirement>, java.util.List<? extends com.cobblemon.mod.common.api.interaction.InteractionEffect>, com.cobblemon.mod.common.api.molang.ExpressionLike);
+  public static com.cobblemon.mod.common.api.interaction.PokemonInteraction copy$default(com.cobblemon.mod.common.api.interaction.PokemonInteraction, java.util.List, java.util.List, com.cobblemon.mod.common.api.molang.ExpressionLike, int, java.lang.Object);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+  private static final kotlin.Unit encode$lambda$0(net.minecraft.network.FriendlyByteBuf, com.cobblemon.mod.common.api.pokemon.requirement.Requirement);
+  private static final void encode$lambda$1(kotlin.jvm.functions.Function2, java.lang.Object, com.cobblemon.mod.common.api.pokemon.requirement.Requirement);
+  public com.cobblemon.mod.common.api.interaction.PokemonInteraction();
+  static {};
+}

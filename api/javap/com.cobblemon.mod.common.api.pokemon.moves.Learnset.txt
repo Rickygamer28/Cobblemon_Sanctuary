@@ -1,0 +1,77 @@
+public final class com.cobblemon.mod.common.api.pokemon.moves.Learnset$Companion {
+  private com.cobblemon.mod.common.api.pokemon.moves.Learnset$Companion();
+  public final com.cobblemon.mod.common.api.pokemon.moves.Learnset$Interpreter getTmInterpreter();
+  public final com.cobblemon.mod.common.api.pokemon.moves.Learnset$Interpreter getEggInterpreter();
+  public final com.cobblemon.mod.common.api.pokemon.moves.Learnset$Interpreter getTutorInterpreter();
+  public final com.cobblemon.mod.common.api.pokemon.moves.Learnset$Interpreter getLegacyInterpreter();
+  public final com.cobblemon.mod.common.api.pokemon.moves.Learnset$Interpreter getSpecialInterpreter();
+  public final com.cobblemon.mod.common.api.pokemon.moves.Learnset$Interpreter getFormChangeInterpreter();
+  public final com.cobblemon.mod.common.api.pokemon.moves.Learnset$Interpreter getLevelUpInterpreter();
+  public final java.util.List<com.cobblemon.mod.common.api.pokemon.moves.Learnset$Interpreter> getInterpreters();
+  public com.cobblemon.mod.common.api.pokemon.moves.Learnset$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.api.pokemon.moves.Learnset$Interpreter$Companion {
+  private com.cobblemon.mod.common.api.pokemon.moves.Learnset$Interpreter$Companion();
+  public final com.cobblemon.mod.common.api.pokemon.moves.Learnset$Interpreter parseFromPrefixIntoList(java.lang.String, kotlin.jvm.functions.Function1<? super com.cobblemon.mod.common.api.pokemon.moves.Learnset, ? extends java.util.List<com.cobblemon.mod.common.api.moves.MoveTemplate>>);
+  private static final boolean parseFromPrefixIntoList$lambda$0(java.lang.String, kotlin.jvm.functions.Function1, com.google.gson.JsonElement, com.cobblemon.mod.common.api.pokemon.moves.Learnset);
+  public com.cobblemon.mod.common.api.pokemon.moves.Learnset$Interpreter$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.api.pokemon.moves.Learnset$Interpreter {
+  public static final com.cobblemon.mod.common.api.pokemon.moves.Learnset$Interpreter$Companion Companion;
+  private final kotlin.jvm.functions.Function2<com.google.gson.JsonElement, com.cobblemon.mod.common.api.pokemon.moves.Learnset, java.lang.Boolean> loadMove;
+  public com.cobblemon.mod.common.api.pokemon.moves.Learnset$Interpreter(kotlin.jvm.functions.Function2<? super com.google.gson.JsonElement, ? super com.cobblemon.mod.common.api.pokemon.moves.Learnset, java.lang.Boolean>);
+  public final kotlin.jvm.functions.Function2<com.google.gson.JsonElement, com.cobblemon.mod.common.api.pokemon.moves.Learnset, java.lang.Boolean> getLoadMove();
+  static {};
+}
+public class com.cobblemon.mod.common.api.pokemon.moves.Learnset {
+  public static final com.cobblemon.mod.common.api.pokemon.moves.Learnset$Companion Companion;
+  private final java.util.Map<java.lang.Integer, java.util.List<com.cobblemon.mod.common.api.moves.MoveTemplate>> levelUpMoves;
+  private final java.util.List<com.cobblemon.mod.common.api.moves.MoveTemplate> eggMoves;
+  private final java.util.List<com.cobblemon.mod.common.api.moves.MoveTemplate> tutorMoves;
+  private final java.util.List<com.cobblemon.mod.common.api.moves.MoveTemplate> legacyMoves;
+  private final java.util.List<com.cobblemon.mod.common.api.moves.MoveTemplate> specialMoves;
+  private final java.util.List<com.cobblemon.mod.common.api.moves.MoveTemplate> tmMoves;
+  private final java.util.Set<com.cobblemon.mod.common.api.moves.MoveTemplate> evolutionMoves;
+  private final java.util.List<com.cobblemon.mod.common.api.moves.MoveTemplate> formChangeMoves;
+  private static final com.cobblemon.mod.common.api.pokemon.moves.Learnset$Interpreter tmInterpreter;
+  private static final com.cobblemon.mod.common.api.pokemon.moves.Learnset$Interpreter eggInterpreter;
+  private static final com.cobblemon.mod.common.api.pokemon.moves.Learnset$Interpreter tutorInterpreter;
+  private static final com.cobblemon.mod.common.api.pokemon.moves.Learnset$Interpreter legacyInterpreter;
+  private static final com.cobblemon.mod.common.api.pokemon.moves.Learnset$Interpreter specialInterpreter;
+  private static final com.cobblemon.mod.common.api.pokemon.moves.Learnset$Interpreter formChangeInterpreter;
+  private static final com.cobblemon.mod.common.api.pokemon.moves.Learnset$Interpreter levelUpInterpreter;
+  private static final java.util.List<com.cobblemon.mod.common.api.pokemon.moves.Learnset$Interpreter> interpreters;
+  public com.cobblemon.mod.common.api.pokemon.moves.Learnset();
+  public final java.util.Map<java.lang.Integer, java.util.List<com.cobblemon.mod.common.api.moves.MoveTemplate>> getLevelUpMoves();
+  public final java.util.List<com.cobblemon.mod.common.api.moves.MoveTemplate> getEggMoves();
+  public final java.util.List<com.cobblemon.mod.common.api.moves.MoveTemplate> getTutorMoves();
+  public final java.util.List<com.cobblemon.mod.common.api.moves.MoveTemplate> getLegacyMoves();
+  public final java.util.List<com.cobblemon.mod.common.api.moves.MoveTemplate> getSpecialMoves();
+  public final java.util.List<com.cobblemon.mod.common.api.moves.MoveTemplate> getTmMoves();
+  public final java.util.Set<com.cobblemon.mod.common.api.moves.MoveTemplate> getEvolutionMoves();
+  public final java.util.List<com.cobblemon.mod.common.api.moves.MoveTemplate> getFormChangeMoves();
+  public final java.util.Set<com.cobblemon.mod.common.api.moves.MoveTemplate> getLevelUpMovesUpTo(int);
+  public final java.util.List<com.cobblemon.mod.common.api.moves.MoveTemplate> tmLearnableMoves();
+  public final java.util.Set<com.cobblemon.mod.common.api.moves.MoveTemplate> getAllLegalMoves();
+  public final boolean shouldSynchronize(com.cobblemon.mod.common.api.pokemon.moves.Learnset);
+  public final void decode(net.minecraft.network.RegistryFriendlyByteBuf);
+  public final void encode(net.minecraft.network.RegistryFriendlyByteBuf);
+  private final void decodeMoveList(net.minecraft.network.RegistryFriendlyByteBuf, java.util.List<com.cobblemon.mod.common.api.moves.MoveTemplate>);
+  private final void encodeMoveList(net.minecraft.network.RegistryFriendlyByteBuf, java.util.List<? extends com.cobblemon.mod.common.api.moves.MoveTemplate>);
+  private static final java.util.List tmInterpreter$lambda$0(com.cobblemon.mod.common.api.pokemon.moves.Learnset);
+  private static final java.util.List eggInterpreter$lambda$0(com.cobblemon.mod.common.api.pokemon.moves.Learnset);
+  private static final java.util.List tutorInterpreter$lambda$0(com.cobblemon.mod.common.api.pokemon.moves.Learnset);
+  private static final java.util.List legacyInterpreter$lambda$0(com.cobblemon.mod.common.api.pokemon.moves.Learnset);
+  private static final java.util.List specialInterpreter$lambda$0(com.cobblemon.mod.common.api.pokemon.moves.Learnset);
+  private static final java.util.List formChangeInterpreter$lambda$0(com.cobblemon.mod.common.api.pokemon.moves.Learnset);
+  private static final boolean levelUpInterpreter$lambda$0(com.google.gson.JsonElement, com.cobblemon.mod.common.api.pokemon.moves.Learnset);
+  public static final com.cobblemon.mod.common.api.pokemon.moves.Learnset$Interpreter access$getTmInterpreter$cp();
+  public static final com.cobblemon.mod.common.api.pokemon.moves.Learnset$Interpreter access$getEggInterpreter$cp();
+  public static final com.cobblemon.mod.common.api.pokemon.moves.Learnset$Interpreter access$getTutorInterpreter$cp();
+  public static final com.cobblemon.mod.common.api.pokemon.moves.Learnset$Interpreter access$getLegacyInterpreter$cp();
+  public static final com.cobblemon.mod.common.api.pokemon.moves.Learnset$Interpreter access$getSpecialInterpreter$cp();
+  public static final com.cobblemon.mod.common.api.pokemon.moves.Learnset$Interpreter access$getFormChangeInterpreter$cp();
+  public static final com.cobblemon.mod.common.api.pokemon.moves.Learnset$Interpreter access$getLevelUpInterpreter$cp();
+  public static final java.util.List access$getInterpreters$cp();
+  static {};
+}

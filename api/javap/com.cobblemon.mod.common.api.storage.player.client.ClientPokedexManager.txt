@@ -1,0 +1,23 @@
+public final class com.cobblemon.mod.common.api.storage.player.client.ClientPokedexManager$Companion {
+  private com.cobblemon.mod.common.api.storage.player.client.ClientPokedexManager$Companion();
+  public final com.cobblemon.mod.common.net.messages.client.SetClientPlayerDataPacket decode(net.minecraft.network.RegistryFriendlyByteBuf);
+  public final void runAction(com.cobblemon.mod.common.api.storage.player.client.ClientInstancedPlayerData);
+  public final void runIncremental(com.cobblemon.mod.common.api.storage.player.client.ClientInstancedPlayerData);
+  private static final net.minecraft.resources.ResourceLocation decode$lambda$0(net.minecraft.network.RegistryFriendlyByteBuf, net.minecraft.network.FriendlyByteBuf);
+  private static final net.minecraft.resources.ResourceLocation decode$lambda$1(kotlin.jvm.functions.Function1, java.lang.Object);
+  private static final com.cobblemon.mod.common.api.pokedex.SpeciesDexRecord decode$lambda$2(net.minecraft.network.RegistryFriendlyByteBuf, net.minecraft.network.FriendlyByteBuf);
+  private static final com.cobblemon.mod.common.api.pokedex.SpeciesDexRecord decode$lambda$3(kotlin.jvm.functions.Function1, java.lang.Object);
+  public com.cobblemon.mod.common.api.storage.player.client.ClientPokedexManager$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.api.storage.player.client.ClientPokedexManager extends com.cobblemon.mod.common.api.pokedex.AbstractPokedexManager implements com.cobblemon.mod.common.api.storage.player.client.ClientInstancedPlayerData {
+  public static final com.cobblemon.mod.common.api.storage.player.client.ClientPokedexManager$Companion Companion;
+  private final java.util.Map<net.minecraft.resources.ResourceLocation, com.cobblemon.mod.common.api.pokedex.SpeciesDexRecord> speciesRecords;
+  public com.cobblemon.mod.common.api.storage.player.client.ClientPokedexManager(java.util.Map<net.minecraft.resources.ResourceLocation, com.cobblemon.mod.common.api.pokedex.SpeciesDexRecord>);
+  public java.util.Map<net.minecraft.resources.ResourceLocation, com.cobblemon.mod.common.api.pokedex.SpeciesDexRecord> getSpeciesRecords();
+  public void encode(net.minecraft.network.RegistryFriendlyByteBuf);
+  private static final kotlin.Unit encode$lambda$0(net.minecraft.network.RegistryFriendlyByteBuf, net.minecraft.network.FriendlyByteBuf, net.minecraft.resources.ResourceLocation);
+  private static final void encode$lambda$1(kotlin.jvm.functions.Function2, java.lang.Object, net.minecraft.resources.ResourceLocation);
+  private static final kotlin.Unit encode$lambda$2(net.minecraft.network.RegistryFriendlyByteBuf, net.minecraft.network.FriendlyByteBuf, com.cobblemon.mod.common.api.pokedex.SpeciesDexRecord);
+  private static final void encode$lambda$3(kotlin.jvm.functions.Function2, java.lang.Object, com.cobblemon.mod.common.api.pokedex.SpeciesDexRecord);
+  static {};
+}

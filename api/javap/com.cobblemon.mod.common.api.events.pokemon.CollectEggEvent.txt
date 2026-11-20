@@ -1,0 +1,15 @@
+public final class com.cobblemon.mod.common.api.events.pokemon.CollectEggEvent extends com.cobblemon.mod.common.api.events.Cancelable {
+  private final com.cobblemon.mod.common.api.pokemon.PokemonProperties egg;
+  private final com.cobblemon.mod.common.pokemon.Pokemon maleParent;
+  private final com.cobblemon.mod.common.pokemon.Pokemon femaleParent;
+  private final net.minecraft.server.level.ServerPlayer player;
+  private final java.util.Map<java.lang.String, com.bedrockk.molang.runtime.value.MoValue> context;
+  private final java.util.Map<java.lang.String, kotlin.jvm.functions.Function1<com.bedrockk.molang.runtime.MoParams, com.bedrockk.molang.runtime.value.MoValue>> functions;
+  public com.cobblemon.mod.common.api.events.pokemon.CollectEggEvent(com.cobblemon.mod.common.api.pokemon.PokemonProperties, com.cobblemon.mod.common.pokemon.Pokemon, com.cobblemon.mod.common.pokemon.Pokemon, net.minecraft.server.level.ServerPlayer);
+  public final com.cobblemon.mod.common.api.pokemon.PokemonProperties getEgg();
+  public final com.cobblemon.mod.common.pokemon.Pokemon getMaleParent();
+  public final com.cobblemon.mod.common.pokemon.Pokemon getFemaleParent();
+  public final net.minecraft.server.level.ServerPlayer getPlayer();
+  public final java.util.Map<java.lang.String, com.bedrockk.molang.runtime.value.MoValue> getContext();
+  public final java.util.Map<java.lang.String, kotlin.jvm.functions.Function1<com.bedrockk.molang.runtime.MoParams, com.bedrockk.molang.runtime.value.MoValue>> getFunctions();
+}

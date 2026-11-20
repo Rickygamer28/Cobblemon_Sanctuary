@@ -1,0 +1,9 @@
+public class com.cobblemon.mod.common.api.pokemon.experience.CommandExperienceSource implements com.cobblemon.mod.common.api.pokemon.experience.ExperienceSource {
+  private final net.minecraft.commands.CommandSourceStack source;
+  public com.cobblemon.mod.common.api.pokemon.experience.CommandExperienceSource(net.minecraft.commands.CommandSourceStack);
+  public final net.minecraft.commands.CommandSourceStack getSource();
+  public boolean isBattle();
+  public boolean isInteraction();
+  public boolean isCommand();
+  public boolean isSidemod();
+}

@@ -1,0 +1,7 @@
+public final class com.cobblemon.mod.common.pokemon.ai.ObtainableItemConditionAdapter implements com.google.gson.JsonDeserializer<com.cobblemon.mod.common.pokemon.ai.ObtainableItemCondition> {
+  public static final com.cobblemon.mod.common.pokemon.ai.ObtainableItemConditionAdapter INSTANCE;
+  private com.cobblemon.mod.common.pokemon.ai.ObtainableItemConditionAdapter();
+  public com.cobblemon.mod.common.pokemon.ai.ObtainableItemCondition deserialize(com.google.gson.JsonElement, java.lang.reflect.Type, com.google.gson.JsonDeserializationContext);
+  public java.lang.Object deserialize(com.google.gson.JsonElement, java.lang.reflect.Type, com.google.gson.JsonDeserializationContext);
+  static {};
+}

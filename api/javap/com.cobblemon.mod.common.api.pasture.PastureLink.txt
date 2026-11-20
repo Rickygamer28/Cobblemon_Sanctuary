@@ -1,0 +1,14 @@
+public final class com.cobblemon.mod.common.api.pasture.PastureLink {
+  private final java.util.UUID linkId;
+  private final java.util.UUID pcId;
+  private final net.minecraft.resources.ResourceLocation dimension;
+  private final net.minecraft.core.BlockPos pos;
+  private final com.cobblemon.mod.common.api.pasture.PasturePermissions permissions;
+  public com.cobblemon.mod.common.api.pasture.PastureLink(java.util.UUID, java.util.UUID, net.minecraft.resources.ResourceLocation, net.minecraft.core.BlockPos, com.cobblemon.mod.common.api.pasture.PasturePermissions);
+  public final java.util.UUID getLinkId();
+  public final java.util.UUID getPcId();
+  public final net.minecraft.resources.ResourceLocation getDimension();
+  public final net.minecraft.core.BlockPos getPos();
+  public final com.cobblemon.mod.common.api.pasture.PasturePermissions getPermissions();
+  public final com.cobblemon.mod.common.api.storage.pc.PCStore getPC(net.minecraft.core.RegistryAccess);
+}

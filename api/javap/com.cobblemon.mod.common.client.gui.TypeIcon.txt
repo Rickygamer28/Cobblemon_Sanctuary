@@ -1,0 +1,33 @@
+public final class com.cobblemon.mod.common.client.gui.TypeIcon$Companion {
+  private com.cobblemon.mod.common.client.gui.TypeIcon$Companion();
+  public com.cobblemon.mod.common.client.gui.TypeIcon$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.client.gui.TypeIcon {
+  public static final com.cobblemon.mod.common.client.gui.TypeIcon$Companion Companion;
+  private final java.lang.Number x;
+  private final java.lang.Number y;
+  private final com.cobblemon.mod.common.api.types.ElementalType type;
+  private final com.cobblemon.mod.common.api.types.ElementalType secondaryType;
+  private final boolean centeredX;
+  private final boolean small;
+  private final float secondaryOffset;
+  private final float doubleCenteredOffset;
+  private final float opacity;
+  private static final int TYPE_ICON_DIAMETER;
+  private static final float SCALE;
+  private static final net.minecraft.resources.ResourceLocation typesResource;
+  private static final net.minecraft.resources.ResourceLocation smallTypesResource;
+  public com.cobblemon.mod.common.client.gui.TypeIcon(java.lang.Number, java.lang.Number, com.cobblemon.mod.common.api.types.ElementalType, com.cobblemon.mod.common.api.types.ElementalType, boolean, boolean, float, float, float);
+  public com.cobblemon.mod.common.client.gui.TypeIcon(java.lang.Number, java.lang.Number, com.cobblemon.mod.common.api.types.ElementalType, com.cobblemon.mod.common.api.types.ElementalType, boolean, boolean, float, float, float, int, kotlin.jvm.internal.DefaultConstructorMarker);
+  public final java.lang.Number getX();
+  public final java.lang.Number getY();
+  public final com.cobblemon.mod.common.api.types.ElementalType getType();
+  public final com.cobblemon.mod.common.api.types.ElementalType getSecondaryType();
+  public final boolean getCenteredX();
+  public final boolean getSmall();
+  public final float getSecondaryOffset();
+  public final float getDoubleCenteredOffset();
+  public final float getOpacity();
+  public final void render(net.minecraft.client.gui.GuiGraphics);
+  static {};
+}

@@ -1,0 +1,39 @@
+public final class com.cobblemon.mod.common.api.events.pokemon.HatchEggEvent$Post implements com.cobblemon.mod.common.api.events.pokemon.HatchEggEvent {
+  private net.minecraft.server.level.ServerPlayer player;
+  private final com.cobblemon.mod.common.pokemon.Pokemon pokemon;
+  private final java.util.Map<java.lang.String, com.bedrockk.molang.runtime.value.MoValue> context;
+  public com.cobblemon.mod.common.api.events.pokemon.HatchEggEvent$Post(net.minecraft.server.level.ServerPlayer, com.cobblemon.mod.common.pokemon.Pokemon);
+  public net.minecraft.server.level.ServerPlayer getPlayer();
+  public void setPlayer(net.minecraft.server.level.ServerPlayer);
+  public final com.cobblemon.mod.common.pokemon.Pokemon getPokemon();
+  public final java.util.Map<java.lang.String, com.bedrockk.molang.runtime.value.MoValue> getContext();
+  public final net.minecraft.server.level.ServerPlayer component1();
+  public final com.cobblemon.mod.common.pokemon.Pokemon component2();
+  public final com.cobblemon.mod.common.api.events.pokemon.HatchEggEvent$Post copy(net.minecraft.server.level.ServerPlayer, com.cobblemon.mod.common.pokemon.Pokemon);
+  public static com.cobblemon.mod.common.api.events.pokemon.HatchEggEvent$Post copy$default(com.cobblemon.mod.common.api.events.pokemon.HatchEggEvent$Post, net.minecraft.server.level.ServerPlayer, com.cobblemon.mod.common.pokemon.Pokemon, int, java.lang.Object);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+}
+public final class com.cobblemon.mod.common.api.events.pokemon.HatchEggEvent$Pre extends com.cobblemon.mod.common.api.events.Cancelable implements com.cobblemon.mod.common.api.events.pokemon.HatchEggEvent {
+  private com.cobblemon.mod.common.api.pokemon.PokemonProperties egg;
+  private final net.minecraft.server.level.ServerPlayer player;
+  private final java.util.Map<java.lang.String, com.bedrockk.molang.runtime.value.MoValue> context;
+  private final java.util.Map<java.lang.String, kotlin.jvm.functions.Function1<com.bedrockk.molang.runtime.MoParams, com.bedrockk.molang.runtime.value.MoValue>> functions;
+  public com.cobblemon.mod.common.api.events.pokemon.HatchEggEvent$Pre(com.cobblemon.mod.common.api.pokemon.PokemonProperties, net.minecraft.server.level.ServerPlayer);
+  public final com.cobblemon.mod.common.api.pokemon.PokemonProperties getEgg();
+  public final void setEgg(com.cobblemon.mod.common.api.pokemon.PokemonProperties);
+  public net.minecraft.server.level.ServerPlayer getPlayer();
+  public final java.util.Map<java.lang.String, com.bedrockk.molang.runtime.value.MoValue> getContext();
+  public final java.util.Map<java.lang.String, kotlin.jvm.functions.Function1<com.bedrockk.molang.runtime.MoParams, com.bedrockk.molang.runtime.value.MoValue>> getFunctions();
+  public final com.cobblemon.mod.common.api.pokemon.PokemonProperties component1();
+  public final net.minecraft.server.level.ServerPlayer component2();
+  public final com.cobblemon.mod.common.api.events.pokemon.HatchEggEvent$Pre copy(com.cobblemon.mod.common.api.pokemon.PokemonProperties, net.minecraft.server.level.ServerPlayer);
+  public static com.cobblemon.mod.common.api.events.pokemon.HatchEggEvent$Pre copy$default(com.cobblemon.mod.common.api.events.pokemon.HatchEggEvent$Pre, com.cobblemon.mod.common.api.pokemon.PokemonProperties, net.minecraft.server.level.ServerPlayer, int, java.lang.Object);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+}
+public interface com.cobblemon.mod.common.api.events.pokemon.HatchEggEvent {
+  public abstract net.minecraft.server.level.ServerPlayer getPlayer();
+}

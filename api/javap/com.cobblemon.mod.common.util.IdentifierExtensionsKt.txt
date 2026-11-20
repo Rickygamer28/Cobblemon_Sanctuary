@@ -1,0 +1,5 @@
+public final class com.cobblemon.mod.common.util.IdentifierExtensionsKt {
+  public static final boolean endsWith(net.minecraft.resources.ResourceLocation, java.lang.String);
+  public static final java.lang.String simplify(net.minecraft.resources.ResourceLocation, java.lang.String);
+  public static java.lang.String simplify$default(net.minecraft.resources.ResourceLocation, java.lang.String, int, java.lang.Object);
+}

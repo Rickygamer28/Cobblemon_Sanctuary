@@ -1,0 +1,11 @@
+com/cobblemon/mod/common/block/TumblestoneBlock$Companion.class
+com/cobblemon/mod/common/block/TumblestoneBlock.class
+com/cobblemon/mod/common/block/TypeGemClusterBlock$Companion.class
+com/cobblemon/mod/common/block/TypeGemClusterBlock$EntriesMappings.class
+com/cobblemon/mod/common/block/TypeGemClusterBlock$GrowthType.class
+com/cobblemon/mod/common/block/TypeGemClusterBlock$WhenMappings.class
+com/cobblemon/mod/common/block/TypeGemClusterBlock.class
+com/cobblemon/mod/common/block/TypeGemCoreBlock$Companion$EntriesMappings.class
+com/cobblemon/mod/common/block/TypeGemCoreBlock$Companion.class
+com/cobblemon/mod/common/block/TypeGemCoreBlock$EntriesMappings.class
+com/cobblemon/mod/common/block/TypeGemCoreBlock.class

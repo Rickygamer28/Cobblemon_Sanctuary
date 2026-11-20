@@ -1,0 +1,8 @@
+public final class com.cobblemon.mod.common.CobblemonTradeOffers {
+  public static final com.cobblemon.mod.common.CobblemonTradeOffers INSTANCE;
+  private com.cobblemon.mod.common.CobblemonTradeOffers();
+  public final java.util.List<com.cobblemon.mod.common.CobblemonTradeOffers$VillagerTradeOffer> tradeOffersForAll();
+  public final java.util.List<com.cobblemon.mod.common.CobblemonTradeOffers$VillagerTradeOffer> tradeOffersFor(net.minecraft.world.entity.npc.VillagerProfession);
+  public final java.util.List<com.cobblemon.mod.common.CobblemonTradeOffers$WandererTradeOffer> resolveWanderingTradeOffers();
+  static {};
+}

@@ -1,0 +1,13 @@
+public final class com.cobblemon.mod.common.pokemon.evolution.CobblemonLazyPreEvolution implements com.cobblemon.mod.common.api.pokemon.evolution.PreEvolution {
+  private final java.lang.String rawData;
+  private final kotlin.Lazy lazySpecies$delegate;
+  private final kotlin.Lazy lazyForm$delegate;
+  public com.cobblemon.mod.common.pokemon.evolution.CobblemonLazyPreEvolution(java.lang.String);
+  private final com.cobblemon.mod.common.api.pokemon.PokemonProperties getProperties();
+  private final com.cobblemon.mod.common.pokemon.Species getLazySpecies();
+  private final com.cobblemon.mod.common.pokemon.FormData getLazyForm();
+  public com.cobblemon.mod.common.pokemon.Species getSpecies();
+  public com.cobblemon.mod.common.pokemon.FormData getForm();
+  private static final com.cobblemon.mod.common.pokemon.Species lazySpecies_delegate$lambda$0(com.cobblemon.mod.common.pokemon.evolution.CobblemonLazyPreEvolution);
+  private static final com.cobblemon.mod.common.pokemon.FormData lazyForm_delegate$lambda$0(com.cobblemon.mod.common.pokemon.evolution.CobblemonLazyPreEvolution);
+}

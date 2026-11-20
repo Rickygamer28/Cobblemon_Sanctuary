@@ -1,0 +1,3 @@
+public interface com.cobblemon.mod.common.api.entity.pokemon.PhysicalEffect extends com.cobblemon.mod.common.api.entity.pokemon.EntityEffect {
+  public abstract float getScale();
+}

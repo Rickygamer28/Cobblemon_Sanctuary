@@ -1,0 +1,10 @@
+public final class com.cobblemon.mod.common.api.reactive.ObservableSubscription<T> {
+  private final com.cobblemon.mod.common.api.reactive.Observable<T> observable;
+  private final kotlin.jvm.functions.Function1<T, kotlin.Unit> handler;
+  private boolean alive;
+  public com.cobblemon.mod.common.api.reactive.ObservableSubscription(com.cobblemon.mod.common.api.reactive.Observable<T>, kotlin.jvm.functions.Function1<? super T, kotlin.Unit>);
+  public final boolean getAlive();
+  public final void setAlive(boolean);
+  public final void handle(T);
+  public final void unsubscribe();
+}

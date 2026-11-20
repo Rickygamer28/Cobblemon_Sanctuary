@@ -1,0 +1,14 @@
+public final class com.cobblemon.mod.common.api.ai.config.task.SharedEntityVariables {
+  public static final com.cobblemon.mod.common.api.ai.config.task.SharedEntityVariables INSTANCE;
+  public static final java.lang.String MOVEMENT_CATEGORY;
+  public static final java.lang.String FEAR_CATEGORY;
+  public static final java.lang.String ATTACKING_CATEGORY;
+  public static final java.lang.String BATTLING_CATEGORY;
+  public static final java.lang.String LOOKING_CATEGORY;
+  public static final java.lang.String WALK_SPEED;
+  public static final java.lang.String FLEE_SPEED_MULTIPLIER;
+  public static final java.lang.String FLEE_DESIRED_DISTANCE;
+  public static final java.lang.String SEE_DISTANCE;
+  private com.cobblemon.mod.common.api.ai.config.task.SharedEntityVariables();
+  static {};
+}

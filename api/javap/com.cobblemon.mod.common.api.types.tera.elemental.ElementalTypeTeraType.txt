@@ -1,0 +1,14 @@
+public final class com.cobblemon.mod.common.api.types.tera.elemental.ElementalTypeTeraType implements com.cobblemon.mod.common.api.types.tera.TeraType {
+  private final com.cobblemon.mod.common.api.types.ElementalType type;
+  private final boolean legalAsStatic;
+  private final java.lang.String name;
+  private final net.minecraft.resources.ResourceLocation id;
+  private final net.minecraft.network.chat.Component displayName;
+  public com.cobblemon.mod.common.api.types.tera.elemental.ElementalTypeTeraType(com.cobblemon.mod.common.api.types.ElementalType);
+  public final com.cobblemon.mod.common.api.types.ElementalType getType();
+  public boolean getLegalAsStatic();
+  public java.lang.String getName();
+  public net.minecraft.resources.ResourceLocation getId();
+  public net.minecraft.network.chat.Component getDisplayName();
+  public java.lang.String showdownId();
+}

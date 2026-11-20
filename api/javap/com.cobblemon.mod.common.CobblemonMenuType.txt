@@ -1,0 +1,11 @@
+public final class com.cobblemon.mod.common.CobblemonMenuType extends com.cobblemon.mod.common.platform.PlatformRegistry<net.minecraft.core.Registry<net.minecraft.world.inventory.MenuType<?>>, net.minecraft.resources.ResourceKey<net.minecraft.core.Registry<net.minecraft.world.inventory.MenuType<?>>>, net.minecraft.world.inventory.MenuType<?>> {
+  public static final com.cobblemon.mod.common.CobblemonMenuType INSTANCE;
+  private static final net.minecraft.world.inventory.MenuType<com.cobblemon.mod.common.block.campfirepot.CookingPotMenu> COOKING_POT;
+  private static final net.minecraft.world.inventory.MenuType<com.cobblemon.mod.common.block.tmmachine.TMMachineMenu> TM_MACHINE;
+  private com.cobblemon.mod.common.CobblemonMenuType();
+  public final net.minecraft.world.inventory.MenuType<com.cobblemon.mod.common.block.campfirepot.CookingPotMenu> getCOOKING_POT();
+  public final net.minecraft.world.inventory.MenuType<com.cobblemon.mod.common.block.tmmachine.TMMachineMenu> getTM_MACHINE();
+  public net.minecraft.core.Registry<net.minecraft.world.inventory.MenuType<?>> getRegistry();
+  public net.minecraft.resources.ResourceKey<net.minecraft.core.Registry<net.minecraft.world.inventory.MenuType<?>>> getResourceKey();
+  static {};
+}

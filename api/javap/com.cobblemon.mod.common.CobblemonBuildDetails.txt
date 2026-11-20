@@ -1,0 +1,12 @@
+public final class com.cobblemon.mod.common.CobblemonBuildDetails {
+  public static final com.cobblemon.mod.common.CobblemonBuildDetails INSTANCE;
+  public static final java.lang.String MOD_ID;
+  public static final java.lang.String VERSION;
+  public static final boolean SNAPSHOT;
+  private static final java.util.Properties git;
+  public static final java.lang.String GIT_COMMIT;
+  public static final java.lang.String BRANCH;
+  private com.cobblemon.mod.common.CobblemonBuildDetails();
+  public final java.lang.String smallCommitHash();
+  static {};
+}

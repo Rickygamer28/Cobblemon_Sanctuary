@@ -1,0 +1,25 @@
+public final class com.cobblemon.mod.common.entity.pokemon.ai.tasks.JumpOutOfWaterTask$Companion {
+  private com.cobblemon.mod.common.entity.pokemon.ai.tasks.JumpOutOfWaterTask$Companion();
+  public com.cobblemon.mod.common.entity.pokemon.ai.tasks.JumpOutOfWaterTask$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.entity.pokemon.ai.tasks.JumpOutOfWaterTask extends net.minecraft.world.entity.ai.behavior.Behavior<com.cobblemon.mod.common.entity.pokemon.PokemonEntity> {
+  public static final com.cobblemon.mod.common.entity.pokemon.ai.tasks.JumpOutOfWaterTask$Companion Companion;
+  private boolean inWater;
+  private static final int MAX_DURATION;
+  private static final int CHANCE;
+  private static final int[] OFFSET_MULTIPLIERS;
+  public com.cobblemon.mod.common.entity.pokemon.ai.tasks.JumpOutOfWaterTask();
+  public final boolean getInWater();
+  public final void setInWater(boolean);
+  protected boolean checkExtraStartConditions(net.minecraft.server.level.ServerLevel, com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+  protected boolean canStillUse(net.minecraft.server.level.ServerLevel, com.cobblemon.mod.common.entity.pokemon.PokemonEntity, long);
+  protected void start(net.minecraft.server.level.ServerLevel, com.cobblemon.mod.common.entity.pokemon.PokemonEntity, long);
+  protected void tick(net.minecraft.server.level.ServerLevel, com.cobblemon.mod.common.entity.pokemon.PokemonEntity, long);
+  private final boolean isWater(com.cobblemon.mod.common.entity.pokemon.PokemonEntity, net.minecraft.core.BlockPos, int, int, int);
+  private final boolean isAirAbove(com.cobblemon.mod.common.entity.pokemon.PokemonEntity, net.minecraft.core.BlockPos, int, int, int);
+  public boolean checkExtraStartConditions(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity);
+  public boolean canStillUse(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity, long);
+  public void start(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity, long);
+  public void tick(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity, long);
+  static {};
+}

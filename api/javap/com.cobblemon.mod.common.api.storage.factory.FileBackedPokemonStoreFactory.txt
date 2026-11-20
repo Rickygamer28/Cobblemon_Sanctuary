@@ -1,0 +1,50 @@
+public final class com.cobblemon.mod.common.api.storage.factory.FileBackedPokemonStoreFactory$StoreCache<E extends com.cobblemon.mod.common.api.storage.StorePosition, T extends com.cobblemon.mod.common.api.storage.PokemonStore<E>> {
+  private final java.util.Map<java.util.UUID, T> cacheMap;
+  final com.cobblemon.mod.common.api.storage.factory.FileBackedPokemonStoreFactory<S> this$0;
+  public com.cobblemon.mod.common.api.storage.factory.FileBackedPokemonStoreFactory$StoreCache();
+  public final java.util.Map<java.util.UUID, T> getCacheMap();
+}
+public class com.cobblemon.mod.common.api.storage.factory.FileBackedPokemonStoreFactory<S> implements com.cobblemon.mod.common.api.storage.factory.PokemonStoreFactory {
+  private final com.cobblemon.mod.common.api.storage.adapter.flatfile.FileStoreAdapter<S> adapter;
+  private final boolean createIfMissing;
+  private final kotlin.jvm.functions.Function1<java.util.UUID, com.cobblemon.mod.common.api.storage.party.PlayerPartyStore> partyConstructor;
+  private final kotlin.jvm.functions.Function1<java.util.UUID, com.cobblemon.mod.common.api.storage.pc.PCStore> pcConstructor;
+  private int passedTicks;
+  private final com.cobblemon.mod.common.api.reactive.ObservableSubscription<com.cobblemon.mod.common.platform.events.ServerTickEvent$Pre> saveSubscription;
+  private java.util.concurrent.ExecutorService saveExecutor;
+  private final java.util.Map<java.lang.Class<? extends com.cobblemon.mod.common.api.storage.PokemonStore<?>>, com.cobblemon.mod.common.api.storage.factory.FileBackedPokemonStoreFactory<S>.StoreCache<?, ?>> storeCaches;
+  private final java.util.Set<com.cobblemon.mod.common.api.storage.PokemonStore<?>> dirtyStores;
+  public com.cobblemon.mod.common.api.storage.factory.FileBackedPokemonStoreFactory(com.cobblemon.mod.common.api.storage.adapter.flatfile.FileStoreAdapter<S>, boolean, kotlin.jvm.functions.Function1<? super java.util.UUID, ? extends com.cobblemon.mod.common.api.storage.party.PlayerPartyStore>, kotlin.jvm.functions.Function1<? super java.util.UUID, ? extends com.cobblemon.mod.common.api.storage.pc.PCStore>);
+  public com.cobblemon.mod.common.api.storage.factory.FileBackedPokemonStoreFactory(com.cobblemon.mod.common.api.storage.adapter.flatfile.FileStoreAdapter, boolean, kotlin.jvm.functions.Function1, kotlin.jvm.functions.Function1, int, kotlin.jvm.internal.DefaultConstructorMarker);
+  protected final com.cobblemon.mod.common.api.storage.adapter.flatfile.FileStoreAdapter<S> getAdapter();
+  protected final boolean getCreateIfMissing();
+  public final kotlin.jvm.functions.Function1<java.util.UUID, com.cobblemon.mod.common.api.storage.party.PlayerPartyStore> getPartyConstructor();
+  public final kotlin.jvm.functions.Function1<java.util.UUID, com.cobblemon.mod.common.api.storage.pc.PCStore> getPcConstructor();
+  public final int getPassedTicks();
+  public final void setPassedTicks(int);
+  protected final com.cobblemon.mod.common.api.reactive.ObservableSubscription<com.cobblemon.mod.common.platform.events.ServerTickEvent$Pre> getSaveSubscription();
+  protected final java.util.concurrent.ExecutorService getSaveExecutor();
+  protected final void setSaveExecutor(java.util.concurrent.ExecutorService);
+  protected final java.util.Map<java.lang.Class<? extends com.cobblemon.mod.common.api.storage.PokemonStore<?>>, com.cobblemon.mod.common.api.storage.factory.FileBackedPokemonStoreFactory<S>.StoreCache<?, ?>> getStoreCaches();
+  protected final <E extends com.cobblemon.mod.common.api.storage.StorePosition, T extends com.cobblemon.mod.common.api.storage.PokemonStore<E>> com.cobblemon.mod.common.api.storage.factory.FileBackedPokemonStoreFactory<S>.StoreCache<E, T> getStoreCache(java.lang.Class<T>);
+  public com.cobblemon.mod.common.api.storage.party.PlayerPartyStore getPlayerParty(java.util.UUID, net.minecraft.core.RegistryAccess);
+  public com.cobblemon.mod.common.api.storage.pc.PCStore getPC(java.util.UUID, net.minecraft.core.RegistryAccess);
+  public <E extends com.cobblemon.mod.common.api.storage.StorePosition, T extends com.cobblemon.mod.common.api.storage.PokemonStore<E>> T getCustomStore(java.lang.Class<T>, java.util.UUID, net.minecraft.core.RegistryAccess);
+  public final <E extends com.cobblemon.mod.common.api.storage.StorePosition, T extends com.cobblemon.mod.common.api.storage.PokemonStore<E>> T getStore(java.lang.Class<T>, java.util.UUID, net.minecraft.core.RegistryAccess, kotlin.jvm.functions.Function1<? super java.util.UUID, ? extends T>);
+  public static com.cobblemon.mod.common.api.storage.PokemonStore getStore$default(com.cobblemon.mod.common.api.storage.factory.FileBackedPokemonStoreFactory, java.lang.Class, java.util.UUID, net.minecraft.core.RegistryAccess, kotlin.jvm.functions.Function1, int, java.lang.Object);
+  public final void save(com.cobblemon.mod.common.api.storage.PokemonStore<?>, net.minecraft.core.RegistryAccess);
+  public final void saveAll(net.minecraft.core.RegistryAccess);
+  public final boolean isCached(com.cobblemon.mod.common.api.storage.PokemonStore<?>);
+  public final void track(com.cobblemon.mod.common.api.storage.PokemonStore<?>);
+  public void shutdown(net.minecraft.core.RegistryAccess);
+  public void onPlayerDisconnect(net.minecraft.server.level.ServerPlayer);
+  public com.cobblemon.mod.common.api.storage.pc.PCStore getPCForPlayer(net.minecraft.server.level.ServerPlayer, com.cobblemon.mod.common.block.entity.PCBlockEntity);
+  private static final com.cobblemon.mod.common.api.storage.party.PlayerPartyStore _init_$lambda$0(java.util.UUID);
+  private static final com.cobblemon.mod.common.api.storage.pc.PCStore _init_$lambda$1(java.util.UUID);
+  private static final kotlin.Unit saveSubscription$lambda$0(com.cobblemon.mod.common.api.storage.factory.FileBackedPokemonStoreFactory, com.cobblemon.mod.common.platform.events.ServerTickEvent$Pre);
+  private static final com.cobblemon.mod.common.api.storage.PokemonStore getStore$lambda$0(java.lang.Class, java.util.UUID);
+  private static final void save$lambda$0(com.cobblemon.mod.common.api.storage.factory.FileBackedPokemonStoreFactory, com.cobblemon.mod.common.api.storage.adapter.SerializedStore);
+  private static final void saveAll$lambda$1(java.util.List, com.cobblemon.mod.common.api.storage.factory.FileBackedPokemonStoreFactory);
+  private static final boolean track$lambda$0(com.cobblemon.mod.common.api.storage.factory.FileBackedPokemonStoreFactory, com.cobblemon.mod.common.api.storage.PokemonStore, kotlin.Unit);
+  private static final kotlin.Unit track$lambda$1(com.cobblemon.mod.common.api.storage.factory.FileBackedPokemonStoreFactory, com.cobblemon.mod.common.api.storage.PokemonStore);
+}

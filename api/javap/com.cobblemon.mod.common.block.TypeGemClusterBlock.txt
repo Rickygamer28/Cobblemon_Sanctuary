@@ -1,0 +1,76 @@
+public final class com.cobblemon.mod.common.block.TypeGemClusterBlock$Companion {
+  private com.cobblemon.mod.common.block.TypeGemClusterBlock$Companion();
+  public final com.mojang.serialization.MapCodec<com.cobblemon.mod.common.block.TypeGemClusterBlock> getCODEC();
+  public final java.util.Map<net.minecraft.world.level.block.Block, com.cobblemon.mod.common.block.TypeGemClusterBlock> getGemToClusterMap();
+  public final net.minecraft.world.level.block.state.properties.DirectionProperty getFACING();
+  public final net.minecraft.world.level.block.state.properties.IntegerProperty getSTAGE();
+  public final net.minecraft.world.level.block.state.properties.EnumProperty<com.cobblemon.mod.common.block.TypeGemClusterBlock$GrowthType> getGROWTH_TYPE();
+  public final com.cobblemon.mod.common.block.TypeGemClusterBlock clusterFromGemBlock(net.minecraft.world.level.block.Block);
+  public com.cobblemon.mod.common.block.TypeGemClusterBlock$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.block.TypeGemClusterBlock$EntriesMappings {
+  public static final kotlin.enums.EnumEntries<net.minecraft.core.Direction> entries$0;
+  static {};
+}
+public final class com.cobblemon.mod.common.block.TypeGemClusterBlock$GrowthType extends java.lang.Enum<com.cobblemon.mod.common.block.TypeGemClusterBlock$GrowthType> implements net.minecraft.util.StringRepresentable {
+  private final java.lang.String label;
+  private final float chance;
+  public static final com.cobblemon.mod.common.block.TypeGemClusterBlock$GrowthType DECORATION;
+  public static final com.cobblemon.mod.common.block.TypeGemClusterBlock$GrowthType FULL;
+  public static final com.cobblemon.mod.common.block.TypeGemClusterBlock$GrowthType STUNTED;
+  private static final com.cobblemon.mod.common.block.TypeGemClusterBlock$GrowthType[] $VALUES;
+  private static final kotlin.enums.EnumEntries $ENTRIES;
+  private com.cobblemon.mod.common.block.TypeGemClusterBlock$GrowthType(java.lang.String, float);
+  public final float getChance();
+  public java.lang.String getSerializedName();
+  public static com.cobblemon.mod.common.block.TypeGemClusterBlock$GrowthType[] values();
+  public static com.cobblemon.mod.common.block.TypeGemClusterBlock$GrowthType valueOf(java.lang.String);
+  public static kotlin.enums.EnumEntries<com.cobblemon.mod.common.block.TypeGemClusterBlock$GrowthType> getEntries();
+  private static final com.cobblemon.mod.common.block.TypeGemClusterBlock$GrowthType[] $values();
+  static {};
+}
+public final class com.cobblemon.mod.common.block.TypeGemClusterBlock$WhenMappings {
+  public static final int[] $EnumSwitchMapping$0;
+  static {};
+}
+public final class com.cobblemon.mod.common.block.TypeGemClusterBlock extends net.minecraft.world.level.block.DirectionalBlock {
+  public static final com.cobblemon.mod.common.block.TypeGemClusterBlock$Companion Companion;
+  private final net.minecraft.world.level.block.Block nextStage;
+  private final net.minecraft.resources.ResourceLocation dropItemId;
+  private static final com.mojang.serialization.MapCodec<com.cobblemon.mod.common.block.TypeGemClusterBlock> CODEC;
+  private static final java.util.Map<net.minecraft.world.level.block.Block, com.cobblemon.mod.common.block.TypeGemClusterBlock> gemToClusterMap;
+  private static final net.minecraft.world.level.block.state.properties.DirectionProperty FACING;
+  private static final net.minecraft.world.level.block.state.properties.IntegerProperty STAGE;
+  private static final net.minecraft.world.level.block.state.properties.EnumProperty<com.cobblemon.mod.common.block.TypeGemClusterBlock$GrowthType> GROWTH_TYPE;
+  public com.cobblemon.mod.common.block.TypeGemClusterBlock(net.minecraft.world.level.block.state.BlockBehaviour$Properties, net.minecraft.world.level.block.Block, net.minecraft.resources.ResourceLocation);
+  public final net.minecraft.world.level.block.Block getNextStage();
+  public final net.minecraft.resources.ResourceLocation getDropItemId();
+  public net.minecraft.world.level.block.state.BlockState getStateForPlacement(net.minecraft.world.item.context.BlockPlaceContext);
+  public boolean isRandomlyTicking(net.minecraft.world.level.block.state.BlockState);
+  protected void randomTick(net.minecraft.world.level.block.state.BlockState, net.minecraft.server.level.ServerLevel, net.minecraft.core.BlockPos, net.minecraft.util.RandomSource);
+  public final void advanceGrowth(net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.LevelAccessor, net.minecraft.core.BlockPos, net.minecraft.util.RandomSource);
+  private final boolean isGem(net.minecraft.world.level.block.state.BlockState);
+  public final boolean gemClusterCanGrow(net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.LevelReader, net.minecraft.core.BlockPos);
+  protected java.util.List<net.minecraft.world.item.ItemStack> getDrops(net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.storage.loot.LootParams$Builder);
+  protected net.minecraft.world.phys.shapes.VoxelShape getShape(net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.BlockGetter, net.minecraft.core.BlockPos, net.minecraft.world.phys.shapes.CollisionContext);
+  protected net.minecraft.world.level.block.state.BlockState updateShape(net.minecraft.world.level.block.state.BlockState, net.minecraft.core.Direction, net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.LevelAccessor, net.minecraft.core.BlockPos, net.minecraft.core.BlockPos);
+  protected net.minecraft.world.level.block.state.BlockState rotate(net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.block.Rotation);
+  protected net.minecraft.world.level.block.state.BlockState mirror(net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.block.Mirror);
+  protected boolean canSurvive(net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.LevelReader, net.minecraft.core.BlockPos);
+  protected boolean propagatesSkylightDown(net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.BlockGetter, net.minecraft.core.BlockPos);
+  protected float getShadeBrightness(net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.BlockGetter, net.minecraft.core.BlockPos);
+  protected boolean useShapeForLightOcclusion(net.minecraft.world.level.block.state.BlockState);
+  protected com.mojang.serialization.MapCodec<? extends net.minecraft.world.level.block.DirectionalBlock> codec();
+  protected void createBlockStateDefinition(net.minecraft.world.level.block.state.StateDefinition$Builder<net.minecraft.world.level.block.Block, net.minecraft.world.level.block.state.BlockState>);
+  public net.minecraft.world.item.ItemStack getCloneItemStack(net.minecraft.world.level.LevelReader, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);
+  private static final com.mojang.datafixers.kinds.App CODEC$lambda$0(com.mojang.serialization.codecs.RecordCodecBuilder$Instance);
+  private static final net.minecraft.world.level.block.Block CODEC$lambda$0$0(com.cobblemon.mod.common.block.TypeGemClusterBlock);
+  private static final net.minecraft.resources.ResourceLocation CODEC$lambda$0$1(com.cobblemon.mod.common.block.TypeGemClusterBlock);
+  private static final com.cobblemon.mod.common.block.TypeGemClusterBlock CODEC$lambda$0$2(net.minecraft.world.level.block.state.BlockBehaviour$Properties, net.minecraft.world.level.block.Block, net.minecraft.resources.ResourceLocation);
+  public static final com.mojang.serialization.MapCodec access$getCODEC$cp();
+  public static final java.util.Map access$getGemToClusterMap$cp();
+  public static final net.minecraft.world.level.block.state.properties.DirectionProperty access$getFACING$cp();
+  public static final net.minecraft.world.level.block.state.properties.IntegerProperty access$getSTAGE$cp();
+  public static final net.minecraft.world.level.block.state.properties.EnumProperty access$getGROWTH_TYPE$cp();
+  static {};
+}

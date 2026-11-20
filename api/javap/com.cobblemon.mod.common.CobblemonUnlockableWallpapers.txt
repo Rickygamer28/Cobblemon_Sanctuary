@@ -1,0 +1,24 @@
+public final class com.cobblemon.mod.common.CobblemonUnlockableWallpapers implements com.cobblemon.mod.common.api.data.JsonDataRegistry<com.cobblemon.mod.common.api.storage.pc.UnlockablePCWallpaper> {
+  public static final com.cobblemon.mod.common.CobblemonUnlockableWallpapers INSTANCE;
+  private static final com.google.gson.Gson gson;
+  private static final com.google.gson.reflect.TypeToken<com.cobblemon.mod.common.api.storage.pc.UnlockablePCWallpaper> typeToken;
+  private static final java.lang.String resourcePath;
+  private static final net.minecraft.resources.ResourceLocation id;
+  private static final net.minecraft.server.packs.PackType type;
+  private static final com.cobblemon.mod.common.api.reactive.SimpleObservable<com.cobblemon.mod.common.CobblemonUnlockableWallpapers> observable;
+  private static final java.util.Map<net.minecraft.resources.ResourceLocation, com.cobblemon.mod.common.api.storage.pc.UnlockablePCWallpaper> unlockableWallpapers;
+  private com.cobblemon.mod.common.CobblemonUnlockableWallpapers();
+  public com.google.gson.Gson getGson();
+  public com.google.gson.reflect.TypeToken<com.cobblemon.mod.common.api.storage.pc.UnlockablePCWallpaper> getTypeToken();
+  public java.lang.String getResourcePath();
+  public net.minecraft.resources.ResourceLocation getId();
+  public net.minecraft.server.packs.PackType getType();
+  public com.cobblemon.mod.common.api.reactive.SimpleObservable<com.cobblemon.mod.common.CobblemonUnlockableWallpapers> getObservable();
+  public final java.util.Map<net.minecraft.resources.ResourceLocation, com.cobblemon.mod.common.api.storage.pc.UnlockablePCWallpaper> getUnlockableWallpapers();
+  public void sync(net.minecraft.server.level.ServerPlayer);
+  public void reload(java.util.Map<net.minecraft.resources.ResourceLocation, com.cobblemon.mod.common.api.storage.pc.UnlockablePCWallpaper>);
+  public void reload(net.minecraft.server.packs.resources.ResourceManager);
+  public com.cobblemon.mod.common.api.storage.pc.UnlockablePCWallpaper parse(java.io.BufferedReader, net.minecraft.resources.ResourceLocation);
+  public java.lang.Object parse(java.io.BufferedReader, net.minecraft.resources.ResourceLocation);
+  static {};
+}

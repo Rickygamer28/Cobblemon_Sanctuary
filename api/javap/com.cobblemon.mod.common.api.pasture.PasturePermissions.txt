@@ -1,0 +1,17 @@
+public final class com.cobblemon.mod.common.api.pasture.PasturePermissions$Companion {
+  private com.cobblemon.mod.common.api.pasture.PasturePermissions$Companion();
+  public final com.cobblemon.mod.common.api.pasture.PasturePermissions decode(net.minecraft.network.RegistryFriendlyByteBuf);
+  public com.cobblemon.mod.common.api.pasture.PasturePermissions$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.api.pasture.PasturePermissions {
+  public static final com.cobblemon.mod.common.api.pasture.PasturePermissions$Companion Companion;
+  private final boolean canUnpastureOthers;
+  private final boolean canPasture;
+  private final int maxPokemon;
+  public com.cobblemon.mod.common.api.pasture.PasturePermissions(boolean, boolean, int);
+  public final boolean getCanUnpastureOthers();
+  public final boolean getCanPasture();
+  public final int getMaxPokemon();
+  public final void encode(net.minecraft.network.RegistryFriendlyByteBuf);
+  static {};
+}

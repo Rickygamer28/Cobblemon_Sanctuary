@@ -1,0 +1,8 @@
+public final class com.cobblemon.mod.common.api.storage.molang.MoLangDataStoreFactory$DefaultImpls {
+  public static com.bedrockk.molang.runtime.struct.VariableStruct load$default(com.cobblemon.mod.common.api.storage.molang.MoLangDataStoreFactory, java.util.UUID, java.lang.String, int, java.lang.Object);
+}
+public interface com.cobblemon.mod.common.api.storage.molang.MoLangDataStoreFactory {
+  public abstract void markDirty(java.util.UUID);
+  public abstract com.bedrockk.molang.runtime.struct.VariableStruct load(java.util.UUID, java.lang.String);
+  public static com.bedrockk.molang.runtime.struct.VariableStruct load$default(com.cobblemon.mod.common.api.storage.molang.MoLangDataStoreFactory, java.util.UUID, java.lang.String, int, java.lang.Object);
+}

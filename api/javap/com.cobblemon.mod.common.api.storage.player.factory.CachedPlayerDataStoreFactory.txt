@@ -1,0 +1,15 @@
+public final class com.cobblemon.mod.common.api.storage.player.factory.CachedPlayerDataStoreFactory<T extends com.cobblemon.mod.common.api.storage.player.InstancedPlayerData> implements com.cobblemon.mod.common.api.storage.player.PlayerInstancedDataFactory<T> {
+  private final com.cobblemon.mod.common.api.storage.player.adapter.PlayerDataStoreBackend<T> backend;
+  private final java.util.Map<java.util.UUID, T> cache;
+  public com.cobblemon.mod.common.api.storage.player.factory.CachedPlayerDataStoreFactory(com.cobblemon.mod.common.api.storage.player.adapter.PlayerDataStoreBackend<T>);
+  public final com.cobblemon.mod.common.api.storage.player.adapter.PlayerDataStoreBackend<T> getBackend();
+  public void setup(net.minecraft.server.MinecraftServer);
+  public T getForPlayer(java.util.UUID);
+  public void saveAll();
+  public void saveSingle(java.util.UUID);
+  public void onPlayerDisconnect(net.minecraft.server.level.ServerPlayer);
+  public void sendToPlayer(net.minecraft.server.level.ServerPlayer);
+  public T getForPlayer(net.minecraft.world.entity.player.Player);
+  public void saveSingle(net.minecraft.world.entity.player.Player);
+  private static final boolean saveAll$lambda$1(java.util.Map$Entry);
+}

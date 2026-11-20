@@ -1,0 +1,19 @@
+public final class com.cobblemon.mod.common.entity.ai.CobblemonRandomSurfacePos$Companion {
+  private com.cobblemon.mod.common.entity.ai.CobblemonRandomSurfacePos$Companion();
+  public final net.minecraft.world.phys.Vec3 getPos(net.minecraft.world.entity.PathfinderMob, int, int);
+  public final net.minecraft.world.phys.Vec3 getPos(net.minecraft.world.entity.PathfinderMob, int, int, java.util.function.ToDoubleFunction<net.minecraft.core.BlockPos>);
+  public final net.minecraft.world.phys.Vec3 getPosTowards(net.minecraft.world.entity.PathfinderMob, int, int, net.minecraft.world.phys.Vec3);
+  private final net.minecraft.world.phys.Vec3 getPosInDirection(net.minecraft.world.entity.PathfinderMob, int, int, net.minecraft.world.phys.Vec3, boolean);
+  public final net.minecraft.core.BlockPos generateRandomPosTowardDirection(net.minecraft.world.entity.PathfinderMob, int, boolean, net.minecraft.core.BlockPos);
+  public final net.minecraft.core.BlockPos movePosUpOutOfSolid(net.minecraft.world.entity.PathfinderMob, net.minecraft.core.BlockPos);
+  private static final double getPos$lambda$0(net.minecraft.world.entity.PathfinderMob, net.minecraft.core.BlockPos);
+  private static final net.minecraft.core.BlockPos getPos$lambda$1(net.minecraft.world.entity.PathfinderMob, int, int, boolean);
+  private static final net.minecraft.core.BlockPos getPosInDirection$lambda$0(net.minecraft.world.entity.PathfinderMob, int, int, net.minecraft.world.phys.Vec3, boolean);
+  private static final boolean movePosUpOutOfSolid$lambda$0(net.minecraft.world.entity.PathfinderMob, net.minecraft.core.BlockPos);
+  public com.cobblemon.mod.common.entity.ai.CobblemonRandomSurfacePos$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.entity.ai.CobblemonRandomSurfacePos {
+  public static final com.cobblemon.mod.common.entity.ai.CobblemonRandomSurfacePos$Companion Companion;
+  public com.cobblemon.mod.common.entity.ai.CobblemonRandomSurfacePos();
+  static {};
+}

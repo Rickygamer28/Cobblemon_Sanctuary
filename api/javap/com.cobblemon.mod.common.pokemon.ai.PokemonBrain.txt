@@ -1,0 +1,21 @@
+public final class com.cobblemon.mod.common.pokemon.ai.PokemonBrain {
+  public static final com.cobblemon.mod.common.pokemon.ai.PokemonBrain INSTANCE;
+  private static final net.minecraft.util.valueproviders.UniformInt ADULT_FOLLOW_RANGE;
+  private static final net.minecraft.util.valueproviders.UniformInt AVOID_MEMORY_DURATION;
+  private static final java.util.Collection<net.minecraft.world.entity.ai.sensing.SensorType<? extends net.minecraft.world.entity.ai.sensing.Sensor<? super com.cobblemon.mod.common.entity.pokemon.PokemonEntity>>> SENSORS;
+  private static final java.util.List<net.minecraft.world.entity.ai.memory.MemoryModuleType<?>> MEMORY_MODULES;
+  private com.cobblemon.mod.common.pokemon.ai.PokemonBrain();
+  public final java.util.Collection<net.minecraft.world.entity.ai.sensing.SensorType<? extends net.minecraft.world.entity.ai.sensing.Sensor<? super com.cobblemon.mod.common.entity.pokemon.PokemonEntity>>> getSENSORS();
+  public final void applyBrain(com.cobblemon.mod.common.entity.pokemon.PokemonEntity, com.cobblemon.mod.common.pokemon.Pokemon, com.mojang.serialization.Dynamic<?>);
+  public final java.util.List<net.minecraft.world.entity.ai.memory.MemoryModuleType<?>> getMEMORY_MODULES();
+  private final java.util.List<com.mojang.datafixers.util.Pair<java.lang.Integer, net.minecraft.world.entity.ai.behavior.BehaviorControl<? super com.cobblemon.mod.common.entity.pokemon.PokemonEntity>>> coreTasks(com.cobblemon.mod.common.pokemon.Pokemon);
+  private final java.util.List<com.mojang.datafixers.util.Pair<java.lang.Integer, net.minecraft.world.entity.ai.behavior.BehaviorControl<? super com.cobblemon.mod.common.entity.pokemon.PokemonEntity>>> fightTasks(com.cobblemon.mod.common.pokemon.Pokemon);
+  private final java.util.List<com.mojang.datafixers.util.Pair<java.lang.Integer, net.minecraft.world.entity.ai.behavior.BehaviorControl<? super com.cobblemon.mod.common.entity.pokemon.PokemonEntity>>> avoidTasks(com.cobblemon.mod.common.pokemon.Pokemon);
+  private final java.util.List<com.mojang.datafixers.util.Pair<java.lang.Integer, net.minecraft.world.entity.ai.behavior.BehaviorControl<? super com.cobblemon.mod.common.entity.pokemon.PokemonEntity>>> idleTasks(com.cobblemon.mod.common.pokemon.Pokemon);
+  private final net.minecraft.world.entity.ai.behavior.RunOne<com.cobblemon.mod.common.entity.pokemon.PokemonEntity> makeRandomWalkTask();
+  private final java.util.List<com.mojang.datafixers.util.Pair<java.lang.Integer, net.minecraft.world.entity.ai.behavior.BehaviorControl<? super com.cobblemon.mod.common.entity.pokemon.PokemonEntity>>> battlingTasks();
+  private final java.util.List<com.mojang.datafixers.util.Pair<java.lang.Integer, net.minecraft.world.entity.ai.behavior.BehaviorControl<? super com.cobblemon.mod.common.entity.pokemon.PokemonEntity>>> sleepingTasks();
+  private final java.util.List<com.mojang.datafixers.util.Pair<java.lang.Integer, net.minecraft.world.entity.ai.behavior.BehaviorControl<? super com.cobblemon.mod.common.entity.pokemon.PokemonEntity>>> growingPlantTasks(com.cobblemon.mod.common.pokemon.Pokemon);
+  public final void onCaptureFailed(com.cobblemon.mod.common.entity.pokemon.PokemonEntity, net.minecraft.world.entity.Entity);
+  static {};
+}

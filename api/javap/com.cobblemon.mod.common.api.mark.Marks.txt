@@ -1,0 +1,26 @@
+public final class com.cobblemon.mod.common.api.mark.Marks implements com.cobblemon.mod.common.api.data.JsonDataRegistry<com.cobblemon.mod.common.api.mark.Mark> {
+  public static final com.cobblemon.mod.common.api.mark.Marks INSTANCE;
+  private static final net.minecraft.resources.ResourceLocation id;
+  private static final net.minecraft.server.packs.PackType type;
+  private static final com.cobblemon.mod.common.api.reactive.SimpleObservable<com.cobblemon.mod.common.api.mark.Marks> observable;
+  private static final com.google.gson.reflect.TypeToken<com.cobblemon.mod.common.api.mark.Mark> typeToken;
+  private static final java.lang.String resourcePath;
+  private static final com.google.gson.Gson gson;
+  private static final java.util.HashMap<net.minecraft.resources.ResourceLocation, com.cobblemon.mod.common.api.mark.Mark> marks;
+  private com.cobblemon.mod.common.api.mark.Marks();
+  public net.minecraft.resources.ResourceLocation getId();
+  public net.minecraft.server.packs.PackType getType();
+  public com.cobblemon.mod.common.api.reactive.SimpleObservable<com.cobblemon.mod.common.api.mark.Marks> getObservable();
+  public com.google.gson.reflect.TypeToken<com.cobblemon.mod.common.api.mark.Mark> getTypeToken();
+  public java.lang.String getResourcePath();
+  public com.google.gson.Gson getGson();
+  public void reload(java.util.Map<net.minecraft.resources.ResourceLocation, com.cobblemon.mod.common.api.mark.Mark>);
+  public void sync(net.minecraft.server.level.ServerPlayer);
+  public static final java.util.List<com.cobblemon.mod.common.api.mark.Mark> all();
+  public static final java.util.Collection<java.lang.String> identifiers();
+  public static final com.cobblemon.mod.common.api.mark.Mark getByIdentifier(net.minecraft.resources.ResourceLocation);
+  public void reload(net.minecraft.server.packs.resources.ResourceManager);
+  public com.cobblemon.mod.common.api.mark.Mark parse(java.io.BufferedReader, net.minecraft.resources.ResourceLocation);
+  public java.lang.Object parse(java.io.BufferedReader, net.minecraft.resources.ResourceLocation);
+  static {};
+}

@@ -1,0 +1,36 @@
+final class com.cobblemon.mod.common.api.pokemon.status.Status$Companion$CODEC$1 extends kotlin.jvm.internal.FunctionReferenceImpl implements kotlin.jvm.functions.Function1<net.minecraft.resources.ResourceLocation, com.cobblemon.mod.common.api.pokemon.status.Status> {
+  com.cobblemon.mod.common.api.pokemon.status.Status$Companion$CODEC$1(java.lang.Object);
+  public final com.cobblemon.mod.common.api.pokemon.status.Status invoke(net.minecraft.resources.ResourceLocation);
+  public java.lang.Object invoke(java.lang.Object);
+}
+final class com.cobblemon.mod.common.api.pokemon.status.Status$Companion$CODEC$2 extends kotlin.jvm.internal.PropertyReference1Impl {
+  public static final com.cobblemon.mod.common.api.pokemon.status.Status$Companion$CODEC$2 INSTANCE;
+  com.cobblemon.mod.common.api.pokemon.status.Status$Companion$CODEC$2();
+  public java.lang.Object get(java.lang.Object);
+  static {};
+}
+public final class com.cobblemon.mod.common.api.pokemon.status.Status$Companion {
+  private com.cobblemon.mod.common.api.pokemon.status.Status$Companion();
+  public final com.mojang.serialization.Codec<com.cobblemon.mod.common.api.pokemon.status.Status> getCODEC();
+  public static void getCODEC$annotations();
+  public com.cobblemon.mod.common.api.pokemon.status.Status$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public class com.cobblemon.mod.common.api.pokemon.status.Status {
+  public static final com.cobblemon.mod.common.api.pokemon.status.Status$Companion Companion;
+  private final net.minecraft.resources.ResourceLocation name;
+  private final java.lang.String showdownName;
+  private final java.lang.String applyMessage;
+  private final java.lang.String removeMessage;
+  private static final com.mojang.serialization.Codec<com.cobblemon.mod.common.api.pokemon.status.Status> CODEC;
+  public com.cobblemon.mod.common.api.pokemon.status.Status(net.minecraft.resources.ResourceLocation, java.lang.String, java.lang.String, java.lang.String);
+  public com.cobblemon.mod.common.api.pokemon.status.Status(net.minecraft.resources.ResourceLocation, java.lang.String, java.lang.String, java.lang.String, int, kotlin.jvm.internal.DefaultConstructorMarker);
+  public final net.minecraft.resources.ResourceLocation getName();
+  public final java.lang.String getShowdownName();
+  public final java.lang.String getApplyMessage();
+  public final java.lang.String getRemoveMessage();
+  public final com.cobblemon.mod.common.api.moves.animations.ActionEffectTimeline getActionEffect();
+  private static final java.lang.String CODEC$lambda$0(net.minecraft.resources.ResourceLocation);
+  public static final com.mojang.serialization.Codec<com.cobblemon.mod.common.api.pokemon.status.Status> getCODEC();
+  public static final com.mojang.serialization.Codec access$getCODEC$cp();
+  static {};
+}

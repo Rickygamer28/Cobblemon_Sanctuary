@@ -1,0 +1,29 @@
+public final class com.cobblemon.mod.common.CobblemonBehaviours implements com.cobblemon.mod.common.api.data.JsonDataRegistry<com.cobblemon.mod.common.api.ai.CobblemonBehaviour> {
+  public static final com.cobblemon.mod.common.CobblemonBehaviours INSTANCE;
+  private static final com.google.gson.Gson gson;
+  private static final com.google.gson.reflect.TypeToken<com.cobblemon.mod.common.api.ai.CobblemonBehaviour> typeToken;
+  private static final java.lang.String resourcePath;
+  private static final net.minecraft.resources.ResourceLocation id;
+  private static final net.minecraft.server.packs.PackType type;
+  private static final com.cobblemon.mod.common.api.reactive.SimpleObservable<com.cobblemon.mod.common.CobblemonBehaviours> observable;
+  private static final java.util.List<com.cobblemon.mod.common.api.ai.CobblemonBehaviour> autoPokemonBehaviours;
+  private static final java.util.List<com.cobblemon.mod.common.api.ai.CobblemonBehaviour> autoNPCBehaviours;
+  private static final java.util.Map<net.minecraft.resources.ResourceLocation, com.cobblemon.mod.common.api.ai.CobblemonBehaviour> behaviours;
+  private com.cobblemon.mod.common.CobblemonBehaviours();
+  public com.google.gson.Gson getGson();
+  public com.google.gson.reflect.TypeToken<com.cobblemon.mod.common.api.ai.CobblemonBehaviour> getTypeToken();
+  public java.lang.String getResourcePath();
+  public net.minecraft.resources.ResourceLocation getId();
+  public net.minecraft.server.packs.PackType getType();
+  public com.cobblemon.mod.common.api.reactive.SimpleObservable<com.cobblemon.mod.common.CobblemonBehaviours> getObservable();
+  public final java.util.List<com.cobblemon.mod.common.api.ai.CobblemonBehaviour> getAutoPokemonBehaviours();
+  public final java.util.List<com.cobblemon.mod.common.api.ai.CobblemonBehaviour> getAutoNPCBehaviours();
+  public final java.util.Map<net.minecraft.resources.ResourceLocation, com.cobblemon.mod.common.api.ai.CobblemonBehaviour> getBehaviours();
+  public void sync(net.minecraft.server.level.ServerPlayer);
+  public void reload(net.minecraft.server.packs.resources.ResourceManager);
+  public void reload(java.util.Map<net.minecraft.resources.ResourceLocation, com.cobblemon.mod.common.api.ai.CobblemonBehaviour>);
+  public com.cobblemon.mod.common.api.ai.CobblemonBehaviour parse(java.io.BufferedReader, net.minecraft.resources.ResourceLocation);
+  private static final boolean reload$lambda$0(net.minecraft.resources.ResourceLocation);
+  public java.lang.Object parse(java.io.BufferedReader, net.minecraft.resources.ResourceLocation);
+  static {};
+}

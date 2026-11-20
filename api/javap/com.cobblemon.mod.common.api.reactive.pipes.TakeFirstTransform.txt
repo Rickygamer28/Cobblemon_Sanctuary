@@ -1,0 +1,8 @@
+public final class com.cobblemon.mod.common.api.reactive.pipes.TakeFirstTransform<I> implements com.cobblemon.mod.common.api.reactive.Transform<I, I> {
+  private int amount;
+  public com.cobblemon.mod.common.api.reactive.pipes.TakeFirstTransform(int);
+  public com.cobblemon.mod.common.api.reactive.pipes.TakeFirstTransform(int, int, kotlin.jvm.internal.DefaultConstructorMarker);
+  public I invoke(I);
+  public java.lang.Void noTransform(boolean);
+  public com.cobblemon.mod.common.api.reactive.pipes.TakeFirstTransform();
+}

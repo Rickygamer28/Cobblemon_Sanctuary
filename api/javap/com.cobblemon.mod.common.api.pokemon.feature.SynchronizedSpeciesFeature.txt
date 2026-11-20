@@ -1,0 +1,2 @@
+public interface com.cobblemon.mod.common.api.pokemon.feature.SynchronizedSpeciesFeature extends com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeature,com.cobblemon.mod.common.api.serialization.BufferSerializer {
+}

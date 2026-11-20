@@ -1,0 +1,9 @@
+public final class com.cobblemon.mod.common.entity.pokemon.ai.tasks.ChooseWaterWanderTargetTask {
+  public static final com.cobblemon.mod.common.entity.pokemon.ai.tasks.ChooseWaterWanderTargetTask INSTANCE;
+  private com.cobblemon.mod.common.entity.pokemon.ai.tasks.ChooseWaterWanderTargetTask();
+  public final net.minecraft.world.entity.ai.behavior.OneShot<net.minecraft.world.entity.PathfinderMob> create(int, int, int, float, int);
+  private static final com.mojang.datafixers.kinds.App create$lambda$0(int, int, int, float, int, net.minecraft.world.entity.ai.behavior.declarative.BehaviorBuilder$Instance);
+  private static final net.minecraft.world.entity.ai.behavior.declarative.Trigger create$lambda$0$0(int, int, int, float, int, net.minecraft.world.entity.ai.behavior.declarative.MemoryAccessor, net.minecraft.world.entity.ai.behavior.declarative.MemoryAccessor);
+  private static final boolean create$lambda$0$0$0(int, int, int, net.minecraft.world.entity.ai.behavior.declarative.MemoryAccessor, float, int, net.minecraft.world.entity.ai.behavior.declarative.MemoryAccessor, net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.PathfinderMob, long);
+  static {};
+}

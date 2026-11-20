@@ -1,0 +1,22 @@
+public final class com.cobblemon.mod.common.api.ai.config.task.PointToSpawnTaskConfig implements com.cobblemon.mod.common.api.ai.config.task.SingleTaskConfig {
+  public com.cobblemon.mod.common.api.ai.config.task.PointToSpawnTaskConfig();
+  public java.util.List<com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable> getVariables(net.minecraft.world.entity.LivingEntity, com.cobblemon.mod.common.api.ai.BehaviourConfigurationContext);
+  public net.minecraft.world.entity.ai.behavior.BehaviorControl<? super net.minecraft.world.entity.LivingEntity> createTask(net.minecraft.world.entity.LivingEntity, com.cobblemon.mod.common.api.ai.BehaviourConfigurationContext);
+  public java.util.List<net.minecraft.world.entity.ai.behavior.BehaviorControl<? super net.minecraft.world.entity.LivingEntity>> createTasks(net.minecraft.world.entity.LivingEntity, com.cobblemon.mod.common.api.ai.BehaviourConfigurationContext);
+  public boolean checkCondition(com.bedrockk.molang.runtime.MoLangRuntime, com.mojang.datafixers.util.Either<com.bedrockk.molang.Expression, com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable>);
+  public com.bedrockk.molang.Expression asSimplifiedExpression(com.mojang.datafixers.util.Either<com.bedrockk.molang.Expression, com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable>, net.minecraft.world.entity.LivingEntity);
+  public com.bedrockk.molang.Expression asExpression(com.mojang.datafixers.util.Either<com.bedrockk.molang.Expression, com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable>);
+  public java.lang.String resolveString(com.mojang.datafixers.util.Either<com.bedrockk.molang.Expression, com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable>, com.bedrockk.molang.runtime.MoLangRuntime);
+  public boolean resolveBoolean(com.mojang.datafixers.util.Either<com.bedrockk.molang.Expression, com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable>, com.bedrockk.molang.runtime.MoLangRuntime);
+  public int resolveInt(com.mojang.datafixers.util.Either<com.bedrockk.molang.Expression, com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable>, com.bedrockk.molang.runtime.MoLangRuntime);
+  public double resolveDouble(com.mojang.datafixers.util.Either<com.bedrockk.molang.Expression, com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable>, com.bedrockk.molang.runtime.MoLangRuntime);
+  public float resolveFloat(com.mojang.datafixers.util.Either<com.bedrockk.molang.Expression, com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable>, com.bedrockk.molang.runtime.MoLangRuntime);
+  public com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable stringVariable(java.lang.String, java.lang.String, java.lang.String);
+  public com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable numberVariable(java.lang.String, java.lang.String, java.lang.Number);
+  public com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable booleanVariable(java.lang.String, java.lang.String, boolean);
+  public com.bedrockk.molang.Expression getVariableExpression(java.lang.String);
+  public boolean resolveBooleanVariable(java.lang.String, com.bedrockk.molang.runtime.MoLangRuntime);
+  private static final com.mojang.datafixers.kinds.App createTask$lambda$0(net.minecraft.world.entity.ai.behavior.declarative.BehaviorBuilder$Instance);
+  private static final net.minecraft.world.entity.ai.behavior.declarative.Trigger createTask$lambda$0$0(net.minecraft.world.entity.ai.behavior.declarative.MemoryAccessor, net.minecraft.world.entity.ai.behavior.declarative.MemoryAccessor);
+  private static final boolean createTask$lambda$0$0$0(net.minecraft.world.entity.ai.behavior.declarative.MemoryAccessor, net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity, long);
+}

@@ -1,0 +1,18 @@
+public final class com.cobblemon.mod.common.api.item.HeldItems implements com.cobblemon.mod.common.api.data.DataRegistry {
+  public static final com.cobblemon.mod.common.api.item.HeldItems INSTANCE;
+  private static final net.minecraft.resources.ResourceLocation id;
+  private static final net.minecraft.server.packs.PackType type;
+  private static final com.cobblemon.mod.common.api.reactive.SimpleObservable<com.cobblemon.mod.common.api.item.HeldItems> observable;
+  private static final java.util.Map<java.lang.String, java.lang.String> heldItemsScripts;
+  private static final java.util.HashSet<java.lang.String> showdownItems;
+  private com.cobblemon.mod.common.api.item.HeldItems();
+  public net.minecraft.resources.ResourceLocation getId();
+  public net.minecraft.server.packs.PackType getType();
+  public com.cobblemon.mod.common.api.reactive.SimpleObservable<com.cobblemon.mod.common.api.item.HeldItems> getObservable();
+  public void sync(net.minecraft.server.level.ServerPlayer);
+  public final java.util.Map<java.lang.String, java.lang.String> getHeldItemsScripts$common();
+  public final java.util.HashSet<java.lang.String> getShowdownItems();
+  public void reload(net.minecraft.server.packs.resources.ResourceManager);
+  private static final boolean reload$lambda$0(net.minecraft.resources.ResourceLocation);
+  static {};
+}

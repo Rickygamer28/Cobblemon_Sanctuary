@@ -1,0 +1,3 @@
+public final class com.cobblemon.mod.common.util.RedstoneExtensionsKt {
+  public static final void activateNearbyObservers(net.minecraft.world.level.Level, net.minecraft.core.BlockPos);
+}

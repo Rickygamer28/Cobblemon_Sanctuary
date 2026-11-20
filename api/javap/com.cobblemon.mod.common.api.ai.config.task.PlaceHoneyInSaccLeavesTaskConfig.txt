@@ -1,0 +1,49 @@
+public final class com.cobblemon.mod.common.api.ai.config.task.PlaceHoneyInSaccLeavesTaskConfig$Companion {
+  private com.cobblemon.mod.common.api.ai.config.task.PlaceHoneyInSaccLeavesTaskConfig$Companion();
+  public com.cobblemon.mod.common.api.ai.config.task.PlaceHoneyInSaccLeavesTaskConfig$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.api.ai.config.task.PlaceHoneyInSaccLeavesTaskConfig$createTask$1 extends net.minecraft.world.entity.ai.behavior.Behavior<net.minecraft.world.entity.LivingEntity> {
+  private int successfulPollinationTicks;
+  private int lastSoundPlayedTick;
+  private net.minecraft.world.phys.Vec3 hoverPos;
+  final net.minecraft.world.entity.LivingEntity $entity;
+  com.cobblemon.mod.common.api.ai.config.task.PlaceHoneyInSaccLeavesTaskConfig$createTask$1(net.minecraft.world.entity.LivingEntity, java.util.Map<net.minecraft.world.entity.ai.memory.MemoryModuleType<?>, ? extends net.minecraft.world.entity.ai.memory.MemoryStatus>);
+  public final int getSuccessfulPollinationTicks();
+  public final void setSuccessfulPollinationTicks(int);
+  public final int getLastSoundPlayedTick();
+  public final void setLastSoundPlayedTick(int);
+  public final net.minecraft.world.phys.Vec3 getHoverPos();
+  public final void setHoverPos(net.minecraft.world.phys.Vec3);
+  protected boolean checkExtraStartConditions(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity);
+  protected boolean canStillUse(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity, long);
+  protected void start(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity, long);
+  protected void tick(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity, long);
+  protected void stop(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity, long);
+}
+public final class com.cobblemon.mod.common.api.ai.config.task.PlaceHoneyInSaccLeavesTaskConfig implements com.cobblemon.mod.common.api.ai.config.task.SingleTaskConfig {
+  public static final com.cobblemon.mod.common.api.ai.config.task.PlaceHoneyInSaccLeavesTaskConfig$Companion Companion;
+  private final com.mojang.datafixers.util.Either<com.bedrockk.molang.Expression, com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable> condition;
+  public static final java.lang.String POLLINATE;
+  public static final int MIN_DURATION;
+  public static final int MAX_DURATION;
+  public static final int REQUIRED_SUCCESSFUL_POLLINATION_TICKS;
+  public com.cobblemon.mod.common.api.ai.config.task.PlaceHoneyInSaccLeavesTaskConfig();
+  public final com.mojang.datafixers.util.Either<com.bedrockk.molang.Expression, com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable> getCondition();
+  public java.util.List<com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable> getVariables(net.minecraft.world.entity.LivingEntity, com.cobblemon.mod.common.api.ai.BehaviourConfigurationContext);
+  public net.minecraft.world.entity.ai.behavior.BehaviorControl<? super net.minecraft.world.entity.LivingEntity> createTask(net.minecraft.world.entity.LivingEntity, com.cobblemon.mod.common.api.ai.BehaviourConfigurationContext);
+  public java.util.List<net.minecraft.world.entity.ai.behavior.BehaviorControl<? super net.minecraft.world.entity.LivingEntity>> createTasks(net.minecraft.world.entity.LivingEntity, com.cobblemon.mod.common.api.ai.BehaviourConfigurationContext);
+  public boolean checkCondition(com.bedrockk.molang.runtime.MoLangRuntime, com.mojang.datafixers.util.Either<com.bedrockk.molang.Expression, com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable>);
+  public com.bedrockk.molang.Expression asSimplifiedExpression(com.mojang.datafixers.util.Either<com.bedrockk.molang.Expression, com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable>, net.minecraft.world.entity.LivingEntity);
+  public com.bedrockk.molang.Expression asExpression(com.mojang.datafixers.util.Either<com.bedrockk.molang.Expression, com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable>);
+  public java.lang.String resolveString(com.mojang.datafixers.util.Either<com.bedrockk.molang.Expression, com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable>, com.bedrockk.molang.runtime.MoLangRuntime);
+  public boolean resolveBoolean(com.mojang.datafixers.util.Either<com.bedrockk.molang.Expression, com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable>, com.bedrockk.molang.runtime.MoLangRuntime);
+  public int resolveInt(com.mojang.datafixers.util.Either<com.bedrockk.molang.Expression, com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable>, com.bedrockk.molang.runtime.MoLangRuntime);
+  public double resolveDouble(com.mojang.datafixers.util.Either<com.bedrockk.molang.Expression, com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable>, com.bedrockk.molang.runtime.MoLangRuntime);
+  public float resolveFloat(com.mojang.datafixers.util.Either<com.bedrockk.molang.Expression, com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable>, com.bedrockk.molang.runtime.MoLangRuntime);
+  public com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable stringVariable(java.lang.String, java.lang.String, java.lang.String);
+  public com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable numberVariable(java.lang.String, java.lang.String, java.lang.Number);
+  public com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable booleanVariable(java.lang.String, java.lang.String, boolean);
+  public com.bedrockk.molang.Expression getVariableExpression(java.lang.String);
+  public boolean resolveBooleanVariable(java.lang.String, com.bedrockk.molang.runtime.MoLangRuntime);
+  static {};
+}

@@ -1,0 +1,4 @@
+public final class com.cobblemon.mod.common.util.BitUtilitiesKt {
+  public static final byte setBitForByte(byte, int, boolean);
+  public static final boolean getBitForByte(byte, int);
+}
