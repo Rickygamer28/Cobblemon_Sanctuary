@@ -85,6 +85,21 @@ object BiomeDresser {
                 it.value().place(level, level.chunkSource.generator, random, surface.above())
             }
         }
+        // a swamp oak's vines don't hang down over the water (they'd trail in the pond)
+        if (key == TreeFeatures.SWAMP_OAK) for (dx in -5..5) for (dz in -5..5) {
+            var y = surface.y + 14
+            val vines = ArrayList<BlockPos>()
+            while (y > surface.y - 6) {
+                val p = BlockPos(surface.x + dx, y, surface.z + dz)
+                val st = level.getBlockState(p)
+                if (st.`is`(Blocks.VINE)) vines += p
+                else if (!st.isAir && !st.`is`(net.minecraft.tags.BlockTags.LEAVES)) {
+                    if (!st.fluidState.isEmpty) for (v in vines) level.setBlock(v, b(Blocks.AIR), 2)
+                    break
+                } else if (st.`is`(net.minecraft.tags.BlockTags.LEAVES)) vines.clear()
+                y--
+            }
+        }
         if (protectRadius > 0) {
             for (dx in -protectRadius..protectRadius) for (dz in -protectRadius..protectRadius) {
                 if (dx == 0 && dz == 0) continue
@@ -961,6 +976,20 @@ object BiomeDresser {
             for (i in 1 until n) g[i] = g[i].coerceIn(g[i - 1] - grade, g[i - 1] + grade)
             for (i in n - 2 downTo 0) g[i] = g[i].coerceIn(g[i + 1] - grade, g[i + 1] + grade)
         }
+        // over a cave the route can't cut down (it would open the cave): there it rises, gently, from both sides
+        val floorAt = DoubleArray(n) { i ->
+            val a = l.start + i
+            val b = bend(s, l, a)
+            val cave = Caves.at(s, (s.center.x + l.ux * a + l.uz * b).roundToInt(), (s.center.z + l.uz * a - l.ux * b).roundToInt())
+            if (cave != null && !cave.mouth) min(raw[i], cave.ceil + 4.0) else -1.0
+        }
+        if (floorAt.any { it >= 0 }) {
+            for (i in 0 until n) g[i] = max(g[i], floorAt[i])
+            repeat(2) {
+                for (i in 1 until n) g[i] = max(g[i], g[i - 1] - grade)
+                for (i in n - 2 downTo 0) g[i] = max(g[i], g[i + 1] - grade)
+            }
+        }
         return RouteProfile(l.start, g).also { routeProfiles[zone] = it }
     }
 
@@ -1515,10 +1544,9 @@ object BiomeDresser {
     private class RouteLine(val ux: Double, val uz: Double, val start: Double, val end: Double, val i: Int, val anchorDist: Double)
 
     private fun routeLine(s: Sanctuary, zone: String, hb: ZoneLayout.Habitat): RouteLine {
-        // the route ends at the landmark (which stays where it was built)
-        val mark = s.landmarks[zone]?.takeIf { it != Landmarks.NONE && zone != "fire" }?.let { BlockPos.of(it) }
-        val ax = mark?.x ?: hb.x
-        val az = mark?.z ?: hb.z
+        // the route ends where the habitat's landmark stands: its anchor, fixed by the layout (so the route's shape
+        // doesn't change when a landmark is built or moved, leaving ground built along the old one at the wrong height)
+        val (ax, az) = if (zone == "fire") hb.x to hb.z else ZoneLayout.anchor(s, zone)
         val adx = (ax - s.center.x).toDouble()
         val adz = (az - s.center.z).toDouble()
         val anchorDist = sqrt(adx * adx + adz * adz)
