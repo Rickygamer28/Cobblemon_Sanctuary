@@ -1575,6 +1575,29 @@ object BiomeDresser {
         return best
     }
 
+    /** A point along a route: where it is, which way the route runs there, and how far out from the middle. */
+    class RoutePoint(val x: Double, val z: Double, val dx: Double, val dz: Double, val along: Double)
+
+    /** Points every [step] blocks along the route to [zone] (empty when it has none). */
+    fun routePoints(s: Sanctuary, zone: String, step: Double): List<RoutePoint> {
+        val hb = s.habitats[zone] ?: return emptyList()
+        if (zone !in s.unlocked) return emptyList()
+        val l = routeLine(s, zone, hb)
+        val out = ArrayList<RoutePoint>()
+        var a = l.start
+        while (a <= l.end) {
+            val b0 = bend(s, l, a)
+            val db = (bend(s, l, a + 1) - bend(s, l, a - 1)) / 2
+            var tx = l.ux + l.uz * db
+            var tz = l.uz - l.ux * db
+            val len = sqrt(tx * tx + tz * tz).coerceAtLeast(1e-6)
+            tx /= len; tz /= len
+            out += RoutePoint(s.center.x + l.ux * a + l.uz * b0, s.center.z + l.uz * a - l.ux * b0, tx, tz, a)
+            a += step
+        }
+        return out
+    }
+
     /** Routes are trodden earth: a dirt path, or whatever the ground there wears down to. */
     private fun routeBlocks(zone: String, variant: Int): Pair<BlockState, BlockState> = when (zone) {
         "water" -> b(Blocks.SAND) to b(Blocks.SANDSTONE)

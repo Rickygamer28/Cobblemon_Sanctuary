@@ -166,6 +166,33 @@ object SanctuaryGuis {
                 it.put("rewards", ListTag().also { rl -> g.rewards.forEach { rw -> rl.add(StringTag.valueOf("${rw.count}|${rw.id}")) } })
             })
         })
+        run {
+            val R = com.rickygamer28.sanctuary.life.Requests
+            val lv = R.level(s)
+            t.put("heart", CompoundTag().also { h ->
+                h.putInt("points", s.heart)
+                h.putInt("level", lv)
+                h.putInt("prev", if (lv == 0) 0 else R.LEVELS[lv - 1].points)
+                h.putInt("next", R.LEVELS.getOrNull(lv)?.points ?: -1)
+                h.put("levels", ListTag().also { l -> R.LEVELS.forEach { x -> l.add(StringTag.valueOf("${x.points}|${x.title}|${x.desc}")) } })
+            })
+            t.put("requests", ListTag().also { l ->
+                val now = SanctuaryDimension.level(player.server)?.gameTime ?: 0L
+                for (r in s.requests) l.add(CompoundTag().also { c ->
+                    val (text, how) = R.describe(s, rt, r)
+                    c.putUUID("u", r.pokemon)
+                    c.putString("text", text)
+                    c.putString("how", how)
+                    c.putString("zone", r.zone)
+                    c.putInt("pts", R.points(r))
+                    c.putLong("left", ((24000L * 3 - (now - r.created)) / 1200L).coerceAtLeast(0))
+                    (rt.live[r.pokemon]?.pokemon ?: Residents.findRoster(rt, r.pokemon)?.pokemon)?.let { pk ->
+                        c.putString("sp", pk.species.resourceIdentifier.toString())
+                        c.put("as", ListTag().also { a -> pk.aspects.forEach { x -> a.add(StringTag.valueOf(x)) } })
+                    }
+                })
+            })
+        }
         t.putInt("crowd", s.crowd)
         t.putBoolean("crowdAllowed", com.rickygamer28.sanctuary.SanctuaryConfig.allowBigCrowds.get())
         run {
@@ -348,6 +375,16 @@ object SanctuaryGuis {
         t.putString("ability", runCatching { pk.ability.name }.getOrDefault(""))
         com.rickygamer28.sanctuary.life.Personality.of(pk).let { p -> t.putString("pers", p.label); t.putString("persB", p.blurb) }
         com.rickygamer28.sanctuary.life.PropVisits.describe(s, s.residents[id])?.let { t.putString("fav", it) }
+        run {
+            val home = runCatching { TypeLogic.homeZone(pk, s.residents[id], ring, s) }.getOrNull()
+            com.rickygamer28.sanctuary.life.Requests.title(s.residents[id], home)?.let { t.putString("title", it) }
+            s.requests.firstOrNull { it.pokemon == id }?.let { r ->
+                val (text, how) = com.rickygamer28.sanctuary.life.Requests.describe(s, rt, r)
+                t.putString("req", text); t.putString("reqHow", how)
+            }
+            com.rickygamer28.sanctuary.life.Evolving.status(s, pk)?.let { t.putString("evo", it) }
+            t.putBoolean("stay", s.residents[id]?.noEvolve == true)
+        }
         t.putInt("hpNow", pk.currentHealth)
         val stats = listOf(Stats.HP, Stats.ATTACK, Stats.DEFENCE, Stats.SPECIAL_ATTACK, Stats.SPECIAL_DEFENCE, Stats.SPEED)
         t.putIntArray("stats", intArrayOf(pk.maxHealth, pk.attack, pk.defence, pk.specialAttack, pk.specialDefence, pk.speed))

@@ -41,6 +41,10 @@ class ResidentData(
     /** Its favourite spot in the valley (a log, rock, pool… or a berry tree) and what it is. */
     var favourite: Long? = null,
     var favouriteKind: String? = null,
+    /** How many of its requests players have done (it earns a title). */
+    var helped: Int = 0,
+    /** Its trainer asked it not to evolve in the sanctuary. */
+    var noEvolve: Boolean = false,
 ) {
     fun save(): CompoundTag = CompoundTag().also { t ->
         tether?.let { t.putUUID("Tether", it) }
@@ -51,6 +55,8 @@ class ResidentData(
         t.putLong("Feed", lastFeed)
         favourite?.let { t.putLong("Fav", it) }
         favouriteKind?.let { t.putString("FavKind", it) }
+        if (helped > 0) t.putInt("Helped", helped)
+        if (noEvolve) t.putBoolean("NoEvolve", true)
     }
 
     companion object {
@@ -63,6 +69,8 @@ class ResidentData(
             tether = if (t.hasUUID("Tether")) t.getUUID("Tether") else null,
             favourite = if (t.contains("Fav")) t.getLong("Fav") else null,
             favouriteKind = if (t.contains("FavKind")) t.getString("FavKind") else null,
+            helped = t.getInt("Helped"),
+            noEvolve = t.getBoolean("NoEvolve"),
         )
     }
 }
@@ -203,6 +211,17 @@ class Sanctuary(
     /** Goals reached (and announced). */
     val reached: MutableSet<String> = linkedSetOf()
 
+    /** The Valley Heart: points from residents' requests done; its level unlocks things (see Requests.LEVELS). */
+    var heart: Int = 0
+    /** Requests residents have open right now. */
+    val requests: MutableList<com.rickygamer28.sanctuary.life.Request> = mutableListOf()
+    /** Benches, flower posts and signposts along the routes (position → what), put up once the Heart is high enough. */
+    val decor: MutableMap<Long, String> = linkedMapOf()
+    /** Habitats whose route already got its decorations. */
+    val decorDone: MutableSet<String> = linkedSetOf()
+    /** Landmarks that got their lantern posts. */
+    val litLandmarks: MutableSet<String> = linkedSetOf()
+
     fun stat(key: String, by: Int = 1) { stats[key] = (stats[key] ?: 0) + by }
 
     /** Biome variant chosen per type for this sanctuary. */
@@ -265,6 +284,9 @@ class Sanctuary(
         // the valley's own spots go; decorations players placed stay
         props.values.removeIf { !it.startsWith("player_") }
         dens.clear()
+        decor.clear()
+        decorDone.clear()
+        litLandmarks.clear()
         needsCheck = true
         generationDirty = true
     }
@@ -316,6 +338,12 @@ class Sanctuary(
         t.putLongArray("DenPos", dens.keys.toLongArray())
         t.put("DenInfo", ListTag().also { l -> dens.values.forEach { l.add(net.minecraft.nbt.StringTag.valueOf(it)) } })
         t.putInt("Crowd", crowd)
+        t.putInt("Heart", heart)
+        t.put("Requests", ListTag().also { l -> requests.forEach { l.add(it.save()) } })
+        t.putLongArray("DecorPos", decor.keys.toLongArray())
+        t.put("DecorKind", ListTag().also { l -> decor.values.forEach { l.add(StringTag.valueOf(it)) } })
+        t.put("DecorDone", ListTag().also { l -> decorDone.forEach { l.add(StringTag.valueOf(it)) } })
+        t.put("LitLandmarks", ListTag().also { l -> litLandmarks.forEach { l.add(StringTag.valueOf(it)) } })
         t.put("Stats", CompoundTag().also { c -> stats.forEach { (k, v) -> c.putInt(k, v) } })
         t.put("BasketOff", ListTag().also { l -> basketOff.forEach { l.add(net.minecraft.nbt.StringTag.valueOf(it)) } })
         t.put("Claimed", ListTag().also { l -> claimed.forEach { l.add(net.minecraft.nbt.StringTag.valueOf(it)) } })
@@ -437,6 +465,15 @@ class Sanctuary(
                 for (i in dp.indices) if (i < di.size) s.dens[dp[i]] = di.getString(i)
             }
             s.crowd = t.getInt("Crowd")
+            s.heart = t.getInt("Heart")
+            t.getList("Requests", Tag.TAG_COMPOUND.toInt()).forEach { e -> runCatching { com.rickygamer28.sanctuary.life.Request.load(e as CompoundTag) }.getOrNull()?.let { s.requests += it } }
+            run {
+                val dp = t.getLongArray("DecorPos")
+                val dk = t.getList("DecorKind", Tag.TAG_STRING.toInt())
+                for (i in dp.indices) if (i < dk.size) s.decor[dp[i]] = dk.getString(i)
+            }
+            t.getList("DecorDone", Tag.TAG_STRING.toInt()).forEach { s.decorDone += it.asString }
+            t.getList("LitLandmarks", Tag.TAG_STRING.toInt()).forEach { s.litLandmarks += it.asString }
             t.getCompound("Stats").let { c -> c.allKeys.forEach { k -> s.stats[k] = c.getInt(k) } }
             t.getList("Claimed", Tag.TAG_STRING.toInt()).forEach { s.claimed += it.asString }
             t.getList("BasketOff", Tag.TAG_STRING.toInt()).forEach { s.basketOff += it.asString }

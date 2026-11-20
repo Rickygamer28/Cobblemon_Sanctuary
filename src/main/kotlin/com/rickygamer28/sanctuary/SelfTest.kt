@@ -212,6 +212,8 @@ object SelfTest {
         s.planned = true
         s.planRadius = s.size.radius
         s.generationDirty = true
+        // (a full Valley Heart, so the routes get their decorations and the landmarks their lanterns)
+        s.heart = 1000
         if (zones.any { it in CUSTOM }) {
             s.customPockets.clear()
             s.customPockets += CUSTOM_POCKETS
@@ -403,7 +405,7 @@ object SelfTest {
             if (ax != 0 || az != 0) log("last '$why' at (${ax - s.center.x}, ${az - s.center.z}): ${Trace.of(ax, az)}")
         }
         log("removed as players' blocks so far: ${Trace.removedBlocks}")
-        log("scanned $columns columns ($unloaded loaded from disk); ${s.landmarks.count { it.value != Landmarks.NONE }} landmarks, $dens dens, ${ZoneLayout.pockets(s).count { it.live(s) }} pockets")
+        log("scanned $columns columns ($unloaded loaded from disk); ${s.landmarks.count { it.value != Landmarks.NONE }} landmarks, $dens dens, ${ZoneLayout.pockets(s).count { it.live(s) }} pockets, ${s.decor.size} route decorations (${s.decor.values.groupingBy { it }.eachCount()}), ${s.litLandmarks.size} lit landmarks")
         if (f.isEmpty()) log("  no problems found")
         for (finding in f.values) {
             log("  ${finding.name}: ${finding.count}")

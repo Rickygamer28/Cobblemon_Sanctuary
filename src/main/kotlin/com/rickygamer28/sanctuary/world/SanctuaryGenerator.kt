@@ -773,6 +773,7 @@ object SanctuaryGenerator {
             }
             if (now % 40L == 0L) Landmarks.tick(level, s)
             if (now % 40L == 20L) Dens.upgrade(level, s)
+            if (now % 40L == 30L) RouteDecor.tick(level, s)
             val retry = retryAt[s.id] ?: return
             if (now < retry) return
             retryAt.remove(s.id)

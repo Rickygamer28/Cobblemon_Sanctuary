@@ -139,6 +139,7 @@ object Landmarks {
             }
             BiomeDresser.removeLooseLeaves(level, p, r + 8, p.y, minOf(level.maxBuildHeight - 1, p.y + 60))
             if (stale) s.staleLandmarks.remove(zone) else s.landmarks.remove(zone)
+            s.litLandmarks.remove(zone)
             for (ox in -r - 2..r + 2) for (oz in -r - 2..r + 2) {
                 val idx = ColumnOrder.indexOf(p.x + ox - s.center.x, p.z + oz - s.center.z)
                 if (idx >= 0) { s.dressed.clear(idx); s.meadow.clear(idx) }

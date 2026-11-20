@@ -60,6 +60,7 @@ object Interactions {
                     if (owner) pokemon.incrementFriendship(2)
                     say(player, "$name loves it!", net.minecraft.ChatFormatting.GREEN)
                 } else say(player, "$name enjoys the attention.", net.minecraft.ChatFormatting.GRAY)
+                com.rickygamer28.sanctuary.life.Requests.onPet(f.level, f.s, pokemonId, player)
             }
             "play" -> {
                 if (live == null || !near(player, live)) return say(player, "Get close to $name first.", net.minecraft.ChatFormatting.GRAY)
@@ -72,13 +73,18 @@ object Interactions {
                     if (owner) pokemon.incrementFriendship(1)
                 }
                 say(player, "$name plays with you!", net.minecraft.ChatFormatting.GREEN)
+                com.rickygamer28.sanctuary.life.Requests.onPlayed(f.level, f.s, pokemonId, player)
             }
             "feed" -> {
                 if (live == null || !near(player, live)) return say(player, "Get close to $name first.", net.minecraft.ChatFormatting.GRAY)
-                val slot = (0 until player.inventory.containerSize).firstOrNull { player.inventory.getItem(it).`is`(BERRIES) }
+                // the berry it asked for, if you have it
+                val wanted = com.rickygamer28.sanctuary.life.Requests.wantedFood(f.s, pokemonId)
+                val slot = wanted?.let { w -> (0 until player.inventory.containerSize).firstOrNull { player.inventory.getItem(it).`is`(w) } }
+                    ?: (0 until player.inventory.containerSize).firstOrNull { player.inventory.getItem(it).`is`(BERRIES) }
                     ?: return say(player, "You need a berry in your inventory.", net.minecraft.ChatFormatting.RED)
                 val berry = player.inventory.getItem(slot)
                 val berryName = berry.hoverName.string
+                val berryItem = berry.item
                 if (!player.isCreative) berry.shrink(1)
                 Residents.stop(live.entity)
                 live.entity.lookControl.setLookAt(player)
@@ -89,6 +95,7 @@ object Interactions {
                     if (owner) pokemon.incrementFriendship(3)
                 }
                 say(player, "$name happily eats the $berryName.", net.minecraft.ChatFormatting.GREEN)
+                com.rickygamer28.sanctuary.life.Requests.onFed(f.level, f.s, pokemonId, berryItem, player)
                 // nearby residents notice the food
                 Residents.runtime(f.s).live.values.filter { it !== live && it.entity.distanceToSqr(live.entity) < 100 && now >= it.busyUntil }.take(3)
                     .forEach { Residents.walkTo(it.entity, player.blockPosition(), 0.45f, 3) }
@@ -107,6 +114,11 @@ object Interactions {
                 }
                 f.s.logEvent("$name moved to the ${Residents.zoneName(zone)}.")
                 say(player, "$name will now live in the ${Residents.zoneName(zone)}.", net.minecraft.ChatFormatting.GREEN)
+            }
+            "stay" -> {
+                if (!owner) return say(player, "Only its trainer can decide that.", net.minecraft.ChatFormatting.RED)
+                data.noEvolve = !data.noEvolve
+                say(player, if (data.noEvolve) "$name will stay as it is." else "$name can evolve in the sanctuary again.", net.minecraft.ChatFormatting.GREEN)
             }
             "take" -> {
                 if (!owner) return say(player, "Only its trainer can take it.", net.minecraft.ChatFormatting.RED)

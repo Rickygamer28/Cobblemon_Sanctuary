@@ -32,13 +32,14 @@ object Gathering {
     /** Called every second for every sanctuary, with or without players. */
     fun tick(level: ServerLevel, s: Sanctuary, rt: SanctuaryRuntime, now: Long) {
         if (!SanctuaryConfig.basketEnabled.get() || s.basketPos == null) return
-        val every = SanctuaryConfig.basketMinutes.get().coerceAtLeast(1) * 60L
+        val every = (SanctuaryConfig.basketMinutes.get().coerceAtLeast(1) * 60L).let { if (Requests.basketFaster(s)) it * 3 / 4 else it }
         if ((now / 20L + (s.id.hashCode() and 127)) % every != 0L) return
         val roster = rt.roster
         if (roster.isEmpty()) return
         val random = level.random
         val ring = ZoneLayout.ring(s)
-        val finds = (roster.size / 40).coerceIn(1, 4)
+        val finds = (roster.size / 40).coerceIn(1, 4) + Requests.basketExtraFinds(s)
+        gift(level, s, rt)
         var reported = false
         repeat(finds) {
             val e = roster[random.nextInt(roster.size)]
@@ -70,6 +71,33 @@ object Gathering {
         Sanctuaries.data(level).setDirty()
     }
 
+    /** What a grateful resident might bring, by its type. */
+    private val GIFTS = mapOf(
+        "fire" to listOf("blaze_powder", "magma_cream", "fire_charge"), "water" to listOf("prismarine_shard", "prismarine_crystals", "cod"),
+        "grass" to listOf("sweet_berries", "apple", "moss_block"), "bug" to listOf("honeycomb", "string", "slime_ball"),
+        "electric" to listOf("redstone", "glowstone_dust", "copper_ingot"), "ice" to listOf("snowball", "packed_ice", "blue_ice"),
+        "rock" to listOf("flint", "iron_nugget", "amethyst_shard"), "ground" to listOf("clay_ball", "gold_nugget", "brick"),
+        "fairy" to listOf("glow_berries", "pink_petals", "amethyst_shard"), "ghost" to listOf("bone", "soul_sand", "phantom_membrane"),
+        "dark" to listOf("ink_sac", "coal", "obsidian"), "psychic" to listOf("lapis_lazuli", "amethyst_shard", "ender_pearl"),
+        "dragon" to listOf("ender_pearl", "obsidian", "prismarine_crystals"), "poison" to listOf("spider_eye", "slime_ball", "fermented_spider_eye"),
+        "steel" to listOf("iron_nugget", "iron_ingot", "chain"), "fighting" to listOf("leather", "iron_nugget", "bread"),
+        "flying" to listOf("feather", "feather", "arrow"), "normal" to listOf("wheat", "egg", "bread"),
+    )
+
+    /** Now and then a resident you've helped leaves a gift in the basket. */
+    private fun gift(level: ServerLevel, s: Sanctuary, rt: SanctuaryRuntime) {
+        val chance = if (Requests.level(s) >= Requests.GIFTS_LEVEL) 0.5 else 0.25
+        if (level.random.nextDouble() >= chance) return
+        val helpers = rt.roster.filter { (s.residents[it.pokemon.uuid]?.helped ?: 0) > 0 }
+        val e = helpers.randomOrNull() ?: return
+        val type = runCatching { TypeLogic.currentTypes(e.pokemon).firstOrNull() }.getOrNull() ?: "normal"
+        val id = (GIFTS[type] ?: GIFTS.getValue("normal")).let { it[level.random.nextInt(it.size)] }
+        val item = BuiltInRegistries.ITEM.get(ResourceLocation.withDefaultNamespace(id))
+        if (item == Items.AIR) return
+        val stack = ItemStack(item, 1 + level.random.nextInt(2))
+        if (add(s, stack)) s.logEvent("${e.pokemon.getDisplayName(false).string} left a gift in the basket: ${stack.hoverName.string}.")
+    }
+
     fun itemCount(s: Sanctuary): Int = (0 until s.basket.containerSize).sumOf { s.basket.getItem(it).count }
 
     private fun isFull(s: Sanctuary) = (0 until s.basket.containerSize).none { s.basket.getItem(it).isEmpty }
@@ -83,7 +111,7 @@ object Gathering {
      */
     fun add(s: Sanctuary, stack: ItemStack): Boolean {
         if (stack.isEmpty || s.basketPos == null || !SanctuaryConfig.basketEnabled.get()) return false
-        val room = SanctuaryConfig.basketItemCap.get() - countOf(s, stack.item)
+        val room = (SanctuaryConfig.basketItemCap.get() * Requests.basketRoom(s)).toInt() - countOf(s, stack.item)
         if (room <= 0) return false
         val put = stack.copyWithCount(stack.count.coerceAtMost(room))
         val left = s.basket.addItem(put)

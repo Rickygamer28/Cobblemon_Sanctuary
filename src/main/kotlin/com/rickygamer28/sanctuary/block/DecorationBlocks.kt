@@ -56,6 +56,7 @@ abstract class DecorationBlock(properties: Properties, private val kind: String,
             return
         }
         s.props[pos.asLong()] = kind
+        com.rickygamer28.sanctuary.life.Requests.onPlaced(level, s, pos, kind, placer as? ServerPlayer)
         Sanctuaries.data(level).setDirty()
     }
 

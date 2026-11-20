@@ -153,6 +153,8 @@ object Residents {
         Gathering.tick(level, s, rt, now)
         Growth.tick(level, s, rt, now)
         Milestones.tick(level, s, rt, now)
+        Requests.tick(level, s, rt, now)
+        Evolving.tick(level, s, rt, now)
         if (players.isEmpty()) {
             despawnAll(rt)
             rt.hadPlayers = false

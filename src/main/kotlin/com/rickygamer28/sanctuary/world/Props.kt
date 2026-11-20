@@ -284,6 +284,9 @@ object Props {
     val DECOR_BLOCKS: Set<Block> = setOf(
         Blocks.CAMPFIRE, Blocks.RED_CARPET, Blocks.WHITE_CARPET, Blocks.SMOOTH_STONE_SLAB, Blocks.WHITE_CANDLE,
         Blocks.DARK_OAK_FENCE, Blocks.STRIPPED_OAK_LOG, Blocks.STRIPPED_BIRCH_LOG,
+        // (the Valley Heart's route decorations: benches, flower posts, signposts)
+        Blocks.SPRUCE_STAIRS, Blocks.OAK_SIGN, Blocks.POTTED_POPPY, Blocks.POTTED_DANDELION, Blocks.POTTED_BLUE_ORCHID,
+        Blocks.POTTED_ALLIUM, Blocks.POTTED_CORNFLOWER, Blocks.POTTED_OXEYE_DAISY,
     )
 
     /** Natural-looking blocks that should count as ground (cut down like rock when the valley is rebuilt). */

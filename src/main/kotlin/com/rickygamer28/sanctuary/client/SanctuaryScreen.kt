@@ -1121,6 +1121,27 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
         if (pers.isNotEmpty() && over(mx, my, x, ly - 12, w, 12)) tooltip = listOf(Component.literal(pers), Component.literal(d.getString("persB")).withStyle(net.minecraft.ChatFormatting.GRAY))
         row("Ability", Component.translatable("cobblemon.ability.${d.getString("ability")}").string)
         row("Favourite", if (d.contains("fav")) d.getString("fav") else "hasn't picked a spot yet", if (d.contains("fav")) 0xFFE8C46A.toInt() else DIM)
+        if (d.contains("title")) row("Title", d.getString("title"), GOLD)
+        if (d.contains("req")) {
+            row("Wants", d.getString("req"), 0xFFF07CB4.toInt())
+            if (over(mx, my, x, ly - 12, w, 12)) tooltip = listOf(Component.literal(d.getString("req")), Component.literal(d.getString("reqHow")).withStyle(net.minecraft.ChatFormatting.GRAY))
+        }
+        if (d.contains("evo")) {
+            val stay = d.getBoolean("stay")
+            text(g, "Evolution", x, ly, SUB)
+            val label = if (d.getBoolean("m")) (if (stay) "Let it evolve" else "Stay as it is") else ""
+            val bw = if (label.isEmpty()) 0 else font.width(label) + 10
+            text(g, fit(d.getString("evo"), w - 74 - bw), x + 70, ly, if (d.getString("evo").startsWith("About")) GOOD else TEXT)
+            if (label.isNotEmpty()) {
+                val bx = x + w - bw
+                val hover = over(mx, my, bx, ly - 2, bw, 12)
+                box(g, bx, ly - 2, bw, 12, if (hover) CARD_HOVER else 0xFF2B4150.toInt())
+                g.drawCenteredString(font, label, bx + bw / 2, ly, if (stay) GOOD else SUB)
+                if (hover) tooltip = listOf(Component.literal(if (stay) "It can evolve on its own in the sanctuary again" else "Keep it from evolving on its own in the sanctuary"))
+                hit(bx, ly - 2, bw, 12) { send("act", "stay", d.getUUID("u"), page = "resident") }
+            }
+            ly += 12
+        }
         val f = d.getInt("friendship")
         text(g, "Friendship", x, ly, SUB)
         bar(g, x + 70, ly + 1, w - 110, 6, f / 255.0, 0xFFF07CB4.toInt())
@@ -1403,10 +1424,79 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
         val gh = h - 18
         val cardH = 40
         val gap = 5
-        maxScroll = max(0.0, list.size * (cardH + gap) - gap - gh.toDouble())
+        val heart = data.getCompound("heart")
+        val reqs = data.getList("requests", Tag.TAG_COMPOUND.toInt()).let { l -> (0 until l.size).map { l.getCompound(it) } }
+        val heartH = 62
+        val reqH = 34
+        val top = heartH + gap + 14 + (if (reqs.isEmpty()) 16 else reqs.size * (reqH + 4)) + 18
+        maxScroll = max(0.0, top + list.size * (cardH + gap) - gap - gh.toDouble())
         scroll = scroll.coerceIn(0.0, maxScroll)
         g.enableScissor(x - 2, gy, x + w + 2, gy + gh)
         var cy = gy - scroll.toInt()
+        // the Valley Heart
+        run {
+            val pink = 0xFFF07CB4.toInt()
+            val lv = heart.getInt("level")
+            val pts = heart.getInt("points")
+            val prev = heart.getInt("prev")
+            val next = heart.getInt("next")
+            val levels = heart.getList("levels", Tag.TAG_STRING.toInt()).let { l -> (0 until l.size).map { l.getString(it).split('|', limit = 3) } }
+            box(g, x, cy, w, heartH, mix(pink, 0x182029, 0.86f))
+            g.fill(x, cy, x + 2, cy + heartH, pink)
+            text(g, "♥ Valley Heart", x + 8, cy + 5, pink, true)
+            text(g, "Level $lv", x + 8 + font.width("♥ Valley Heart") + 8, cy + 5, TEXT, true)
+            val frac = if (next < 0) 1.0 else (pts - prev).toDouble() / (next - prev).coerceAtLeast(1)
+            bar(g, x + 8, cy + 18, w - 90, 5, frac, pink)
+            text(g, if (next < 0) "$pts points" else "$pts/$next", x + w - 76, cy + 16, if (next < 0) GOLD else SUB)
+            val upcoming = levels.getOrNull(lv)
+            text(g, fit(if (upcoming != null) "Next: ${upcoming[1]} — ${upcoming.getOrElse(2) { "" }}" else "Everything is unlocked. Thank you for looking after them!", w - 16), x + 8, cy + 29, SUB)
+            // one pip per level: what it unlocks
+            var px = x + 8
+            for ((i, l) in levels.withIndex()) {
+                val got = i < lv
+                val label = "${i + 1}"
+                val bw = font.width(label) + 10
+                box(g, px, cy + 42, bw, 14, if (got) pink else CARD)
+                g.drawCenteredString(font, label, px + bw / 2, cy + 45, if (got) 0xFFFFFFFF.toInt() else DIM)
+                if (over(mx, my, px, cy + 42, bw, 14) && my in gy until gy + gh) tooltip = listOf(
+                    Component.literal("Level ${i + 1}: ${l.getOrElse(1) { "" }}").withStyle(if (got) net.minecraft.ChatFormatting.LIGHT_PURPLE else net.minecraft.ChatFormatting.WHITE),
+                    Component.literal(l.getOrElse(2) { "" }).withStyle(net.minecraft.ChatFormatting.GRAY),
+                    Component.literal(if (got) "Unlocked" else "At ${l[0]} points").withStyle(if (got) net.minecraft.ChatFormatting.GREEN else net.minecraft.ChatFormatting.DARK_GRAY))
+                px += bw + 4
+            }
+            text(g, "Do residents' requests to grow it.", px + 6, cy + 45, DIM)
+            cy += heartH + gap
+        }
+        // the residents' requests
+        text(g, "Requests", x, cy + 2, SUB)
+        cy += 14
+        if (reqs.isEmpty()) {
+            text(g, "Nobody is asking for anything right now. Check back in a while!", x + 8, cy + 2, DIM)
+            cy += 16
+        }
+        for (r in reqs) {
+            if (cy + reqH >= gy && cy <= gy + gh) {
+                val hover = over(mx, my, x, cy, w, reqH) && my in gy until gy + gh
+                box(g, x, cy, w, reqH, if (hover) CARD_HOVER else CARD)
+                g.fill(x, cy, x + 2, cy + reqH, opaque(color(r.getString("zone"))))
+                ResourceLocation.tryParse(r.getString("sp"))?.let { sp ->
+                    val aspects = r.getList("as", Tag.TAG_STRING.toInt()).let { l -> (0 until l.size).map { l.getString(it) }.toSet() }
+                    item(g, monStack(sp, aspects), x + 7, cy + 9)
+                }
+                text(g, fit(r.getString("text"), w - 110), x + 30, cy + 6, TEXT)
+                text(g, fit(r.getString("how"), w - 110), x + 30, cy + 19, SUB)
+                val pts = "+${r.getInt("pts")} ♥"
+                text(g, pts, x + w - 8 - font.width(pts), cy + 6, 0xFFF07CB4.toInt())
+                val mins = r.getLong("left")
+                val left = if (mins >= 60) "${mins / 60}h left" else "${mins}m left"
+                text(g, left, x + w - 8 - font.width(left), cy + 19, DIM)
+                if (hover) tooltip = listOf(Component.literal("Open its page"))
+                if (cy >= gy && cy + reqH <= gy + gh) hit(x, cy, w, reqH) { openResident(r.getUUID("u")) }
+            }
+            cy += reqH + 4
+        }
+        text(g, "Goals", x, cy + 4, SUB)
+        cy += 18
         for (goal in list) {
             if (cy + cardH >= gy && cy <= gy + gh) {
                 val reached = goal.getBoolean("reached")

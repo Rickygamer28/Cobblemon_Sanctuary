@@ -120,6 +120,24 @@ object SanctuaryConfig {
     val basketItemCap: ModConfigSpec.IntValue = builder
         .comment("Residents stop bringing an item once the basket holds this many of it.")
         .defineInRange("basketItemCap", 32, 1, 3456)
+    val requestsEnabled: ModConfigSpec.BooleanValue = builder
+        .comment("Residents ask players for small things (a berry, a visit, a bed in their habitat); doing them grows the Valley Heart.")
+        .define("requestsEnabled", true)
+    val requestMax: ModConfigSpec.IntValue = builder
+        .comment("How many requests can be open at once in a sanctuary.")
+        .defineInRange("requestMax", 3, 1, 10)
+    val requestMinutes: ModConfigSpec.IntValue = builder
+        .comment("Minutes between new requests (while fewer than requestMax are open).")
+        .defineInRange("requestMinutes", 8, 1, 1440)
+    val evolveInSanctuary: ModConfigSpec.BooleanValue = builder
+        .comment("Residents fond of their trainer evolve on their own once they meet their evolution's conditions (level, friendship, time of day). An Everstone or the trainer's 'Stay as it is' stops it.")
+        .define("evolveInSanctuary", true)
+    val evolveFriendship: ModConfigSpec.IntValue = builder
+        .comment("How fond of its trainer a resident must be to evolve in the sanctuary (0-255).")
+        .defineInRange("evolveFriendship", 160, 0, 255)
+    val atmosphere: ModConfigSpec.BooleanValue = builder
+        .comment("Habitat atmosphere: snowfall on the peak, ash over the volcano, fireflies in the swamp at night, petals in the flower garden… (only particles; the sanctuary never has real weather).")
+        .define("atmosphere", true)
     val jobRate: ModConfigSpec.DoubleValue = builder
         .comment("How often residents' jobs turn up something for the basket (1.0 = default, 0 = jobs only change the valley).")
         .defineInRange("jobRate", 1.0, 0.0, 10.0)
