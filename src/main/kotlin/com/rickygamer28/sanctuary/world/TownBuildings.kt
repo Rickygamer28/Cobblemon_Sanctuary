@@ -105,10 +105,11 @@ object TownBuildings {
         val hub = s.size.hubRadius
         val ring = ZoneLayout.ring(s)
         val salt = kind.hashCode()
-        for (frac in listOf(0.55, 0.65, 0.45, 0.75, 0.35, 0.85)) for (step in 0 until 28) {
+        // in the town if there's room, else in the meadows just outside it
+        for (frac in listOf(0.55, 0.65, 0.45, 0.75, 0.35, 0.85, 1.3, 1.5, 1.7)) for (step in 0 until 28) {
             val a = (step + (salt and 7) * 0.37) * Math.PI * 2 / 28
-            val r = hub * frac
-            if (r < half + 6 || r > hub - half - 1) continue
+            val r = if (frac > 1) hub + (frac - 1) * 40 else hub * frac
+            if (r < half + 6 || (frac < 1 && r > hub - half - 1) || r > s.size.radius - half - 8) continue
             val cx = s.center.x + (cos(a) * r).toInt()
             val cz = s.center.z + (sin(a) * r).toInt()
             // apart from the landmarks and the other buildings
