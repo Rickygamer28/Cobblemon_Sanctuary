@@ -105,14 +105,14 @@ object TownBuildings {
         val hub = s.size.hubRadius
         val ring = ZoneLayout.ring(s)
         val salt = kind.hashCode()
-        for (frac in listOf(0.55, 0.65, 0.45, 0.75)) for (step in 0 until 20) {
-            val a = (step + (salt and 7) * 0.37) * Math.PI * 2 / 20
+        for (frac in listOf(0.55, 0.65, 0.45, 0.75, 0.35, 0.85)) for (step in 0 until 28) {
+            val a = (step + (salt and 7) * 0.37) * Math.PI * 2 / 28
             val r = hub * frac
-            if (r < half + 7 || r > hub - half - 3) continue
+            if (r < half + 6 || r > hub - half - 1) continue
             val cx = s.center.x + (cos(a) * r).toInt()
             val cz = s.center.z + (sin(a) * r).toInt()
             // apart from the landmarks and the other buildings
-            if (s.landmarks.values.any { it != Landmarks.NONE && BlockPos.of(it).let { p -> (p.x - cx) * (p.x - cx) + (p.z - cz) * (p.z - cz) < 18 * 18 } }) continue
+            if (s.landmarks.values.any { it != Landmarks.NONE && BlockPos.of(it).let { p -> (p.x - cx) * (p.x - cx) + (p.z - cz) * (p.z - cz) < 15 * 15 } }) continue
             var ok = true
             val heights = ArrayList<Int>()
             loop@ for (dx in -half - 1..half + 1) for (dz in -half - 1..half + 1) {
@@ -120,8 +120,9 @@ object TownBuildings {
                 val z = cz + dz
                 if (!level.hasChunk(x shr 4, z shr 4)) { ok = false; break@loop }
                 val idx = ColumnOrder.indexOf(x - s.center.x, z - s.center.z)
+                val inside = kotlin.math.abs(dx) <= half && kotlin.math.abs(dz) <= half
                 if (idx < 0 || !s.dressed.get(idx) || ZoneLayout.locate(s, x, z, ring)?.zone != ZoneLayout.HUB ||
-                    BiomeDresser.pathAt(s, x, z, ring) || Caves.at(s, x, z)?.mouth == true) { ok = false; break@loop }
+                    (inside && BiomeDresser.pathAt(s, x, z, ring)) || Caves.at(s, x, z)?.mouth == true) { ok = false; break@loop }
                 val y = groundY(level, x, z) ?: run { ok = false; null } ?: break@loop
                 if (!level.getBlockState(BlockPos(x, y + 1, z)).fluidState.isEmpty) { ok = false; break@loop }
                 heights += y
