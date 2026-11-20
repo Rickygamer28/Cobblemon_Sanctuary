@@ -51,7 +51,7 @@ object RouteDecor {
                 val z = floor(p.z).toInt()
                 if (!level.hasChunk(x shr 4, z shr 4) || !level.hasChunk((x + 4) shr 4, (z + 4) shr 4) || !level.hasChunk((x - 4) shr 4, (z - 4) shr 4)) continue
                 val last = i == points.size - 1
-                val kind = when { i == 1 || last -> "sign"; i % 2 == 0 -> "bench"; else -> "flowers" }
+                val kind = when { i == 1 || last -> "sign"; Math.floorMod(i + zone.hashCode(), 2) == 0 -> "bench"; else -> "flowers" }
                 val side = if ((i + zone.hashCode()) % 2 == 0) 1 else -1
                 runCatching { put(level, s, zone, p, kind, side, last) }
                 s.decorDone += key
