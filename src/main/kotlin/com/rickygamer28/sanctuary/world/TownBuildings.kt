@@ -152,7 +152,7 @@ object TownBuildings {
         val half = HALF[kind] ?: 4
         // clear the spot (trees as a whole) and lay a level floor, filled down so it never floats
         // (whole trees in a wider circle, so a big tree next to the spot isn't left with a branch hanging in the air)
-        BiomeDresser.removeTreesIn(level, base, half + 6, base.y - 2, base.y + 30)
+        BiomeDresser.removeTreesIn(level, base, half + 10, base.y - 2, base.y + 30)
         for (dx in -half - 1..half + 1) for (dz in -half - 1..half + 1) {
             for (y in base.y + 1..base.y + 24) {
                 val p = BlockPos(base.x + dx, y, base.z + dz)
