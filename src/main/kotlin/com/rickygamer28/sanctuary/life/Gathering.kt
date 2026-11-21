@@ -105,7 +105,13 @@ object Gathering {
 
     fun itemCount(s: Sanctuary): Int = (0 until s.basket.containerSize).sumOf { s.basket.getItem(it).count }
 
-    private fun isFull(s: Sanctuary) = (0 until s.basket.containerSize).none { s.basket.getItem(it).isEmpty }
+    /** The basket's rows: what the Valley Heart gives it, or more if something's already in the slots further down. */
+    fun rows(s: Sanctuary): Int {
+        val last = (s.basket.containerSize - 1 downTo 0).firstOrNull { !s.basket.getItem(it).isEmpty } ?: -1
+        return maxOf(Requests.basketRows(s), last / 9 + 1).coerceIn(3, 6)
+    }
+
+    private fun isFull(s: Sanctuary) = (0 until rows(s) * 9).none { s.basket.getItem(it).isEmpty }
 
     /** How many of [item] are already in the basket. */
     private fun countOf(s: Sanctuary, item: Item) = (0 until s.basket.containerSize).sumOf { val st = s.basket.getItem(it); if (st.`is`(item)) st.count else 0 }
@@ -118,8 +124,22 @@ object Gathering {
         if (stack.isEmpty || s.basketPos == null || !SanctuaryConfig.basketEnabled.get()) return false
         val room = (SanctuaryConfig.basketItemCap.get() * Requests.basketRoom(s)).toInt() - countOf(s, stack.item)
         if (room <= 0) return false
-        val put = stack.copyWithCount(stack.count.coerceAtMost(room))
-        val left = s.basket.addItem(put)
-        return left.count < put.count
+        var left = stack.count.coerceAtMost(room)
+        val start = left
+        val slots = rows(s) * 9
+        // onto stacks of the same thing first, then into empty slots (only the basket's open rows)
+        for (i in 0 until slots) {
+            if (left <= 0) break
+            val cur = s.basket.getItem(i)
+            if (!cur.isEmpty && ItemStack.isSameItemSameComponents(cur, stack) && cur.count < cur.maxStackSize) {
+                val n = minOf(left, cur.maxStackSize - cur.count); cur.grow(n); left -= n
+            }
+        }
+        for (i in 0 until slots) {
+            if (left <= 0) break
+            if (s.basket.getItem(i).isEmpty) { val n = minOf(left, stack.maxStackSize); s.basket.setItem(i, stack.copyWithCount(n)); left -= n }
+        }
+        if (left < start) s.basket.setChanged()
+        return left < start
     }
 }
