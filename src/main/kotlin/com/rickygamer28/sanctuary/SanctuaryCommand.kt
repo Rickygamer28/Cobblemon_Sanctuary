@@ -69,8 +69,34 @@ object SanctuaryCommand {
                     Commands.literal("testpc").requires { it.hasPermission(2) }
                         .then(Commands.literal("add").executes { ctx -> testAdd(ctx, true) })
                         .then(Commands.literal("clear").executes { ctx -> testClear(ctx) }),
+                )
+                // the Valley Heart, for trying its unlocks out (needs cheats / op)
+                .then(
+                    Commands.literal("heart").requires { it.hasPermission(2) }
+                        .executes { ctx -> heart(ctx, null, 0) }
+                        .then(Commands.literal("add").then(Commands.argument("points", IntegerArgumentType.integer(1)).executes { ctx -> heart(ctx, "add", IntegerArgumentType.getInteger(ctx, "points")) }))
+                        .then(Commands.literal("set").then(Commands.argument("points", IntegerArgumentType.integer(0)).executes { ctx -> heart(ctx, "set", IntegerArgumentType.getInteger(ctx, "points")) }))
+                        .then(Commands.literal("level").then(Commands.argument("level", IntegerArgumentType.integer(0, com.rickygamer28.sanctuary.life.Requests.LEVELS.size)).executes { ctx -> heart(ctx, "level", IntegerArgumentType.getInteger(ctx, "level")) })),
                 ),
         )
+    }
+
+    /** /sanctuary heart [add <points> | set <points> | level <level>]: the Valley Heart of the sanctuary you own (or are in). */
+    private fun heart(ctx: CommandContext<CommandSourceStack>, how: String?, n: Int): Int {
+        val player = ctx.source.playerOrException
+        val mine = Sanctuaries.forPlayer(player.server, player.uuid)
+        val (level, s) = mine.firstOrNull { it.second.owner == player.uuid } ?: mine.firstOrNull()
+            ?: run { player.sendSystemMessage(Text.error("You don't have a sanctuary yet.")); return 0 }
+        val R = com.rickygamer28.sanctuary.life.Requests
+        when (how) {
+            "add" -> R.setHeart(level, s, s.heart + n)
+            "set" -> R.setHeart(level, s, n)
+            "level" -> R.setHeart(level, s, if (n == 0) 0 else R.LEVELS[n - 1].points)
+        }
+        val lv = R.level(s)
+        val next = R.LEVELS.getOrNull(lv)
+        player.sendSystemMessage(Text.good("Valley Heart: ${s.heart} points, level $lv" + (next?.let { " (next: ${it.title} at ${it.points})" } ?: " (everything unlocked)")))
+        return 1
     }
 
     private const val TEST_TAG = "sanctuary_test"

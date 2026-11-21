@@ -252,20 +252,33 @@ object Requests {
         rt.live[r.pokemon]?.entity?.let { Effects.hearts(it); Effects.happy(it); Effects.play(it, Effects.CRY) }
         val before = level(s)
         s.heart += points(r)
+        announce(level, s, before)
         s.stat("requests")
         val who = player?.gameProfile?.name ?: "Someone"
         s.logEvent("$who did $name's request ($name is so happy!).")
         player?.displayClientMessage(Component.literal("$name is so happy! +${points(r)} Valley Heart").withStyle(ChatFormatting.LIGHT_PURPLE), true)
         val newTitle = title(data, home)
         if (newTitle != null && newTitle != oldTitle) s.logEvent("$name is now known as the $newTitle.")
+        Sanctuaries.data(level).setDirty()
+    }
+
+    /** Sets the Valley Heart's points (from the command), announcing any level it reaches. */
+    fun setHeart(level: ServerLevel, s: Sanctuary, points: Int) {
+        val before = level(s)
+        s.heart = points.coerceAtLeast(0)
+        announce(level, s, before)
+        Sanctuaries.data(level).setDirty()
+    }
+
+    /** Tells the members about every level the Heart reached since [before]. */
+    private fun announce(level: ServerLevel, s: Sanctuary, before: Int) {
         val after = level(s)
-        if (after > before) {
-            val lv = LEVELS[after - 1]
-            s.logEvent("The Valley Heart grew to level $after: ${lv.title}!")
+        for (n in before + 1..after) {
+            val lv = LEVELS[n - 1]
+            s.logEvent("The Valley Heart grew to level $n: ${lv.title}!")
             for (p in level.players()) if (s.isMember(p.uuid)) (p as? ServerPlayer)?.sendSystemMessage(
-                Component.literal("♥ The Valley Heart grew to level $after: ").withStyle(ChatFormatting.LIGHT_PURPLE)
+                Component.literal("♥ The Valley Heart grew to level $n: ").withStyle(ChatFormatting.LIGHT_PURPLE)
                     .append(Component.literal(lv.title).withStyle(ChatFormatting.GOLD)).append(Component.literal(" — ${lv.desc}").withStyle(ChatFormatting.GRAY)))
         }
-        Sanctuaries.data(level).setDirty()
     }
 }
