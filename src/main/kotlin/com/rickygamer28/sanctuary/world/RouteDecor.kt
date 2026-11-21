@@ -39,7 +39,7 @@ object RouteDecor {
     fun progress(s: Sanctuary): Pair<Int, Int> {
         var total = 0
         for (zone in s.habitats.keys) if (zone in s.unlocked) total += (BiomeDresser.routePoints(s, zone, STEP).size - 1).coerceAtLeast(0)
-        return s.decorDone.size to total
+        return s.decorDone.count { '#' in it && it.count { c -> c == '#' } == 1 } to total
     }
 
     /** Called every two seconds once the valley is built. */
@@ -55,19 +55,32 @@ object RouteDecor {
             if (points.size < 3) continue
             for ((i, p) in points.withIndex()) {
                 if (i == 0) continue
-                val key = "$zone#$i"
-                if (key in s.decorDone) continue
                 val x = floor(p.x).toInt()
                 val z = floor(p.z).toInt()
                 if (!level.hasChunk(x shr 4, z shr 4) || !level.hasChunk((x + 4) shr 4, (z + 4) shr 4) || !level.hasChunk((x - 4) shr 4, (z - 4) shr 4)) continue
                 val last = i == points.size - 1
-                val kind = when { i == 1 || last -> "sign"; Math.floorMod(i + zone.hashCode(), 2) == 0 -> "bench"; else -> "flowers" }
                 val side = if ((i + zone.hashCode()) % 2 == 0) 1 else -1
-                val ok = runCatching { put(level, s, zone, p, kind, side, last) }.getOrDefault(false)
-                // a spot that didn't work is tried again a few times (the ground may still have been settling)
-                val tries = (failed[s.id to key] ?: 0) + 1
-                if (ok || tries >= 4) { s.decorDone += key; failed.remove(s.id to key) } else failed[s.id to key] = tries
-                if (ok && ++placed >= 3) break
+                // what this spot gets: its bench, flowers or sign; flowers around it; a lantern post across the path
+                val tasks = buildList {
+                    add("$zone#$i" to (if (i == 1 || last) "sign" else if (Math.floorMod(i + zone.hashCode(), 2) == 0) "bench" else "flowers"))
+                    if (lv >= Requests.BLOOM_LEVEL) add("$zone#$i#B" to "bloom")
+                    if (lv >= Requests.LANTERNS_LEVEL && !last && i != 1) add("$zone#$i#L" to "lamp")
+                }
+                for ((key, kind) in tasks) {
+                    if (key in s.decorDone) continue
+                    val ok = runCatching {
+                        when (kind) {
+                            "bloom" -> bloom(level, s, p)
+                            "lamp" -> lamp(level, s, p, -side)
+                            else -> put(level, s, zone, p, kind, side, last)
+                        }
+                    }.getOrDefault(false)
+                    // a spot that didn't work is tried again a few times (the ground may still have been settling)
+                    val tries = (failed[s.id to key] ?: 0) + 1
+                    if (ok || tries >= 4) { s.decorDone += key; failed.remove(s.id to key) } else failed[s.id to key] = tries
+                    if (ok) placed++
+                }
+                if (placed >= 3) break
             }
             if (placed >= 3) break
         }
@@ -144,6 +157,37 @@ object RouteDecor {
         }
     }
 
+    private val FLOWERS = listOf(Blocks.POPPY, Blocks.DANDELION, Blocks.CORNFLOWER, Blocks.OXEYE_DAISY, Blocks.ALLIUM, Blocks.AZURE_BLUET, Blocks.PINK_TULIP, Blocks.WHITE_TULIP)
+
+    /** Blooming Valley: a handful of flowers on the grass around a spot of the route. */
+    private fun bloom(level: ServerLevel, s: Sanctuary, p: BiomeDresser.RoutePoint): Boolean {
+        val r = level.random
+        var n = 0
+        repeat(14) {
+            val x = floor(p.x).toInt() + r.nextInt(11) - 5
+            val z = floor(p.z).toInt() + r.nextInt(11) - 5
+            if (!level.hasChunk(x shr 4, z shr 4) || BiomeDresser.routeDistance(s, x, z) < 1.8 || Landmarks.near(s, x, z)) return@repeat
+            val pos = BlockPos(x, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z), z)
+            if (!level.getBlockState(pos).isAir || !level.getBlockState(pos.below()).`is`(Blocks.GRASS_BLOCK)) return@repeat
+            level.setBlock(pos, b(FLOWERS[r.nextInt(FLOWERS.size)]), FLAGS)
+            n++
+        }
+        return true
+    }
+
+    /** Lanterns Everywhere: a lantern post across the path. */
+    private fun lamp(level: ServerLevel, s: Sanctuary, p: BiomeDresser.RoutePoint, side: Int): Boolean {
+        val x = floor(p.x + p.dz * side * 3.2).toInt()
+        val z = floor(p.z - p.dx * side * 3.2).toInt()
+        val a = spot(level, s, x, z) ?: return false
+        if (!level.getBlockState(a.above(2)).isAir) return false
+        level.setBlock(a, b(Blocks.SPRUCE_FENCE), FLAGS)
+        level.setBlock(a.above(), b(Blocks.SPRUCE_FENCE), FLAGS)
+        level.setBlock(a.above(2), b(Blocks.LANTERN), FLAGS)
+        s.decor[a.asLong()] = "lamp"
+        return true
+    }
+
     /** Decorations a rebuild took away: let their route put them up again. */
     private fun heal(level: ServerLevel, s: Sanctuary) {
         if (s.decor.isEmpty()) return
@@ -152,7 +196,7 @@ object RouteDecor {
             val p = BlockPos.of(packed)
             if (!level.hasChunk(p.x shr 4, p.z shr 4)) continue
             val st = level.getBlockState(p)
-            val ok = when (kind) { "bench" -> st.`is`(Blocks.SPRUCE_STAIRS); "flowers" -> st.`is`(Blocks.SPRUCE_FENCE); else -> st.`is`(Blocks.OAK_SIGN) }
+            val ok = when (kind) { "bench" -> st.`is`(Blocks.SPRUCE_STAIRS); "flowers", "lamp" -> st.`is`(Blocks.SPRUCE_FENCE); else -> st.`is`(Blocks.OAK_SIGN) }
             if (!ok) missing += packed
         }
         if (missing.isEmpty()) return

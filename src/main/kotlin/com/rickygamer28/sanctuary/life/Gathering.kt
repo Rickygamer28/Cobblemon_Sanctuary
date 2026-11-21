@@ -94,7 +94,10 @@ object Gathering {
         val e = helpers.randomOrNull() ?: return
         val type = runCatching { TypeLogic.currentTypes(e.pokemon).firstOrNull() }.getOrNull() ?: "normal"
         val id = (GIFTS[type] ?: GIFTS.getValue("normal")).let { it[level.random.nextInt(it.size)] }
-        val item = BuiltInRegistries.ITEM.get(ResourceLocation.withDefaultNamespace(id))
+        // the Golden Heart: now and then something rare
+        val rare = Requests.level(s) >= Requests.GOLDEN_LEVEL && level.random.nextInt(8) == 0
+        val item = if (rare) BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath("cobblemon", listOf("rare_candy", "exp_candy_l", "exp_candy_m")[level.random.nextInt(3)]))
+            else BuiltInRegistries.ITEM.get(ResourceLocation.withDefaultNamespace(id))
         if (item == Items.AIR) return
         val stack = ItemStack(item, 1 + level.random.nextInt(2))
         if (add(s, stack)) s.logEvent("${e.pokemon.getDisplayName(false).string} left a gift in the basket: ${stack.hoverName.string}.")

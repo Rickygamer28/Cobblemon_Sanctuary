@@ -256,6 +256,38 @@ object Families {
         say(player, "${baby.species.translatedName.string} hatched! It lives in the sanctuary now.", ChatFormatting.GREEN)
     }
 
+    /**
+     * The hatchery (a Valley Heart building): an egg that has waited in the Nest long enough hatches on its own, one at
+     * a time, into its trainer's PC, just as if they'd pressed Hatch.
+     */
+    fun hatcheryTick(level: net.minecraft.server.level.ServerLevel, s: Sanctuary, now: Long) {
+        if (s.eggs.isEmpty() || !com.rickygamer28.sanctuary.world.TownBuildings.built(s, "hatchery")) return
+        if ((now / 20L + (s.id.hashCode() and 31)) % 30L != 0L) return
+        val wait = if (Requests.level(s) >= Requests.WARM_LEVEL) 9000L else 18000L
+        val egg = s.eggs.values.firstOrNull { now - it.laidAt >= wait } ?: return
+        val baby = runCatching { Pokemon().loadFromNBT(level.registryAccess(), egg.pokemon) }.getOrNull() ?: run { s.eggs.remove(egg.id); return }
+        runCatching { baby.setOriginalTrainer(egg.owner) }
+        val pc = runCatching { Cobblemon.storage.getPC(egg.owner, level.registryAccess()) }.getOrNull() ?: return
+        if (!pc.add(baby)) return
+        val nest = egg.nest
+        s.eggs.remove(egg.id)
+        removeNest(s, egg)
+        recordFamily(s, baby, egg)
+        s.logEvent("A baby ${baby.species.translatedName.string} hatched in the hatchery! Its parents are ${egg.mother.name} and ${egg.father.name}.")
+        Sanctuaries.data(level.server).setDirty()
+        val rt = Residents.runtime(s)
+        Residents.refreshRoster(level, s, rt, now)
+        val at = nest ?: rt.live[egg.mother.id]?.entity?.blockPosition()
+        if (at != null && level.isLoaded(at)) {
+            hatchEffects(level, at)
+            Residents.findRoster(rt, baby.uuid)?.let { Residents.spawn(level, s, rt, it, at) }?.let { live ->
+                live.followParents = egg.mother.id to egg.father.id
+                live.followUntil = now + FOLLOW_TICKS
+            }
+        }
+        level.server.playerList.getPlayer(egg.owner)?.let { say(it, "${baby.species.translatedName.string} hatched in the sanctuary's hatchery!", ChatFormatting.GREEN) }
+    }
+
     fun pickUp(s: Sanctuary, egg: EggData, player: ServerPlayer) {
         val stack = eggItem(s, egg)
         s.eggs.remove(egg.id)

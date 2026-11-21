@@ -154,6 +154,7 @@ object Residents {
         Growth.tick(level, s, rt, now)
         Milestones.tick(level, s, rt, now)
         Requests.tick(level, s, rt, now)
+        Families.hatcheryTick(level, s, now)
         Evolving.tick(level, s, rt, now)
         if (players.isEmpty()) {
             despawnAll(rt)

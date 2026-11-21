@@ -857,7 +857,7 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
         // recent events
         val ey = cy + 26
         text(g, "Recently", x, ey, SUB)
-        val basket = if (data.getBoolean("hasBasket")) "Basket: ${data.getInt("basketItems")} items" else "No Gathering Basket placed yet"
+        val basket = if (data.getBoolean("hasBasket")) "Basket: ${data.getInt("basketItems")} items" else "The Gathering Post is being built in the town"
         var bx2 = x + w
         if (data.getBoolean("hasBasket")) {
             // what residents bring: click to switch a kind of find on or off
@@ -870,7 +870,7 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
                 box(g, bx2, ey - 2, pw2, 12, if (on) mix(GOLD, 0x182029, if (hover) 0.45f else 0.6f) else if (hover) CARD_HOVER else CARD)
                 g.drawString(font, label, bx2 + 4, ey, if (on) TEXT else DIM, false)
                 if (hover) tooltip = listOf(Component.literal(if (on) "Residents bring $label (click to stop)" else "Residents don't bring $label (click to allow)"),
-                    Component.literal("Each item stops at 32 in the basket.").withStyle(net.minecraft.ChatFormatting.GRAY))
+                    Component.literal("Each item stops at ${data.getInt("basketCap")} in the basket (the Valley Heart makes room for more).").withStyle(net.minecraft.ChatFormatting.GRAY))
                 if (owner) hit(bx2, ey - 2, pw2, 12) { send("basket", key, page = "home") }
                 bx2 -= 3
             }
@@ -1460,7 +1460,7 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
             for ((i, l) in levels.withIndex()) {
                 val got = i < lv
                 val label = "${i + 1}"
-                val bw = font.width(label) + 10
+                val bw = font.width(label) + if (levels.size > 12) 6 else 10
                 box(g, px, cy + 42, bw, 14, if (got) pink else CARD)
                 g.drawCenteredString(font, label, px + bw / 2, cy + 45, if (got) 0xFFFFFFFF.toInt() else DIM)
                 if (over(mx, my, px, cy + 42, bw, 14) && my in gy until gy + gh) tooltip = listOf(
@@ -1469,7 +1469,7 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
                     Component.literal(if (got) "Unlocked" else "At ${l[0]} points").withStyle(if (got) net.minecraft.ChatFormatting.GREEN else net.minecraft.ChatFormatting.DARK_GRAY))
                 px += bw + 4
             }
-            text(g, "Do residents' requests to grow it.", px + 6, cy + 45, DIM)
+            if (px + 6 + font.width("Do residents' requests to grow it.") < x + w) text(g, "Do residents' requests to grow it.", px + 6, cy + 45, DIM)
             cy += heartH + gap
         }
         // the residents' requests

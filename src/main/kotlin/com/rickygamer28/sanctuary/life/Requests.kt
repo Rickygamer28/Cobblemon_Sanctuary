@@ -68,17 +68,29 @@ object Requests {
         Level(40, "Grateful Gifts", "Residents you've helped bring you gifts twice as often."),
         Level(60, "The Biggest Basket", "Three times the room for each thing, and more finds every trip."),
         Level(85, "New Looks", "Every habitat and the town get a fourth look to choose on the Region tab."),
-        Level(115, "Lookout Tower", "A lookout tower goes up in the town, with a view over the whole valley."),
-        Level(150, "Berry Market", "A berry market opens in the town, and residents bring more berries to the basket."),
-        Level(200, "Rest House", "A rest house opens in the town, with a healing machine for your party."),
+        Level(115, "Lookout Tower", "A lookout tower goes up by the town, with a view over the whole valley."),
+        Level(150, "Berry Market", "A covered berry market opens, and residents bring more berries to the basket."),
+        Level(200, "Hatchery", "A hatchery opens: eggs in the Nest hatch on their own after a while."),
+        Level(260, "Rest House", "A rest house opens, with a healing machine for your party and beds for residents."),
+        Level(330, "Blooming Valley", "Flowers spread along every route."),
+        Level(420, "Warm Hatchery", "Eggs in the hatchery hatch twice as fast."),
+        Level(520, "Lanterns Everywhere", "Lantern posts line every route, so the valley glows at night."),
+        Level(650, "Golden Heart", "The Heart Shrine turns golden, and residents' gifts can be rare candies."),
     )
 
     const val DECOR_LEVEL = 2
     const val LIGHTS_LEVEL = 3
     const val GIFTS_LEVEL = 5
     const val LOOKS_LEVEL = 7
-    /** The town buildings and the level each one comes at. */
-    val BUILDINGS = linkedMapOf("tower" to 8, "market" to 9, "rest" to 10)
+    const val BLOOM_LEVEL = 12
+    const val WARM_LEVEL = 13
+    const val LANTERNS_LEVEL = 14
+    const val GOLDEN_LEVEL = 15
+    /** The town's buildings and the level each one comes at (the Gathering Post and the Heart Shrine are there from the start). */
+    val BUILDINGS = linkedMapOf("basket" to 0, "shrine" to 0, "tower" to 8, "market" to 9, "hatchery" to 10, "rest" to 11)
+
+    /** How big the Heart Shrine has grown (1 to 5). */
+    fun shrineTier(s: Sanctuary): Int { val l = level(s); return 1 + listOf(4, 8, 12, 15).count { l >= it } }
 
     fun level(s: Sanctuary): Int = LEVELS.count { s.heart >= it.points }
 
