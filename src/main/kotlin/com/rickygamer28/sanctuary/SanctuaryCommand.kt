@@ -96,6 +96,26 @@ object SanctuaryCommand {
         val lv = R.level(s)
         val next = R.LEVELS.getOrNull(lv)
         player.sendSystemMessage(Text.good("Valley Heart: ${s.heart} points, level $lv" + (next?.let { " (next: ${it.title} at ${it.points})" } ?: " (everything unlocked)")))
+        // what each unlock is doing
+        val W = com.rickygamer28.sanctuary.world.TownBuildings
+        val built = !s.generationDirty && !com.rickygamer28.sanctuary.world.SanctuaryGenerator.isGrowing(s)
+        fun line(t: String) = player.sendSystemMessage(net.minecraft.network.chat.Component.literal("  $t").withStyle(net.minecraft.ChatFormatting.GRAY))
+        if (!built) line("The valley is still being built: decorations, lanterns and buildings go up once it's done.")
+        if (lv >= 1) line("Basket: holds ${R.basketRoom(s)}× as much of each thing, +${R.basketExtraFinds(s)} find${if (R.basketExtraFinds(s) == 1) "" else "s"} a trip" + (if (R.basketFaster(s)) ", gathers more often" else ""))
+        if (lv >= R.DECOR_LEVEL) com.rickygamer28.sanctuary.world.RouteDecor.progress(s).let { (done, total) ->
+            line("Route decorations: ${s.decor.size} blocks placed; $done of $total spots done (the rest go up when you're near them)")
+        }
+        if (lv >= R.LIGHTS_LEVEL) {
+            val marks = s.landmarks.filter { (k, v) -> v != com.rickygamer28.sanctuary.world.Landmarks.NONE && !W.isBuilding(k) }
+            line("Landmark lanterns: ${marks.keys.count { it in s.litLandmarks }} of ${marks.size} landmarks (the rest when you're near them)")
+        }
+        if (lv >= R.LOOKS_LEVEL) line("New looks: unlocked (Region tab → a habitat → Look)")
+        for ((kind, need) in R.BUILDINGS) line("Town ${kind}: " + when {
+            lv < need -> "unlocks at level $need"
+            W.built(s, kind) -> "built"
+            s.staleLandmarks.containsKey(W.PREFIX + kind) -> "being rebuilt"
+            else -> "looking for room in the town (stay near the town)"
+        })
         return 1
     }
 

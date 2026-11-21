@@ -67,7 +67,7 @@ object Requests {
         Level(25, "An Even Bigger Basket", "Twice the room for each thing, and residents gather more often."),
         Level(40, "Grateful Gifts", "Residents you've helped bring you gifts twice as often."),
         Level(60, "The Biggest Basket", "Three times the room for each thing, and more finds every trip."),
-        Level(85, "New Looks", "Every habitat gets a fourth look to choose on the Region tab."),
+        Level(85, "New Looks", "Every habitat and the town get a fourth look to choose on the Region tab."),
         Level(115, "Lookout Tower", "A lookout tower goes up in the town, with a view over the whole valley."),
         Level(150, "Berry Market", "A berry market opens in the town, and residents bring more berries to the basket."),
         Level(200, "Rest House", "A rest house opens in the town, with a healing machine for your party."),

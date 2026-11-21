@@ -34,6 +34,11 @@ class Remix(
         private fun b(block: Block): BlockState = block.defaultBlockState()
 
         val ALL: Map<String, Remix> = mapOf(
+            ZoneLayout.HUB to Remix("Winter village", "The town square and its meadows under snow, among spruces and lanterns", 0,
+                mapOf(Blocks.GRASS_BLOCK to b(Blocks.SNOW_BLOCK), Blocks.COARSE_DIRT to b(Blocks.PACKED_ICE), Blocks.SHORT_GRASS to b(Blocks.AIR),
+                    Blocks.POPPY to b(Blocks.AIR), Blocks.DANDELION to b(Blocks.AIR), Blocks.ALLIUM to b(Blocks.AIR), Blocks.CORNFLOWER to b(Blocks.AIR),
+                    Blocks.OXEYE_DAISY to b(Blocks.AIR)),
+                mapOf(TreeFeatures.FANCY_OAK to TreeFeatures.SPRUCE, TreeFeatures.OAK to TreeFeatures.SPRUCE)),
             "water" to Remix("Chalk coast", "White chalk cliffs and pale beaches, with birches", 2,
                 mapOf(Blocks.STONE to b(Blocks.CALCITE), Blocks.ANDESITE to b(Blocks.DIORITE), Blocks.GRAVEL to b(Blocks.SAND), Blocks.MOSSY_COBBLESTONE to b(Blocks.CALCITE)),
                 mapOf(TreeFeatures.OAK to TreeFeatures.BIRCH, TreeFeatures.SPRUCE to TreeFeatures.BIRCH)),

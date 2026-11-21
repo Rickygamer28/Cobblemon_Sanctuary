@@ -125,7 +125,8 @@ object SelfTest {
                 for (zone in fourth + com.rickygamer28.sanctuary.world.ZoneLayout.HUB + CUSTOM.filter { it in sanctuary.habitats } + CUSTOM_POCKETS + CUSTOM_SUBS.keys) {
                     val now0 = BiomeDresser.lookOf(sanctuary, zone)
                     // (the town goes to the Old Kanto village, with its koi ponds)
-                    val next = if (zone == com.rickygamer28.sanctuary.world.ZoneLayout.HUB) (if (now0 == 1) 2 else 1) else if (zone in fourth) com.rickygamer28.sanctuary.world.Remix.INDEX else (now0 + 1) % 3
+                    // (the town goes to its fourth look, the Winter village)
+                    val next = if (zone == com.rickygamer28.sanctuary.world.ZoneLayout.HUB) com.rickygamer28.sanctuary.world.Remix.INDEX else if (zone in fourth) com.rickygamer28.sanctuary.world.Remix.INDEX else (now0 + 1) % 3
                     if (zone == com.rickygamer28.sanctuary.world.ZoneLayout.HUB) com.rickygamer28.sanctuary.world.TownBuildings.rebuildAll(sanctuary)
                     sanctuary.variants[zone] = next
                     sanctuary.rebuildZones += zone

@@ -766,6 +766,9 @@ object SanctuaryGenerator {
         if (now % 10L == 0L) BiomePainter.tick(level, s)
         if (now % 40L == 0L) Landmarks.maintain(level, s)
         if (!s.generationDirty && !cursors.containsKey(s.id)) {
+            // the Valley Heart's additions don't wait for the leftover check (it can take a while on a big valley)
+            if (now % 40L == 30L) RouteDecor.tick(level, s)
+            if (now % 40L == 10L) TownBuildings.tick(level, s)
             // the valley is built: check for leftovers, then put up the landmarks of awake biomes
             if (repair(level, s)) return
             repairAgainAt[s.id]?.let { at ->
@@ -773,8 +776,6 @@ object SanctuaryGenerator {
             }
             if (now % 40L == 0L) Landmarks.tick(level, s)
             if (now % 40L == 20L) Dens.upgrade(level, s)
-            if (now % 40L == 30L) RouteDecor.tick(level, s)
-            if (now % 40L == 10L) TownBuildings.tick(level, s)
             val retry = retryAt[s.id] ?: return
             if (now < retry) return
             retryAt.remove(s.id)

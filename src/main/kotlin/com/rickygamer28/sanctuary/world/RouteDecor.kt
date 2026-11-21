@@ -32,6 +32,16 @@ object RouteDecor {
 
     private fun b(block: Block): BlockState = block.defaultBlockState()
 
+    /** Route spots that didn't work yet, and how many times. */
+    private val failed = HashMap<Pair<java.util.UUID, String>, Int>()
+
+    /** For /sanctuary heart: how many route spots there are and how many are done. */
+    fun progress(s: Sanctuary): Pair<Int, Int> {
+        var total = 0
+        for (zone in s.habitats.keys) if (zone in s.unlocked) total += (BiomeDresser.routePoints(s, zone, STEP).size - 1).coerceAtLeast(0)
+        return s.decorDone.size to total
+    }
+
     /** Called every two seconds once the valley is built. */
     fun tick(level: ServerLevel, s: Sanctuary) {
         val lv = Requests.level(s)
@@ -53,9 +63,11 @@ object RouteDecor {
                 val last = i == points.size - 1
                 val kind = when { i == 1 || last -> "sign"; Math.floorMod(i + zone.hashCode(), 2) == 0 -> "bench"; else -> "flowers" }
                 val side = if ((i + zone.hashCode()) % 2 == 0) 1 else -1
-                runCatching { put(level, s, zone, p, kind, side, last) }
-                s.decorDone += key
-                if (++placed >= 3) break
+                val ok = runCatching { put(level, s, zone, p, kind, side, last) }.getOrDefault(false)
+                // a spot that didn't work is tried again a few times (the ground may still have been settling)
+                val tries = (failed[s.id to key] ?: 0) + 1
+                if (ok || tries >= 4) { s.decorDone += key; failed.remove(s.id to key) } else failed[s.id to key] = tries
+                if (ok && ++placed >= 3) break
             }
             if (placed >= 3) break
         }
@@ -77,7 +89,15 @@ object RouteDecor {
         return pos
     }
 
-    private fun put(level: ServerLevel, s: Sanctuary, zone: String, p: BiomeDresser.RoutePoint, kind: String, side: Int, last: Boolean) {
+    private fun put(level: ServerLevel, s: Sanctuary, zone: String, p: BiomeDresser.RoutePoint, kind: String, side: Int, last: Boolean): Boolean {
+        put0(level, s, zone, p, kind, side, last)
+        return placedNow
+    }
+
+    private var placedNow = false
+
+    private fun put0(level: ServerLevel, s: Sanctuary, zone: String, p: BiomeDresser.RoutePoint, kind: String, side: Int, last: Boolean) {
+        placedNow = false
         // across the path, pointing away from it on this side
         val nx = p.dz * side
         val nz = -p.dx * side
@@ -91,6 +111,7 @@ object RouteDecor {
                 val c = spot(level, s, bx + along.stepX, bz + along.stepZ)?.takeIf { it.y == a.y } ?: return
                 val stair = b(Blocks.SPRUCE_STAIRS).setValue(StairBlock.FACING, away)
                 for (q in listOf(a, c)) { level.setBlock(q, stair, FLAGS); s.decor[q.asLong()] = "bench" }
+                placedNow = true
             }
             "flowers" -> {
                 val a = spot(level, s, bx, bz) ?: return
@@ -99,6 +120,7 @@ object RouteDecor {
                 val pot = POTS[Math.floorMod(bx * 31 + bz * 17, POTS.size)]
                 level.setBlock(a.above(), b(pot), FLAGS)
                 s.decor[a.asLong()] = "flowers"
+                placedNow = true
             }
             "sign" -> {
                 val a = spot(level, s, bx, bz) ?: return
@@ -117,6 +139,7 @@ object RouteDecor {
                     level.sendBlockUpdated(a, level.getBlockState(a), level.getBlockState(a), Block.UPDATE_ALL)
                 }
                 s.decor[a.asLong()] = "sign"
+                placedNow = true
             }
         }
     }
