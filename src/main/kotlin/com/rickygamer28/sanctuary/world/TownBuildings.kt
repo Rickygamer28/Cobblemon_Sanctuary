@@ -209,7 +209,7 @@ object TownBuildings {
     private fun abs(i: Int) = kotlin.math.abs(i)
 
     /** A square hipped roof: a ring of stairs facing in at each height, filled with [fill], up to a point. */
-    private fun hipRoof(c: B, y0: Int, r0: Int, stair: Block, fill: Block, cap: Block) {
+    private fun hipRoof(c: B, y0: Int, r0: Int, stair: Block, fill: Block, cap: BlockState) {
         var y = y0
         var r = r0
         while (r >= 1) {
@@ -227,7 +227,7 @@ object TownBuildings {
     }
 
     /** A gabled roof running along x: stairs on the long sides stepping up to a ridge, the ends filled in. */
-    private fun gableRoof(c: B, y0: Int, halfX: Int, halfZ: Int, stair: Block, slab: Block, end: Block) {
+    private fun gableRoof(c: B, y0: Int, halfX: Int, halfZ: Int, stair: Block, slab: BlockState, end: Block) {
         for (i in 0..halfZ + 1) {
             val z = halfZ + 1 - i
             for (x in -halfX - 1..halfX + 1) {
