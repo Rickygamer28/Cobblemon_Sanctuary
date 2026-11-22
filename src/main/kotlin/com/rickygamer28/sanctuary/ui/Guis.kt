@@ -387,6 +387,10 @@ object SanctuaryGuis {
                 t.putString("req", text); t.putString("reqHow", how)
             }
             com.rickygamer28.sanctuary.life.Evolving.status(s, pk)?.let { t.putString("evo", it) }
+            SanctuaryDimension.level(player.server)?.let { lvl ->
+                val opts = com.rickygamer28.sanctuary.life.Evolving.options(lvl, s, pk, player, pk.getOwnerUUID() == player.uuid)
+                if (opts.isNotEmpty()) t.put("evos", ListTag().also { l -> opts.forEach { l.add(it) } })
+            }
             t.putBoolean("stay", s.residents[id]?.noEvolve == true)
         }
         t.putInt("hpNow", pk.currentHealth)

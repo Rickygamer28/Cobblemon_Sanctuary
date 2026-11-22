@@ -1146,6 +1146,25 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
                 hit(bx, ly - 2, bw, 12) { send("act", "stay", d.getUUID("u"), page = "resident") }
             }
             ly += 12
+            // every way it can evolve, with a button for the ones it can do now (a stone, a trade)
+            val evos = d.getList("evos", Tag.TAG_COMPOUND.toInt())
+            for (k in 0 until minOf(evos.size, 4)) {
+                val e = evos.getCompound(k)
+                val btn = e.getString("btn")
+                val bw2 = if (btn.isEmpty()) 0 else font.width(btn) + 10
+                text(g, fit("→ ${e.getString("name")}: ${e.getString("how")}", w - 74 - bw2), x + 70, ly, if (btn.isNotEmpty()) GOOD else SUB)
+                if (over(mx, my, x + 70, ly - 2, w - 70 - bw2, 12)) tooltip = listOf(Component.literal(e.getString("name")), Component.literal(e.getString("how")).withStyle(net.minecraft.ChatFormatting.GRAY))
+                if (btn.isNotEmpty()) {
+                    val bx2 = x + w - bw2
+                    val hover = over(mx, my, bx2, ly - 2, bw2, 12)
+                    box(g, bx2, ly - 2, bw2, 12, if (hover) CARD_HOVER else 0xFF2B4150.toInt())
+                    g.drawCenteredString(font, btn, bx2 + bw2 / 2, ly, GOOD)
+                    val act = e.getString("act")
+                    val arg = e.getString("arg")
+                    hit(bx2, ly - 2, bw2, 12) { send("act", act, d.getUUID("u"), extra = arg, page = "resident") }
+                }
+                ly += 12
+            }
         }
         val f = d.getInt("friendship")
         text(g, "Friendship", x, ly, SUB)

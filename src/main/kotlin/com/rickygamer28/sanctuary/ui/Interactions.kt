@@ -115,6 +115,10 @@ object Interactions {
                 f.s.logEvent("$name moved to the ${Residents.zoneName(zone)}.")
                 say(player, "$name will now live in the ${Residents.zoneName(zone)}.", net.minecraft.ChatFormatting.GREEN)
             }
+            "evoitem", "evotrade" -> {
+                if (!owner) return say(player, "Only its trainer can decide that.", net.minecraft.ChatFormatting.RED)
+                com.rickygamer28.sanctuary.life.Evolving.byHand(f.level, f.s, pokemon, player, action, arg?.toIntOrNull() ?: -1)?.let { say(player, it, net.minecraft.ChatFormatting.RED) }
+            }
             "stay" -> {
                 if (!owner) return say(player, "Only its trainer can decide that.", net.minecraft.ChatFormatting.RED)
                 data.noEvolve = !data.noEvolve
