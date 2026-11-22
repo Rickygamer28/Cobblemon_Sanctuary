@@ -73,7 +73,7 @@ object RegionMap {
             mark("landmark", "${ZoneLayout.NAMES[zone] ?: zone}: landmark", p.x + 0.5, p.z + 0.5, zone)
         }
         // the Guardian's Rise: a landmark of its own
-        s.landmarks[TownBuildings.PREFIX + "rise"]?.takeIf { it != Landmarks.NONE }?.let { packed ->
+        s.landmarks[com.rickygamer28.sanctuary.world.TownBuildings.PREFIX + "rise"]?.takeIf { it != Landmarks.NONE }?.let { packed ->
             val p = BlockPos.of(packed)
             val g = com.rickygamer28.sanctuary.life.Guardian.of(s, com.rickygamer28.sanctuary.life.Residents.runtime(s))
             val zone = ZoneLayout.locate(s, p.x, p.z)?.zone ?: ZoneLayout.HUB
