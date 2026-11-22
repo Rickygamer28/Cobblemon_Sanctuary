@@ -61,12 +61,12 @@ object Requests {
     class Level(val points: Int, val title: String, val desc: String)
 
     val LEVELS = listOf(
-        Level(3, "A Bigger Basket", "The Gathering Basket gets a fourth row of slots, holds half as much again of each thing, and residents bring a little more."),
+        Level(3, "A Bigger Basket", "The Gathering Basket doubles to 54 slots, holds half as much again of each thing, and residents bring a little more."),
         Level(8, "Decorated Routes", "Benches, flower posts and signposts appear along the routes."),
         Level(15, "Lit Landmarks", "Lantern posts go up around every landmark."),
-        Level(25, "An Even Bigger Basket", "A fifth row of slots, twice the room for each thing, and residents gather more often."),
+        Level(25, "An Even Bigger Basket", "The basket grows to 81 slots, with twice the room for each thing, and residents gather more often."),
         Level(40, "Grateful Gifts", "Residents you've helped bring you gifts twice as often."),
-        Level(60, "The Biggest Basket", "A sixth row of slots (a full chest), three times the room for each thing, and more finds every trip."),
+        Level(60, "The Biggest Basket", "The basket grows to 108 slots, with three times the room for each thing, and more finds every trip."),
         Level(85, "New Looks", "Every habitat and the town get a fourth look to choose on the Region tab."),
         Level(115, "Lookout Tower", "A lookout tower goes up by the town, with a view over the whole valley."),
         Level(150, "Berry Market", "A covered berry market opens, and residents bring more berries to the basket."),
@@ -98,8 +98,8 @@ object Requests {
     fun basketRoom(s: Sanctuary): Double = when { level(s) >= 6 -> 3.0; level(s) >= 4 -> 2.0; level(s) >= 1 -> 1.5; else -> 1.0 }
     fun basketExtraFinds(s: Sanctuary): Int = when { level(s) >= 6 -> 2; level(s) >= 1 -> 1; else -> 0 }
     fun basketFaster(s: Sanctuary): Boolean = level(s) >= 4
-    /** How many rows of slots the basket has: 3, then one more at each basket level (6 at most, a full chest). */
-    fun basketRows(s: Sanctuary): Int = 3 + listOf(1, 4, 6).count { level(s) >= it }
+    /** How many slots the basket has: 27, then 54, 81 and 108 at the basket levels. */
+    fun basketSlots(s: Sanctuary): Int = 27 * (1 + listOf(1, 4, 6).count { level(s) >= it })
 
     private val BERRIES = listOf("oran", "pecha", "cheri", "chesto", "rawst", "aspear", "persim", "leppa", "sitrus", "lum")
     private const val LIFETIME = 24000L * 3

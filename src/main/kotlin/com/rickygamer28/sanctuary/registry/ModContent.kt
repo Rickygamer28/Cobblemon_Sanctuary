@@ -37,6 +37,11 @@ object ModContent {
     private val ITEMS: DeferredRegister.Items = DeferredRegister.createItems(CobblemonSanctuary.MOD_ID)
     private val BLOCK_ENTITIES: DeferredRegister<BlockEntityType<*>> = DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, CobblemonSanctuary.MOD_ID)
     private val TABS: DeferredRegister<CreativeModeTab> = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, CobblemonSanctuary.MOD_ID)
+    private val MENUS: DeferredRegister<net.minecraft.world.inventory.MenuType<*>> = DeferredRegister.create(Registries.MENU, CobblemonSanctuary.MOD_ID)
+
+    /** The Gathering Basket's menu (its size comes along when it opens). */
+    val BASKET_MENU: net.neoforged.neoforge.registries.DeferredHolder<net.minecraft.world.inventory.MenuType<*>, net.minecraft.world.inventory.MenuType<com.rickygamer28.sanctuary.ui.BasketMenu>> =
+        MENUS.register("basket") { -> net.neoforged.neoforge.common.extensions.IMenuTypeExtension.create { id, inv, buf -> com.rickygamer28.sanctuary.ui.BasketMenu(id, inv, buf.readVarInt(), buf.readVarInt()) } }
 
     val SANCTUARY_CORE: DeferredBlock<SanctuaryCoreBlock> = BLOCKS.register("sanctuary_core") { ->
         SanctuaryCoreBlock(
@@ -129,6 +134,7 @@ object ModContent {
     }
 
     fun register(bus: IEventBus) {
+        MENUS.register(bus)
         BLOCKS.register(bus)
         ITEMS.register(bus)
         BLOCK_ENTITIES.register(bus)

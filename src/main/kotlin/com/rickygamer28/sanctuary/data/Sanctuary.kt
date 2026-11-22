@@ -167,7 +167,7 @@ class Sanctuary(
     var awayEggs = 0
 
     /** The Gathering Basket's contents (shared by every basket placed in the valley). */
-    val basket: net.minecraft.world.SimpleContainer = net.minecraft.world.SimpleContainer(54)
+    val basket: net.minecraft.world.SimpleContainer = net.minecraft.world.SimpleContainer(108)
 
     /** Where a Gathering Basket stands in the valley (residents only gather while one is placed). */
     var basketPos: BlockPos? = null

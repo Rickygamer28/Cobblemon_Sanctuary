@@ -49,9 +49,9 @@ class GatheringBasketBlock(properties: Properties) : Block(properties) {
                 !s.isMember(player.uuid) -> say(player, "This basket belongs to ${s.ownerName}'s sanctuary.", ChatFormatting.GRAY)
                 else -> {
                     if (s.basketPos == null) { s.basketPos = pos; Sanctuaries.data(level).setDirty() }
-                    val rows = com.rickygamer28.sanctuary.life.Gathering.rows(s)
-                    val type = when (rows) { 3 -> net.minecraft.world.inventory.MenuType.GENERIC_9x3; 4 -> net.minecraft.world.inventory.MenuType.GENERIC_9x4; 5 -> net.minecraft.world.inventory.MenuType.GENERIC_9x5; else -> net.minecraft.world.inventory.MenuType.GENERIC_9x6 }
-                    player.openMenu(SimpleMenuProvider({ id, inv, _ -> ChestMenu(type, id, inv, s.basket, rows) }, Component.literal("Gathering Basket (${rows * 9} slots)")))
+                    val (rows, cols) = com.rickygamer28.sanctuary.life.Gathering.layout(s)
+                    player.openMenu(SimpleMenuProvider({ id, inv, _ -> com.rickygamer28.sanctuary.ui.BasketMenu(id, inv, s.basket, rows, cols) },
+                        Component.literal("Gathering Basket (${rows * cols} slots)"))) { buf -> buf.writeVarInt(rows); buf.writeVarInt(cols) }
                 }
             }
         }

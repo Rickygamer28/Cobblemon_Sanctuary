@@ -105,13 +105,17 @@ object Gathering {
 
     fun itemCount(s: Sanctuary): Int = (0 until s.basket.containerSize).sumOf { s.basket.getItem(it).count }
 
-    /** The basket's rows: what the Valley Heart gives it, or more if something's already in the slots further down. */
-    fun rows(s: Sanctuary): Int {
+    /** The basket's slots: what the Valley Heart gives it, or more if something's already in the slots further on. */
+    fun slots(s: Sanctuary): Int {
         val last = (s.basket.containerSize - 1 downTo 0).firstOrNull { !s.basket.getItem(it).isEmpty } ?: -1
-        return maxOf(Requests.basketRows(s), last / 9 + 1).coerceIn(3, 6)
+        val need = maxOf(Requests.basketSlots(s), last + 1)
+        return listOf(27, 54, 81, 108).first { it >= need.coerceAtMost(108) }
     }
 
-    private fun isFull(s: Sanctuary) = (0 until rows(s) * 9).none { s.basket.getItem(it).isEmpty }
+    /** How the basket's slots are laid out: 9 across, or 12 across for the biggest (9 rows of 12). */
+    fun layout(s: Sanctuary): Pair<Int, Int> = slots(s).let { n -> if (n > 81) (n / 12) to 12 else (n / 9) to 9 }
+
+    private fun isFull(s: Sanctuary) = (0 until slots(s)).none { s.basket.getItem(it).isEmpty }
 
     /** How many of [item] are already in the basket. */
     private fun countOf(s: Sanctuary, item: Item) = (0 until s.basket.containerSize).sumOf { val st = s.basket.getItem(it); if (st.`is`(item)) st.count else 0 }
@@ -126,7 +130,7 @@ object Gathering {
         if (room <= 0) return false
         var left = stack.count.coerceAtMost(room)
         val start = left
-        val slots = rows(s) * 9
+        val slots = slots(s)
         // onto stacks of the same thing first, then into empty slots (only the basket's open rows)
         for (i in 0 until slots) {
             if (left <= 0) break
