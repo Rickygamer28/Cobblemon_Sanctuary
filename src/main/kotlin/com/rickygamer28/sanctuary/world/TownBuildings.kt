@@ -88,7 +88,10 @@ object TownBuildings {
         for ((k, v) in s.landmarks.entries.toList()) {
             if (!isBuilding(k) || v == Landmarks.NONE) continue
             val p = BlockPos.of(v)
-            if (level.hasChunk(p.x shr 4, p.z shr 4) && !floorBlock(k.removePrefix(PREFIX)).let { level.getBlockState(p).`is`(it) }) {
+            val kind = k.removePrefix(PREFIX)
+            val there = level.getBlockState(p)
+            val standing = if (kind == "rise") there.block in GuardianRise.BLOCKS else there.`is`(floorBlock(kind))
+            if (level.hasChunk(p.x shr 4, p.z shr 4) && !standing) {
                 s.landmarks.remove(k); s.staleLandmarks[k] = v
                 return
             }
