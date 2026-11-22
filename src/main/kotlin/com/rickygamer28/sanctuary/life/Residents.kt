@@ -104,6 +104,8 @@ class SanctuaryRuntime(val id: UUID) {
     /** When a resident last came out of each den. */
     val denUsed = HashMap<Long, Long>()
     var gatherUntil = 0L
+    /** The guardian is out on its Rise right now (dawn or dusk). */
+    var guardianOut = false
     val scenes = ArrayList<Scene>()
     var anchors: Map<String, Pair<Int, Int>> = emptyMap()
     var outlineUntil = 0L
@@ -158,6 +160,7 @@ object Residents {
         Rank.tick(level, s, rt, now)
         if (players.isNotEmpty()) Migrations.tick(level, s, rt, now)
         Visitors.tick(level, s, rt, now, players)
+        Guardian.tick(level, s, rt, now, players)
         Evolving.tick(level, s, rt, now)
         if (players.isEmpty()) {
             despawnAll(rt)

@@ -32,7 +32,7 @@ object Growth {
         runCatching {
             val before = pokemon.friendship
             if (before >= 255) return
-            pokemon.incrementFriendship(points)
+            pokemon.incrementFriendship((points * Guardian.blessing(s, pokemon)).toInt().coerceAtLeast(points))
             if (before < FOND && pokemon.friendship >= FOND) {
                 s.logEvent("${pokemon.getDisplayName(false).string} has grown really fond of its trainer.")
             }

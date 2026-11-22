@@ -70,6 +70,12 @@ object SanctuaryCommand {
                         .then(Commands.literal("add").executes { ctx -> testAdd(ctx, true) })
                         .then(Commands.literal("clear").executes { ctx -> testClear(ctx) }),
                 )
+                // the valley's guardian (Golden Heart): list your legendaries, or name one
+                .then(
+                    Commands.literal("guardian")
+                        .executes { ctx -> guardian(ctx, null) }
+                        .then(Commands.argument("pokemon", net.minecraft.commands.arguments.UuidArgument.uuid()).executes { ctx -> guardian(ctx, net.minecraft.commands.arguments.UuidArgument.getUuid(ctx, "pokemon")) }),
+                )
                 // the Valley Heart, for trying its unlocks out (needs cheats / op)
                 .then(
                     Commands.literal("heart").requires { it.hasPermission(2) }
@@ -79,6 +85,15 @@ object SanctuaryCommand {
                         .then(Commands.literal("level").then(Commands.argument("level", IntegerArgumentType.integer(0, com.rickygamer28.sanctuary.life.Requests.LEVELS.size)).executes { ctx -> heart(ctx, "level", IntegerArgumentType.getInteger(ctx, "level")) })),
                 ),
         )
+    }
+
+    /** /sanctuary guardian [<pokemon>]: lists your legendaries to choose from, or names one the guardian. */
+    private fun guardian(ctx: CommandContext<CommandSourceStack>, id: java.util.UUID?): Int {
+        val player = ctx.source.playerOrException
+        val (level, s) = Sanctuaries.forPlayer(player.server, player.uuid).firstOrNull { it.second.owner == player.uuid }
+            ?: run { player.sendSystemMessage(Text.error("You don't own a sanctuary.")); return 0 }
+        if (id == null) com.rickygamer28.sanctuary.life.Guardian.list(player, s) else com.rickygamer28.sanctuary.life.Guardian.choose(player, level, s, id)
+        return 1
     }
 
     /** /sanctuary heart [add <points> | set <points> | level <level>]: the Valley Heart of the sanctuary you own (or are in). */

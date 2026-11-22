@@ -32,11 +32,20 @@ import kotlin.math.sin
  */
 object TownBuildings {
     const val PREFIX = "building:"
+
+    /** Each type's colour, for the Guardian's Rise. */
+    private val TYPE_WOOL: Map<String, Block> = mapOf(
+        "fire" to Blocks.RED_WOOL, "water" to Blocks.BLUE_WOOL, "grass" to Blocks.GREEN_WOOL, "electric" to Blocks.YELLOW_WOOL,
+        "ice" to Blocks.LIGHT_BLUE_WOOL, "fighting" to Blocks.ORANGE_WOOL, "poison" to Blocks.PURPLE_WOOL, "ground" to Blocks.BROWN_WOOL,
+        "flying" to Blocks.WHITE_WOOL, "psychic" to Blocks.PINK_WOOL, "bug" to Blocks.LIME_WOOL, "rock" to Blocks.GRAY_WOOL,
+        "ghost" to Blocks.PURPLE_WOOL, "dragon" to Blocks.CYAN_WOOL, "dark" to Blocks.BLACK_WOOL, "steel" to Blocks.LIGHT_GRAY_WOOL,
+        "fairy" to Blocks.PINK_WOOL, "normal" to Blocks.WHITE_WOOL,
+    )
     private const val FLAGS = Block.UPDATE_CLIENTS
 
     private val NAMES = mapOf("basket" to "the Gathering Post", "shrine" to "the Heart Shrine", "tower" to "a lookout tower",
-        "market" to "a berry market", "hatchery" to "a hatchery", "rest" to "a rest house")
-    private val HALF = mapOf("basket" to 3, "shrine" to 4, "tower" to 4, "market" to 5, "hatchery" to 5, "rest" to 5)
+        "market" to "a berry market", "hatchery" to "a hatchery", "rest" to "a rest house", "rise" to "the Guardian's Rise")
+    private val HALF = mapOf("basket" to 3, "shrine" to 4, "tower" to 4, "market" to 5, "hatchery" to 5, "rest" to 5, "rise" to 4)
 
     /** Every block the buildings are made of (so the valley's cleanup leaves them alone). */
     val BLOCKS: Set<Block> = setOf(
@@ -49,9 +58,15 @@ object TownBuildings {
         Blocks.RED_TERRACOTTA, Blocks.WHITE_TERRACOTTA, Blocks.YELLOW_CARPET, Blocks.BRICKS, Blocks.CAMPFIRE, Blocks.FURNACE, Blocks.BOOKSHELF,
         Blocks.POTTED_DANDELION, Blocks.POTTED_PINK_TULIP, Blocks.QUARTZ_BRICKS, Blocks.SMOOTH_QUARTZ, Blocks.CHISELED_QUARTZ_BLOCK, Blocks.QUARTZ_PILLAR,
         Blocks.PINK_STAINED_GLASS, Blocks.PEARLESCENT_FROGLIGHT, Blocks.GOLD_BLOCK, Blocks.PINK_CANDLE, Blocks.SPRUCE_FENCE,
-    )
+        Blocks.STONE_BRICK_STAIRS, Blocks.SMOOTH_STONE, Blocks.SEA_LANTERN,
+    ) + TYPE_WOOL.values.toSet()
 
     fun isBuilding(key: String) = key.startsWith(PREFIX)
+
+    /** Takes a building down so it goes up again (the Rise, when the guardian changes). */
+    fun restyle(s: Sanctuary, kind: String) {
+        s.landmarks.remove(PREFIX + kind)?.let { if (it != Landmarks.NONE) s.staleLandmarks[PREFIX + kind] = it }
+    }
 
     /** When each missing building may look for room again. */
     private val nextTry = HashMap<Pair<java.util.UUID, String>, Long>()
@@ -108,6 +123,7 @@ object TownBuildings {
 
     private fun floorBlock(kind: String): Block = when (kind) {
         "tower" -> Blocks.STONE_BRICKS; "market" -> Blocks.POLISHED_ANDESITE; "basket" -> Blocks.SPRUCE_PLANKS; "shrine" -> Blocks.CHISELED_QUARTZ_BLOCK
+        "rise" -> Blocks.SMOOTH_STONE
         else -> Blocks.OAK_PLANKS
     }
 
@@ -199,6 +215,7 @@ object TownBuildings {
             "tower" -> tower(c)
             "market" -> market(c)
             "hatchery" -> hatchery(c)
+            "rise" -> rise(c, s)
             else -> restHouse(c, s)
         }
     }
@@ -424,5 +441,27 @@ object TownBuildings {
         c.set(-4, 1, -3, Blocks.POTTED_RED_TULIP)
         c.set(4, 3, -3, Blocks.LANTERN); c.set(-4, 1, -1, Blocks.LANTERN)
         sign(c, 1, 1, -5, listOf("", "Rest House", "Heal up inside", ""))
+    }
+
+    /** The Guardian's Rise: a raised stone platform with steps, four pillars hung with the guardian's colours, and a pedestal it stands on. */
+    private fun rise(c: B, s: Sanctuary) {
+        val types = com.rickygamer28.sanctuary.life.Guardian.types(s)
+        val colours = types.mapNotNull { TYPE_WOOL[it] }.ifEmpty { listOf(Blocks.WHITE_WOOL) }
+        c.fill(-4, 4, 0, 0, -4, 4, Blocks.STONE_BRICKS)
+        for (x in -3..3) for (z in -3..3) c.set(x, 1, z, if (abs(x) == 3 || abs(z) == 3) Blocks.CHISELED_STONE_BRICKS else Blocks.STONE_BRICKS)
+        c.set(0, 0, 0, Blocks.SMOOTH_STONE)
+        c.set(0, 1, 0, Blocks.SEA_LANTERN)
+        for (x in -1..1) c.set(x, 1, -4, stairs(Blocks.STONE_BRICK_STAIRS, Direction.SOUTH))
+        for ((i, p) in listOf(-3 to -3, 3 to -3, -3 to 3, 3 to 3).withIndex()) {
+            val (x, z) = p
+            for (y in 2..5) c.set(x, y, z, Blocks.QUARTZ_PILLAR)
+            val wool = colours[i % colours.size]
+            c.set(x, 6, z, wool)
+            c.set(x, 7, z, Blocks.LANTERN)
+            // a strip of colour down the outer side
+            val ox = if (x > 0) 1 else -1
+            for (y in 3..5) c.set(x + ox, y, z, wool)
+        }
+        sign(c, 2, 1, -5, listOf("", "Guardian's Rise", if (types.isEmpty()) "awaiting a guardian" else "", ""))
     }
 }

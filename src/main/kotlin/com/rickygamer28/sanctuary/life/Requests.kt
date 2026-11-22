@@ -75,7 +75,7 @@ object Requests {
         Level(330, "Blooming Valley", "Flowers spread along every route."),
         Level(420, "Warm Hatchery", "Eggs in the hatchery hatch twice as fast."),
         Level(520, "Lanterns Everywhere", "Lantern posts line every route, so the valley glows at night."),
-        Level(650, "Golden Heart", "The Heart Shrine turns golden, and residents' gifts can be rare candies."),
+        Level(650, "Golden Heart", "The Heart Shrine turns golden, residents' gifts can be rare candies, and the Guardian's Rise goes up: name a legendary of yours the valley's guardian."),
     )
 
     const val DECOR_LEVEL = 2
@@ -87,7 +87,7 @@ object Requests {
     const val LANTERNS_LEVEL = 14
     const val GOLDEN_LEVEL = 15
     /** The town's buildings and the level each one comes at (the Gathering Post and the Heart Shrine are there from the start). */
-    val BUILDINGS = linkedMapOf("basket" to 0, "shrine" to 0, "tower" to 8, "market" to 9, "hatchery" to 10, "rest" to 11)
+    val BUILDINGS = linkedMapOf("basket" to 0, "shrine" to 0, "tower" to 8, "market" to 9, "hatchery" to 10, "rest" to 11, "rise" to 15)
 
     /** How big the Heart Shrine has grown (1 to 5). */
     fun shrineTier(s: Sanctuary): Int { val l = level(s); return 1 + listOf(4, 8, 12, 15).count { l >= it } }

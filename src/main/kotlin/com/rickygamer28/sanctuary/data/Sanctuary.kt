@@ -219,6 +219,9 @@ class Sanctuary(
     val decor: MutableMap<Long, String> = linkedMapOf()
     /** Habitats whose route already got its decorations. */
     val decorDone: MutableSet<String> = linkedSetOf()
+    /** The valley's guardian (a legendary of the owner's), and when it was named. */
+    var guardian: java.util.UUID? = null
+    var guardianSetAt: Long = 0L
     /** Wild Pokémon visiting for a day. */
     val visitors: MutableList<com.rickygamer28.sanctuary.life.Visitor> = mutableListOf()
     /** Landmarks that got their lantern posts. */
@@ -342,6 +345,8 @@ class Sanctuary(
         t.put("DenInfo", ListTag().also { l -> dens.values.forEach { l.add(net.minecraft.nbt.StringTag.valueOf(it)) } })
         t.putInt("Crowd", crowd)
         t.putInt("Heart", heart)
+        guardian?.let { t.putUUID("Guardian", it) }
+        t.putLong("GuardianAt", guardianSetAt)
         t.put("Visitors", ListTag().also { l -> visitors.forEach { l.add(it.save()) } })
         t.put("Requests", ListTag().also { l -> requests.forEach { l.add(it.save()) } })
         t.putLongArray("DecorPos", decor.keys.toLongArray())
@@ -470,6 +475,8 @@ class Sanctuary(
             }
             s.crowd = t.getInt("Crowd")
             s.heart = t.getInt("Heart")
+            if (t.hasUUID("Guardian")) s.guardian = t.getUUID("Guardian")
+            s.guardianSetAt = t.getLong("GuardianAt")
             t.getList("Visitors", Tag.TAG_COMPOUND.toInt()).forEach { e -> runCatching { com.rickygamer28.sanctuary.life.Visitor.load(e as CompoundTag) }.getOrNull()?.let { s.visitors += it } }
             t.getList("Requests", Tag.TAG_COMPOUND.toInt()).forEach { e -> runCatching { com.rickygamer28.sanctuary.life.Request.load(e as CompoundTag) }.getOrNull()?.let { s.requests += it } }
             run {
