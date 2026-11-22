@@ -83,6 +83,7 @@ object Guardian {
     fun tick(level: ServerLevel, s: Sanctuary, rt: SanctuaryRuntime, now: Long, players: List<ServerPlayer>) {
         val id = s.guardian ?: return
         if (players.isEmpty() || !unlocked(s)) return
+        glow(level, s, rt, players)
         val rise = s.landmarks[TownBuildings.PREFIX + "rise"]?.takeIf { it != com.rickygamer28.sanctuary.world.Landmarks.NONE }?.let { BlockPos.of(it) } ?: return
         if (!level.hasChunk(rise.x shr 4, rise.z shr 4)) return
         val t = level.dayTime % DAY
@@ -112,5 +113,20 @@ object Guardian {
             if (level.random.nextInt(6) == 0) Effects.happy(r.entity)
         }
         if ((now / 20L) % 2L == 0L) level.sendParticles(ParticleTypes.END_ROD, e.x, e.y + e.bbHeight + 0.4, e.z, 3, 0.4, 0.2, 0.4, 0.0)
+    }
+
+    /** The guardian's soft glow: motes of light drifting around anyone in its home habitat. */
+    private fun glow(level: ServerLevel, s: Sanctuary, rt: SanctuaryRuntime, players: List<ServerPlayer>) {
+        val pk = of(s, rt) ?: return
+        val home = runCatching { TypeLogic.homeZone(pk, s.residents[pk.uuid], com.rickygamer28.sanctuary.world.ZoneLayout.ring(s), s) }.getOrNull() ?: return
+        for (p in players) {
+            if (com.rickygamer28.sanctuary.world.ZoneLayout.locate(s, p.blockX, p.blockZ)?.zone != home) continue
+            repeat(6) {
+                val x = p.x + (level.random.nextDouble() * 2 - 1) * 14
+                val z = p.z + (level.random.nextDouble() * 2 - 1) * 14
+                val y = p.y + level.random.nextDouble() * 6 - 1
+                level.sendParticles(p, ParticleTypes.END_ROD, false, x, y, z, 1, 0.0, 0.02, 0.0, 0.005)
+            }
+        }
     }
 }
