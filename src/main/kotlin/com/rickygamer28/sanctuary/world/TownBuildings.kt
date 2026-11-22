@@ -129,7 +129,7 @@ object TownBuildings {
         val ring = ZoneLayout.ring(s)
         val salt = kind.hashCode()
         // in the town if there's room, else in the meadows just outside it
-        for (frac in listOf(0.55, 0.65, 0.45, 0.75, 0.35, 0.85, 1.3, 1.5, 1.7, 1.9, 2.2, 2.5)) for (step in 0 until 28) {
+        for (frac in listOf(0.55, 0.65, 0.45, 0.75, 0.35, 0.85, 1.3, 1.5, 1.7, 1.9, 2.2, 2.5, 2.8, 3.2)) for (step in 0 until 28) {
             val a = (step + (salt and 7) * 0.37) * Math.PI * 2 / 28
             val r = if (frac > 1) hub + (frac - 1) * 40 else hub * frac
             if (r < half + 6 || (frac < 1 && r > hub - half - 1) || r > s.size.radius - half - 8) continue
