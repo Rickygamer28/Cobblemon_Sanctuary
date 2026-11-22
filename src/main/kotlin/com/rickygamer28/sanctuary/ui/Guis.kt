@@ -312,6 +312,7 @@ object SanctuaryGuis {
         t.put("eggs", eggs(player, s, ring))
 
         if (page == "residents") residentsWindow(player, s, rt, ring, t)
+        if (page == "guardian") com.rickygamer28.sanctuary.life.Guardian.page(player, s, SanctuaryDimension.level(player.server), t)
         if (page == "resident" && pokemon != null) {
             val pk = rt.live[pokemon]?.pokemon ?: Residents.findRoster(rt, pokemon)?.pokemon
             if (pk != null) t.put("mon", detail(player, s, pk, ring))
@@ -615,6 +616,11 @@ object ScreenActions {
                 SanctuaryGuis.send(player, s, "nest")
             }
             "guardian" -> { SanctuaryGuis.close(player); com.rickygamer28.sanctuary.life.Guardian.list(player, s) }
+            "guardianset" -> {
+                val id = pokemon ?: return
+                SanctuaryDimension.level(player.server)?.let { com.rickygamer28.sanctuary.life.Guardian.choose(player, it, s, id) }
+                SanctuaryGuis.send(player, s, "guardian")
+            }
             "act" -> {
                 val target = pokemon ?: return
                 val action = v

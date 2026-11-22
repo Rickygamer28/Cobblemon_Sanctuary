@@ -323,6 +323,7 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
             tab == "goals" -> goalsPage(g, cx, cy, cw, ch, mouseX, mouseY)
             tab == "nest" -> nestPage(g, cx, cy, cw, ch, mouseX, mouseY)
             tab == "members" -> membersPage(g, cx, cy, cw, ch, mouseX, mouseY)
+            tab == "guardian" -> guardianPage(g, cx, cy, cw, ch, mouseX, mouseY)
         }
         if (search.visible) search.render(g, mouseX, mouseY, partialTick)
         toast?.takeIf { toastTicks > 0 }?.let { msg ->
@@ -766,6 +767,72 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
     }
 
     // ------------------------------------------------------------------ overview
+
+    /** Choosing the valley's guardian: the owner's legendaries as cards, the guardian marked; click one to name it. */
+    private fun guardianPage(g: GuiGraphics, x: Int, y: Int, w: Int, h: Int, mx: Int, my: Int) {
+        val back = "← Goals"
+        val bw = font.width(back) + 10
+        val bh = over(mx, my, x, y, bw, 14)
+        box(g, x, y, bw, 14, if (bh) CARD_HOVER else CARD)
+        text(g, back, x + 5, y + 3, SUB)
+        hit(x, y, bw, 14) { goTab("goals") }
+        text(g, "★ The Valley's Guardian", x + bw + 10, y + 3, GOLD, true)
+        text(g, fit("It watches over the valley from the Guardian's Rise at dawn and dusk. Residents of its types grow fond of their trainers faster, and its habitat glows softly.", w), x, y + 20, SUB)
+        val top = y + 36
+        if (!data.getBoolean("gUnlocked")) {
+            text(g, "A guardian can be chosen at Valley Heart level ${data.getInt("gLevel")} (the Golden Heart).", x, top + 4, DIM)
+            return
+        }
+        if (!data.getBoolean("isOwner")) { text(g, "Only the sanctuary's owner can choose its guardian.", x, top + 4, DIM); return }
+        if (data.contains("gWait")) text(g, "The guardian can change again in ${data.getLong("gWait")} minutes.", x, top, DIM)
+        val list = data.getList("legends", Tag.TAG_COMPOUND.toInt())
+        if (list.isEmpty()) {
+            text(g, "You have no legendary or mythical Pokémon in your PC yet. The Guardian's Rise is waiting for one.", x, top + 14, DIM)
+            return
+        }
+        val current = if (data.hasUUID("gId")) data.getUUID("gId") else null
+        val cols = maxOf(1, w / 150)
+        val gap = 6
+        val cw = (w - gap * (cols - 1)) / cols
+        val chh = 52
+        val gy = top + 14
+        val gh = h - (gy - y)
+        val rows = (list.size + cols - 1) / cols
+        maxScroll = max(0.0, rows * (chh + gap) - gap - gh.toDouble())
+        scroll = scroll.coerceIn(0.0, maxScroll)
+        g.enableScissor(x - 2, gy, x + w + 2, gy + gh)
+        for (i in 0 until list.size) {
+            val c = list.getCompound(i)
+            val cx = x + (i % cols) * (cw + gap)
+            val cy = gy + (i / cols) * (chh + gap) - scroll.toInt()
+            if (cy + chh < gy || cy > gy + gh) continue
+            val id = c.getUUID("u")
+            val chosen = id == current
+            val hover = over(mx, my, cx, cy, cw, chh) && my in gy until gy + gh
+            box(g, cx, cy, cw, chh, if (chosen) 0xFF3A2F18.toInt() else if (hover) CARD_HOVER else CARD)
+            if (chosen) { g.fill(cx, cy, cx + cw, cy + 1, GOLD); g.fill(cx, cy + chh - 1, cx + cw, cy + chh, GOLD); g.fill(cx, cy, cx + 1, cy + chh, GOLD); g.fill(cx + cw - 1, cy, cx + cw, cy + chh, GOLD) }
+            ResourceLocation.tryParse(c.getString("sp"))?.let { sp ->
+                val aspects = c.getList("as", Tag.TAG_STRING.toInt()).let { l -> (0 until l.size).map { l.getString(it) }.toSet() }
+                item(g, monStack(sp, aspects), cx + 6, cy + 10, 2f)
+            }
+            text(g, fit(c.getString("name"), cw - 50), cx + 44, cy + 7, if (chosen) GOLD else TEXT, true)
+            text(g, "Lv.${c.getInt("lv")}" + if (c.getBoolean("mythical")) " · Mythical" else " · Legendary", cx + 44, cy + 20, SUB)
+            var tx = cx + 44
+            for (type in c.getString("types").split(',').filter { it.isNotBlank() }) {
+                val label = type.replaceFirstChar { it.uppercase() }
+                val tw = font.width(label) + 6
+                box(g, tx, cy + 32, tw, 11, opaque(color(type)))
+                text(g, label, tx + 3, cy + 34, 0xFFFFFFFF.toInt())
+                tx += tw + 3
+            }
+            if (chosen) text(g, "★ Guardian", cx + cw - 6 - font.width("★ Guardian"), cy + 34, GOLD)
+            else if (hover) {
+                tooltip = listOf(Component.literal("Make ${c.getString("name")} the valley's guardian"))
+                if (cy >= gy && cy + chh <= gy + gh) hit(cx, cy, cw, chh) { send("guardianset", pokemon = id, page = "guardian") }
+            }
+        }
+        g.disableScissor()
+    }
 
     private fun homePage(g: GuiGraphics, x: Int, y: Int, w: Int, h: Int, mx: Int, my: Int) {
         val owner = data.getBoolean("isOwner")
@@ -1491,7 +1558,7 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
                 box(g, bx, cy + 3, bw, 12, if (hover) CARD_HOVER else 0xFF3A2F18.toInt())
                 g.drawCenteredString(font, label, bx + bw / 2, cy + 5, GOLD)
                 if (hover) tooltip = listOf(Component.literal("Name one of your legendaries the valley's guardian"), Component.literal("It watches from the Guardian's Rise at dawn and dusk").withStyle(net.minecraft.ChatFormatting.GRAY))
-                if (cy >= gy) hit(bx, cy + 3, bw, 12) { send("guardian") }
+                if (cy >= gy) hit(bx, cy + 3, bw, 12) { goTab("guardian") }
             }
             val frac = if (next < 0) 1.0 else (pts - prev).toDouble() / (next - prev).coerceAtLeast(1)
             bar(g, x + 8, cy + 18, w - 90, 5, frac, pink)

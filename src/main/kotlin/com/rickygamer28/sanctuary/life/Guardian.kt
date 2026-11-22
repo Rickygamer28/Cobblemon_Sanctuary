@@ -43,6 +43,28 @@ object Guardian {
         return if (g.isNotEmpty() && runCatching { TypeLogic.currentTypes(pk).any { it in g } }.getOrDefault(false)) 1.5 else 1.0
     }
 
+    /** The owner's legendary and mythical Pokémon, for the guardian page. */
+    fun page(player: ServerPlayer, s: Sanctuary, level: ServerLevel?, t: net.minecraft.nbt.CompoundTag) {
+        t.putBoolean("gUnlocked", unlocked(s))
+        t.putInt("gLevel", Requests.GOLDEN_LEVEL)
+        s.guardian?.let { t.putUUID("gId", it) }
+        val since = (level?.gameTime ?: 0L) - s.guardianSetAt
+        if (s.guardian != null && since in 0 until DAY) t.putLong("gWait", (DAY - since) / 1200)
+        if (s.owner != player.uuid) return
+        val pc = runCatching { Cobblemon.storage.getPC(player) }.getOrNull() ?: return
+        t.put("legends", net.minecraft.nbt.ListTag().also { l ->
+            for (pk in pc.filter { isLegend(it) }) l.add(net.minecraft.nbt.CompoundTag().also { c ->
+                c.putUUID("u", pk.uuid)
+                c.putString("name", pk.getDisplayName(false).string)
+                c.putString("sp", pk.species.resourceIdentifier.toString())
+                c.put("as", net.minecraft.nbt.ListTag().also { a -> pk.aspects.forEach { x -> a.add(net.minecraft.nbt.StringTag.valueOf(x)) } })
+                c.putInt("lv", pk.level)
+                c.putString("types", runCatching { TypeLogic.currentTypes(pk).joinToString(",") }.getOrDefault(""))
+                c.putBoolean("mythical", runCatching { "mythical" in pk.species.labels }.getOrDefault(false))
+            })
+        })
+    }
+
     /** The owner's legendary and mythical Pokémon, as clickable lines in chat. */
     fun list(player: ServerPlayer, s: Sanctuary) {
         if (!unlocked(s)) return player.sendSystemMessage(Component.literal("A guardian can be chosen at Valley Heart level ${Requests.GOLDEN_LEVEL} (the Golden Heart).").withStyle(ChatFormatting.GRAY))
