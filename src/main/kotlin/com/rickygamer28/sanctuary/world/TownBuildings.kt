@@ -53,6 +53,9 @@ object TownBuildings {
 
     fun isBuilding(key: String) = key.startsWith(PREFIX)
 
+    /** When each missing building may look for room again. */
+    private val nextTry = HashMap<Pair<java.util.UUID, String>, Long>()
+
     /** The town is being rebuilt: its buildings come down and go up again on the new ground. */
     fun rebuildAll(s: Sanctuary) {
         for (k in s.landmarks.keys.filter { isBuilding(it) }) {
@@ -83,7 +86,12 @@ object TownBuildings {
         val lv = Requests.level(s)
         for ((kind, need) in Requests.BUILDINGS) {
             if (lv < need || built(s, kind) || s.staleLandmarks.containsKey(PREFIX + kind)) continue
+            // looking for room takes a little work: at most every half minute per building
+            val key = s.id to kind
+            if (level.gameTime < (nextTry[key] ?: 0L)) continue
+            nextTry[key] = level.gameTime + 600L
             val spot = find(level, s, kind) ?: continue
+            nextTry.remove(key)
             runCatching { build(level, s, kind, spot.first, spot.second) }.onFailure {
                 com.rickygamer28.sanctuary.CobblemonSanctuary.LOGGER.warn("Couldn't build the town's $kind", it)
             }
@@ -121,7 +129,7 @@ object TownBuildings {
         val ring = ZoneLayout.ring(s)
         val salt = kind.hashCode()
         // in the town if there's room, else in the meadows just outside it
-        for (frac in listOf(0.55, 0.65, 0.45, 0.75, 0.35, 0.85, 1.3, 1.5, 1.7)) for (step in 0 until 28) {
+        for (frac in listOf(0.55, 0.65, 0.45, 0.75, 0.35, 0.85, 1.3, 1.5, 1.7, 1.9, 2.2, 2.5)) for (step in 0 until 28) {
             val a = (step + (salt and 7) * 0.37) * Math.PI * 2 / 28
             val r = if (frac > 1) hub + (frac - 1) * 40 else hub * frac
             if (r < half + 6 || (frac < 1 && r > hub - half - 1) || r > s.size.radius - half - 8) continue
