@@ -36,7 +36,7 @@ object TownBuildings {
 
     private val NAMES = mapOf("basket" to "the Gathering Post", "shrine" to "the Heart Shrine", "tower" to "a lookout tower",
         "market" to "a berry market", "hatchery" to "a hatchery", "rest" to "a rest house")
-    private val HALF = mapOf("basket" to 3, "shrine" to 4, "tower" to 4, "market" to 6, "hatchery" to 5, "rest" to 6)
+    private val HALF = mapOf("basket" to 3, "shrine" to 4, "tower" to 4, "market" to 5, "hatchery" to 5, "rest" to 5)
 
     /** Every block the buildings are made of (so the valley's cleanup leaves them alone). */
     val BLOCKS: Set<Block> = setOf(
