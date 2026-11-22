@@ -151,7 +151,8 @@ object TownBuildings {
                 if (!level.getBlockState(BlockPos(x, y + 1, z)).fluidState.isEmpty) { ok = false; break@loop }
                 heights += y
             }
-            if (!ok || heights.isEmpty() || heights.max() - heights.min() > 2) continue
+            // (up to 4 blocks of slope: the floor is levelled, cut into the high side and filled under the low side)
+            if (!ok || heights.isEmpty() || heights.max() - heights.min() > 4) continue
             val floor = heights.sorted()[heights.size / 2]
             val toMiddle = Direction.getNearest((s.center.x - cx).toDouble(), 0.0, (s.center.z - cz).toDouble())
             return BlockPos(cx, floor, cz) to toMiddle
