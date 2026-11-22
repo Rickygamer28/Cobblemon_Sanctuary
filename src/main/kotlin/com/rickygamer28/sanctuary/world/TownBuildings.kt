@@ -140,17 +140,39 @@ object TownBuildings {
 
     /** A flat, dry spot in the town, off its paths and away from everything else, with the door facing the middle. */
     private fun find(level: ServerLevel, s: Sanctuary, kind: String): Pair<BlockPos, Direction>? {
-        val half = HALF[kind] ?: 4
+        // the Guardian's Rise goes in its guardian's own habitat (by the town while there's none, or no room)
+        if (kind == "rise") {
+            val g = com.rickygamer28.sanctuary.life.Guardian.of(s, com.rickygamer28.sanctuary.life.Residents.runtime(s))
+            val home = g?.let { runCatching { TypeLogic.homeZone(it, s.residents[it.uuid], ZoneLayout.ring(s), s) }.getOrNull() }
+            if (home != null && home != ZoneLayout.HUB && home in s.habitats) {
+                val (ax, az) = ZoneLayout.anchor(s, home)
+                val spots = ArrayList<Pair<Int, Int>>()
+                for (r in listOf(18, 22, 26, 14, 30, 34, 38)) for (step in 0 until 24) {
+                    val a = step * Math.PI * 2 / 24
+                    spots += (ax + (cos(a) * r).toInt()) to (az + (sin(a) * r).toInt())
+                }
+                search(level, s, kind, home, spots, maxSlope = 6)?.let { return it }
+            }
+        }
         val hub = s.size.hubRadius
-        val ring = ZoneLayout.ring(s)
+        val half = HALF[kind] ?: 4
         val salt = kind.hashCode()
         // in the town if there's room, else in the meadows just outside it
+        val spots = ArrayList<Pair<Int, Int>>()
         for (frac in listOf(0.55, 0.65, 0.45, 0.75, 0.35, 0.85, 1.3, 1.5, 1.7, 1.9, 2.2, 2.5, 2.8, 3.2)) for (step in 0 until 28) {
             val a = (step + (salt and 7) * 0.37) * Math.PI * 2 / 28
             val r = if (frac > 1) hub + (frac - 1) * 40 else hub * frac
             if (r < half + 6 || (frac < 1 && r > hub - half - 1) || r > s.size.radius - half - 8) continue
-            val cx = s.center.x + (cos(a) * r).toInt()
-            val cz = s.center.z + (sin(a) * r).toInt()
+            spots += (s.center.x + (cos(a) * r).toInt()) to (s.center.z + (sin(a) * r).toInt())
+        }
+        return search(level, s, kind, ZoneLayout.HUB, spots, maxSlope = 4)
+    }
+
+    /** The first of [spots] that's flat and dry enough, all in [zone], off its paths and away from everything else. */
+    private fun search(level: ServerLevel, s: Sanctuary, kind: String, zone: String, spots: List<Pair<Int, Int>>, maxSlope: Int): Pair<BlockPos, Direction>? {
+        val half = HALF[kind] ?: 4
+        val ring = ZoneLayout.ring(s)
+        for ((cx, cz) in spots) {
             // apart from the landmarks and the other buildings
             if (s.landmarks.values.any { it != Landmarks.NONE && BlockPos.of(it).let { p -> (p.x - cx) * (p.x - cx) + (p.z - cz) * (p.z - cz) < 15 * 15 } }) continue
             var ok = true
@@ -161,14 +183,14 @@ object TownBuildings {
                 if (!level.hasChunk(x shr 4, z shr 4)) { ok = false; break@loop }
                 val idx = ColumnOrder.indexOf(x - s.center.x, z - s.center.z)
                 val inside = kotlin.math.abs(dx) <= half && kotlin.math.abs(dz) <= half
-                if (idx < 0 || !s.dressed.get(idx) || ZoneLayout.locate(s, x, z, ring)?.zone != ZoneLayout.HUB ||
+                if (idx < 0 || !s.dressed.get(idx) || ZoneLayout.locate(s, x, z, ring)?.zone != zone ||
                     (inside && BiomeDresser.pathAt(s, x, z, ring)) || Caves.at(s, x, z)?.mouth == true) { ok = false; break@loop }
                 val y = groundY(level, x, z) ?: run { ok = false; null } ?: break@loop
                 if (!level.getBlockState(BlockPos(x, y + 1, z)).fluidState.isEmpty) { ok = false; break@loop }
                 heights += y
             }
-            // (up to 4 blocks of slope: the floor is levelled, cut into the high side and filled under the low side)
-            if (!ok || heights.isEmpty() || heights.max() - heights.min() > 4) continue
+            // (some slope is fine: the floor is levelled, cut into the high side and filled under the low side)
+            if (!ok || heights.isEmpty() || heights.max() - heights.min() > maxSlope) continue
             val floor = heights.sorted()[heights.size / 2]
             val toMiddle = Direction.getNearest((s.center.x - cx).toDouble(), 0.0, (s.center.z - cz).toDouble())
             return BlockPos(cx, floor, cz) to toMiddle

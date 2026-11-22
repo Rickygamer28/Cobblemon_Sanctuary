@@ -75,7 +75,7 @@ object Requests {
         Level(330, "Blooming Valley", "Flowers spread along every route."),
         Level(420, "Warm Hatchery", "Eggs in the hatchery hatch twice as fast."),
         Level(520, "Lanterns Everywhere", "Lantern posts line every route, so the valley glows at night."),
-        Level(650, "Golden Heart", "The Heart Shrine turns golden, residents' gifts can be rare candies, and the Guardian's Rise goes up: name a legendary of yours the valley's guardian."),
+        Level(650, "Golden Heart", "The Heart Shrine turns golden, residents' gifts can be rare candies, and you can name a legendary of yours the valley's guardian: its Rise goes up in its own habitat."),
     )
 
     const val DECOR_LEVEL = 2
