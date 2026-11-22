@@ -1371,6 +1371,13 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
             val zc = colorOf[mapKey(m.getString("zone"))] ?: 0xFFFFFFFF.toInt()
             when (m.getString("k")) {
                 "landmark" -> { box(g, px - 3, pz - 3, 7, 7, 0xFF1A1A1A.toInt()); box(g, px - 2, pz - 2, 5, 5, 0xFFFFFFFF.toInt()); box(g, px - 1, pz - 1, 3, 3, zc) }
+                "guardian" -> { // a gold diamond with the habitat's colour inside
+                    for (i in 0..4) g.fill(px - i, pz - 4 + i, px + i + 1, pz - 3 + i, 0xFF1A1A1A.toInt())
+                    for (i in 0..4) g.fill(px - i, pz + 4 - i, px + i + 1, pz + 5 - i, 0xFF1A1A1A.toInt())
+                    for (i in 0..3) g.fill(px - i, pz - 3 + i, px + i + 1, pz - 2 + i, GOLD)
+                    for (i in 0..3) g.fill(px - i, pz + 3 - i, px + i + 1, pz + 4 - i, GOLD)
+                    box(g, px - 1, pz - 1, 3, 3, zc)
+                }
                 "peak" -> { // a little mountain
                     g.fill(px, pz - 3, px + 1, pz - 2, 0xFFFFFFFF.toInt())
                     g.fill(px - 1, pz - 2, px + 2, pz - 1, 0xFFFFFFFF.toInt())

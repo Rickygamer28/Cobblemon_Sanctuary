@@ -72,6 +72,13 @@ object RegionMap {
             val p = BlockPos.of(pos)
             mark("landmark", "${ZoneLayout.NAMES[zone] ?: zone}: landmark", p.x + 0.5, p.z + 0.5, zone)
         }
+        // the Guardian's Rise: a landmark of its own
+        s.landmarks[TownBuildings.PREFIX + "rise"]?.takeIf { it != Landmarks.NONE }?.let { packed ->
+            val p = BlockPos.of(packed)
+            val g = com.rickygamer28.sanctuary.life.Guardian.of(s, com.rickygamer28.sanctuary.life.Residents.runtime(s))
+            val zone = ZoneLayout.locate(s, p.x, p.z)?.zone ?: ZoneLayout.HUB
+            mark("guardian", "The Guardian's Rise" + (g?.let { " (${it.getDisplayName(false).string})" } ?: ""), p.x + 0.5, p.z + 0.5, zone)
+        }
         if ("fire" in s.unlocked) BiomeDresser.peakOf(s, "fire")?.let { mark("peak", "The volcano's crater", it.first, it.second, "fire") }
         if ("ice" in s.unlocked) BiomeDresser.peakOf(s, "ice")?.let { mark("peak", "The snowy summit", it.first, it.second, "ice") }
         for ((zone, ex, ez) in Caves.entrances(s)) mark("cave", "Cave entrance", ex, ez, zone)

@@ -49,7 +49,7 @@ object Guardian {
         t.putInt("gLevel", Requests.GOLDEN_LEVEL)
         s.guardian?.let { t.putUUID("gId", it) }
         val since = (level?.gameTime ?: 0L) - s.guardianSetAt
-        if (s.guardian != null && since in 0 until DAY) t.putLong("gWait", (DAY - since) / 1200)
+        if (s.guardian != null && since in 0 until DAY && !player.isCreative) t.putLong("gWait", (DAY - since) / 1200)
         if (s.owner != player.uuid) return
         val pc = runCatching { Cobblemon.storage.getPC(player) }.getOrNull() ?: return
         t.put("legends", net.minecraft.nbt.ListTag().also { l ->
@@ -91,7 +91,7 @@ object Guardian {
         if (pk == null || !isLegend(pk)) return player.sendSystemMessage(Component.literal("That Pokémon isn't a legendary in your PC.").withStyle(ChatFormatting.RED))
         if (s.guardian == id) return player.sendSystemMessage(Component.literal("${pk.getDisplayName(false).string} is already the guardian.").withStyle(ChatFormatting.GRAY))
         val since = level.gameTime - s.guardianSetAt
-        if (s.guardian != null && since in 0 until DAY) return player.sendSystemMessage(Component.literal("The guardian can change once a day (in ${(DAY - since) / 1200} minutes).").withStyle(ChatFormatting.GRAY))
+        if (s.guardian != null && since in 0 until DAY && !player.isCreative) return player.sendSystemMessage(Component.literal("The guardian can change once a day (in ${(DAY - since) / 1200} minutes).").withStyle(ChatFormatting.GRAY))
         s.guardian = id
         s.guardianSetAt = level.gameTime
         s.logEvent("${pk.getDisplayName(false).string} is now the valley's guardian!")
