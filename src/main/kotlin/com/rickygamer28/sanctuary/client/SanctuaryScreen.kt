@@ -1481,6 +1481,18 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
             g.fill(x, cy, x + 2, cy + heartH, pink)
             text(g, "♥ Valley Heart", x + 8, cy + 5, pink, true)
             text(g, "Level $lv", x + 8 + font.width("♥ Valley Heart") + 8, cy + 5, TEXT, true)
+            // the Golden Heart: name the valley's guardian
+            if (heart.contains("guardian")) {
+                val gname = heart.getString("guardian")
+                val label = if (gname.isEmpty()) "Choose a guardian" else "Guardian: $gname"
+                val bw = font.width(label) + 12
+                val bx = x + w - bw - 6
+                val hover = over(mx, my, bx, cy + 3, bw, 12) && my in gy until gy + gh
+                box(g, bx, cy + 3, bw, 12, if (hover) CARD_HOVER else 0xFF3A2F18.toInt())
+                g.drawCenteredString(font, label, bx + bw / 2, cy + 5, GOLD)
+                if (hover) tooltip = listOf(Component.literal("Name one of your legendaries the valley's guardian"), Component.literal("It watches from the Guardian's Rise at dawn and dusk").withStyle(net.minecraft.ChatFormatting.GRAY))
+                if (cy >= gy) hit(bx, cy + 3, bw, 12) { send("guardian") }
+            }
             val frac = if (next < 0) 1.0 else (pts - prev).toDouble() / (next - prev).coerceAtLeast(1)
             bar(g, x + 8, cy + 18, w - 90, 5, frac, pink)
             text(g, if (next < 0) "$pts points" else "$pts/$next", x + w - 76, cy + 16, if (next < 0) GOLD else SUB)

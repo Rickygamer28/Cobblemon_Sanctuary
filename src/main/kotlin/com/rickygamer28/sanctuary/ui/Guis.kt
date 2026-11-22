@@ -174,6 +174,7 @@ object SanctuaryGuis {
                 h.putInt("level", lv)
                 h.putInt("prev", if (lv == 0) 0 else R.LEVELS[lv - 1].points)
                 h.putInt("next", R.LEVELS.getOrNull(lv)?.points ?: -1)
+                if (lv >= R.GOLDEN_LEVEL && s.owner == player.uuid) h.putString("guardian", com.rickygamer28.sanctuary.life.Guardian.of(s, rt)?.getDisplayName(false)?.string ?: "")
                 h.put("levels", ListTag().also { l -> R.LEVELS.forEach { x -> l.add(StringTag.valueOf("${x.points}|${x.title}|${x.desc}")) } })
             })
             t.put("requests", ListTag().also { l ->
@@ -613,6 +614,7 @@ object ScreenActions {
                 }
                 SanctuaryGuis.send(player, s, "nest")
             }
+            "guardian" -> { SanctuaryGuis.close(player); com.rickygamer28.sanctuary.life.Guardian.list(player, s) }
             "act" -> {
                 val target = pokemon ?: return
                 val action = v
