@@ -59,7 +59,7 @@ object TownBuildings {
         Blocks.POTTED_DANDELION, Blocks.POTTED_PINK_TULIP, Blocks.QUARTZ_BRICKS, Blocks.SMOOTH_QUARTZ, Blocks.CHISELED_QUARTZ_BLOCK, Blocks.QUARTZ_PILLAR,
         Blocks.PINK_STAINED_GLASS, Blocks.PEARLESCENT_FROGLIGHT, Blocks.GOLD_BLOCK, Blocks.PINK_CANDLE, Blocks.SPRUCE_FENCE,
         Blocks.STONE_BRICK_STAIRS, Blocks.SMOOTH_STONE, Blocks.SEA_LANTERN,
-    ) + TYPE_WOOL.values.toSet()
+    ) + TYPE_WOOL.values.toSet() + GuardianRise.BLOCKS
 
     fun isBuilding(key: String) = key.startsWith(PREFIX)
 
@@ -92,6 +92,14 @@ object TownBuildings {
                 s.landmarks.remove(k); s.staleLandmarks[k] = v
                 return
             }
+        }
+        // the Guardian's Rise follows its guardian's home habitat
+        s.landmarks[PREFIX + "rise"]?.takeIf { it != Landmarks.NONE }?.let { packed ->
+            val p = BlockPos.of(packed)
+            val g = com.rickygamer28.sanctuary.life.Guardian.of(s, com.rickygamer28.sanctuary.life.Residents.runtime(s))
+            val home = g?.let { runCatching { TypeLogic.homeZone(it, s.residents[it.uuid], ZoneLayout.ring(s), s) }.getOrNull() }
+            val here = ZoneLayout.locate(s, p.x, p.z)?.zone
+            if (home != null && home != ZoneLayout.HUB && home in s.habitats && here != home) { restyle(s, "rise"); return }
         }
         // the Heart Shrine grows: put it up again at its new size
         if (built(s, "shrine") && (s.stats["shrineTier"] ?: 0) != Requests.shrineTier(s)) {
@@ -211,6 +219,7 @@ object TownBuildings {
     }
 
     private fun build(level: ServerLevel, s: Sanctuary, kind: String, base: BlockPos, facing: Direction) {
+        if (kind == "rise") { GuardianRise.build(level, s, base, facing); return }
         val half = HALF[kind] ?: 4
         // clear the spot (trees as a whole) and lay a level floor, filled down so it never floats
         // (whole trees in a wider circle, so a big tree next to the spot isn't left with a branch hanging in the air)
@@ -237,7 +246,6 @@ object TownBuildings {
             "tower" -> tower(c)
             "market" -> market(c)
             "hatchery" -> hatchery(c)
-            "rise" -> rise(c, s)
             else -> restHouse(c, s)
         }
     }
@@ -465,25 +473,4 @@ object TownBuildings {
         sign(c, 1, 1, -5, listOf("", "Rest House", "Heal up inside", ""))
     }
 
-    /** The Guardian's Rise: a raised stone platform with steps, four pillars hung with the guardian's colours, and a pedestal it stands on. */
-    private fun rise(c: B, s: Sanctuary) {
-        val types = com.rickygamer28.sanctuary.life.Guardian.types(s)
-        val colours = types.mapNotNull { TYPE_WOOL[it] }.ifEmpty { listOf(Blocks.WHITE_WOOL) }
-        c.fill(-4, 4, 0, 0, -4, 4, Blocks.STONE_BRICKS)
-        for (x in -3..3) for (z in -3..3) c.set(x, 1, z, if (abs(x) == 3 || abs(z) == 3) Blocks.CHISELED_STONE_BRICKS else Blocks.STONE_BRICKS)
-        c.set(0, 0, 0, Blocks.SMOOTH_STONE)
-        c.set(0, 1, 0, Blocks.SEA_LANTERN)
-        for (x in -1..1) c.set(x, 1, -4, stairs(Blocks.STONE_BRICK_STAIRS, Direction.SOUTH))
-        for ((i, p) in listOf(-3 to -3, 3 to -3, -3 to 3, 3 to 3).withIndex()) {
-            val (x, z) = p
-            for (y in 2..5) c.set(x, y, z, Blocks.QUARTZ_PILLAR)
-            val wool = colours[i % colours.size]
-            c.set(x, 6, z, wool)
-            c.set(x, 7, z, Blocks.LANTERN)
-            // a strip of colour down the outer side
-            val ox = if (x > 0) 1 else -1
-            for (y in 3..5) c.set(x + ox, y, z, wool)
-        }
-        sign(c, 2, 1, -5, listOf("", "Guardian's Rise", if (types.isEmpty()) "awaiting a guardian" else "", ""))
-    }
 }
