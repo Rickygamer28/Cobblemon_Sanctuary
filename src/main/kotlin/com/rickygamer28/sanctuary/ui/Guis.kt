@@ -193,6 +193,16 @@ object SanctuaryGuis {
                 })
             })
         }
+        run {
+            val R = com.rickygamer28.sanctuary.life.Rank
+            val parts = R.parts(s, rt)
+            val score = parts.sumOf { p -> p.second }
+            val tier = R.tier(score)
+            t.putString("rank", R.TIERS[tier].name)
+            t.putInt("rankScore", score)
+            R.TIERS.getOrNull(tier + 1)?.let { n -> t.putString("rankNext", n.name); t.putInt("rankNextAt", n.score) }
+            t.put("rankParts", ListTag().also { l -> parts.forEach { (k, v) -> l.add(StringTag.valueOf("$k: $v")) } })
+        }
         t.putInt("crowd", s.crowd)
         t.putBoolean("crowdAllowed", com.rickygamer28.sanctuary.SanctuaryConfig.allowBigCrowds.get())
         run {

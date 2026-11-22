@@ -793,6 +793,18 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
         box(g, x, sy, w, 52, CARD)
         text(g, "${data.getString("sizeLabel")} Sanctuary", x + 10, sy + 8, TEXT, true)
         text(g, "Radius ${data.getInt("radius")} blocks", x + 10 + font.width("${data.getString("sizeLabel")} Sanctuary") + 8, sy + 8, SUB)
+        // its rank, with what makes it up
+        if (data.contains("rank")) {
+            val label = "★ ${data.getString("rank")}"
+            val rx = x + w - 10 - font.width(label)
+            text(g, label, rx, sy + 8, GOLD, true)
+            if (over(mx, my, rx - 2, sy + 4, font.width(label) + 4, 14)) tooltip = buildList {
+                add(Component.literal("${data.getString("rank")}: ${data.getInt("rankScore")} points").withStyle(net.minecraft.ChatFormatting.GOLD))
+                val parts = data.getList("rankParts", Tag.TAG_STRING.toInt())
+                for (i in 0 until parts.size) add(Component.literal(parts.getString(i)).withStyle(net.minecraft.ChatFormatting.GRAY))
+                if (data.contains("rankNext")) add(Component.literal("Next: ${data.getString("rankNext")} at ${data.getInt("rankNextAt")}").withStyle(net.minecraft.ChatFormatting.YELLOW))
+            }
+        }
         if (data.contains("nextLabel")) {
             val needed = data.getInt("nextNeeded")
             val have = data.getInt("residents")
