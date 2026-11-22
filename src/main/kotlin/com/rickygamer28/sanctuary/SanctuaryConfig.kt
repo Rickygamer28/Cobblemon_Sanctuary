@@ -135,6 +135,12 @@ object SanctuaryConfig {
     val evolveFriendship: ModConfigSpec.IntValue = builder
         .comment("How fond of its trainer a resident must be to evolve in the sanctuary (0-255).")
         .defineInRange("evolveFriendship", 160, 0, 255)
+    val visitorsEnabled: ModConfigSpec.BooleanValue = builder
+        .comment("Wild Pokémon visit the sanctuary for a day now and then; befriend one and it can stay. (Legendaries never visit.)")
+        .define("visitorsEnabled", true)
+    val visitorsPerDay: ModConfigSpec.DoubleValue = builder
+        .comment("About how many visitors come per in-game day before the Valley Heart (it brings more).")
+        .defineInRange("visitorsPerDay", 1.0, 0.05, 10.0)
     val atmosphere: ModConfigSpec.BooleanValue = builder
         .comment("Habitat atmosphere: snowfall on the peak, ash over the volcano, fireflies in the swamp at night, petals in the flower garden… (only particles; the sanctuary never has real weather).")
         .define("atmosphere", true)

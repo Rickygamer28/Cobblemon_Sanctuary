@@ -80,6 +80,15 @@ class CobblemonSanctuary(modBus: IEventBus, container: ModContainer) {
     /** Right-clicking a resident while holding the Journal opens its menu. */
     private fun onEntityInteract(event: PlayerInteractEvent.EntityInteract) {
         val target = event.target as? PokemonEntity ?: return
+        // a wild visitor: a berry feeds it, the Journal pets it or asks it to stay
+        if (com.rickygamer28.sanctuary.life.Visitors.isVisitor(target)) {
+            val player = event.entity as? ServerPlayer ?: return
+            if (com.rickygamer28.sanctuary.life.Visitors.interact(player, target, event.itemStack.`is`(ModContent.JOURNAL.get()))) {
+                event.isCanceled = true
+                event.cancellationResult = InteractionResult.SUCCESS
+            }
+            return
+        }
         if (!event.itemStack.`is`(ModContent.JOURNAL.get())) return
         val tethering = target.tethering as? SanctuaryTethering ?: return
         event.isCanceled = true
@@ -113,7 +122,7 @@ class CobblemonSanctuary(modBus: IEventBus, container: ModContainer) {
         val tethering = entity.tethering
         if (tethering == null) {
             if (SanctuaryDimension.isSanctuary(level) && SanctuaryConfig.blockWildSpawns.get() &&
-                runCatching { entity.pokemon.isWild() && !entity.isBattleClone() }.getOrDefault(false)
+                runCatching { entity.pokemon.isWild() && !entity.isBattleClone() && !entity.tags.contains(com.rickygamer28.sanctuary.life.Visitors.TAG) }.getOrDefault(false)
             ) event.isCanceled = true
             return
         }
