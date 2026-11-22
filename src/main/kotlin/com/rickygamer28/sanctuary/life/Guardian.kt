@@ -110,16 +110,23 @@ object Guardian {
         if (!level.hasChunk(rise.x shr 4, rise.z shr 4)) return
         val t = level.dayTime % DAY
         val watch = t >= 23300L || t < 700L || t in 11800L..12800L
-        if (!watch) { rt.guardianOut = false; return }
+        // always out while anyone's in the sanctuary, keeping to its Rise
         val top = rise.above(2)
         val entry = Residents.findRoster(rt, id) ?: return
         val live = rt.live[id] ?: Residents.spawn(level, s, rt, entry, top) ?: return
         val e = live.entity
-        if (e.distanceToSqr(top.x + 0.5, top.y.toDouble(), top.z + 0.5) > 4.0) {
+        live.leaving = false
+        live.napping = false
+        live.busyUntil = now + 60
+        val dist = e.distanceToSqr(top.x + 0.5, top.y.toDouble(), top.z + 0.5)
+        if (watch && dist > 4.0 || dist > 36.0) {
             e.teleportTo(top.x + 0.5, top.y.toDouble(), top.z + 0.5)
             Residents.stop(e)
+        } else if (!watch && dist <= 36.0 && level.random.nextInt(20) == 0) {
+            // between dawn and dusk it rests on the Rise, now and then stepping about on it
+            Residents.walkTo(e, top.offset(level.random.nextInt(5) - 2, 0, level.random.nextInt(5) - 2), 0.3f, 1)
         }
-        live.busyUntil = now + 60
+        if (!watch) { rt.guardianOut = false; return }
         if (!rt.guardianOut) {
             rt.guardianOut = true
             val name = live.pokemon.getDisplayName(false).string

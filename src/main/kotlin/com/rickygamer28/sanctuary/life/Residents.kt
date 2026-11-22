@@ -500,6 +500,8 @@ object Residents {
             }
         }
         val wantedIds = wanted.map { it.pokemon.uuid }.toHashSet()
+        // the valley's guardian is always out (on its Rise)
+        s.guardian?.let { if (Guardian.unlocked(s)) wantedIds += it }
 
         // the ones no longer wanted go back to rest: out of sight they just go; near a player they walk into a den
         // (or out of sight, or dive), so nobody sees them vanish
