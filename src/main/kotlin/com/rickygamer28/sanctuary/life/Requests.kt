@@ -68,6 +68,7 @@ object Requests {
         Level(40, "Grateful Gifts", "Residents you've helped bring you gifts twice as often."),
         Level(60, "The Biggest Basket", "The basket grows to 108 slots, with three times the room for each thing, and more finds every trip."),
         Level(85, "New Looks", "Every habitat and the town get a fourth look to choose on the Region tab."),
+        Level(100, "Basket Link", "Craft a Basket Link: place it anywhere, even in the overworld, to open the basket from there, and hoppers under it can pull the items out."),
         Level(115, "Lookout Tower", "A lookout tower goes up by the town, with a view over the whole valley."),
         Level(150, "Berry Market", "A covered berry market opens, and residents bring more berries to the basket."),
         Level(200, "Hatchery", "A hatchery opens: eggs in the Nest hatch on their own after a while."),
@@ -82,15 +83,16 @@ object Requests {
     const val LIGHTS_LEVEL = 3
     const val GIFTS_LEVEL = 5
     const val LOOKS_LEVEL = 7
-    const val BLOOM_LEVEL = 12
-    const val WARM_LEVEL = 13
-    const val LANTERNS_LEVEL = 14
-    const val GOLDEN_LEVEL = 15
+    const val LINK_LEVEL = 8
+    const val BLOOM_LEVEL = 13
+    const val WARM_LEVEL = 14
+    const val LANTERNS_LEVEL = 15
+    const val GOLDEN_LEVEL = 16
     /** The town's buildings and the level each one comes at (the Gathering Post and the Heart Shrine are there from the start). */
-    val BUILDINGS = linkedMapOf("basket" to 0, "shrine" to 0, "tower" to 8, "market" to 9, "hatchery" to 10, "rest" to 11, "rise" to 15)
+    val BUILDINGS = linkedMapOf("basket" to 0, "shrine" to 0, "tower" to 9, "market" to 10, "hatchery" to 11, "rest" to 12, "rise" to 16)
 
     /** How big the Heart Shrine has grown (1 to 5). */
-    fun shrineTier(s: Sanctuary): Int { val l = level(s); return 1 + listOf(4, 8, 12, 15).count { l >= it } }
+    fun shrineTier(s: Sanctuary): Int { val l = level(s); return 1 + listOf(4, 9, 13, 16).count { l >= it } }
 
     fun level(s: Sanctuary): Int = LEVELS.count { s.heart >= it.points }
 

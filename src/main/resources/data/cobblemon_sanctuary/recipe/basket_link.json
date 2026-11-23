@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "GEG",
+    "BCB",
+    "GBG"
+  ],
+  "key": {
+    "G": { "item": "minecraft:gold_ingot" },
+    "E": { "item": "minecraft:ender_pearl" },
+    "B": { "item": "minecraft:bamboo" },
+    "C": { "item": "minecraft:chest" }
+  },
+  "result": { "id": "cobblemon_sanctuary:basket_link", "count": 1 }
+}

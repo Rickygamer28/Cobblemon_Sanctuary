@@ -1,0 +1,8 @@
+{
+  "parent": "cobblemon_sanctuary:block/gathering_basket",
+  "textures": {
+    "particle": "cobblemon_sanctuary:block/basket_weave",
+    "rim": "minecraft:block/gold_block",
+    "fill": "minecraft:block/amethyst_block"
+  }
+}

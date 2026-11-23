@@ -63,6 +63,9 @@ object ModContent {
     val GATHERING_BASKET: DeferredBlock<GatheringBasketBlock> = BLOCKS.register("gathering_basket") { ->
         GatheringBasketBlock(BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(0.8f).sound(SoundType.BAMBOO_WOOD).noOcclusion())
     }
+    val BASKET_LINK: DeferredBlock<com.rickygamer28.sanctuary.block.BasketLinkBlock> = BLOCKS.register("basket_link") { ->
+        com.rickygamer28.sanctuary.block.BasketLinkBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).strength(0.8f).sound(SoundType.BAMBOO_WOOD).noOcclusion().lightLevel { 4 })
+    }
     val POKEMON_BED: DeferredBlock<PokemonBedBlock> = BLOCKS.register("pokemon_bed") { ->
         PokemonBedBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED).strength(0.6f).sound(SoundType.WOOL).noOcclusion(), 1)
     }
@@ -81,6 +84,9 @@ object ModContent {
     val FEEDING_TROUGH: DeferredBlock<FeedingTroughBlock> = BLOCKS.register("feeding_trough") { ->
         FeedingTroughBlock(BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(1.0f).sound(SoundType.WOOD).noOcclusion())
     }
+    val BASKET_LINK_ENTITY: DeferredHolder<BlockEntityType<*>, BlockEntityType<com.rickygamer28.sanctuary.block.BasketLinkBlockEntity>> = BLOCK_ENTITIES.register("basket_link") { ->
+        BlockEntityType.Builder.of({ pos, state -> com.rickygamer28.sanctuary.block.BasketLinkBlockEntity(pos, state) }, BASKET_LINK.get()).build(null)
+    }
     val INCUBATOR_ENTITY: DeferredHolder<BlockEntityType<*>, BlockEntityType<IncubatorBlockEntity>> = BLOCK_ENTITIES.register("incubator") { ->
         BlockEntityType.Builder.of({ pos, state -> IncubatorBlockEntity(pos, state) }, INCUBATOR.get()).build(null)
     }
@@ -96,6 +102,9 @@ object ModContent {
     }
     val INCUBATOR_ITEM: DeferredItem<Item> = ITEMS.register("incubator") { ->
         net.minecraft.world.item.BlockItem(INCUBATOR.get(), Item.Properties())
+    }
+    val BASKET_LINK_ITEM: DeferredItem<Item> = ITEMS.register("basket_link") { ->
+        net.minecraft.world.item.BlockItem(BASKET_LINK.get(), Item.Properties())
     }
     val GATHERING_BASKET_ITEM: DeferredItem<Item> = ITEMS.register("gathering_basket") { ->
         net.minecraft.world.item.BlockItem(GATHERING_BASKET.get(), Item.Properties())
@@ -124,6 +133,7 @@ object ModContent {
                 output.accept(HUB_BELL_ITEM.get())
                 output.accept(INCUBATOR_ITEM.get())
                 output.accept(GATHERING_BASKET_ITEM.get())
+                output.accept(BASKET_LINK_ITEM.get())
                 output.accept(POKEMON_BED_ITEM.get())
                 output.accept(LARGE_POKEMON_BED_ITEM.get())
                 output.accept(HUGE_POKEMON_BED_ITEM.get())
