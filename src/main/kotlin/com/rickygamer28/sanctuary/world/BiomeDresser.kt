@@ -776,12 +776,16 @@ object BiomeDresser {
                         val n = f01(s, wx, wz, 46.0, 44, 2)
                         (smooth((n - 0.58) / 0.06) * 13 + smooth((n - 0.5) / 0.08) * 3) * c + f(s, wx, wz, 60.0, 45, 2) * 1.2 + 1
                     }
-                    else -> { // dunes: long crests whose direction slowly turns
-                        val dir = f(s, xd, zd, 160.0, 41, 2) * 1.4
-                        val u = wx * cos(dir) + wz * sin(dir)
-                        val crest = 1 - abs(sin(u / 30.0 + f(s, xd, zd, 90.0, 42, 2) * 2.0))
-                        val field = smooth((f01(s, xd, zd, 110.0, 44, 2) - 0.35) / 0.25)
-                        var hh = (if (variant == 0) Math.pow(crest, 4.0) * 6 else Math.pow(crest, 3.0) * 3) * field * c + f(s, wx, wz, 120.0, 43, 2) * 1.5 + 1
+                    else -> if (s.variants["ground"] == Remix.INDEX) {
+                        // the Dry savanna: gentle rolling grassland of its own (no dunes)
+                        (f(s, wx, wz, 80.0, 46, 3) * 2.5 + f(s, wx, wz, 180.0, 47, 2) * 2.0) * c + 2
+                    } else { // dunes: soft, winding crests with broad slopes between them
+                        val field = smooth((f01(s, xd, zd, 110.0, 44, 2) - 0.3) / 0.3)
+                        val wxw = wx + f(s, xd, zd, 55.0, 41, 2) * 20
+                        val wzw = wz + f(s, xd, zd, 55.0, 42, 2) * 20
+                        val ridge = Noise.ridged(s.seed + 48 * 7919L, wxw / 75.0, wzw / 75.0, 2)
+                        val crest = smooth((ridge - 0.4) / 0.6)
+                        var hh = crest * (if (variant == 0) 5.0 else 3.0) * field * c + f(s, wx, wz, 120.0, 43, 2) * 1.5 + 1
                         if (variant == 2) { // an oasis
                             val (ox, oz) = oasis(s)
                             val od = sqrt((x - ox) * (x - ox) + (z - oz) * (z - oz).toDouble())
@@ -2256,8 +2260,8 @@ object BiomeDresser {
             }
             return
         }
-        // sand, with sandstone only where it's too steep for sand to stay
-        c.natural(b(Blocks.SAND), b(Blocks.SANDSTONE), b(Blocks.SANDSTONE), b(Blocks.SMOOTH_SANDSTONE))
+        // sand, with sandstone only on real cliffs (not on every little step, which drew stripes)
+        if (c.cliff) c.ground(b(Blocks.SANDSTONE), b(Blocks.SANDSTONE)) else c.ground(b(Blocks.SAND), b(Blocks.SANDSTONE))
         val (ox, oz) = oasis(c.s)
         val nearOasis = c.variant == 2 && ZoneLayout.distance(c.x, c.z, ox, oz) < 17
         when {

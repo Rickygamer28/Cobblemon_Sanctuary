@@ -324,6 +324,15 @@ object Residents {
         shrinkCustom(s, customCounts)
         updatePockets(s, customCounts)
         // the custom types' ground got a new shape (gentle passes where the routes run): built again, once
+        // the desert's dunes (and the Dry savanna's own land) were reshaped: rebuild them once
+        if ((s.stats["desertShape"] ?: 0) < 2) {
+            s.stats["desertShape"] = 2
+            if ("ground" in s.habitats && s.planned) {
+                s.rebuildZones += "ground"
+                for (p in ZoneLayout.pockets(s)) if (p.zone == "ground") s.rebuildZones += if (p.sub) "circle:${p.x},${p.z},${p.r + 6}" else "pocket:${p.x},${p.z}"
+                s.generationDirty = true
+            }
+        }
         if (s.customTerrain < CUSTOM_TERRAIN) {
             s.customTerrain = CUSTOM_TERRAIN
             for (zone in s.habitats.keys) if (com.rickygamer28.sanctuary.world.CustomTypes.isCustom(zone)) s.rebuildZones += zone
