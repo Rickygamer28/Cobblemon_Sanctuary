@@ -44,8 +44,11 @@ object TownBuildings {
     private const val FLAGS = Block.UPDATE_CLIENTS
 
     private val NAMES = mapOf("basket" to "the Gathering Post", "shrine" to "the Heart Shrine", "tower" to "a lookout tower",
-        "market" to "a berry market", "hatchery" to "a hatchery", "rest" to "a rest house", "rise" to "the Guardian's Rise", "garden" to "the Berry Garden")
-    private val HALF = mapOf("basket" to 3, "shrine" to 4, "tower" to 4, "market" to 5, "hatchery" to 5, "rest" to 5, "rise" to 4, "garden" to 4)
+        "market" to "a berry market", "hatchery" to "a hatchery", "rest" to "a rest house", "rise" to "the Guardian's Rise", "garden" to "the Berry Garden",
+        "spring" to "a hot spring", "ruins" to "the desert ruins")
+    /** Buildings that belong in a habitat rather than the town. */
+    private val SITES = mapOf("spring" to "fire", "ruins" to "ground")
+    private val HALF = mapOf("basket" to 3, "shrine" to 4, "tower" to 4, "market" to 5, "hatchery" to 5, "rest" to 5, "rise" to 4, "garden" to 4, "spring" to 4, "ruins" to 5)
 
     /** Every block the buildings are made of (so the valley's cleanup leaves them alone). */
     val BLOCKS: Set<Block> = setOf(
@@ -59,7 +62,8 @@ object TownBuildings {
         Blocks.POTTED_DANDELION, Blocks.POTTED_PINK_TULIP, Blocks.QUARTZ_BRICKS, Blocks.SMOOTH_QUARTZ, Blocks.CHISELED_QUARTZ_BLOCK, Blocks.QUARTZ_PILLAR,
         Blocks.PINK_STAINED_GLASS, Blocks.PEARLESCENT_FROGLIGHT, Blocks.GOLD_BLOCK, Blocks.PINK_CANDLE, Blocks.SPRUCE_FENCE,
         Blocks.STONE_BRICK_STAIRS, Blocks.SMOOTH_STONE, Blocks.SEA_LANTERN, Blocks.OAK_FENCE_GATE, Blocks.FARMLAND, Blocks.WHEAT,
-        Blocks.CARROTS, Blocks.POTATOES, Blocks.CARVED_PUMPKIN, Blocks.DIRT_PATH,
+        Blocks.CARROTS, Blocks.POTATOES, Blocks.CARVED_PUMPKIN, Blocks.DIRT_PATH, Blocks.POLISHED_BASALT, Blocks.SMOOTH_BASALT,
+        Blocks.CUT_SANDSTONE, Blocks.CHISELED_SANDSTONE, Blocks.SANDSTONE, Blocks.SMOOTH_SANDSTONE, Blocks.CHEST,
     ) + TYPE_WOOL.values.toSet() + GuardianRise.BLOCKS
 
     fun isBuilding(key: String) = key.startsWith(PREFIX)
@@ -91,7 +95,7 @@ object TownBuildings {
             val p = BlockPos.of(v)
             val kind = k.removePrefix(PREFIX)
             val there = level.getBlockState(p)
-            val standing = if (kind == "rise") there.block in GuardianRise.BLOCKS else there.`is`(floorBlock(kind))
+            val standing = if (kind == "rise") there.block in GuardianRise.BLOCKS else if (kind == "ruins") true else there.`is`(floorBlock(kind))
             if (level.hasChunk(p.x shr 4, p.z shr 4) && !standing) {
                 s.landmarks.remove(k); s.staleLandmarks[k] = v
                 return
@@ -113,6 +117,7 @@ object TownBuildings {
         val lv = Requests.level(s)
         for ((kind, need) in Requests.BUILDINGS) {
             if (lv < need || built(s, kind) || s.staleLandmarks.containsKey(PREFIX + kind)) continue
+            SITES[kind]?.let { z -> if (z !in s.unlocked || z !in s.habitats) continue }
             // looking for room takes a little work: at most every half minute per building
             val key = s.id to kind
             if (level.gameTime < (nextTry[key] ?: 0L)) continue
@@ -135,7 +140,7 @@ object TownBuildings {
 
     private fun floorBlock(kind: String): Block = when (kind) {
         "tower" -> Blocks.STONE_BRICKS; "market" -> Blocks.POLISHED_ANDESITE; "basket" -> Blocks.SPRUCE_PLANKS; "shrine" -> Blocks.CHISELED_QUARTZ_BLOCK
-        "rise" -> Blocks.SMOOTH_STONE; "garden" -> Blocks.DIRT_PATH
+        "rise" -> Blocks.SMOOTH_STONE; "garden" -> Blocks.DIRT_PATH; "spring" -> Blocks.WATER
         else -> Blocks.OAK_PLANKS
     }
 
@@ -165,6 +170,15 @@ object TownBuildings {
                 }
                 search(level, s, kind, home, spots, maxSlope = 6)?.let { return it }
             }
+        }
+        SITES[kind]?.let { zone ->
+            val (ax, az) = ZoneLayout.anchor(s, zone)
+            val spots = ArrayList<Pair<Int, Int>>()
+            for (r in listOf(24, 30, 20, 36, 42, 16)) for (step in 0 until 24) {
+                val a = (step + (kind.hashCode() and 7) * 0.4) * Math.PI * 2 / 24
+                spots += (ax + (cos(a) * r).toInt()) to (az + (sin(a) * r).toInt())
+            }
+            return search(level, s, kind, zone, spots, maxSlope = if (kind == "spring") 3 else 4)
         }
         val hub = s.size.hubRadius
         val half = HALF[kind] ?: 4
@@ -251,6 +265,8 @@ object TownBuildings {
             "market" -> market(c)
             "hatchery" -> hatchery(c)
             "garden" -> garden(c)
+            "spring" -> hotSpring(c)
+            "ruins" -> { ruins(c); s.stats["ruinStage"] = 0; s.stats["ruinDay"] = -1 }
             else -> restHouse(c, s)
         }
     }
@@ -498,5 +514,36 @@ object TownBuildings {
         c.set(3, 1, -3, Blocks.OAK_FENCE); c.set(3, 2, -3, Blocks.HAY_BLOCK); c.set(3, 3, -3, Blocks.CARVED_PUMPKIN)
         c.set(-3, 1, -3, Blocks.COMPOSTER)
         sign(c, 2, 1, -5, listOf("", "Berry Garden", "Grass types", "tend it"))
+    }
+
+    /** The volcano's hot spring: a steaming pool in a basalt rim, with stone lanterns. */
+    private fun hotSpring(c: B) {
+        for (x in -3..3) for (z in -3..3) {
+            val rim = abs(x) == 3 || abs(z) == 3
+            if (rim) c.set(x, 0, z, Blocks.POLISHED_BASALT)
+            else { c.set(x, -1, z, Blocks.SMOOTH_BASALT); c.set(x, 0, z, Blocks.WATER) }
+        }
+        for ((x, z) in listOf(-3 to -3, 3 to -3, -3 to 3, 3 to 3)) { c.set(x, 1, z, Blocks.SMOOTH_BASALT); c.set(x, 2, z, Blocks.LANTERN) }
+        sign(c, 1, 1, -4, listOf("", "Hot Spring", "Rest and heal", ""))
+    }
+
+    /** The desert ruins: a sandstone courtyard with pillars, buried to its brim (the wind uncovers it a layer a day). */
+    private fun ruins(c: B) {
+        for (x in -4..4) for (z in -4..4) {
+            val wall = abs(x) == 4 || abs(z) == 4
+            c.set(x, -4, z, if ((x + z) % 3 == 0) Blocks.CHISELED_SANDSTONE else Blocks.CUT_SANDSTONE)
+            for (y in -3..0) c.set(x, y, z, when {
+                wall && (x + z + y) % 5 != 0 -> Blocks.SANDSTONE
+                wall -> Blocks.SAND
+                else -> Blocks.SAND
+            })
+        }
+        // pillars standing out of the sand, some broken off
+        for ((i, p) in listOf(-2 to -2, 2 to -2, -2 to 2, 2 to 2).withIndex()) {
+            val (x, z) = p
+            val top = if (i % 2 == 0) 2 else 1
+            for (y in -3..top) c.set(x, y, z, if (y == top) Blocks.CHISELED_SANDSTONE else Blocks.SMOOTH_SANDSTONE)
+        }
+        sign(c, 0, 1, -5, listOf("", "Desert Ruins", "The wind uncovers", "more each day"))
     }
 }

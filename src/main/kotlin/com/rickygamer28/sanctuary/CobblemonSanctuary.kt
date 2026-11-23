@@ -46,7 +46,8 @@ class CobblemonSanctuary(modBus: IEventBus, container: ModContainer) {
         bus.addListener(PlayerInteractEvent.EntityInteract::class.java) { onEntityInteract(it) }
         bus.addListener(EntityJoinLevelEvent::class.java) { onEntityJoin(it) }
         bus.addListener(net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent::class.java) { onDamage(it) }
-        bus.addListener(BlockEvent.BreakEvent::class.java) { if (!NoBuilding.onBreak(it)) onBlockBreak(it) }
+        bus.addListener(BlockEvent.BreakEvent::class.java) { if (!com.rickygamer28.sanctuary.life.Activities.onBreak(it) && !NoBuilding.onBreak(it)) onBlockBreak(it) }
+        bus.addListener(net.neoforged.neoforge.event.entity.player.ItemFishedEvent::class.java) { com.rickygamer28.sanctuary.life.Activities.onFished(it) }
         // nobody builds in a sanctuary (the mod's own beds, balls, nests… still go down)
         bus.addListener(BlockEvent.EntityPlaceEvent::class.java) { NoBuilding.onPlace(it) }
         bus.addListener(PlayerInteractEvent.RightClickBlock::class.java) { NoBuilding.onUseOnBlock(it) }

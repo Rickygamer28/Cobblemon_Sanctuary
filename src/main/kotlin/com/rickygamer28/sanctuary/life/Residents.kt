@@ -165,6 +165,7 @@ object Residents {
         NightEvents.tick(level, s, rt, now, players)
         Digs.tick(level, s, rt, now, players)
         Contests.tick(level, s, rt, now, players)
+        Activities.tick(level, s, rt, now, players)
         Evolving.tick(level, s, rt, now)
         if (players.isEmpty()) {
             despawnAll(rt)

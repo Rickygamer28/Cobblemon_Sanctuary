@@ -232,6 +232,8 @@ class Sanctuary(
     val dexEvolved: MutableSet<String> = linkedSetOf()
     /** Other players may visit (without living here). */
     var openToVisitors: Boolean = false
+    /** Crystal nodes in the caves, ready to mine (position → when they grew). */
+    val crystals: MutableMap<Long, Long> = linkedMapOf()
     /** Dig spots residents left (position → when). */
     val digs: MutableMap<Long, Long> = linkedMapOf()
     /** Wild Pokémon visiting for a day. */
@@ -362,6 +364,7 @@ class Sanctuary(
         t.put("DexEvolved", ListTag().also { l -> dexEvolved.forEach { l.add(StringTag.valueOf(it)) } })
         t.putBoolean("OpenToVisitors", openToVisitors)
         t.putLongArray("DigPos", digs.keys.toLongArray())
+        t.putLongArray("CrystalPos", crystals.keys.toLongArray())
         t.putLongArray("DigAt", digs.values.toLongArray())
         guardian?.let { t.putUUID("Guardian", it) }
         t.putLong("GuardianAt", guardianSetAt)
@@ -497,6 +500,7 @@ class Sanctuary(
             t.getList("DexHatched", Tag.TAG_STRING.toInt()).forEach { s.dexHatched += it.asString }
             t.getList("DexEvolved", Tag.TAG_STRING.toInt()).forEach { s.dexEvolved += it.asString }
             s.openToVisitors = t.getBoolean("OpenToVisitors")
+            t.getLongArray("CrystalPos").forEach { s.crystals[it] = 0L }
             run { val dp = t.getLongArray("DigPos"); val da = t.getLongArray("DigAt"); for (i in dp.indices) if (i < da.size) s.digs[dp[i]] = da[i] }
             if (t.hasUUID("Guardian")) s.guardian = t.getUUID("Guardian")
             s.guardianSetAt = t.getLong("GuardianAt")

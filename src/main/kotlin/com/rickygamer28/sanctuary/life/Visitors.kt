@@ -130,10 +130,20 @@ object Visitors {
     private fun name(level: ServerLevel, v: Visitor) = pokemonOf(level, v)?.species?.translatedName?.string ?: "Pokémon"
 
     /** Picks who comes: a Pokémon that suits an awake habitat, about as strong as the residents. */
-    private fun arrive(level: ServerLevel, s: Sanctuary, rt: SanctuaryRuntime, now: Long): Visitor? {
+    /** A visitor arrives right now in [zone] (the desert's mirage). */
+    fun arriveNow(level: ServerLevel, s: Sanctuary, rt: SanctuaryRuntime, now: Long, zone: String): Boolean {
+        if (s.visitors.size >= 4 || rt.roster.isEmpty()) return false
+        val v = arrive(level, s, rt, now, zone) ?: return false
+        s.visitors += v
+        s.logEvent("A wild ${name(level, v)} appeared out of a mirage in the ${Residents.zoneName(zone)}!")
+        Sanctuaries.data(level).setDirty()
+        return true
+    }
+
+    private fun arrive(level: ServerLevel, s: Sanctuary, rt: SanctuaryRuntime, now: Long, only: String? = null): Visitor? {
         val r = level.random
         val lv = Requests.level(s)
-        val awake = s.unlocked.filter { it in s.habitats && it != ZoneLayout.HUB }.toSet()
+        val awake = s.unlocked.filter { it in s.habitats && it != ZoneLayout.HUB && (only == null || it == only) }.toSet()
         if (awake.isEmpty()) return null
         val pool = runCatching { PokemonSpecies.implemented }.getOrDefault(emptyList()).filter { sp ->
             sp.labels.none { it in NEVER } && sp.types.any { t -> ZoneLayout.habitatOf(t.name.lowercase()) in awake }
