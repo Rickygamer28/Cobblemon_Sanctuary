@@ -42,6 +42,11 @@ object Gathering {
         // the berry market: someone always brings a berry
         if (com.rickygamer28.sanctuary.world.TownBuildings.built(s, "market") && "berries" !in s.basketOff) randomFromTag(BERRIES, level)?.let { add(s, it) }
         gift(level, s, rt)
+        // the Berry Garden: Grass types tend it and bring its berries
+        if (com.rickygamer28.sanctuary.world.TownBuildings.built(s, "garden") && "berries" !in s.basketOff) {
+            val grass = roster.count { e -> runCatching { "grass" in TypeLogic.currentTypes(e.pokemon) }.getOrDefault(false) }
+            if (grass > 0) repeat((grass / 5 + 1).coerceAtMost(3)) { randomFromTag(BERRIES, level)?.let { add(s, it) } }
+        }
         var reported = false
         repeat(finds) {
             val e = roster[random.nextInt(roster.size)]

@@ -236,6 +236,7 @@ object Families {
         s.eggs.remove(egg.id)
         removeNest(s, egg)
         recordFamily(s, baby, egg)
+        Dex.hatched(s, baby)
         s.logEvent("A baby ${baby.species.translatedName.string} hatched! Its parents are ${egg.mother.name} and ${egg.father.name}.")
         Sanctuaries.data(server).setDirty()
         // bring it out right away
@@ -273,6 +274,7 @@ object Families {
         s.eggs.remove(egg.id)
         removeNest(s, egg)
         recordFamily(s, baby, egg)
+        Dex.hatched(s, baby)
         s.logEvent("A baby ${baby.species.translatedName.string} hatched in the hatchery! Its parents are ${egg.mother.name} and ${egg.father.name}.")
         Sanctuaries.data(level.server).setDirty()
         val rt = Residents.runtime(s)

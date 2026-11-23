@@ -44,6 +44,9 @@ object Migrations {
         return true
     }
 
+    /** A group gathers in [zone] for [stay] ticks (for night events and contests). */
+    fun gather(level: ServerLevel, s: Sanctuary, group: List<LiveResident>, zone: String, now: Long, stay: Long) = go(level, s, group, zone, now, stay)
+
     /** Everyone heads for the same spot in [zone] (a little apart), and stays [stay] ticks. */
     private fun go(level: ServerLevel, s: Sanctuary, group: List<LiveResident>, zone: String, now: Long, stay: Long) {
         val pt = ZoneLayout.randomPoint(s, zone, level.random) ?: return

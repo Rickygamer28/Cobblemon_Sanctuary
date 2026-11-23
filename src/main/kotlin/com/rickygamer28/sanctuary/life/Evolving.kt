@@ -234,6 +234,7 @@ object Evolving {
         val zone = runCatching { TypeLogic.homeZone(pk, s.residents[pk.uuid], ZoneLayout.ring(s), s) }.getOrNull()
         s.logEvent("$before evolved into $after in the ${Residents.zoneName(zone)}${how?.let { " $it" } ?: ""}!")
         s.stat("evolutions")
+        Dex.evolved(s, pk)
         live?.entity?.let { e -> Effects.happy(e); Effects.hearts(e) }
         for (p in level.players()) if (s.isMember(p.uuid)) (p as? ServerPlayer)?.displayClientMessage(
             Component.literal("✦ $before evolved into $after in your sanctuary!").withStyle(ChatFormatting.AQUA), false)

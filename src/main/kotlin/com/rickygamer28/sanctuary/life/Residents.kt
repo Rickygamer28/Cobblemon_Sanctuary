@@ -161,6 +161,10 @@ object Residents {
         if (players.isNotEmpty()) Migrations.tick(level, s, rt, now)
         Visitors.tick(level, s, rt, now, players)
         Guardian.tick(level, s, rt, now, players)
+        Dex.tick(s, rt, now)
+        NightEvents.tick(level, s, rt, now, players)
+        Digs.tick(level, s, rt, now, players)
+        Contests.tick(level, s, rt, now, players)
         Evolving.tick(level, s, rt, now)
         if (players.isEmpty()) {
             despawnAll(rt)

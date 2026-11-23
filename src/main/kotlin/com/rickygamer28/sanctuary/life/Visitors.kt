@@ -18,13 +18,13 @@ import net.minecraft.server.level.ServerPlayer
 import java.util.UUID
 
 /** A wild Pokémon staying in the sanctuary for a day. */
-class Visitor(val id: UUID, val pokemon: CompoundTag, val zone: String, val arrived: Long, var trust: Int = 0, var lastPet: Long = 0L) {
+class Visitor(val id: UUID, val pokemon: CompoundTag, val zone: String, val arrived: Long, var trust: Int = 0, var lastPet: Long = 0L, var need: String = "") {
     fun save(): CompoundTag = CompoundTag().also {
-        it.putUUID("Id", id); it.put("Mon", pokemon); it.putString("Zone", zone); it.putLong("At", arrived); it.putInt("Trust", trust)
+        it.putUUID("Id", id); it.put("Mon", pokemon); it.putString("Zone", zone); it.putLong("At", arrived); it.putInt("Trust", trust); it.putString("Need", need)
     }
 
     companion object {
-        fun load(t: CompoundTag) = Visitor(t.getUUID("Id"), t.getCompound("Mon"), t.getString("Zone"), t.getLong("At"), t.getInt("Trust"))
+        fun load(t: CompoundTag) = Visitor(t.getUUID("Id"), t.getCompound("Mon"), t.getString("Zone"), t.getLong("At"), t.getInt("Trust"), need = t.getString("Need"))
     }
 }
 
@@ -78,7 +78,11 @@ object Visitors {
                 val n = name(level, v)
                 s.logEvent("A wild $n is visiting the ${Residents.zoneName(v.zone)}!")
                 for (p in level.players()) if (s.isMember(p.uuid)) (p as? ServerPlayer)?.sendSystemMessage(
-                    Component.literal("✦ A wild $n is visiting the ${Residents.zoneName(v.zone)}! Befriend it and it might stay.").withStyle(ChatFormatting.AQUA))
+                    Component.literal("✦ A wild $n is visiting the ${Residents.zoneName(v.zone)}!" + when (v.need) {
+                        "hungry" -> " It looks hungry: a berry would win it over."
+                        "tired" -> " It looks tired: a bed in its habitat would help."
+                        else -> " Befriend it and it might stay."
+                    }).withStyle(ChatFormatting.AQUA))
                 Sanctuaries.data(level).setDirty()
             }
         }
@@ -92,8 +96,34 @@ object Visitors {
             if (e.distanceToSqr(anchor.first + 0.5, e.y, anchor.second + 0.5) > 28.0 * 28.0)
                 Residents.walkTo(e, Residents.surface(level, anchor.first, anchor.second), 0.5f, 3)
             if (level.random.nextInt(3) == 0) level.sendParticles(ParticleTypes.END_ROD, e.x, e.y + e.bbHeight + 0.3, e.z, 2, 0.2, 0.1, 0.2, 0.0)
+            // a tired visitor with a bed near it rests and settles in
+            if (v.need == "tired") {
+                if (level.random.nextInt(4) == 0) level.sendParticles(ParticleTypes.CLOUD, e.x, e.y + e.bbHeight + 0.2, e.z, 1, 0.1, 0.0, 0.1, 0.0)
+                val bed = s.props.entries.any { (p, k) -> k.startsWith("player_bed") && BlockPos.of(p).distSqr(e.blockPosition()) < 16.0 * 16.0 }
+                if (bed) {
+                    v.need = ""; v.trust = (v.trust + 40).coerceAtMost(100)
+                    level.sendParticles(ParticleTypes.HEART, e.x, e.y + e.bbHeight, e.z, 5, 0.3, 0.2, 0.3, 0.0)
+                    for (p in players) if (p.distanceToSqr(e) < 48.0 * 48.0) p.displayClientMessage(Component.literal("The visiting ${e.pokemon.species.translatedName.string} found a bed and had a good rest. Trust: ${v.trust}/$TRUST_TO_STAY").withStyle(ChatFormatting.GREEN), true)
+                }
+            } else if (v.need == "hungry" && level.random.nextInt(4) == 0) level.sendParticles(ParticleTypes.SMOKE, e.x, e.y + e.bbHeight + 0.2, e.z, 1, 0.1, 0.0, 0.1, 0.0)
             val company = rt.live.values.count { it.entity.distanceToSqr(e) < 100.0 }
             if (company >= 2 && level.random.nextInt(4) == 0) v.trust = (v.trust + 1).coerceAtMost(100)
+        }
+    }
+
+    /** The visitor board: who's visiting, where, how much they trust you, what they need and how long they stay. */
+    fun board(level: ServerLevel, s: Sanctuary): net.minecraft.nbt.ListTag = net.minecraft.nbt.ListTag().also { l ->
+        for (v in s.visitors) {
+            val pk = pokemonOf(level, v) ?: continue
+            l.add(CompoundTag().also { c ->
+                c.putString("name", pk.species.translatedName.string + if (pk.shiny) " ✦" else "")
+                c.putString("sp", pk.species.resourceIdentifier.toString())
+                c.put("as", net.minecraft.nbt.ListTag().also { a -> pk.aspects.forEach { x -> a.add(net.minecraft.nbt.StringTag.valueOf(x)) } })
+                c.putString("zone", v.zone)
+                c.putInt("trust", v.trust)
+                c.putString("need", v.need)
+                c.putLong("left", ((STAY - (level.gameTime - v.arrived)) / 1200L).coerceAtLeast(0))
+            })
         }
     }
 
@@ -121,7 +151,9 @@ object Visitors {
         if (r.nextInt(if (lv >= Requests.GOLDEN_LEVEL) 64 else 512) == 0) pk.shiny = true
         val zone = sp.types.mapNotNull { ZoneLayout.habitatOf(it.name.lowercase()) }.firstOrNull { it in awake } ?: return null
         val tag = runCatching { pk.saveToNBT(level.registryAccess(), CompoundTag()) }.getOrNull() ?: return null
-        return Visitor(UUID.randomUUID(), tag, zone, now)
+        // some arrive hungry (a berry wins them over faster) or tired (a bed in their habitat helps)
+        val need = when (r.nextInt(10)) { 0, 1, 2, 3 -> "hungry"; 4, 5 -> "tired"; else -> "" }
+        return Visitor(UUID.randomUUID(), tag, zone, now, need = need)
     }
 
     private fun spawn(level: ServerLevel, s: Sanctuary, v: Visitor, anchor: Pair<Int, Int>): PokemonEntity? {
@@ -147,7 +179,8 @@ object Visitors {
         when {
             !journal && hand.`is`(net.minecraft.tags.ItemTags.create(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("cobblemon", "berries"))) -> {
                 if (!player.isCreative) hand.shrink(1)
-                v.trust = (v.trust + 25).coerceAtMost(100)
+                v.trust = (v.trust + if (v.need == "hungry") 50 else 25).coerceAtMost(100)
+                if (v.need == "hungry") v.need = ""
                 level.sendParticles(ParticleTypes.HAPPY_VILLAGER, e.x, e.y + e.bbHeight, e.z, 6, 0.3, 0.3, 0.3, 0.0)
                 player.displayClientMessage(Component.literal("$n eats the berry happily. Trust: ${v.trust}/$TRUST_TO_STAY").withStyle(ChatFormatting.GREEN), true)
             }

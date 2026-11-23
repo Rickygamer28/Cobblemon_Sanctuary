@@ -89,7 +89,7 @@ object Requests {
     const val LANTERNS_LEVEL = 15
     const val GOLDEN_LEVEL = 16
     /** The town's buildings and the level each one comes at (the Gathering Post and the Heart Shrine are there from the start). */
-    val BUILDINGS = linkedMapOf("basket" to 0, "shrine" to 0, "tower" to 9, "market" to 10, "hatchery" to 11, "rest" to 12, "rise" to 16)
+    val BUILDINGS = linkedMapOf("basket" to 0, "shrine" to 0, "garden" to 0, "tower" to 9, "market" to 10, "hatchery" to 11, "rest" to 12, "rise" to 16)
 
     /** How big the Heart Shrine has grown (1 to 5). */
     fun shrineTier(s: Sanctuary): Int { val l = level(s); return 1 + listOf(4, 9, 13, 16).count { l >= it } }

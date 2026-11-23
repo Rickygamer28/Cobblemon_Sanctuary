@@ -44,8 +44,8 @@ object TownBuildings {
     private const val FLAGS = Block.UPDATE_CLIENTS
 
     private val NAMES = mapOf("basket" to "the Gathering Post", "shrine" to "the Heart Shrine", "tower" to "a lookout tower",
-        "market" to "a berry market", "hatchery" to "a hatchery", "rest" to "a rest house", "rise" to "the Guardian's Rise")
-    private val HALF = mapOf("basket" to 3, "shrine" to 4, "tower" to 4, "market" to 5, "hatchery" to 5, "rest" to 5, "rise" to 4)
+        "market" to "a berry market", "hatchery" to "a hatchery", "rest" to "a rest house", "rise" to "the Guardian's Rise", "garden" to "the Berry Garden")
+    private val HALF = mapOf("basket" to 3, "shrine" to 4, "tower" to 4, "market" to 5, "hatchery" to 5, "rest" to 5, "rise" to 4, "garden" to 4)
 
     /** Every block the buildings are made of (so the valley's cleanup leaves them alone). */
     val BLOCKS: Set<Block> = setOf(
@@ -58,7 +58,8 @@ object TownBuildings {
         Blocks.RED_TERRACOTTA, Blocks.WHITE_TERRACOTTA, Blocks.YELLOW_CARPET, Blocks.BRICKS, Blocks.CAMPFIRE, Blocks.FURNACE, Blocks.BOOKSHELF,
         Blocks.POTTED_DANDELION, Blocks.POTTED_PINK_TULIP, Blocks.QUARTZ_BRICKS, Blocks.SMOOTH_QUARTZ, Blocks.CHISELED_QUARTZ_BLOCK, Blocks.QUARTZ_PILLAR,
         Blocks.PINK_STAINED_GLASS, Blocks.PEARLESCENT_FROGLIGHT, Blocks.GOLD_BLOCK, Blocks.PINK_CANDLE, Blocks.SPRUCE_FENCE,
-        Blocks.STONE_BRICK_STAIRS, Blocks.SMOOTH_STONE, Blocks.SEA_LANTERN,
+        Blocks.STONE_BRICK_STAIRS, Blocks.SMOOTH_STONE, Blocks.SEA_LANTERN, Blocks.OAK_FENCE_GATE, Blocks.FARMLAND, Blocks.WHEAT,
+        Blocks.CARROTS, Blocks.POTATOES, Blocks.CARVED_PUMPKIN, Blocks.DIRT_PATH,
     ) + TYPE_WOOL.values.toSet() + GuardianRise.BLOCKS
 
     fun isBuilding(key: String) = key.startsWith(PREFIX)
@@ -134,7 +135,7 @@ object TownBuildings {
 
     private fun floorBlock(kind: String): Block = when (kind) {
         "tower" -> Blocks.STONE_BRICKS; "market" -> Blocks.POLISHED_ANDESITE; "basket" -> Blocks.SPRUCE_PLANKS; "shrine" -> Blocks.CHISELED_QUARTZ_BLOCK
-        "rise" -> Blocks.SMOOTH_STONE
+        "rise" -> Blocks.SMOOTH_STONE; "garden" -> Blocks.DIRT_PATH
         else -> Blocks.OAK_PLANKS
     }
 
@@ -249,6 +250,7 @@ object TownBuildings {
             "tower" -> tower(c)
             "market" -> market(c)
             "hatchery" -> hatchery(c)
+            "garden" -> garden(c)
             else -> restHouse(c, s)
         }
     }
@@ -476,4 +478,25 @@ object TownBuildings {
         sign(c, 1, 1, -5, listOf("", "Rest House", "Heal up inside", ""))
     }
 
+
+    /** The Berry Garden: a fenced plot of berry bushes and crops with a pond and a scarecrow, tended by Grass types. */
+    private fun garden(c: B) {
+        for (x in -4..4) for (z in -4..4) if (abs(x) == 4 || abs(z) == 4) c.set(x, 1, z, Blocks.OAK_FENCE)
+        c.set(0, 1, -4, Blocks.OAK_FENCE_GATE.defaultBlockState().setValue(net.minecraft.world.level.block.FenceGateBlock.FACING, Direction.NORTH))
+        for (x in -3..3) {
+            c.set(x, 0, -2, Blocks.DIRT)
+            if (x != 0) c.set(x, 1, -2, Blocks.SWEET_BERRY_BUSH.defaultBlockState().setValue(net.minecraft.world.level.block.SweetBerryBushBlock.AGE, 2 + Math.floorMod(x, 2)))
+            for (z in listOf(-3, -1, 0)) c.set(x, 0, z, Blocks.DIRT_PATH)
+            for ((z, crop) in listOf(1 to Blocks.WHEAT, 2 to Blocks.POTATOES, 3 to Blocks.CARROTS)) {
+                if (z == 2 && x == 0) continue
+                c.set(x, 0, z, Blocks.FARMLAND.defaultBlockState().setValue(net.minecraft.world.level.block.FarmBlock.MOISTURE, 7))
+                c.set(x, 1, z, (crop as net.minecraft.world.level.block.CropBlock).getStateForAge(crop.maxAge))
+            }
+        }
+        c.set(0, 0, 2, Blocks.WATER)
+        c.set(0, 0, 0, Blocks.DIRT_PATH)
+        c.set(3, 1, -3, Blocks.OAK_FENCE); c.set(3, 2, -3, Blocks.HAY_BLOCK); c.set(3, 3, -3, Blocks.CARVED_PUMPKIN)
+        c.set(-3, 1, -3, Blocks.COMPOSTER)
+        sign(c, 2, 1, -5, listOf("", "Berry Garden", "Grass types", "tend it"))
+    }
 }

@@ -43,6 +43,8 @@ class ResidentData(
     var favouriteKind: String? = null,
     /** How many of its requests players have done (it earns a title). */
     var helped: Int = 0,
+    /** Contests it has won. */
+    var ribbons: Int = 0,
     /** Its trainer asked it not to evolve in the sanctuary. */
     var noEvolve: Boolean = false,
 ) {
@@ -56,6 +58,7 @@ class ResidentData(
         favourite?.let { t.putLong("Fav", it) }
         favouriteKind?.let { t.putString("FavKind", it) }
         if (helped > 0) t.putInt("Helped", helped)
+        if (ribbons > 0) t.putInt("Ribbons", ribbons)
         if (noEvolve) t.putBoolean("NoEvolve", true)
     }
 
@@ -70,6 +73,7 @@ class ResidentData(
             favourite = if (t.contains("Fav")) t.getLong("Fav") else null,
             favouriteKind = if (t.contains("FavKind")) t.getString("FavKind") else null,
             helped = t.getInt("Helped"),
+            ribbons = t.getInt("Ribbons"),
             noEvolve = t.getBoolean("NoEvolve"),
         )
     }
@@ -222,6 +226,14 @@ class Sanctuary(
     /** The valley's guardian (a legendary of the owner's), and when it was named. */
     var guardian: java.util.UUID? = null
     var guardianSetAt: Long = 0L
+    /** The Sanctuary Dex: every species that has lived here, and those born or evolved here. */
+    val dex: MutableSet<String> = linkedSetOf()
+    val dexHatched: MutableSet<String> = linkedSetOf()
+    val dexEvolved: MutableSet<String> = linkedSetOf()
+    /** Other players may visit (without living here). */
+    var openToVisitors: Boolean = false
+    /** Dig spots residents left (position → when). */
+    val digs: MutableMap<Long, Long> = linkedMapOf()
     /** Wild Pokémon visiting for a day. */
     val visitors: MutableList<com.rickygamer28.sanctuary.life.Visitor> = mutableListOf()
     /** Landmarks that got their lantern posts. */
@@ -345,6 +357,12 @@ class Sanctuary(
         t.put("DenInfo", ListTag().also { l -> dens.values.forEach { l.add(net.minecraft.nbt.StringTag.valueOf(it)) } })
         t.putInt("Crowd", crowd)
         t.putInt("Heart", heart)
+        t.put("Dex", ListTag().also { l -> dex.forEach { l.add(StringTag.valueOf(it)) } })
+        t.put("DexHatched", ListTag().also { l -> dexHatched.forEach { l.add(StringTag.valueOf(it)) } })
+        t.put("DexEvolved", ListTag().also { l -> dexEvolved.forEach { l.add(StringTag.valueOf(it)) } })
+        t.putBoolean("OpenToVisitors", openToVisitors)
+        t.putLongArray("DigPos", digs.keys.toLongArray())
+        t.putLongArray("DigAt", digs.values.toLongArray())
         guardian?.let { t.putUUID("Guardian", it) }
         t.putLong("GuardianAt", guardianSetAt)
         t.put("Visitors", ListTag().also { l -> visitors.forEach { l.add(it.save()) } })
@@ -475,6 +493,11 @@ class Sanctuary(
             }
             s.crowd = t.getInt("Crowd")
             s.heart = t.getInt("Heart")
+            t.getList("Dex", Tag.TAG_STRING.toInt()).forEach { s.dex += it.asString }
+            t.getList("DexHatched", Tag.TAG_STRING.toInt()).forEach { s.dexHatched += it.asString }
+            t.getList("DexEvolved", Tag.TAG_STRING.toInt()).forEach { s.dexEvolved += it.asString }
+            s.openToVisitors = t.getBoolean("OpenToVisitors")
+            run { val dp = t.getLongArray("DigPos"); val da = t.getLongArray("DigAt"); for (i in dp.indices) if (i < da.size) s.digs[dp[i]] = da[i] }
             if (t.hasUUID("Guardian")) s.guardian = t.getUUID("Guardian")
             s.guardianSetAt = t.getLong("GuardianAt")
             t.getList("Visitors", Tag.TAG_COMPOUND.toInt()).forEach { e -> runCatching { com.rickygamer28.sanctuary.life.Visitor.load(e as CompoundTag) }.getOrNull()?.let { s.visitors += it } }
