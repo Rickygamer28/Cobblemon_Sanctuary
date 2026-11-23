@@ -313,6 +313,21 @@ object SanctuaryGuis {
 
         if (page == "residents") residentsWindow(player, s, rt, ring, t)
         if (page == "guardian") com.rickygamer28.sanctuary.life.Guardian.page(player, s, SanctuaryDimension.level(player.server), t)
+        if (page == "dex") {
+            // the Sanctuary Dex, in Pokédex order
+            val all = runCatching { com.cobblemon.mod.common.api.pokemon.PokemonSpecies.implemented }.getOrDefault(emptyList())
+            t.putInt("dexTotal", all.size)
+            val byId = all.associateBy { it.resourceIdentifier.toString() }
+            t.put("dex", ListTag().also { l ->
+                for (id in s.dex.sortedBy { byId[it]?.nationalPokedexNumber ?: 9999 }) l.add(StringTag.valueOf(
+                    "$id|${byId[id]?.translatedName?.string ?: id.substringAfter(':')}|${byId[id]?.nationalPokedexNumber ?: 0}|${if (id in s.dexHatched) "H" else ""}${if (id in s.dexEvolved) "E" else ""}"))
+            })
+        }
+        SanctuaryDimension.level(player.server)?.let { lvl -> t.put("visitorsBoard", com.rickygamer28.sanctuary.life.Visitors.board(lvl, s)) }
+        t.putInt("dexCount", s.dex.size)
+        t.putBoolean("openToVisitors", s.openToVisitors)
+        t.putBoolean("canSettings", Settings.allowed(player))
+        if (page == "settings" && Settings.allowed(player)) Settings.data(player, t)
         if (page == "resident" && pokemon != null) {
             val pk = rt.live[pokemon]?.pokemon ?: Residents.findRoster(rt, pokemon)?.pokemon
             if (pk != null) t.put("mon", detail(player, s, pk, ring))
@@ -404,6 +419,7 @@ object SanctuaryGuis {
                 if (opts.isNotEmpty()) t.put("evos", ListTag().also { l -> opts.forEach { l.add(it) } })
             }
             t.putBoolean("stay", s.residents[id]?.noEvolve == true)
+            s.residents[id]?.ribbons?.takeIf { it > 0 }?.let { t.putInt("ribbons", it) }
         }
         t.putInt("hpNow", pk.currentHealth)
         val stats = listOf(Stats.HP, Stats.ATTACK, Stats.DEFENCE, Stats.SPECIAL_ATTACK, Stats.SPECIAL_DEFENCE, Stats.SPEED)
@@ -616,6 +632,15 @@ object ScreenActions {
                 SanctuaryGuis.send(player, s, "nest")
             }
             "guardian" -> { SanctuaryGuis.close(player); com.rickygamer28.sanctuary.life.Guardian.list(player, s) }
+            "visitors" -> {
+                if (s.owner == player.uuid) { s.openToVisitors = !s.openToVisitors; Sanctuaries.data(player.server).setDirty() }
+                SanctuaryGuis.send(player, s, "members")
+            }
+            "setting" -> {
+                val (i, dir) = v.split(':').let { (it.getOrNull(0)?.toIntOrNull() ?: -1) to (it.getOrNull(1) == "up") }
+                Settings.change(player, i, dir)
+                SanctuaryGuis.send(player, s, "settings")
+            }
             "guardianset" -> {
                 val id = pokemon ?: return
                 SanctuaryDimension.level(player.server)?.let { com.rickygamer28.sanctuary.life.Guardian.choose(player, it, s, id) }

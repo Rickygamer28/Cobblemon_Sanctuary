@@ -12,6 +12,8 @@ import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.Commands
 import net.minecraft.commands.arguments.EntityArgument
 import net.minecraft.commands.arguments.UuidArgument
+import net.minecraft.ChatFormatting
+import net.minecraft.server.level.ServerPlayer
 
 /** /sanctuary … — mostly run by the clickable chat menus. */
 object SanctuaryCommand {
@@ -70,6 +72,13 @@ object SanctuaryCommand {
                         .then(Commands.literal("add").executes { ctx -> testAdd(ctx, true) })
                         .then(Commands.literal("clear").executes { ctx -> testClear(ctx) }),
                 )
+                // visiting friends: see who's open to visitors, visit one, leave a gift in their basket
+                .then(
+                    Commands.literal("visit")
+                        .executes { ctx -> visit(ctx, null) }
+                        .then(Commands.argument("player", net.minecraft.commands.arguments.EntityArgument.player()).executes { ctx -> visit(ctx, net.minecraft.commands.arguments.EntityArgument.getPlayer(ctx, "player")) }),
+                )
+                .then(Commands.literal("gift").executes { ctx -> gift(ctx) })
                 // the valley's guardian (Golden Heart): list your legendaries, or name one
                 .then(
                     Commands.literal("guardian")
@@ -85,6 +94,48 @@ object SanctuaryCommand {
                         .then(Commands.literal("level").then(Commands.argument("level", IntegerArgumentType.integer(0, com.rickygamer28.sanctuary.life.Requests.LEVELS.size)).executes { ctx -> heart(ctx, "level", IntegerArgumentType.getInteger(ctx, "level")) })),
                 ),
         )
+    }
+
+    /** /sanctuary visit [<player>]: lists the sanctuaries open to visitors, or goes to one. */
+    private fun visit(ctx: CommandContext<CommandSourceStack>, target: ServerPlayer?): Int {
+        val player = ctx.source.playerOrException
+        val server = player.server
+        if (target == null) {
+            val open = Sanctuaries.all(server).map { it.second }.filter { it.openToVisitors && it.state == com.rickygamer28.sanctuary.data.SanctuaryState.ACTIVE && server.playerList.getPlayer(it.owner) != null }
+            if (open.isEmpty()) { player.sendSystemMessage(Text.info("No sanctuary is open to visitors right now.")); return 1 }
+            player.sendSystemMessage(Text.info("Sanctuaries open to visitors (click to visit):"))
+            for (s in open) player.sendSystemMessage(Text.button("  ${s.ownerName}'s sanctuary", "/sanctuary visit ${s.ownerName}", "Visit", ChatFormatting.AQUA))
+            return 1
+        }
+        val (_, s) = Sanctuaries.forPlayer(server, target.uuid).firstOrNull { it.second.owner == target.uuid }
+            ?: run { player.sendSystemMessage(Text.error("${target.gameProfile.name} doesn't own a sanctuary.")); return 0 }
+        if (!s.isMember(player.uuid) && !s.openToVisitors) { player.sendSystemMessage(Text.error("${target.gameProfile.name}'s sanctuary isn't open to visitors.")); return 0 }
+        if (s.state != com.rickygamer28.sanctuary.data.SanctuaryState.ACTIVE) { player.sendSystemMessage(Text.error("That sanctuary isn't ready yet.")); return 0 }
+        com.rickygamer28.sanctuary.SanctuaryDimension.travel(player, s)
+        if (!s.isMember(player.uuid)) {
+            player.sendSystemMessage(Text.good("Welcome to ${s.ownerName}'s sanctuary! Look around; /sanctuary gift leaves the item in your hand in their basket, and /sanctuary home takes you back."))
+            target.sendSystemMessage(Text.info("${player.gameProfile.name} is visiting your sanctuary."))
+            s.logEvent("${player.gameProfile.name} came to visit.")
+        }
+        return 1
+    }
+
+    /** /sanctuary gift: while visiting, leaves the item in your hand in the sanctuary's basket. */
+    private fun gift(ctx: CommandContext<CommandSourceStack>): Int {
+        val player = ctx.source.playerOrException
+        val level = player.serverLevel()
+        val s = Sanctuaries.at(level, player.blockPosition()) ?: run { player.sendSystemMessage(Text.error("Go to a friend's sanctuary first (/sanctuary visit).")); return 0 }
+        val stack = player.mainHandItem
+        if (stack.isEmpty) { player.sendSystemMessage(Text.error("Hold the item you want to give.")); return 0 }
+        val given = com.rickygamer28.sanctuary.life.Gathering.give(s, stack.copy())
+        if (given <= 0) { player.sendSystemMessage(Text.error("Their basket has no room for that.")); return 0 }
+        val name = stack.hoverName.string
+        stack.shrink(given)
+        s.logEvent("${player.gameProfile.name} left a gift in the basket: $given × $name.")
+        player.sendSystemMessage(Text.good("You left $given × $name in ${s.ownerName}'s basket."))
+        for (m in s.members + s.owner) player.server.playerList.getPlayer(m)?.takeIf { it.uuid != player.uuid }?.sendSystemMessage(Text.info("${player.gameProfile.name} left you a gift: $given × $name (in the basket)."))
+        Sanctuaries.data(player.server).setDirty()
+        return 1
     }
 
     /** /sanctuary guardian [<pokemon>]: lists your legendaries to choose from, or names one the guardian. */

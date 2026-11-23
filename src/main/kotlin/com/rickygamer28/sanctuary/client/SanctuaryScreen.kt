@@ -324,6 +324,8 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
             tab == "nest" -> nestPage(g, cx, cy, cw, ch, mouseX, mouseY)
             tab == "members" -> membersPage(g, cx, cy, cw, ch, mouseX, mouseY)
             tab == "guardian" -> guardianPage(g, cx, cy, cw, ch, mouseX, mouseY)
+            tab == "dex" -> dexPage(g, cx, cy, cw, ch, mouseX, mouseY)
+            tab == "settings" -> settingsPage(g, cx, cy, cw, ch, mouseX, mouseY)
         }
         if (search.visible) search.render(g, mouseX, mouseY, partialTick)
         toast?.takeIf { toastTicks > 0 }?.let { msg ->
@@ -671,7 +673,7 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
             Triple("events", "Journal", ItemStack(ModContent.JOURNAL.get())),
             Triple("goals", "Goals", itemOf("cobblemon:rare_candy", Items.NETHER_STAR)),
             Triple("members", "Members", ItemStack(Items.PLAYER_HEAD)),
-        )
+        ) + if (data.getBoolean("canSettings")) listOf(Triple("settings", "Settings", ItemStack(Items.COMPARATOR))) else emptyList()
         var ty = y + 8
         for ((key, label, icon) in tabs) {
             val active = tab == key || (key == "residents" && tab == "resident")
@@ -767,6 +769,43 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
     }
 
     // ------------------------------------------------------------------ overview
+
+    /** The Sanctuary Dex: every species that has lived here, in Pokédex order; born here and evolved here are marked. */
+    private fun dexPage(g: GuiGraphics, x: Int, y: Int, w: Int, h: Int, mx: Int, my: Int) {
+        val back = "← Goals"
+        val bw = font.width(back) + 10
+        box(g, x, y, bw, 14, if (over(mx, my, x, y, bw, 14)) CARD_HOVER else CARD)
+        text(g, back, x + 5, y + 3, SUB)
+        hit(x, y, bw, 14) { goTab("goals") }
+        val list = data.getList("dex", Tag.TAG_STRING.toInt())
+        text(g, "Sanctuary Dex: ${list.size} of ${data.getInt("dexTotal")} kinds", x + bw + 10, y + 3, TEXT, true)
+        text(g, "Every kind of Pokémon that has lived here.  H = born here,  E = evolved here.", x, y + 20, SUB)
+        val gy = y + 34
+        val gh = h - 34
+        val cell = 34
+        val cols = maxOf(1, w / cell)
+        val rows = (list.size + cols - 1) / cols
+        maxScroll = max(0.0, rows * cell - gh.toDouble())
+        scroll = scroll.coerceIn(0.0, maxScroll)
+        g.enableScissor(x - 2, gy, x + w + 2, gy + gh)
+        for (i in 0 until list.size) {
+            val parts = list.getString(i).split('|')
+            val cx = x + (i % cols) * cell
+            val cy = gy + (i / cols) * cell - scroll.toInt()
+            if (cy + cell < gy || cy > gy + gh) continue
+            val hover = over(mx, my, cx, cy, cell - 2, cell - 2) && my in gy until gy + gh
+            box(g, cx, cy, cell - 2, cell - 2, if (hover) CARD_HOVER else CARD)
+            ResourceLocation.tryParse(parts[0])?.let { item(g, monStack(it, emptySet()), cx + 7, cy + 5) }
+            val flags = parts.getOrElse(3) { "" }
+            if (flags.isNotEmpty()) text(g, flags, cx + cell - 4 - font.width(flags), cy + 22, GOLD)
+            if (hover) tooltip = listOfNotNull(
+                Component.literal("#${parts.getOrElse(2) { "?" }} ${parts.getOrElse(1) { "" }}"),
+                if ('H' in flags) Component.literal("Born in the sanctuary").withStyle(net.minecraft.ChatFormatting.GOLD) else null,
+                if ('E' in flags) Component.literal("Evolved in the sanctuary").withStyle(net.minecraft.ChatFormatting.AQUA) else null)
+        }
+        g.disableScissor()
+        if (list.size == 0) text(g, "Nobody yet: residents are noted here a minute after they move in.", x, gy + 4, DIM)
+    }
 
     /** Choosing the valley's guardian: the owner's legendaries as cards, the guardian marked; click one to name it. */
     private fun guardianPage(g: GuiGraphics, x: Int, y: Int, w: Int, h: Int, mx: Int, my: Int) {
@@ -1206,6 +1245,7 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
         row("Ability", Component.translatable("cobblemon.ability.${d.getString("ability")}").string)
         row("Favourite", if (d.contains("fav")) d.getString("fav") else "hasn't picked a spot yet", if (d.contains("fav")) 0xFFE8C46A.toInt() else DIM)
         if (d.contains("title")) row("Title", d.getString("title"), GOLD)
+        if (d.contains("ribbons")) row("Ribbons", "★".repeat(d.getInt("ribbons").coerceAtMost(10)) + "  (${d.getInt("ribbons")} contest${if (d.getInt("ribbons") == 1) "" else "s"} won)", GOLD)
         if (d.contains("req")) {
             row("Wants", d.getString("req"), 0xFFF07CB4.toInt())
             if (over(mx, my, x, ly - 12, w, 12)) tooltip = listOf(Component.literal(d.getString("req")), Component.literal(d.getString("reqHow")).withStyle(net.minecraft.ChatFormatting.GRAY))
@@ -1538,7 +1578,8 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
         val reqs = data.getList("requests", Tag.TAG_COMPOUND.toInt()).let { l -> (0 until l.size).map { l.getCompound(it) } }
         val heartH = 62
         val reqH = 34
-        val top = heartH + gap + 14 + (if (reqs.isEmpty()) 16 else reqs.size * (reqH + 4)) + 18
+        val visitorsN = data.getList("visitorsBoard", Tag.TAG_COMPOUND.toInt()).size
+        val top = heartH + gap + 14 + (if (reqs.isEmpty()) 16 else reqs.size * (reqH + 4)) + 18 + (if (visitorsN > 0) 14 + visitorsN * (reqH + 4) else 0)
         maxScroll = max(0.0, top + list.size * (cardH + gap) - gap - gh.toDouble())
         scroll = scroll.coerceIn(0.0, maxScroll)
         g.enableScissor(x - 2, gy, x + w + 2, gy + gh)
@@ -1617,7 +1658,42 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
             }
             cy += reqH + 4
         }
+        // the visitor board
+        val board = data.getList("visitorsBoard", Tag.TAG_COMPOUND.toInt())
+        if (board.size > 0) {
+            text(g, "Visitors", x, cy + 2, SUB)
+            cy += 14
+            for (k in 0 until board.size) {
+                val v = board.getCompound(k)
+                if (cy + reqH >= gy && cy <= gy + gh) {
+                    box(g, x, cy, w, reqH, CARD)
+                    g.fill(x, cy, x + 2, cy + reqH, opaque(color(v.getString("zone"))))
+                    ResourceLocation.tryParse(v.getString("sp"))?.let { sp ->
+                        val aspects = v.getList("as", Tag.TAG_STRING.toInt()).let { l -> (0 until l.size).map { l.getString(it) }.toSet() }
+                        item(g, monStack(sp, aspects), x + 7, cy + 9)
+                    }
+                    val need = when (v.getString("need")) { "hungry" -> "  · Hungry: feed it a berry"; "tired" -> "  · Tired: put a bed in its habitat"; else -> "" }
+                    text(g, fit("A wild ${v.getString("name")} in the ${biomes.firstOrNull { it.zone == v.getString("zone") }?.name ?: v.getString("zone")}$need", w - 110), x + 30, cy + 6, TEXT)
+                    val trust = v.getInt("trust")
+                    text(g, if (trust >= 60) "Trusts you: use the Journal on it to ask it to stay!" else "Trust $trust/60: pet it with the Journal, feed it berries", x + 30, cy + 19, if (trust >= 60) GOOD else SUB)
+                    val mins = v.getLong("left")
+                    val left = if (mins >= 60) "${mins / 60}h left" else "${mins}m left"
+                    text(g, left, x + w - 8 - font.width(left), cy + 6, DIM)
+                }
+                cy += reqH + 4
+            }
+        }
         text(g, "Goals", x, cy + 4, SUB)
+        // the Sanctuary Dex
+        run {
+            val label = "Sanctuary Dex (${data.getInt("dexCount")})"
+            val bw = font.width(label) + 12
+            val bx = x + w - bw
+            val hover = over(mx, my, bx, cy + 1, bw, 13) && my in gy until gy + gh
+            box(g, bx, cy + 1, bw, 13, if (hover) CARD_HOVER else 0xFF2B4150.toInt())
+            g.drawCenteredString(font, label, bx + bw / 2, cy + 4, ACCENT)
+            if (cy + 1 >= gy && cy + 14 <= gy + gh) hit(bx, cy + 1, bw, 13) { goTab("dex") }
+        }
         cy += 18
         for (goal in list) {
             if (cy + cardH >= gy && cy <= gy + gh) {
@@ -1745,8 +1821,70 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
 
     // ------------------------------------------------------------------ members
 
+    /** The server's main options (for the host or an op): switches and − / + steppers, grouped. */
+    private fun settingsPage(g: GuiGraphics, x: Int, y: Int, w: Int, h: Int, mx: Int, my: Int) {
+        text(g, "The server's sanctuary options. Changes apply right away and are saved.", x, y, SUB)
+        val list = data.getList("settings", Tag.TAG_COMPOUND.toInt())
+        val gy = y + 16
+        val gh = h - 16
+        val rowH = 16
+        var groups = 0
+        var last = ""
+        for (i in 0 until list.size) { val gname = list.getCompound(i).getString("group"); if (gname != last) { groups++; last = gname } }
+        maxScroll = max(0.0, list.size * rowH + groups * 14 - gh.toDouble())
+        scroll = scroll.coerceIn(0.0, maxScroll)
+        g.enableScissor(x - 2, gy, x + w + 2, gy + gh)
+        var ly = gy - scroll.toInt()
+        last = ""
+        for (i in 0 until list.size) {
+            val c = list.getCompound(i)
+            val gname = c.getString("group")
+            if (gname != last) { text(g, gname, x, ly + 3, ACCENT); ly += 14; last = gname }
+            val visible = ly >= gy && ly + rowH <= gy + gh
+            text(g, c.getString("label"), x + 8, ly + 4, TEXT)
+            val idx = c.getInt("i")
+            when (c.getString("kind")) {
+                "bool" -> {
+                    val on = c.getBoolean("on")
+                    val label = if (on) "On" else "Off"
+                    val bx = x + w - 50
+                    val hover = over(mx, my, bx, ly + 1, 44, 13) && visible
+                    box(g, bx, ly + 1, 44, 13, if (on) (if (hover) 0xFF3E7A5C.toInt() else 0xFF2F6A4C.toInt()) else (if (hover) CARD_HOVER else CARD))
+                    g.drawCenteredString(font, label, bx + 22, ly + 4, if (on) 0xFFFFFFFF.toInt() else SUB)
+                    if (visible) hit(bx, ly + 1, 44, 13) { send("setting", "$idx:toggle", page = "settings") }
+                }
+                "int", "double" -> {
+                    val v = c.getDouble("v")
+                    val shown = if (c.getString("kind") == "int") "${v.toInt()}" else String.format("%.2f", v)
+                    val bx = x + w - 90
+                    for ((dx, sign, up) in listOf(Triple(0, "−", false), Triple(70, "+", true))) {
+                        val hover = over(mx, my, bx + dx, ly + 1, 16, 13) && visible
+                        box(g, bx + dx, ly + 1, 16, 13, if (hover) CARD_HOVER else CARD)
+                        g.drawCenteredString(font, sign, bx + dx + 8, ly + 4, TEXT)
+                        if (visible) hit(bx + dx, ly + 1, 16, 13) { send("setting", "$idx:${if (up) "up" else "down"}", page = "settings") }
+                    }
+                    g.drawCenteredString(font, shown, bx + 43, ly + 4, GOLD)
+                }
+            }
+            ly += rowH
+        }
+        g.disableScissor()
+    }
+
     private fun membersPage(g: GuiGraphics, x: Int, y: Int, w: Int, h: Int, mx: Int, my: Int) {
         val owner = data.getBoolean("isOwner")
+        // friends may visit (without living here) when the owner opens the sanctuary
+        if (owner) {
+            val open = data.getBoolean("openToVisitors")
+            val label = if (open) "Open to visitors: On" else "Open to visitors: Off"
+            val bw = font.width(label) + 12
+            val bx = x + w - bw
+            val hover = over(mx, my, bx, y - 3, bw, 13)
+            box(g, bx, y - 3, bw, 13, if (open) 0xFF2F6A4C.toInt() else if (hover) CARD_HOVER else CARD)
+            g.drawCenteredString(font, label, bx + bw / 2, y, if (open) 0xFFFFFFFF.toInt() else SUB)
+            if (hover) tooltip = listOf(Component.literal("Let other players visit with /sanctuary visit <your name>"), Component.literal("Visitors can look around and leave gifts in the basket (/sanctuary gift)").withStyle(net.minecraft.ChatFormatting.GRAY))
+            hit(bx, y - 3, bw, 13) { send("visitors", page = "members") }
+        }
         text(g, "People sharing this sanctuary. Their PC Pokémon live here too.", x, y, SUB)
         val members = data.getList("members", Tag.TAG_COMPOUND.toInt())
         var ly = y + 16

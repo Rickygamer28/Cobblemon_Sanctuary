@@ -108,6 +108,19 @@ object Gathering {
         if (add(s, stack)) s.logEvent("${e.pokemon.getDisplayName(false).string} left a gift in the basket: ${stack.hoverName.string}.")
     }
 
+    /** A visitor's gift: as much of [stack] as fits in the open slots (the room cap doesn't apply). Returns how many went in. */
+    fun give(s: Sanctuary, stack: ItemStack): Int {
+        var left = stack.count
+        for (i in 0 until slots(s)) {
+            if (left <= 0) break
+            val cur = s.basket.getItem(i)
+            if (cur.isEmpty) { val n = minOf(left, stack.maxStackSize); s.basket.setItem(i, stack.copyWithCount(n)); left -= n }
+            else if (ItemStack.isSameItemSameComponents(cur, stack) && cur.count < cur.maxStackSize) { val n = minOf(left, cur.maxStackSize - cur.count); cur.grow(n); left -= n }
+        }
+        s.basket.setChanged()
+        return stack.count - left
+    }
+
     fun itemCount(s: Sanctuary): Int = (0 until s.basket.containerSize).sumOf { s.basket.getItem(it).count }
 
     /** The basket's slots: what the Valley Heart gives it, or more if something's already in the slots further on. */

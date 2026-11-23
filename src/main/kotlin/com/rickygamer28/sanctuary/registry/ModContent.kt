@@ -103,6 +103,7 @@ object ModContent {
     val INCUBATOR_ITEM: DeferredItem<Item> = ITEMS.register("incubator") { ->
         net.minecraft.world.item.BlockItem(INCUBATOR.get(), Item.Properties())
     }
+    val CAMERA: DeferredItem<Item> = ITEMS.register("camera") { -> com.rickygamer28.sanctuary.item.CameraItem(Item.Properties().stacksTo(1)) }
     val BASKET_LINK_ITEM: DeferredItem<Item> = ITEMS.register("basket_link") { ->
         net.minecraft.world.item.BlockItem(BASKET_LINK.get(), Item.Properties())
     }
@@ -134,6 +135,7 @@ object ModContent {
                 output.accept(INCUBATOR_ITEM.get())
                 output.accept(GATHERING_BASKET_ITEM.get())
                 output.accept(BASKET_LINK_ITEM.get())
+                output.accept(CAMERA.get())
                 output.accept(POKEMON_BED_ITEM.get())
                 output.accept(LARGE_POKEMON_BED_ITEM.get())
                 output.accept(HUGE_POKEMON_BED_ITEM.get())
