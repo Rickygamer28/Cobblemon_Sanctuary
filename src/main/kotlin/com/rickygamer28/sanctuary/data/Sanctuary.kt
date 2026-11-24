@@ -271,6 +271,8 @@ class Sanctuary(
     var residentCount: Int = 0
     /** Biomes that have woken up. The Normal hub is always awake. */
     var unlocked: Set<String> = setOf("normal")
+    /** The awake habitats were saved (older saves didn't keep them). Not saved. */
+    var unlockedSaved: Boolean = false
     /** Set when the biome layout should be swept again (new type, growth, expansion). */
     var generationDirty: Boolean = true
 
@@ -437,6 +439,8 @@ class Sanctuary(
         t.putIntArray("Away", intArrayOf(awayMeetings, awayFriends, awayRivals, awayEggs))
         t.putBoolean("LegacyTethers", legacyTethersFixed)
         t.putInt("Version", DATA_VERSION)
+        t.put("Unlocked", ListTag().also { l -> unlocked.forEach { l.add(StringTag.valueOf(it)) } })
+        t.put("TypeCounts", CompoundTag().also { c -> typeCounts.forEach { (k, v) -> c.putInt(k, v) } })
         t.putInt("Layout", LAYOUT_VERSION)
         t.putBoolean("Planned", planned)
         t.putInt("LayoutSalt", layoutSalt)
@@ -619,6 +623,13 @@ class Sanctuary(
                 s.landmarks.forEach { (k, v) -> if (v != Long.MIN_VALUE) s.staleLandmarks[k] = v }
                 s.landmarks.clear()
             }
+            // which habitats were awake (so a server start doesn't take them all for ones that just woke up)
+            if (t.contains("Unlocked")) {
+                s.unlocked = linkedSetOf("normal") + t.getList("Unlocked", Tag.TAG_STRING.toInt()).map { it.asString }
+                s.unlockedSaved = true
+                s.unlockedChanged = false
+            }
+            t.getCompound("TypeCounts").let { c -> if (c.allKeys.isNotEmpty()) s.typeCounts = c.allKeys.associateWith { c.getInt(it) } }
             val vars = t.getCompound("Variants")
             vars.allKeys.forEach { k -> s.variants[k] = vars.getInt(k) }
             val homes = t.getCompound("CustomHomes")

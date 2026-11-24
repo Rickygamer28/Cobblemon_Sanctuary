@@ -254,10 +254,24 @@ object Residents {
         countsDone(level, s, rt, list, HashMap(rt.countsSoFar), HashMap(rt.customSoFar))
     }
 
+    /** Whether [zone]'s ground is built as a sleeping meadow (or not built yet). */
+    private fun builtAsleep(s: Sanctuary, zone: String): Boolean {
+        val spot = s.habitats[zone]?.let { it.x to it.z }
+            ?: ZoneLayout.pockets(s).firstOrNull { it.zone == zone }?.let { it.x to it.z }
+            ?: return true
+        val idx = com.rickygamer28.sanctuary.world.ColumnOrder.indexOf(spot.first - s.center.x, spot.second - s.center.z)
+        return idx < 0 || !s.dressed.get(idx) || s.meadow.get(idx)
+    }
+
     private fun countsDone(level: ServerLevel, s: Sanctuary, rt: SanctuaryRuntime, list: List<RosterEntry>, counts: HashMap<String, Int>, customCounts: HashMap<String, Int>) {
         val ring = ZoneLayout.zonesOf(s)
         s.customCounts = customCounts
         val unlocked = linkedSetOf(ZoneLayout.HUB) + counts.keys.filter { it in ring } + s.customPockets + s.customSubs.keys
+        // a save from before the awake habitats were kept: the first count after loading only treats as new the
+        // habitats still built as sleeping meadow (the others were awake already, and stay as they are)
+        val firstOfOldSave = !s.unlockedSaved && s.planned && s.dressed.cardinality() > 0
+        if (firstOfOldSave) s.unlocked = linkedSetOf(ZoneLayout.HUB) + (unlocked - ZoneLayout.HUB).filter { !builtAsleep(s, it) }
+        s.unlockedSaved = true
         val newTypes = unlocked - s.unlocked
         val cavesChange = s.state == SanctuaryState.ACTIVE && s.planned && s.caveStyle >= 2 &&
             com.rickygamer28.sanctuary.world.Caves.MOUNTAINS.any { (it in unlocked) != (it in s.unlocked) }
