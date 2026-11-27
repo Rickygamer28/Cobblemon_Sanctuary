@@ -1,0 +1,54 @@
+plugins {
+    id 'java-library'
+    id 'net.neoforged.moddev'
+    id 'org.jetbrains.kotlin.jvm'
+}
+
+base { archivesName = "${mod_id}-neoforge" }
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+kotlin { jvmToolchain(21) }
+
+sourceSets {
+    main {
+        kotlin { srcDir '../common/src/main/kotlin' }
+        resources { srcDir '../common/src/main/resources' }
+    }
+}
+
+neoForge {
+    version = project.neo_version
+    runs {
+        client { client() }
+        server { server(); programArgument '--nogui' }
+    }
+    mods {
+        "${mod_id}" { sourceSet(sourceSets.main) }
+    }
+}
+
+repositories {
+    maven {
+        name = 'Modrinth'
+        url = 'https://api.modrinth.com/maven'
+        content { includeGroup 'maven.modrinth' }
+    }
+    mavenCentral()
+}
+
+dependencies {
+    // Cobblemon (NeoForge build): compiled against, players install it themselves
+    compileOnly "maven.modrinth:cobblemon:${cobblemon_version}"
+}
+
+var generateModMetadata = tasks.register('generateModMetadata', ProcessResources) {
+    var replaceProperties = [
+            minecraft_version: minecraft_version, neo_version: neo_version, mod_id: mod_id, mod_name: mod_name,
+            mod_license: mod_license, mod_version: mod_version, mod_authors: mod_authors,
+    ]
+    inputs.properties replaceProperties
+    expand replaceProperties
+    from 'src/main/templates'
+    into 'build/generated/sources/modMetadata'
+}
+sourceSets.main.resources.srcDir generateModMetadata
+neoForge.ideSyncTask generateModMetadata

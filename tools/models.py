@@ -1,7 +1,7 @@
 # Better models (and textures) for every block of the mod: core, bell, incubator, nest, basket, ball.
 import json, random, math
 from PIL import Image
-R = '/home/claude/cobblemon_sanctuary/src/main/resources'
+R = '/home/claude/cobblemon_sanctuary/common/src/main/resources'
 A = f'{R}/assets/cobblemon_sanctuary'
 NS = 'cobblemon_sanctuary:block/'
 

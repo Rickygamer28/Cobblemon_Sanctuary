@@ -1,7 +1,7 @@
 # Generates the decoration textures and models (beds in three sizes, the ball, the trough).
 import json, random, math
 from PIL import Image
-R='/home/claude/cobblemon_sanctuary/src/main/resources'
+R='/home/claude/cobblemon_sanctuary/common/src/main/resources'
 A=f'{R}/assets/cobblemon_sanctuary'
 def clamp(v): return max(0,min(255,int(v)))
 def img(fn, seed):

@@ -40,12 +40,27 @@ jobs:
           echo "NEO=$NEO" >> "$GITHUB_ENV"
           echo "MDG=$MDG" >> "$GITHUB_ENV"
           echo "COBBLE=$COBBLE" >> "$GITHUB_ENV"
+          # Fabric
+          FMETA=https://maven.fabricmc.net
+          LOOM=$(curl -fsSL $FMETA/fabric-loom/fabric-loom.gradle.plugin/maven-metadata.xml | latest '1\.1[01]\.\d+')
+          FAPI=$(curl -fsSL $FMETA/net/fabricmc/fabric-api/fabric-api/maven-metadata.xml | latest '0\.\d+\.\d+\+1\.21\.1')
+          FLK=$(curl -fsSL $FMETA/net/fabricmc/fabric-language-kotlin/maven-metadata.xml | latest '\d+\.\d+\.\d+\+kotlin\.2\.[0-9.]+')
+          FLOADER=$(curl -fsSL https://meta.fabricmc.net/v2/versions/loader/1.21.1 | jq -r '[.[] | select(.loader.stable)][0].loader.version')
+          FINSTALLER=$(curl -fsSL https://meta.fabricmc.net/v2/versions/installer | jq -r '[.[] | select(.stable)][0].version')
+          curl -fsSL 'https://api.modrinth.com/v2/project/cobblemon/version?loaders=%5B%22fabric%22%5D&game_versions=%5B%221.21.1%22%5D' > cobblemon-fabric-versions.json
+          COBBLE_F=$(jq -r '[.[] | select(.version_number | test("1\\.8\\.4"))][0].id' cobblemon-fabric-versions.json)
+          COBBLE_F_URL=$(jq -r '[.[] | select(.version_number | test("1\\.8\\.4"))][0].files[0].url' cobblemon-fabric-versions.json)
+          curl -fsSL 'https://api.modrinth.com/v2/project/forge-config-api-port/version?loaders=%5B%22fabric%22%5D&game_versions=%5B%221.21.1%22%5D' > fcap-versions.json
+          FCAP=$(jq -r '.[0].id' fcap-versions.json)
+          for v in LOOM FAPI FLK FLOADER FINSTALLER COBBLE_F COBBLE_F_URL FCAP; do echo "$v=${!v}" >> "$GITHUB_ENV"; done
           mkdir -p ci-out
           {
             echo "neoforge=$NEO"
             echo "moddev=$MDG"
             echo "cobblemon_modrinth_id=$COBBLE"
             echo "cobblemon_version=$COBBLE_NAME"
+            echo "loom=$LOOM fabric_api=$FAPI fabric_kotlin=$FLK fabric_loader=$FLOADER installer=$FINSTALLER"
+            echo "cobblemon_fabric=$COBBLE_F fcap=$FCAP ($(jq -r '.[0].version_number' fcap-versions.json))"
             echo "recent cobblemon neoforge versions:"
             jq -r '.[0:8][] | "  \(.version_number)  \(.id)"' cobblemon-versions.json
           } | tee ci-out/versions.txt
@@ -60,42 +75,60 @@ jobs:
         timeout-minutes: 40
         run: |
           set +e
-          timeout 35m ./gradlew build --stacktrace --console=plain --no-daemon -Pneo_version="$NEO" -Pmoddev_version="$MDG" -Pcobblemon_version="$COBBLE" > ci-out/build.log 2>&1
+          timeout 35m ./gradlew build --stacktrace --console=plain --no-daemon -Pneo_version="$NEO" -Pmoddev_version="$MDG" -Pcobblemon_version="$COBBLE" \
+            -Ploom_version="$LOOM" -Pfabric_api_version="$FAPI" -Pfabric_kotlin_version="$FLK" -Pfabric_loader_version="$FLOADER" \
+            -Pcobblemon_fabric_version="$COBBLE_F" -Pfcap_version="$FCAP" > ci-out/build.log 2>&1
           STATUS=$?
           echo "$STATUS" > ci-out/status.txt
           tail -80 ci-out/build.log
-          grep -E "^e: |error:|warning:.*deprecated" ci-out/build.log | head -200 > ci-out/errors.txt || true
+          { grep -E "^e: |error:|warning:.*deprecated" ci-out/build.log | head -200; grep -A12 "What went wrong" ci-out/build.log | head -60; } > ci-out/errors.txt || true
           mkdir -p ci-out/jar
-          cp build/libs/*.jar ci-out/jar/ 2>/dev/null || true
+          cp neoforge/build/libs/*.jar fabric/build/libs/*.jar ci-out/jar/ 2>/dev/null || true
+          rm -f ci-out/jar/*-sources.jar
           echo "status=$STATUS" >> "$GITHUB_OUTPUT"
 
-      - name: Self test (real server builds a valley and checks it)
+      - name: Self test (real servers, NeoForge and Fabric, build a valley and check it)
         # only for big updates: when the commit message asks for it with [selftest]
         if: steps.build.outputs.status == '0' && contains(github.event.head_commit.message, '[selftest]')
         timeout-minutes: 50
         run: |
           set +e
           SIZE=$(cat .ci/selftest | head -1)
-          mkdir -p ci-test/mods ci-out/selftest
-          cd ci-test
-          curl -fsSL -o installer.jar "https://maven.neoforged.net/releases/net/neoforged/neoforge/$NEO/neoforge-$NEO-installer.jar"
-          java -jar installer.jar --installServer > ../ci-out/selftest/install.log 2>&1
-          curl -fsSL -o mods/cobblemon.jar "$COBBLE_URL"
-          KFF_URL=$(curl -fsSL 'https://api.modrinth.com/v2/project/kotlin-for-forge/version?loaders=%5B%22neoforge%22%5D&game_versions=%5B%221.21.1%22%5D' | jq -r '.[0].files[0].url')
-          curl -fsSL -o mods/kotlinforforge.jar "$KFF_URL"
-          cp ../build/libs/*.jar mods/ 2>/dev/null
-          rm -f mods/*-sources.jar
-          ls -la mods > ../ci-out/selftest/mods.txt
-          echo "eula=true" > eula.txt
-          printf 'online-mode=false\nmax-tick-time=-1\nspawn-protection=0\nlevel-type=minecraft\\:flat\nview-distance=4\nsimulation-distance=4\ngenerate-structures=false\n' > server.properties
-          printf '\n-Xmx4G\n-Dsanctuary.selftest=%s\n' "$SIZE" >> user_jvm_args.txt
-          cp user_jvm_args.txt ../ci-out/selftest/jvm-args.txt
-          timeout 42m ./run.sh nogui > ../ci-out/selftest/server.log 2>&1
-          echo "exit=$?" > ../ci-out/selftest/exit.txt
-          cp selftest-report.txt ../ci-out/selftest/ 2>/dev/null || echo "no report" > ../ci-out/selftest/selftest-report.txt
-          grep -E "selftest|Sanctuary|ERROR|Exception" ../ci-out/selftest/server.log | head -300 > ../ci-out/selftest/highlights.txt
-          tail -200 ../ci-out/selftest/server.log > ../ci-out/selftest/server-tail.log
-          rm -f ../ci-out/selftest/server.log
+          ROOT=$PWD
+          props() { echo "eula=true" > eula.txt; printf 'server-port=%s\nonline-mode=false\nmax-tick-time=-1\nspawn-protection=0\nlevel-type=minecraft\\:flat\nview-distance=4\nsimulation-distance=4\ngenerate-structures=false\n' "$1" > server.properties; }
+          finish() { # $1 = output dir
+            cp selftest-report.txt "$1/" 2>/dev/null || echo "no report" > "$1/selftest-report.txt"
+            grep -E "selftest|Sanctuary|ERROR|Exception" "$1/server.log" | head -300 > "$1/highlights.txt"
+            tail -200 "$1/server.log" > "$1/server-tail.log"
+            rm -f "$1/server.log"
+          }
+          neo_test() {
+            OUT=$ROOT/ci-out/selftest; mkdir -p ci-test-neo/mods "$OUT"; cd ci-test-neo
+            curl -fsSL -o installer.jar "https://maven.neoforged.net/releases/net/neoforged/neoforge/$NEO/neoforge-$NEO-installer.jar"
+            java -jar installer.jar --installServer > "$OUT/install.log" 2>&1
+            curl -fsSL -o mods/cobblemon.jar "$COBBLE_URL"
+            KFF_URL=$(curl -fsSL 'https://api.modrinth.com/v2/project/kotlin-for-forge/version?loaders=%5B%22neoforge%22%5D&game_versions=%5B%221.21.1%22%5D' | jq -r '.[0].files[0].url')
+            curl -fsSL -o mods/kotlinforforge.jar "$KFF_URL"
+            cp "$ROOT"/neoforge/build/libs/*.jar mods/; rm -f mods/*-sources.jar
+            ls -la mods > "$OUT/mods.txt"; props 25565
+            printf '\n-Xmx4G\n-Dsanctuary.selftest=%s\n' "$SIZE" >> user_jvm_args.txt
+            timeout 42m ./run.sh nogui > "$OUT/server.log" 2>&1
+            echo "exit=$?" > "$OUT/exit.txt"; finish "$OUT"
+          }
+          fabric_test() {
+            OUT=$ROOT/ci-out/selftest-fabric; mkdir -p ci-test-fabric/mods "$OUT"; cd ci-test-fabric
+            curl -fsSL -o fabric-server.jar "https://meta.fabricmc.net/v2/versions/loader/1.21.1/$FLOADER/$FINSTALLER/server/jar"
+            curl -fsSL -o mods/cobblemon.jar "$COBBLE_F_URL"
+            curl -fsSL -o mods/fabric-api.jar "https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-api/$FAPI/fabric-api-$FAPI.jar"
+            curl -fsSL -o mods/fabric-language-kotlin.jar "https://maven.fabricmc.net/net/fabricmc/fabric-language-kotlin/$FLK/fabric-language-kotlin-$FLK.jar"
+            cp "$ROOT"/fabric/build/libs/*.jar mods/; rm -f mods/*-sources.jar
+            ls -la mods > "$OUT/mods.txt"; props 25566
+            timeout 42m java -Xmx4G -Dsanctuary.selftest="$SIZE" -jar fabric-server.jar nogui > "$OUT/server.log" 2>&1
+            echo "exit=$?" > "$OUT/exit.txt"; finish "$OUT"
+          }
+          ( neo_test ) &
+          ( fabric_test ) &
+          wait
 
       - name: Publish results to ci-output branch
         if: always()
@@ -114,7 +147,9 @@ jobs:
         if: steps.build.outputs.status == '0'
         with:
           name: cobblemon-sanctuary-jar
-          path: build/libs/*.jar
+          path: |
+            neoforge/build/libs/*.jar
+            fabric/build/libs/*.jar
 
       - name: Fail if build failed
         if: steps.build.outputs.status != '0'

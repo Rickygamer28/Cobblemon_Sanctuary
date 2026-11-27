@@ -2,9 +2,11 @@ pluginManagement {
     repositories {
         gradlePluginPortal()
         maven { url = 'https://maven.neoforged.net/releases' }
+        maven { url = 'https://maven.fabricmc.net/' }
     }
     plugins {
         id 'net.neoforged.moddev' version "${moddev_version}"
+        id 'fabric-loom' version "${loom_version}"
         id 'org.jetbrains.kotlin.jvm' version "${kotlin_version}"
     }
 }
@@ -14,3 +16,5 @@ plugins {
 }
 
 rootProject.name = 'cobblemon_sanctuary'
+// the shared code lives in common/ and is built into each loader's jar
+include 'neoforge', 'fabric'

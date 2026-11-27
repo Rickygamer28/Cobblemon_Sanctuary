@@ -1,6 +1,6 @@
 import re,glob
 names=set()
-for f in glob.glob('src/main/kotlin/com/rickygamer28/sanctuary/world/*.kt'):
+for f in glob.glob('common/src/main/kotlin/com/rickygamer28/sanctuary/world/*.kt'):
     if f.endswith('ValleyBlocks.kt'): continue
     names|=set(re.findall(r'Blocks\.([A-Z_0-9]+)', open(f).read()))
 extra="""OAK_LOG OAK_LEAVES BIRCH_LOG BIRCH_LEAVES SPRUCE_LOG SPRUCE_LEAVES ACACIA_LOG ACACIA_LEAVES DARK_OAK_LOG DARK_OAK_LEAVES
@@ -14,5 +14,5 @@ names|=set(extra)
 names=sorted(names)
 body=",\n".join("        "+", ".join("Blocks."+n for n in names[i:i+5]) for i in range(0,len(names),5))
 tpl=open('tools/ValleyBlocks.kt.tpl').read().replace('@@BODY@@',body)
-open('src/main/kotlin/com/rickygamer28/sanctuary/world/ValleyBlocks.kt','w').write(tpl)
+open('common/src/main/kotlin/com/rickygamer28/sanctuary/world/ValleyBlocks.kt','w').write(tpl)
 print(len(names))

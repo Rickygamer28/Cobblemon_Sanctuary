@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "${mod_id}",
+  "version": "${mod_version}",
+  "name": "${mod_name}",
+  "description": "A living sanctuary for your PC Pokémon. Place a Sanctuary Core and every Pokémon in your PC moves into a little world of type biomes, where they roam, meet, make friends and rivals, and play.",
+  "authors": ["${mod_authors}"],
+  "license": "${mod_license}",
+  "environment": "*",
+  "entrypoints": {
+    "main": [{ "adapter": "kotlin", "value": "com.rickygamer28.sanctuary.fabric.SanctuaryFabric" }],
+    "client": [{ "adapter": "kotlin", "value": "com.rickygamer28.sanctuary.fabric.SanctuaryFabricClient" }]
+  },
+  "mixins": ["cobblemon_sanctuary.mixins.json"],
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": "~${minecraft_version}",
+    "java": ">=21",
+    "fabric-api": "*",
+    "fabric-language-kotlin": "*",
+    "cobblemon": ">=1.8.0"
+  }
+}

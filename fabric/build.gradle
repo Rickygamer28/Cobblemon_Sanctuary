@@ -1,0 +1,46 @@
+plugins {
+    id 'fabric-loom'
+    id 'org.jetbrains.kotlin.jvm'
+}
+
+base { archivesName = "${mod_id}-fabric" }
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+kotlin { jvmToolchain(21) }
+
+sourceSets {
+    main {
+        kotlin { srcDir '../common/src/main/kotlin' }
+        resources { srcDir '../common/src/main/resources' }
+    }
+}
+
+repositories {
+    maven {
+        name = 'Modrinth'
+        url = 'https://api.modrinth.com/maven'
+        content { includeGroup 'maven.modrinth' }
+    }
+    mavenCentral()
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${minecraft_version}"
+    mappings loom.officialMojangMappings()
+    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
+    modImplementation "net.fabricmc:fabric-language-kotlin:${fabric_kotlin_version}"
+    // Cobblemon (Fabric build): compiled against, players install it themselves
+    modCompileOnly "maven.modrinth:cobblemon:${cobblemon_fabric_version}"
+    // NeoForge's config files on Fabric: shipped inside this jar, nothing extra to install
+    modImplementation "maven.modrinth:forge-config-api-port:${fcap_version}"
+    include "maven.modrinth:forge-config-api-port:${fcap_version}"
+    compileOnly "com.electronwill.night-config:core:3.8.1"
+    compileOnly "com.electronwill.night-config:toml:3.8.1"
+}
+
+processResources {
+    var props = [mod_id: mod_id, mod_name: mod_name, mod_version: mod_version, mod_authors: mod_authors,
+                 mod_license: mod_license, minecraft_version: minecraft_version]
+    inputs.properties props
+    filesMatching('fabric.mod.json') { expand props }
+}

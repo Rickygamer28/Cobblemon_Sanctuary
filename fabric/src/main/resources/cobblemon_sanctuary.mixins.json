@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.rickygamer28.sanctuary.fabric.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "BlockItemMixin",
+    "EntitySectionsMixin",
+    "FishingHookMixin",
+    "ItemStackMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
