@@ -44,7 +44,7 @@ jobs:
           FMETA=https://maven.fabricmc.net
           LOOM=$(curl -fsSL $FMETA/fabric-loom/fabric-loom.gradle.plugin/maven-metadata.xml | latest '1\.1[01]\.\d+')
           FAPI=$(curl -fsSL $FMETA/net/fabricmc/fabric-api/fabric-api/maven-metadata.xml | latest '0\.\d+\.\d+\+1\.21\.1')
-          FLK=$(curl -fsSL $FMETA/net/fabricmc/fabric-language-kotlin/maven-metadata.xml | latest '\d+\.\d+\.\d+\+kotlin\.2\.[0-9.]+')
+          FLK=$(curl -fsSL $FMETA/net/fabricmc/fabric-language-kotlin/maven-metadata.xml | latest '\d+\.\d+\.\d+\+kotlin\.2\.2\.\d+')
           FLOADER=$(curl -fsSL https://meta.fabricmc.net/v2/versions/loader/1.21.1 | jq -r '[.[] | select(.loader.stable)][0].loader.version')
           FINSTALLER=$(curl -fsSL https://meta.fabricmc.net/v2/versions/installer | jq -r '[.[] | select(.stable)][0].version')
           curl -fsSL 'https://api.modrinth.com/v2/project/cobblemon/version?loaders=%5B%22fabric%22%5D&game_versions=%5B%221.21.1%22%5D' > cobblemon-fabric-versions.json
