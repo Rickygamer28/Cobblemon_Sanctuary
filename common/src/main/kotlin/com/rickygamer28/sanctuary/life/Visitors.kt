@@ -187,7 +187,7 @@ object Visitors {
         val now = level.gameTime
         val hand = player.mainHandItem
         when {
-            !journal && hand.`is`(net.minecraft.tags.ItemTags.create(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("cobblemon", "berries"))) -> {
+            !journal && hand.`is`(net.minecraft.tags.TagKey.create(net.minecraft.core.registries.Registries.ITEM, net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("cobblemon", "berries"))) -> {
                 if (!player.isCreative) hand.shrink(1)
                 v.trust = (v.trust + if (v.need == "hungry") 50 else 25).coerceAtMost(100)
                 if (v.need == "hungry") v.need = ""

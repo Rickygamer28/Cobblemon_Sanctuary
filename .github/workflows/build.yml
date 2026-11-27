@@ -75,7 +75,7 @@ jobs:
         timeout-minutes: 40
         run: |
           set +e
-          timeout 35m ./gradlew build --stacktrace --console=plain --no-daemon -Pneo_version="$NEO" -Pmoddev_version="$MDG" -Pcobblemon_version="$COBBLE" \
+          timeout 35m ./gradlew build --continue --stacktrace --console=plain --no-daemon -Pneo_version="$NEO" -Pmoddev_version="$MDG" -Pcobblemon_version="$COBBLE" \
             -Ploom_version="$LOOM" -Pfabric_api_version="$FAPI" -Pfabric_kotlin_version="$FLK" -Pfabric_loader_version="$FLOADER" \
             -Pcobblemon_fabric_version="$COBBLE_F" -Pfcap_version="$FCAP" > ci-out/build.log 2>&1
           STATUS=$?
