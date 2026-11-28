@@ -71,6 +71,9 @@ class SanctuaryNeoForge(modBus: IEventBus, container: ModContainer) {
             registrar.playToClient(ViewPayload.TYPE, ViewPayload.CODEC) { payload, ctx ->
                 ctx.enqueueWork { com.rickygamer28.sanctuary.client.ClientHooks.onView(payload.tag) }
             }
+            registrar.playToClient(com.rickygamer28.sanctuary.net.HomesPayload.TYPE, com.rickygamer28.sanctuary.net.HomesPayload.CODEC) { payload, ctx ->
+                ctx.enqueueWork { com.rickygamer28.sanctuary.client.ClientHomes.onHomes(payload.tag) }
+            }
             registrar.playToServer(ActionPayload.TYPE, ActionPayload.CODEC) { payload, ctx ->
                 ctx.enqueueWork { (ctx.player() as? ServerPlayer)?.let { SanctuaryNet.onAction(it, payload.tag) } }
             }

@@ -43,3 +43,16 @@ object SanctuaryNet {
 
     fun send(player: ServerPlayer, tag: CompoundTag) = com.rickygamer28.sanctuary.Platform.current.sendToPlayer(player, ViewPayload(tag))
 }
+
+/**
+ * Server → client: where each of the player's residents lives, and the home-habitat bonus (for Cobblemon
+ * Expeditions' board, which shows it in its tooltips and power).
+ */
+class HomesPayload(val tag: CompoundTag) : CustomPacketPayload {
+    override fun type(): CustomPacketPayload.Type<HomesPayload> = TYPE
+
+    companion object {
+        val TYPE = CustomPacketPayload.Type<HomesPayload>(ResourceLocation.fromNamespaceAndPath(CobblemonSanctuary.MOD_ID, "homes"))
+        val CODEC: StreamCodec<ByteBuf, HomesPayload> = ByteBufCodecs.COMPOUND_TAG.map({ HomesPayload(it) }, { it.tag })
+    }
+}

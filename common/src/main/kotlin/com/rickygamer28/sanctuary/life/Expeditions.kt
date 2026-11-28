@@ -38,6 +38,56 @@ object Expeditions {
         if (snapshot == null || preferredTypes == null) 1.0
         else safe(1.0) { com.rickygamer28.sanctuary.compat.ExpeditionsBridge.homeBonus(snapshot, preferredTypes) }
 
+    private val sentHomes = HashMap<UUID, Int>()
+
+    /**
+     * Every few seconds: each online player's game is told where their residents live (only what changed), so the
+     * Expedition Board can show the home-habitat bonus.
+     */
+    fun syncHomes(server: net.minecraft.server.MinecraftServer) {
+        if (!present || broken) return
+        val data = com.rickygamer28.sanctuary.data.SanctuaryData.get(server)
+        val bonus = com.rickygamer28.sanctuary.SanctuaryConfig.expeditionHomeBonus.get()
+        for (p in server.playerList.players) {
+            val h = net.minecraft.nbt.CompoundTag()
+            for (s in data.sanctuaries.values) {
+                if (!s.isMember(p.uuid)) continue
+                val rt = Residents.runtimeOrNull(s.id) ?: continue
+                val ring = com.rickygamer28.sanctuary.world.ZoneLayout.ring(s)
+                for (e in rt.roster.asSequence() + rt.away.asSequence()) {
+                    if (e.owner != p.uuid) continue
+                    val home = com.rickygamer28.sanctuary.world.TypeLogic.homeZone(e.pokemon, s.residents[e.pokemon.uuid], ring, s) ?: continue
+                    h.putString(e.pokemon.uuid.toString(), "$home|${Residents.zoneName(home)}")
+                }
+            }
+            val hash = h.hashCode() * 31 + bonus
+            if (sentHomes[p.uuid] == hash) continue
+            sentHomes[p.uuid] = hash
+            val t = net.minecraft.nbt.CompoundTag()
+            t.putInt("bonus", bonus)
+            t.put("h", h)
+            runCatching { Platform.current.sendToPlayer(p, com.rickygamer28.sanctuary.net.HomesPayload(t)) }
+        }
+        sentHomes.keys.retainAll(server.playerList.players.map { it.uuid }.toSet())
+    }
+
+    // ---- the Expedition Board (client side, from its mixins)
+
+    @JvmStatic
+    fun boardBonus(poke: Any?, exp: Any?): Double =
+        if (poke == null || exp == null) 1.0 else safe(1.0) { com.rickygamer28.sanctuary.compat.ExpeditionsClientBridge.bonus(poke, exp) }
+
+    @JvmStatic
+    fun rememberHovered(poke: Any?, exp: Any?) {
+        if (poke != null) safe(Unit) { com.rickygamer28.sanctuary.compat.ExpeditionsClientBridge.hovered = poke; com.rickygamer28.sanctuary.compat.ExpeditionsClientBridge.select(exp) }
+    }
+
+    @JvmStatic
+    fun tooltipLines(screen: Any?, lines: MutableList<Any?>?) {
+        if (lines == null) return
+        safe(Unit) { com.rickygamer28.sanctuary.compat.ExpeditionsClientBridge.addLines(screen, lines) }
+    }
+
     /** Time left on a resident's expedition, in minutes (-1 when not known). */
     fun minutesLeft(s: Sanctuary, pokemon: UUID): Long = safe(-1L) { com.rickygamer28.sanctuary.compat.ExpeditionsBridge.minutesLeft(s, pokemon) }
 }

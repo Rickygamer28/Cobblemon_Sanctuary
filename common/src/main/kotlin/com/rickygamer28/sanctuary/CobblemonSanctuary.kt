@@ -50,6 +50,8 @@ object CobblemonSanctuary {
 
     fun serverTick(server: MinecraftServer) {
         if (SelfTest.active) SelfTest.tick(server)
+        // where each player's residents live, for Cobblemon Expeditions' board
+        if (server.tickCount % 100 == 0) com.rickygamer28.sanctuary.life.Expeditions.syncHomes(server)
         val level = SanctuaryDimension.level(server) ?: return
         val data = SanctuaryData.get(server)
         if (data.sanctuaries.isEmpty()) return

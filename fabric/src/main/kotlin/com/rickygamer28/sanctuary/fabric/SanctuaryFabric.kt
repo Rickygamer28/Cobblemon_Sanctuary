@@ -93,6 +93,7 @@ object SanctuaryFabric : ModInitializer {
         FabricPlatform.PLAYER_DATA // registered now
 
         PayloadTypeRegistry.playS2C().register(ViewPayload.TYPE, ViewPayload.CODEC)
+        PayloadTypeRegistry.playS2C().register(com.rickygamer28.sanctuary.net.HomesPayload.TYPE, com.rickygamer28.sanctuary.net.HomesPayload.CODEC)
         PayloadTypeRegistry.playC2S().register(ActionPayload.TYPE, ActionPayload.CODEC)
         ServerPlayNetworking.registerGlobalReceiver(ActionPayload.TYPE) { payload, ctx ->
             ctx.server().execute { SanctuaryNet.onAction(ctx.player(), payload.tag) }
