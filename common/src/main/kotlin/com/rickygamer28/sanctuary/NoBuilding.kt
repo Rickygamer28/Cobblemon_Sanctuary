@@ -30,6 +30,24 @@ object NoBuilding {
 
     private fun inSanctuary(level: Level) = SanctuaryDimension.isSanctuary(level)
 
+    /**
+     * When a break or a placement is stopped, the player's game has often already changed more than the one block
+     * (the other half of a door, bed or tall flower). The server only re-sends that one block, so the rest would stay
+     * invisible but solid: everything around it is sent again (next tick, after the server's own answer).
+     */
+    fun resync(level: Level, player: Player?, pos: BlockPos) {
+        val p = player as? ServerPlayer ?: return
+        val sl = level as? net.minecraft.server.level.ServerLevel ?: return
+        sl.server.execute {
+            for (dx in -1..1) for (dy in -2..2) for (dz in -1..1) {
+                val q = pos.offset(dx, dy, dz)
+                if (!sl.isLoaded(q)) continue
+                p.connection.send(net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket(sl, q))
+                sl.getBlockEntity(q)?.let { be -> be.updatePacket?.let { pk -> p.connection.send(pk) } }
+            }
+        }
+    }
+
     private fun tell(player: Player?) {
         val p = player as? ServerPlayer ?: return
         val now = p.level().gameTime
@@ -46,9 +64,10 @@ object NoBuilding {
     }
 
     /** May [entity] place [placed] here? (false: it's stopped, and they're told why) */
-    fun allowPlace(level: Level, entity: net.minecraft.world.entity.Entity?, placed: BlockState): Boolean {
+    fun allowPlace(level: Level, entity: net.minecraft.world.entity.Entity?, placed: BlockState, pos: BlockPos): Boolean {
         if (!inSanctuary(level) || ValleyBlocks.isMods(placed)) return true
         tell(entity as? Player)
+        resync(level, entity as? Player, pos)
         return false
     }
 

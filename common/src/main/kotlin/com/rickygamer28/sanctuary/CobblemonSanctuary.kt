@@ -110,11 +110,9 @@ object CobblemonSanctuary {
                 runCatching { entity.pokemon.isWild() && !entity.isBattleClone() && !entity.tags.contains(com.rickygamer28.sanctuary.life.Visitors.TAG) }.getOrDefault(false))
         }
         if (tethering is SanctuaryTethering) return true
-        // a real pasture has its Pasture Block at pasturePos; ours (old or new) never does
-        val pos = tethering.pasturePos
-        val isRealPasture = level.isLoaded(pos) && level.getBlockState(pos).`is`(com.cobblemon.mod.common.CobblemonBlocks.PASTURE)
-        val wide = tethering.maxRoamPos.x - tethering.minRoamPos.x > 120
-        if (isRealPasture || (!wide && !level.isLoaded(pos))) return true
+        // outside the sanctuaries, tethered Pokémon belong to pastures (Cobblemon's or other mods'): never touched
+        if (!SanctuaryDimension.isSanctuary(level)) return true
+        // in a sanctuary nobody can build a pasture: a plain tethering here is a resident saved with the world
         if (entity.pokemon.tetheringId == tethering.tetheringId) entity.pokemon.tetheringId = null
         return false
     }
@@ -122,8 +120,9 @@ object CobblemonSanctuary {
     /** A player breaking a block: crystal nodes are mined, the valley is kept, and Cores have their own rules. False stops it. */
     fun allowBreak(level: Level, player: Player, pos: BlockPos, state: BlockState): Boolean {
         if (com.rickygamer28.sanctuary.life.Activities.onBreak(level, player, pos)) return false
-        if (!NoBuilding.allowBreak(level, player, state)) return false
-        return coreBreak(level, player, pos, state)
+        val ok = NoBuilding.allowBreak(level, player, state) && coreBreak(level, player, pos, state)
+        if (!ok) NoBuilding.resync(level, player, pos)
+        return ok
     }
 
     /** The return Core in a sanctuary's hub can't be broken; portal Cores only by their owner. */

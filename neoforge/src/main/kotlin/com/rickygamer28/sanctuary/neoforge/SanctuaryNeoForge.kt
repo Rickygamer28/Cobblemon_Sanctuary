@@ -97,7 +97,7 @@ class SanctuaryNeoForge(modBus: IEventBus, container: ModContainer) {
         // nobody builds in a sanctuary (the mod's own beds, balls, nests… still go down)
         bus.addListener(BlockEvent.EntityPlaceEvent::class.java) { e ->
             val level = e.level as? net.minecraft.world.level.Level ?: return@addListener
-            if (!NoBuilding.allowPlace(level, e.entity, e.placedBlock)) e.isCanceled = true
+            if (!NoBuilding.allowPlace(level, e.entity, e.placedBlock, e.pos)) e.isCanceled = true
         }
         bus.addListener(PlayerInteractEvent.RightClickBlock::class.java) { e ->
             if (!NoBuilding.allowItemUse(e.level, e.entity, e.itemStack)) e.useItem = TriState.FALSE

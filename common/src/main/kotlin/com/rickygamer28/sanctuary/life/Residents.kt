@@ -36,6 +36,11 @@ class LiveResident(
 ) {
     var home: String? = null
     var second: String? = null
+    /**
+     * The mark its trainer gave it, as it was when it came out. Some mods put their own mark back on a Pokémon each time
+     * it appears (alphas); residents appear often, so the trainer's choice is kept while it lives here.
+     */
+    var mark: com.cobblemon.mod.common.api.mark.Mark? = null
     var flyer = false
     var busyUntil = 0L
     var nextMeetAt = 0L
@@ -208,9 +213,9 @@ object Residents {
                 val tether = pokemon.tetheringId
                 if (tether != null && (ours == null || ours.tethering.tetheringId != tether)) {
                     // still linked to the sanctuary from before the game closed (or crashed): bring it back.
-                    // Older versions didn't remember their links, so once, every link without a Pokémon out is freed.
-                    val left = pokemon.entity == null && (tether == s.residents[pokemon.uuid]?.tether || !s.legacyTethersFixed)
-                    if (!left) continue // out in a real Cobblemon Pasture
+                    // Only the sanctuary's own last link: any other is a pasture's (Cobblemon's or another mod's), left alone.
+                    val left = pokemon.entity == null && tether == s.residents[pokemon.uuid]?.tether
+                    if (!left) continue // out in a pasture
                     pokemon.tetheringId = null
                     freed++
                 }
@@ -539,6 +544,9 @@ object Residents {
         var sent = 0
         for (r in rt.live.values.toList()) {
             if (r.leaving && r.pokemonId in wantedIds) { r.leaving = false; r.leaveTarget = null; r.busyUntil = 0 } // wanted again
+            // another mod changed its mark (an alpha's): the trainer's choice stays
+            val pk = r.entity.pokemon
+            if (pk.activeMark != r.mark && pk.uuid == r.pokemonId) runCatching { pk.activeMark = r.mark }
         }
         for (r in rt.live.values.filter { it.pokemonId !in wantedIds && !it.leaving && it.busyUntil < now }.sortedByDescending { nearestPlayer(it) }) {
             if (nearestPlayer(r) >= hidden * hidden) {
@@ -635,6 +643,7 @@ object Residents {
         MegaCompat.cleanStale(pokemon)
         // the sanctuary is a place to rest: residents come out healthy
         if (pokemon.currentHealth < pokemon.maxHealth) runCatching { pokemon.heal() }
+        val markBefore = pokemon.activeMark
         val entity = PokemonEntity(level, pokemon)
         entity.setPos(pos.x + 0.5, pos.y.toDouble(), pos.z + 0.5)
         val r = s.size.radius + 32
@@ -651,6 +660,8 @@ object Residents {
             return null
         }
         val live = LiveResident(pokemon.uuid, e.owner, entity, tethering)
+        live.mark = markBefore
+        if (pokemon.activeMark != markBefore) runCatching { pokemon.activeMark = markBefore }
         live.home = home
         live.second = TypeLogic.secondZone(pokemon, home, ring, s)
         live.flyer = TypeLogic.canFlyInFlocks(pokemon)

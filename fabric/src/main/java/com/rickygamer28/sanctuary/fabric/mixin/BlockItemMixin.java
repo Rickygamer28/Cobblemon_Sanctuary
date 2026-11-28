@@ -15,6 +15,6 @@ abstract class BlockItemMixin {
     @Inject(method = "place(Lnet/minecraft/world/item/context/BlockPlaceContext;)Lnet/minecraft/world/InteractionResult;", at = @At("HEAD"), cancellable = true)
     private void sanctuary$place(BlockPlaceContext ctx, CallbackInfoReturnable<InteractionResult> cir) {
         BlockItem self = (BlockItem) (Object) this;
-        if (!NoBuilding.INSTANCE.allowPlace(ctx.getLevel(), ctx.getPlayer(), self.getBlock().defaultBlockState())) cir.setReturnValue(InteractionResult.FAIL);
+        if (!NoBuilding.INSTANCE.allowPlace(ctx.getLevel(), ctx.getPlayer(), self.getBlock().defaultBlockState(), ctx.getClickedPos())) cir.setReturnValue(InteractionResult.FAIL);
     }
 }
