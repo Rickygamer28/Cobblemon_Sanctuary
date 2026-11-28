@@ -41,6 +41,8 @@ class LiveResident(
      * it appears (alphas); residents appear often, so the trainer's choice is kept while it lives here.
      */
     var mark: com.cobblemon.mod.common.api.mark.Mark? = null
+    /** When it was first seen boxed in by blocks (0: it isn't). */
+    var stuckSince: Long = 0L
     var flyer = false
     var busyUntil = 0L
     var nextMeetAt = 0L
@@ -554,6 +556,8 @@ object Residents {
             // another mod changed its mark (an alpha's): the trainer's choice stays
             val pk = r.entity.pokemon
             if (pk.activeMark != r.mark && pk.uuid == r.pokemonId) runCatching { pk.activeMark = r.mark }
+            // boxed in by blocks for a few seconds (a giant in a den, a cave, a hedge): out to open ground nearby
+            unstick(level, r, now)
             // its link's "pasture" follows it (pasture mods pull Pokémon back to their pasture otherwise)
             (r.entity.tethering as? SanctuaryTethering)?.let { t ->
                 if (!r.entity.isRemoved && t.tetheringId == r.tethering.tetheringId && r.entity.blockPosition().distSqr(t.pasturePos) > 64.0)
@@ -635,7 +639,10 @@ object Residents {
             // out of a den of its biome (it walks out), preferably one near a player
             if (!swimmer) {
                 // a den nobody came out of in the last few seconds, so they don't pile up at one entrance
+                // (only dens it fits through: giants come out in the open)
+                val (bw, bh) = com.rickygamer28.sanctuary.world.Dens.sizeOf(pokemon)
                 val dens = com.rickygamer28.sanctuary.world.Dens.near(level, s, spawnZone)
+                    .filter { com.rickygamer28.sanctuary.world.Dens.fits(it, bw, bh) }
                     .filter { level.gameTime - (rt.denUsed[it.center.asLong()] ?: -1000L) > 60 && com.rickygamer28.sanctuary.world.Dens.intact(level, it) }
                 val den = dens.filter { nearPlayer(it.center.x, it.center.z) }.randomOrNull() ?: dens.randomOrNull()
                 if (den != null && level.random.nextInt(4) != 0) {
@@ -809,6 +816,36 @@ object Residents {
     fun zoneName(zone: String?): String = when (zone) {
         null -> "skies"
         else -> ZoneLayout.NAMES[zone] ?: com.rickygamer28.sanctuary.world.CustomTypes.habitatName(zone)
+    }
+
+    /** A resident stuck inside blocks for 5 seconds is moved to the nearest open ground its body fits on. */
+    private fun unstick(level: ServerLevel, r: LiveResident, now: Long) {
+        val e = r.entity
+        if (e.isRemoved || r.swimmer) { r.stuckSince = 0L; return }
+        val boxed = !level.noCollision(e, e.boundingBox.deflate(0.2))
+        if (!boxed) { r.stuckSince = 0L; return }
+        if (r.stuckSince == 0L) { r.stuckSince = now; return }
+        if (now - r.stuckSince < 100L) return
+        r.stuckSince = 0L
+        val x = e.blockX
+        val z = e.blockZ
+        for (dist in 0..12 step 2) {
+            val steps = if (dist == 0) 1 else 12
+            for (i in 0 until steps) {
+                val a = i * Math.PI * 2 / steps
+                val px = x + (Math.cos(a) * dist).toInt()
+                val pz = z + (Math.sin(a) * dist).toInt()
+                if (!level.hasChunk(px shr 4, pz shr 4)) continue
+                val ground = surface(level, px, pz)
+                val box = e.getDimensions(e.pose).makeBoundingBox(ground.x + 0.5, ground.y.toDouble(), ground.z + 0.5)
+                if (!level.noCollision(e, box)) continue
+                e.teleportTo(ground.x + 0.5, ground.y.toDouble(), ground.z + 0.5)
+                e.navigation.stop()
+                r.waypoints.clear()
+                if (r.leaving) r.leaveTarget = null
+                return
+            }
+        }
     }
 
     fun findRoster(rt: SanctuaryRuntime, pokemonId: UUID): RosterEntry? = rt.roster.firstOrNull { it.pokemon.uuid == pokemonId }

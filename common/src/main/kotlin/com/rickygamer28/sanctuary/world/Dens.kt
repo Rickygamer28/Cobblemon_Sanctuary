@@ -83,6 +83,20 @@ object Dens {
     private fun encode(zone: String, dir: Direction) = "$zone:${dir.get2DDataValue()}:big"
 
     /** Is the den still standing (and its tunnel still open)? */
+    /**
+     * Whether a Pokémon of this size fits through the den (big ones: a 3×3 tunnel into a 3×3×3 hollow; the first,
+     * small ones: about 1×2). Giants like Regigigas or Wailord come and go in the open instead.
+     */
+    fun fits(d: Den, width: Float, height: Float): Boolean =
+        if (d.big) width <= 2.6f && height <= 2.85f else width <= 0.9f && height <= 1.85f
+
+    /** The size a Pokémon will be when it's out (before its entity exists). */
+    fun sizeOf(pokemon: com.cobblemon.mod.common.pokemon.Pokemon): Pair<Float, Float> = runCatching {
+        val f = pokemon.form
+        val k = f.baseScale * pokemon.scaleModifier
+        f.hitbox.width * k to f.hitbox.height * k
+    }.getOrDefault(1f to 1f)
+
     fun intact(level: ServerLevel, d: Den): Boolean =
         level.getBlockState(d.mouth).isAir && !level.getBlockState(d.roof).isAir
 

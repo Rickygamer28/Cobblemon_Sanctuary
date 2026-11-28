@@ -25,8 +25,11 @@ object Leaving {
         if (r.swimmer) { r.leaveTarget = null; return }
         val here = r.entity.blockPosition()
         // one of the nearest dens it may walk to (its own biome's first), not always the same one, so they don't queue
+        // (only dens it fits through: giants walk off somewhere out of sight instead)
+        val w = r.entity.bbWidth
+        val h = r.entity.bbHeight
         val dens = Dens.all(s)
-            .filter { level.isLoaded(it.mouth) && it.mouth.distSqr(here) < 96.0 * 96.0 && Behaviour.canRoam(s, rt, r, it.mouth) }
+            .filter { Dens.fits(it, w, h) && level.isLoaded(it.mouth) && it.mouth.distSqr(here) < 96.0 * 96.0 && Behaviour.canRoam(s, rt, r, it.mouth) }
             .sortedBy { it.mouth.distSqr(here) * (if (it.zone == r.home) 1.0 else 2.5) }
             .filter { Dens.intact(level, it) }
             .take(3).toList()
