@@ -4,3 +4,7 @@ com/cobblemon/mod/common/entity/pokemon/ai/tasks/WakeUpTask*.class
 com/cobblemon/mod/common/entity/pokemon/PokemonEntity.class
 com/cobblemon/mod/common/pokemon/Pokemon.class
 com/cobblemon/mod/common/pokemon/evolution/variants/LevelUpEvolution*.class
+com/cobblemon/mod/common/block/entity/PokemonPastureBlockEntity*.class
+com/cobblemon/mod/common/block/PastureBlock*.class
+com/cobblemon/mod/common/net/serverhandling/pasture/*.class
+com/cobblemon/mod/common/api/pasture/PastureLink*.class
