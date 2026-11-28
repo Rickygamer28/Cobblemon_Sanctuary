@@ -127,6 +127,11 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
     private var lookPick = 0
     /** The custom type whose home is being picked (and the choice so far), or null. */
     private var homeType: String? = null
+    /** A resident whose home is being chosen (its id, name, the habitats it can live in, and where it lives now). */
+    private var homeFor: UUID? = null
+    private var homeForName = ""
+    private var homeForOptions: List<String> = emptyList()
+    private var homeForNow = ""
     private var homePick = "own"
 
     /** A zone's number on the region map: the town 1, the habitats 2..12, the custom types' own habitats 13 on. */
@@ -340,6 +345,7 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
         if (lookZone != null) lookPicker(g, mouseX, mouseY)
         if (typePicker && tab == "residents") typeFilterPicker(g, mouseX, mouseY)
         if (homeType != null) homePicker(g, mouseX, mouseY)
+        if (homeFor != null) residentHomePicker(g, mouseX, mouseY)
         tooltip?.let { g.renderComponentTooltip(font, it, mouseX, mouseY) }
     }
 
@@ -431,6 +437,45 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
             send("customHome", "$type:$pick", page = "biomes"); homeType = null
         }
         button(g, bx + 20 + half, by + bh - 28, half, 20, "Cancel", ACCENT, mx, my, filled = false) { homeType = null }
+        g.pose().popPose()
+    }
+
+    /** Choosing where a resident lives: every habitat it can live in, in two columns; a click moves it there. */
+    private fun residentHomePicker(g: GuiGraphics, mx: Int, my: Int) {
+        val id = homeFor ?: return
+        tooltip = null
+        g.pose().pushPose()
+        g.pose().translate(0f, 0f, 400f)
+        g.fill(px, py, px + pw, py + ph, 0xC0000000.toInt())
+        hit(0, 0, width, height) { }
+        val options = homeForOptions
+        val bw = min(380, pw - 30)
+        val rowH = 18
+        val colW = (bw - 30) / 2
+        val rows = (options.size + 1) / 2
+        val bh = (48 + rows * (rowH + 3) + 36).coerceAtMost(ph - 20)
+        val bx = px + (pw - bw) / 2
+        val by = py + (ph - bh) / 2
+        box(g, bx - 1, by - 1, bw + 2, bh + 2, ACCENT)
+        box(g, bx, by, bw, bh, PANEL)
+        g.fill(bx, by, bx + bw, by + 3, ACCENT)
+        text(g, fit("Where should $homeForName live?", bw - 20), bx + 10, by + 12, TEXT, true)
+        text(g, fit("Now: ${zoneName(homeForNow)}. Pick a habitat and it moves there.", bw - 20), bx + 10, by + 26, SUB)
+        val maxRows = (bh - 48 - 36) / (rowH + 3)
+        options.forEachIndexed { i, o ->
+            if (i / 2 >= maxRows) return@forEachIndexed
+            val rx = bx + 10 + (i % 2) * (colW + 10)
+            val ry = by + 42 + (i / 2) * (rowH + 3)
+            val now = o == homeForNow
+            val hover = over(mx, my, rx, ry, colW, rowH)
+            val oc = opaque(color(o))
+            box(g, rx, ry, colW, rowH, if (now) mix(oc, 0x1A222B, 0.55f) else if (hover) CARD_HOVER else CARD)
+            g.fill(rx + 1, ry + 1, rx + 4, ry + rowH - 1, oc)
+            if (now) outline(g, rx, ry, colW, rowH, oc)
+            text(g, fit(zoneName(o) + if (now) " (now)" else "", colW - 14), rx + 8, ry + 5, if (now) 0xFFFFFFFF.toInt() else TEXT)
+            if (!now) hit(rx, ry, colW, rowH) { send("act", "home", id, o, page = "resident"); homeFor = null }
+        }
+        button(g, bx + (bw - 120) / 2, by + bh - 28, 120, 20, "Cancel", ACCENT, mx, my, filled = false) { homeFor = null }
         g.pose().popPose()
     }
 
@@ -1220,23 +1265,21 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
             var hx = x + font.width("Home:") + 6
             val current = d.getString("h")
             if (homes.size <= 1) text(g, zoneName(current) + " (its only home)", hx, hy + 6, DIM)
-            for (z in homes.take(12)) {
-                val label = zoneName(z)
-                val bw = font.width(label) + 12
-                if (hx + bw > x + w) break
-                val c = opaque(color(z))
-                if (z == current) {
-                    box(g, hx, hy + 1, bw, 18, c)
-                    g.drawCenteredString(font, label, hx + bw / 2, hy + 6, 0xFFFFFFFF.toInt())
-                } else {
-                    val hover = over(mx, my, hx, hy + 1, bw, 18)
-                    box(g, hx, hy + 1, bw, 18, if (hover) CARD_HOVER else CARD)
-                    outline(g, hx, hy + 1, bw, 18, c)
-                    g.drawCenteredString(font, label, hx + bw / 2, hy + 6, c)
-                    if (hover) tooltip = listOf(Component.literal("Move to the $label"))
-                    hit(hx, hy + 1, bw, 18) { send("act", "home", id, z, page = "resident") }
+            else {
+                // where it lives now, and a button that opens the list of every habitat it could live in
+                val label = zoneName(current)
+                val cw2 = font.width(label) + 12
+                val c = opaque(color(current))
+                box(g, hx, hy + 1, cw2, 18, c)
+                g.drawCenteredString(font, label, hx + cw2 / 2, hy + 6, 0xFFFFFFFF.toInt())
+                hx += cw2 + 6
+                val pick = "Choose home…  (${homes.size} options)"
+                button(g, hx, hy + 1, min(font.width(pick) + 16, x + w - hx), 18, pick, ACCENT, mx, my, filled = false) {
+                    homeFor = id
+                    homeForName = d.getString("n").ifEmpty { "this Pokémon" }
+                    homeForOptions = homes
+                    homeForNow = current
                 }
-                hx += bw + 4
             }
         }
     }
