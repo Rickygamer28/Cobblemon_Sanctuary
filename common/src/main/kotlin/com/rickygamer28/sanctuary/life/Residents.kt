@@ -100,6 +100,8 @@ class SanctuaryRuntime(val id: UUID) {
     var hadPlayers = false
     val live = HashMap<UUID, LiveResident>()
     var roster: List<RosterEntry> = emptyList()
+    /** Residents away on an expedition (still theirs, just not in the valley right now). */
+    var away: List<RosterEntry> = emptyList()
     var rosterAt = -100000L
     var rosterDirty = true
     var shuffleSeed = 0L
@@ -171,6 +173,7 @@ object Residents {
         Digs.tick(level, s, rt, now, players)
         Contests.tick(level, s, rt, now, players)
         Activities.tick(level, s, rt, now, players)
+        Expeditions.tick(level, s, rt, now, players)
         Evolving.tick(level, s, rt, now)
         if (players.isEmpty()) {
             despawnAll(rt)
@@ -203,6 +206,7 @@ object Residents {
     fun refreshRoster(level: ServerLevel, s: Sanctuary, rt: SanctuaryRuntime, now: Long) {
         val server = level.server
         val list = ArrayList<RosterEntry>()
+        val awayList = ArrayList<RosterEntry>()
         var freed = 0
         var pcsOk = true
         for (member in s.allMembers()) {
@@ -219,10 +223,13 @@ object Residents {
                     pokemon.tetheringId = null
                     freed++
                 }
+                // away on an expedition: still a resident, but not in the valley until it's back
+                if (Expeditions.isAway(s, pokemon.uuid)) { awayList += RosterEntry(pokemon, member, name, pc.uuid); continue }
                 list += RosterEntry(pokemon, member, name, pc.uuid)
             }
         }
         rt.roster = list
+        rt.away = awayList
         rt.rosterAt = now
         rt.rosterDirty = false
         if (pcsOk && !s.legacyTethersFixed) s.legacyTethersFixed = true
@@ -285,7 +292,7 @@ object Residents {
             newTypes.filter { it != ZoneLayout.HUB && s.unlocked.size > 1 && it in s.habitats }.forEach { s.logEvent("The ${zoneName(it)} woke up!") }
         }
         s.typeCounts = counts
-        s.residentCount = list.size
+        s.residentCount = list.size + rt.away.size
         s.unlocked = unlocked
         if (newTypes.isNotEmpty()) s.unlockedChanged = true
         // the pockets of a habitat that just woke up get built too
@@ -534,7 +541,7 @@ object Residents {
         }
         val wantedIds = wanted.map { it.pokemon.uuid }.toHashSet()
         // the valley's guardian is always out (on its Rise)
-        s.guardian?.let { if (Guardian.unlocked(s)) wantedIds += it }
+        s.guardian?.let { if (Guardian.unlocked(s) && !Expeditions.isAway(s, it)) wantedIds += it }
 
         // the ones no longer wanted go back to rest: out of sight they just go; near a player they walk into a den
         // (or out of sight, or dive), so nobody sees them vanish

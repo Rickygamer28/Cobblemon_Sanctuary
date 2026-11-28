@@ -1,0 +1,12 @@
+{
+  "required": false,
+  "minVersion": "0.8",
+  "package": "com.rickygamer28.sanctuary.compat.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "ExpeditionPowerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 0
+  }
+}

@@ -972,8 +972,21 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
             )
             cx += cw + gap
         }
+        // residents away on expeditions
+        var ey = cy + 26
+        if (data.contains("away")) {
+            val away = data.getList("away", Tag.TAG_STRING.toInt()).let { l -> (0 until l.size).map { l.getString(it).split('|') } }
+            fun left(m: String) = m.toLongOrNull()?.takeIf { it >= 0 }?.let { if (it >= 60) "${it / 60}h ${it % 60}m" else "${it}m" }
+            val line = "✈ On expeditions: " + away.joinToString(", ") { p -> p[0] + " (" + p.getOrElse(1) { "?" } + (left(p.getOrElse(2) { "" })?.let { ", $it" } ?: "") + ")" }
+            text(g, fit(line, w), x, ey, 0xFF7CC8F0.toInt())
+            if (over(mx, my, x, ey - 2, w, 12)) tooltip = buildList {
+                add(Component.literal("Away on expeditions (${away.size})").withColor(0xFF7CC8F0.toInt()))
+                away.forEach { p -> add(Component.literal("${p[0]}: ${p.getOrElse(1) { "?" }}" + (left(p.getOrElse(2) { "" })?.let { ", back in $it" } ?: "")).withColor(SUB)) }
+                add(Component.literal("Friends see them off and welcome them home at the Core.").withColor(DIM))
+            }
+            ey += 14
+        }
         // recent events
-        val ey = cy + 26
         text(g, "Recently", x, ey, SUB)
         val basket = if (data.getBoolean("hasBasket")) "Basket: ${data.getInt("basketItems")} items" else "The Gathering Post is being built in the town"
         var bx2 = x + w
@@ -1245,6 +1258,7 @@ class SanctuaryScreen(initial: CompoundTag) : Screen(Component.literal("Sanctuar
         row("Ability", Component.translatable("cobblemon.ability.${d.getString("ability")}").string)
         row("Favourite", if (d.contains("fav")) d.getString("fav") else "hasn't picked a spot yet", if (d.contains("fav")) 0xFFE8C46A.toInt() else DIM)
         if (d.contains("title")) row("Title", d.getString("title"), GOLD)
+        if (d.contains("trips")) d.getInt("trips").let { n -> row("Expeditions", "$n trip${if (n == 1) "" else "s"}" + if (n >= 5) "  ·  ★ Explorer" else "  (Explorer at 5)", if (n >= 5) GOLD else 0xFF7CC8F0.toInt()) }
         if (d.contains("ribbons")) row("Ribbons", "★".repeat(d.getInt("ribbons").coerceAtMost(10)) + "  (${d.getInt("ribbons")} contest${if (d.getInt("ribbons") == 1) "" else "s"} won)", GOLD)
         if (d.contains("req")) {
             row("Wants", d.getString("req"), 0xFFF07CB4.toInt())

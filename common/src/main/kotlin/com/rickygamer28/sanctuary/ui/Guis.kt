@@ -151,6 +151,14 @@ object SanctuaryGuis {
         t.putInt("radius", s.size.radius)
         t.putBoolean("preview", s.state == SanctuaryState.PREVIEW)
         t.putInt("residents", s.residentCount)
+        // residents away on expeditions (Cobblemon Expeditions)
+        if (rt.away.isNotEmpty()) t.put("away", ListTag().also { l ->
+            for (e in rt.away) {
+                val trip = s.away[e.pokemon.uuid] ?: continue
+                val left = com.rickygamer28.sanctuary.life.Expeditions.minutesLeft(s, e.pokemon.uuid)
+                l.add(StringTag.valueOf("${e.pokemon.getDisplayName(false).string}|${trip.name}|$left"))
+            }
+        })
         t.putInt("live", rt.live.values.count { !it.leaving })
         t.putInt("capNow", Residents.spawnCap(s))
         t.put("basketOff", ListTag().also { l -> s.basketOff.forEach { l.add(StringTag.valueOf(it)) } })
@@ -420,6 +428,7 @@ object SanctuaryGuis {
             }
             t.putBoolean("stay", s.residents[id]?.noEvolve == true)
             s.residents[id]?.ribbons?.takeIf { it > 0 }?.let { t.putInt("ribbons", it) }
+            s.residents[id]?.expeditions?.takeIf { it > 0 }?.let { t.putInt("trips", it) }
         }
         t.putInt("hpNow", pk.currentHealth)
         val stats = listOf(Stats.HP, Stats.ATTACK, Stats.DEFENCE, Stats.SPECIAL_ATTACK, Stats.SPECIAL_DEFENCE, Stats.SPEED)

@@ -52,7 +52,10 @@ jobs:
           COBBLE_F_URL=$(jq -r '[.[] | select(.version_number | test("1\\.8\\.4"))][0].files[0].url' cobblemon-fabric-versions.json)
           curl -fsSL 'https://api.modrinth.com/v2/project/forge-config-api-port/version?loaders=%5B%22fabric%22%5D&game_versions=%5B%221.21.1%22%5D' > fcap-versions.json
           FCAP=$(jq -r '.[0].id' fcap-versions.json)
-          for v in LOOM FAPI FLK FLOADER FINSTALLER COBBLE_F COBBLE_F_URL FCAP; do echo "$v=${!v}" >> "$GITHUB_ENV"; done
+          # Cobblemon Expeditions (optional compatibility), one build per loader
+          EXP_N=$(curl -fsSL 'https://api.modrinth.com/v2/project/HtRy1shF/version?loaders=%5B%22neoforge%22%5D&game_versions=%5B%221.21.1%22%5D' | jq -r '.[0].id')
+          EXP_F=$(curl -fsSL 'https://api.modrinth.com/v2/project/HtRy1shF/version?loaders=%5B%22fabric%22%5D&game_versions=%5B%221.21.1%22%5D' | jq -r '.[0].id')
+          for v in LOOM FAPI FLK FLOADER FINSTALLER COBBLE_F COBBLE_F_URL FCAP EXP_N EXP_F; do echo "$v=${!v}" >> "$GITHUB_ENV"; done
           mkdir -p ci-out
           {
             echo "neoforge=$NEO"
@@ -77,7 +80,8 @@ jobs:
           set +e
           timeout 35m ./gradlew build --continue --stacktrace --console=plain --no-daemon -Pneo_version="$NEO" -Pmoddev_version="$MDG" -Pcobblemon_version="$COBBLE" \
             -Ploom_version="$LOOM" -Pfabric_api_version="$FAPI" -Pfabric_kotlin_version="$FLK" -Pfabric_loader_version="$FLOADER" \
-            -Pcobblemon_fabric_version="$COBBLE_F" -Pfcap_version="$FCAP" > ci-out/build.log 2>&1
+            -Pcobblemon_fabric_version="$COBBLE_F" -Pfcap_version="$FCAP" \
+            -Pexpeditions_neoforge_version="$EXP_N" -Pexpeditions_fabric_version="$EXP_F" > ci-out/build.log 2>&1
           STATUS=$?
           echo "$STATUS" > ci-out/status.txt
           tail -80 ci-out/build.log
@@ -109,6 +113,8 @@ jobs:
             curl -fsSL -o mods/cobblemon.jar "$COBBLE_URL"
             KFF_URL=$(curl -fsSL 'https://api.modrinth.com/v2/project/kotlin-for-forge/version?loaders=%5B%22neoforge%22%5D&game_versions=%5B%221.21.1%22%5D' | jq -r '.[0].files[0].url')
             curl -fsSL -o mods/kotlinforforge.jar "$KFF_URL"
+            # other mods we're compatible with, to check the mod starts cleanly beside them
+            curl -fsSL -o mods/cobblemon-expeditions.jar "$(curl -fsSL "https://api.modrinth.com/v2/version/$EXP_N" | jq -r '.files[0].url')" || true
             cp "$ROOT"/neoforge/build/libs/*.jar mods/; rm -f mods/*-sources.jar
             ls -la mods > "$OUT/mods.txt"; props 25565
             printf '\n-Xmx4G\n-Dsanctuary.selftest=%s\n' "$SIZE" >> user_jvm_args.txt
@@ -121,6 +127,7 @@ jobs:
             curl -fsSL -o mods/cobblemon.jar "$COBBLE_F_URL"
             curl -fsSL -o mods/fabric-api.jar "https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-api/$FAPI/fabric-api-$FAPI.jar"
             curl -fsSL -o mods/fabric-language-kotlin.jar "https://maven.fabricmc.net/net/fabricmc/fabric-language-kotlin/$FLK/fabric-language-kotlin-$FLK.jar"
+            curl -fsSL -o mods/cobblemon-expeditions.jar "$(curl -fsSL "https://api.modrinth.com/v2/version/$EXP_F" | jq -r '.files[0].url')" || true
             cp "$ROOT"/fabric/build/libs/*.jar mods/; rm -f mods/*-sources.jar
             ls -la mods > "$OUT/mods.txt"; props 25566
             timeout 42m java -Xmx4G -Dsanctuary.selftest="$SIZE" -jar fabric-server.jar nogui > "$OUT/server.log" 2>&1

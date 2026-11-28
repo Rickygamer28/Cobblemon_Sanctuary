@@ -11,6 +11,7 @@ kotlin { jvmToolchain(21) }
 sourceSets {
     main {
         kotlin { srcDir '../common/src/main/kotlin' }
+        java { srcDir '../common/src/main/java' }
         resources { srcDir '../common/src/main/resources' }
     }
 }
@@ -38,6 +39,8 @@ repositories {
 dependencies {
     // Cobblemon (NeoForge build): compiled against, players install it themselves
     compileOnly "maven.modrinth:cobblemon:${cobblemon_version}"
+    // Cobblemon Expeditions: optional, compiled against for the compatibility code
+    compileOnly "maven.modrinth:cobblemon_expeditions:${expeditions_neoforge_version}"
 }
 
 var generateModMetadata = tasks.register('generateModMetadata', ProcessResources) {

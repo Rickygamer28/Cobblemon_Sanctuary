@@ -40,7 +40,10 @@ object Settings {
         Setting("World", "No wild Pokémon spawning", C.blockWildSpawns),
         Setting("World", "No NPC trainers spawning", C.blockTrainerSpawns),
         Setting("World", "Play-fights give XP", C.playFightXp),
-    ) }
+    ) + if (com.rickygamer28.sanctuary.life.Expeditions.present) listOf(
+        Setting("Expeditions", "Home habitat bonus (%)", C.expeditionHomeBonus, 0.0, 100.0, 5.0),
+        Setting("Expeditions", "Loot goes to the basket", C.expeditionLootToBasket),
+    ) else emptyList() }
 
     fun allowed(player: ServerPlayer) = player.hasPermissions(2) || player.server.isSingleplayerOwner(player.gameProfile)
 

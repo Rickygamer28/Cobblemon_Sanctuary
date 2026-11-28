@@ -64,6 +64,14 @@ object SanctuaryConfig {
         .comment("Stop wild Pokémon from spawning inside sanctuaries, so only residents live there.")
         .define("blockWildSpawns", true)
 
+    val expeditionLootToBasket: ModConfigSpec.BooleanValue = builder
+        .comment("Cobblemon Expeditions: loot from residents' expeditions goes straight into the Gathering Basket.")
+        .define("expeditionLootToBasket", false)
+
+    val expeditionHomeBonus: ModConfigSpec.IntValue = builder
+        .comment("Cobblemon Expeditions: how much stronger (in percent) a resident is on an expedition that suits the habitat it lives in.")
+        .defineInRange("expeditionHomeBonus", 15, 0, 100)
+
     val blockTrainerSpawns: ModConfigSpec.BooleanValue = builder
         .comment("Stop NPC trainers from other mods (like Radical Cobblemon Trainers) from spawning inside sanctuaries.")
         .define("blockTrainerSpawns", true)

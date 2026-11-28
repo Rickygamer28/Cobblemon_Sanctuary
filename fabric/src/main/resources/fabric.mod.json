@@ -11,7 +11,7 @@
     "main": [{ "adapter": "kotlin", "value": "com.rickygamer28.sanctuary.fabric.SanctuaryFabric" }],
     "client": [{ "adapter": "kotlin", "value": "com.rickygamer28.sanctuary.fabric.SanctuaryFabricClient" }]
   },
-  "mixins": ["cobblemon_sanctuary.mixins.json"],
+  "mixins": ["cobblemon_sanctuary.mixins.json", "cobblemon_sanctuary.compat.mixins.json"],
   "depends": {
     "fabricloader": ">=0.16.0",
     "minecraft": "~${minecraft_version}",

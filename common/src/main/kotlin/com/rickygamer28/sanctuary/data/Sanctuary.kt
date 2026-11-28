@@ -29,6 +29,16 @@ enum class SanctuarySize(val radius: Int, val label: String) {
     }
 }
 
+/** A resident's expedition: which one (its instance, to find the result), its name, whose it is, and when it left. */
+class AwayTrip(val instance: UUID, val expedition: String, val name: String, val owner: UUID, val since: Long) {
+    fun save(): CompoundTag = CompoundTag().also { t ->
+        t.putUUID("I", instance); t.putString("E", expedition); t.putString("N", name); t.putUUID("O", owner); t.putLong("S", since)
+    }
+    companion object {
+        fun load(t: CompoundTag) = AwayTrip(t.getUUID("I"), t.getString("E"), t.getString("N"), t.getUUID("O"), t.getLong("S"))
+    }
+}
+
 /** Per-Pokémon sanctuary data that survives the Pokémon being despawned. */
 class ResidentData(
     var homeChoice: String? = null,
@@ -47,6 +57,8 @@ class ResidentData(
     var ribbons: Int = 0,
     /** Its trainer asked it not to evolve in the sanctuary. */
     var noEvolve: Boolean = false,
+    /** Expeditions it has come back from (Cobblemon Expeditions). */
+    var expeditions: Int = 0,
 ) {
     fun save(): CompoundTag = CompoundTag().also { t ->
         tether?.let { t.putUUID("Tether", it) }
@@ -60,6 +72,7 @@ class ResidentData(
         if (helped > 0) t.putInt("Helped", helped)
         if (ribbons > 0) t.putInt("Ribbons", ribbons)
         if (noEvolve) t.putBoolean("NoEvolve", true)
+        if (expeditions > 0) t.putInt("Expeditions", expeditions)
     }
 
     companion object {
@@ -75,6 +88,7 @@ class ResidentData(
             helped = t.getInt("Helped"),
             ribbons = t.getInt("Ribbons"),
             noEvolve = t.getBoolean("NoEvolve"),
+            expeditions = t.getInt("Expeditions"),
         )
     }
 }
@@ -232,6 +246,8 @@ class Sanctuary(
     val dexEvolved: MutableSet<String> = linkedSetOf()
     /** Other players may visit (without living here). */
     var openToVisitors: Boolean = false
+    /** Residents away on an expedition (Cobblemon Expeditions): Pokémon → the trip. */
+    val away: MutableMap<UUID, AwayTrip> = linkedMapOf()
     /** Crystal nodes in the caves, ready to mine (position → when they grew). */
     val crystals: MutableMap<Long, Long> = linkedMapOf()
     /** Dig spots residents left (position → when). */
@@ -367,6 +383,7 @@ class Sanctuary(
         t.putBoolean("OpenToVisitors", openToVisitors)
         t.putLongArray("DigPos", digs.keys.toLongArray())
         t.putLongArray("CrystalPos", crystals.keys.toLongArray())
+        t.put("Away", ListTag().also { l -> away.forEach { (k, v) -> l.add(v.save().also { c -> c.putUUID("P", k) }) } })
         t.putLongArray("DigAt", digs.values.toLongArray())
         guardian?.let { t.putUUID("Guardian", it) }
         t.putLong("GuardianAt", guardianSetAt)
@@ -505,6 +522,7 @@ class Sanctuary(
             t.getList("DexEvolved", Tag.TAG_STRING.toInt()).forEach { s.dexEvolved += it.asString }
             s.openToVisitors = t.getBoolean("OpenToVisitors")
             t.getLongArray("CrystalPos").forEach { s.crystals[it] = 0L }
+            t.getList("Away", Tag.TAG_COMPOUND.toInt()).forEach { e -> val c = e as CompoundTag; if (c.hasUUID("P")) runCatching { s.away[c.getUUID("P")] = AwayTrip.load(c) } }
             run { val dp = t.getLongArray("DigPos"); val da = t.getLongArray("DigAt"); for (i in dp.indices) if (i < da.size) s.digs[dp[i]] = da[i] }
             if (t.hasUUID("Guardian")) s.guardian = t.getUUID("Guardian")
             s.guardianSetAt = t.getLong("GuardianAt")

@@ -10,6 +10,7 @@ kotlin { jvmToolchain(21) }
 sourceSets {
     main {
         kotlin { srcDir '../common/src/main/kotlin' }
+        java { srcDir '../common/src/main/java' }
         resources { srcDir '../common/src/main/resources' }
     }
 }
@@ -31,6 +32,8 @@ dependencies {
     modImplementation "net.fabricmc:fabric-language-kotlin:${fabric_kotlin_version}"
     // Cobblemon (Fabric build): compiled against, players install it themselves
     modCompileOnly "maven.modrinth:cobblemon:${cobblemon_fabric_version}"
+    // Cobblemon Expeditions: optional, compiled against for the compatibility code
+    modCompileOnly "maven.modrinth:cobblemon_expeditions:${expeditions_fabric_version}"
     // NeoForge's config files on Fabric: shipped inside this jar, nothing extra to install
     modImplementation "maven.modrinth:forge-config-api-port:${fcap_version}"
     include "maven.modrinth:forge-config-api-port:${fcap_version}"
