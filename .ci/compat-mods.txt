@@ -1,3 +1,2 @@
 # searches on Modrinth for mods to check compatibility with
-cobblemon tp pastures
-radical cobblemon trainers
+cobblemon expeditions
