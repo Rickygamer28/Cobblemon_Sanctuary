@@ -1,0 +1,3 @@
+# Modrinth slugs of mods to check compatibility with
+cobblemon-tp-pastures
+radical-cobblemon-trainers

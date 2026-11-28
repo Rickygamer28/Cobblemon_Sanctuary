@@ -77,3 +77,24 @@ PY
 mkdir -p "$OUT/raw/clusters"
 unzip -o -q "$JAR" 'assets/cobblemon/blockstates/*tumblestone*' 'assets/cobblemon/blockstates/*gem_cluster*' -d "$OUT/raw/clusters" 2>/dev/null || true
 grep -E 'block/[A-Za-z]*(Tumblestone|Cluster|Gem)' "$OUT/jar-classes.txt" > "$OUT/raw/clusters/classes.txt" || true
+
+# other mods to look at for compatibility (Modrinth slugs, NeoForge 1.21.1 builds): their classes decompiled whole
+if [ -f .ci/compat-mods.txt ]; then
+  while IFS= read -r slug; do
+    [ -z "$slug" ] && continue
+    case "$slug" in \#*) continue;; esac
+    URL=$(curl -fsSL "https://api.modrinth.com/v2/project/$slug/version?loaders=%5B%22neoforge%22%5D&game_versions=%5B%221.21.1%22%5D" | jq -r '.[0].files[0].url')
+    [ -z "$URL" ] || [ "$URL" = "null" ] && { echo "$slug: no build" >> "$OUT/compat.log"; continue; }
+    D=$(mktemp -d); curl -fsSL -o "$D/mod.jar" "$URL"
+    mkdir -p "$D/classes" "$OUT/compat/$slug"
+    unzip -Z1 "$D/mod.jar" > "$OUT/compat/$slug/files.txt"
+    unzip -o -q "$D/mod.jar" '*.class' -d "$D/classes" 2>/dev/null
+    # big mods: only the classes whose path matches the filter line in compat-filter-<slug>.txt, if there is one
+    if [ -f ".ci/compat-filter-$slug.txt" ]; then
+      find "$D/classes" -name '*.class' | grep -v -E -f ".ci/compat-filter-$slug.txt" | xargs -r rm -f
+    fi
+    unzip -o -q "$D/mod.jar" '*.json' '*.toml' -x 'assets/*' 'data/*/loot_table/*' -d "$OUT/compat/$slug/meta" 2>/dev/null
+    timeout 300 java -jar "$WORK/vineflower.jar" -dgs=1 -log=ERROR "$D/classes" "$OUT/compat/$slug/src" >> "$OUT/compat.log" 2>&1 || echo "$slug: vineflower exit $?" >> "$OUT/compat.log"
+    echo "$slug: $URL" >> "$OUT/compat.log"
+  done < .ci/compat-mods.txt
+fi
