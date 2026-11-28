@@ -1,1 +1,2 @@
 # searches on Modrinth for mods to check compatibility with (one per line; empty = none)
+cobblemon expeditions
