@@ -26,4 +26,12 @@ class SanctuaryTethering(
     var roamCheck: (BlockPos) -> Boolean = { true }
 
     override fun canRoamTo(pos: BlockPos): Boolean = roamCheck(pos)
+
+    /**
+     * The same link, with its "pasture" where the resident stands now. Pasture mods (TP-Pastures) pull a Pokémon back
+     * when it's far from its pasture; a resident's home is the whole valley, so its link follows it around.
+     */
+    fun movedTo(pos: BlockPos): SanctuaryTethering =
+        SanctuaryTethering(minRoamPos, maxRoamPos, playerId, playerName, tetheringId, pokemonId, pcId, entityId, pos, sanctuaryId)
+            .also { it.roamCheck = roamCheck }
 }

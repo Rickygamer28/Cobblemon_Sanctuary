@@ -547,6 +547,11 @@ object Residents {
             // another mod changed its mark (an alpha's): the trainer's choice stays
             val pk = r.entity.pokemon
             if (pk.activeMark != r.mark && pk.uuid == r.pokemonId) runCatching { pk.activeMark = r.mark }
+            // its link's "pasture" follows it (pasture mods pull Pokémon back to their pasture otherwise)
+            (r.entity.tethering as? SanctuaryTethering)?.let { t ->
+                if (!r.entity.isRemoved && t.tetheringId == r.tethering.tetheringId && r.entity.blockPosition().distSqr(t.pasturePos) > 64.0)
+                    r.entity.tethering = t.movedTo(r.entity.blockPosition())
+            }
         }
         for (r in rt.live.values.filter { it.pokemonId !in wantedIds && !it.leaving && it.busyUntil < now }.sortedByDescending { nearestPlayer(it) }) {
             if (nearestPlayer(r) >= hidden * hidden) {
