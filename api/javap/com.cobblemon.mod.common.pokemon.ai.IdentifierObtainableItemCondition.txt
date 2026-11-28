@@ -1,0 +1,6 @@
+public final class com.cobblemon.mod.common.pokemon.ai.IdentifierObtainableItemCondition implements com.cobblemon.mod.common.pokemon.ai.ObtainableItemCondition {
+  private final net.minecraft.resources.ResourceLocation itemId;
+  public com.cobblemon.mod.common.pokemon.ai.IdentifierObtainableItemCondition(net.minecraft.resources.ResourceLocation);
+  public java.lang.String toString();
+  public boolean isItemObtainable(net.minecraft.core.RegistryAccess, net.minecraft.world.item.ItemStack);
+}

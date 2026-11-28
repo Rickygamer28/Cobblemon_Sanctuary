@@ -1,0 +1,9 @@
+public final class com.cobblemon.mod.common.util.ResourceLocationExtensionsKt {
+  public static final void extractTo(net.minecraft.resources.ResourceLocation, java.io.File);
+  public static final net.minecraft.resources.ResourceLocation asIdentifierDefaultingNamespace(java.lang.String, java.lang.String);
+  public static net.minecraft.resources.ResourceLocation asIdentifierDefaultingNamespace$default(java.lang.String, java.lang.String, int, java.lang.Object);
+  public static final net.minecraft.resources.ResourceLocation toAssetPath(net.minecraft.resources.ResourceLocation, java.lang.String, java.lang.String);
+  public static net.minecraft.resources.ResourceLocation toAssetPath$default(net.minecraft.resources.ResourceLocation, java.lang.String, java.lang.String, int, java.lang.Object);
+  public static final net.minecraft.resources.ResourceLocation asIdentifierDefaultingNamespace(com.mojang.brigadier.StringReader, java.lang.String);
+  public static net.minecraft.resources.ResourceLocation asIdentifierDefaultingNamespace$default(com.mojang.brigadier.StringReader, java.lang.String, int, java.lang.Object);
+}

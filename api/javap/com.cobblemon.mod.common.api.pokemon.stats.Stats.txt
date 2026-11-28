@@ -1,0 +1,42 @@
+public final class com.cobblemon.mod.common.api.pokemon.stats.Stats$Companion {
+  private com.cobblemon.mod.common.api.pokemon.stats.Stats$Companion();
+  public final java.util.Set<com.cobblemon.mod.common.api.pokemon.stats.Stat> getALL();
+  public final java.util.Set<com.cobblemon.mod.common.api.pokemon.stats.Stat> getPERMANENT();
+  public final java.util.Set<com.cobblemon.mod.common.api.pokemon.stats.Stat> getBATTLE_ONLY();
+  public final com.cobblemon.mod.common.api.pokemon.stats.Stats getStat(java.lang.String);
+  public final java.lang.String getSeverity(int);
+  public com.cobblemon.mod.common.api.pokemon.stats.Stats$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.api.pokemon.stats.Stats extends java.lang.Enum<com.cobblemon.mod.common.api.pokemon.stats.Stats> implements com.cobblemon.mod.common.api.pokemon.stats.Stat {
+  public static final com.cobblemon.mod.common.api.pokemon.stats.Stats$Companion Companion;
+  private final net.minecraft.resources.ResourceLocation identifier;
+  private final net.minecraft.network.chat.Component displayName;
+  private final com.cobblemon.mod.common.api.pokemon.stats.Stat$Type type;
+  private final java.lang.String showdownId;
+  private static final java.util.Set<com.cobblemon.mod.common.api.pokemon.stats.Stat> ALL;
+  private static final java.util.Set<com.cobblemon.mod.common.api.pokemon.stats.Stat> PERMANENT;
+  private static final java.util.Set<com.cobblemon.mod.common.api.pokemon.stats.Stat> BATTLE_ONLY;
+  public static final com.cobblemon.mod.common.api.pokemon.stats.Stats HP;
+  public static final com.cobblemon.mod.common.api.pokemon.stats.Stats ATTACK;
+  public static final com.cobblemon.mod.common.api.pokemon.stats.Stats DEFENCE;
+  public static final com.cobblemon.mod.common.api.pokemon.stats.Stats SPECIAL_ATTACK;
+  public static final com.cobblemon.mod.common.api.pokemon.stats.Stats SPECIAL_DEFENCE;
+  public static final com.cobblemon.mod.common.api.pokemon.stats.Stats SPEED;
+  public static final com.cobblemon.mod.common.api.pokemon.stats.Stats EVASION;
+  public static final com.cobblemon.mod.common.api.pokemon.stats.Stats ACCURACY;
+  private static final com.cobblemon.mod.common.api.pokemon.stats.Stats[] $VALUES;
+  private static final kotlin.enums.EnumEntries $ENTRIES;
+  private com.cobblemon.mod.common.api.pokemon.stats.Stats(net.minecraft.resources.ResourceLocation, net.minecraft.network.chat.Component, com.cobblemon.mod.common.api.pokemon.stats.Stat$Type, java.lang.String);
+  public net.minecraft.resources.ResourceLocation getIdentifier();
+  public net.minecraft.network.chat.Component getDisplayName();
+  public com.cobblemon.mod.common.api.pokemon.stats.Stat$Type getType();
+  public java.lang.String getShowdownId();
+  public static com.cobblemon.mod.common.api.pokemon.stats.Stats[] values();
+  public static com.cobblemon.mod.common.api.pokemon.stats.Stats valueOf(java.lang.String);
+  public static kotlin.enums.EnumEntries<com.cobblemon.mod.common.api.pokemon.stats.Stats> getEntries();
+  private static final com.cobblemon.mod.common.api.pokemon.stats.Stats[] $values();
+  public static final java.util.Set access$getALL$cp();
+  public static final java.util.Set access$getPERMANENT$cp();
+  public static final java.util.Set access$getBATTLE_ONLY$cp();
+  static {};
+}

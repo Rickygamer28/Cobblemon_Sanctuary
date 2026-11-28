@@ -1,0 +1,17 @@
+public final class com.cobblemon.mod.common.util.NetExtensionsKt {
+  public static final void writeConditional(io.netty.buffer.ByteBuf, kotlin.jvm.functions.Function0<java.lang.Boolean>, kotlin.jvm.functions.Function0<kotlin.Unit>);
+  public static final void writeConditional(io.netty.buffer.ByteBuf, boolean, kotlin.jvm.functions.Function0<kotlin.Unit>);
+  public static final void writeSizedInt(io.netty.buffer.ByteBuf, com.cobblemon.mod.common.net.IntSize, int);
+  public static final void readConditional(io.netty.buffer.ByteBuf, kotlin.jvm.functions.Function0<kotlin.Unit>);
+  public static final int readSizedInt(io.netty.buffer.ByteBuf, com.cobblemon.mod.common.net.IntSize);
+  public static final void readTimes(io.netty.buffer.ByteBuf, com.cobblemon.mod.common.net.IntSize, kotlin.jvm.functions.Function0<kotlin.Unit>);
+  public static void readTimes$default(io.netty.buffer.ByteBuf, com.cobblemon.mod.common.net.IntSize, kotlin.jvm.functions.Function0, int, java.lang.Object);
+  public static final void writeBox(io.netty.buffer.ByteBuf, net.minecraft.world.phys.AABB);
+  public static final net.minecraft.world.phys.AABB readBox(io.netty.buffer.ByteBuf);
+  public static final <K, V> void writeMapK(io.netty.buffer.ByteBuf, com.cobblemon.mod.common.net.IntSize, java.util.Map<K, ? extends V>, kotlin.jvm.functions.Function1<? super java.util.Map$Entry<? extends K, ? extends V>, kotlin.Unit>);
+  public static void writeMapK$default(io.netty.buffer.ByteBuf, com.cobblemon.mod.common.net.IntSize, java.util.Map, kotlin.jvm.functions.Function1, int, java.lang.Object);
+  public static final <K, V> java.util.Map<K, V> readMapK(io.netty.buffer.ByteBuf, com.cobblemon.mod.common.net.IntSize, java.util.Map<K, V>, kotlin.jvm.functions.Function0<? extends kotlin.Pair<? extends K, ? extends V>>);
+  public static java.util.Map readMapK$default(io.netty.buffer.ByteBuf, com.cobblemon.mod.common.net.IntSize, java.util.Map, kotlin.jvm.functions.Function0, int, java.lang.Object);
+  public static final void writeVec3d(io.netty.buffer.ByteBuf, net.minecraft.world.phys.Vec3);
+  public static final net.minecraft.world.phys.Vec3 readVec3d(io.netty.buffer.ByteBuf);
+}

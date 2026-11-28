@@ -1,0 +1,14 @@
+public final class com.cobblemon.mod.common.api.entity.pokemon.MocKEffect$DefaultImpls {
+  public static com.cobblemon.mod.common.pokemon.Species getExposedSpecies(com.cobblemon.mod.common.api.entity.pokemon.MocKEffect);
+  public static com.cobblemon.mod.common.pokemon.FormData getExposedForm(com.cobblemon.mod.common.api.entity.pokemon.MocKEffect);
+  public static com.cobblemon.mod.common.pokeball.PokeBall getExposedBall(com.cobblemon.mod.common.api.entity.pokemon.MocKEffect);
+}
+public interface com.cobblemon.mod.common.api.entity.pokemon.MocKEffect extends com.cobblemon.mod.common.api.entity.pokemon.PhysicalEffect {
+  public abstract com.cobblemon.mod.common.api.pokemon.PokemonProperties getMock();
+  public default com.cobblemon.mod.common.pokemon.Species getExposedSpecies();
+  public default com.cobblemon.mod.common.pokemon.FormData getExposedForm();
+  public default com.cobblemon.mod.common.pokeball.PokeBall getExposedBall();
+  public static com.cobblemon.mod.common.pokemon.Species access$getExposedSpecies$jd(com.cobblemon.mod.common.api.entity.pokemon.MocKEffect);
+  public static com.cobblemon.mod.common.pokemon.FormData access$getExposedForm$jd(com.cobblemon.mod.common.api.entity.pokemon.MocKEffect);
+  public static com.cobblemon.mod.common.pokeball.PokeBall access$getExposedBall$jd(com.cobblemon.mod.common.api.entity.pokemon.MocKEffect);
+}

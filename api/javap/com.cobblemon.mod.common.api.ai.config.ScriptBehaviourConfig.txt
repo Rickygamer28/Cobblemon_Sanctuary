@@ -1,0 +1,16 @@
+public final class com.cobblemon.mod.common.api.ai.config.ScriptBehaviourConfig implements com.cobblemon.mod.common.api.ai.config.BehaviourConfig {
+  private final boolean executeEarly;
+  private final com.mojang.datafixers.util.Either<com.bedrockk.molang.Expression, com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable> condition;
+  private final com.cobblemon.mod.common.api.molang.ExpressionLike script;
+  private final java.util.List<com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable> variables;
+  public com.cobblemon.mod.common.api.ai.config.ScriptBehaviourConfig();
+  public final boolean getExecuteEarly();
+  public final com.mojang.datafixers.util.Either<com.bedrockk.molang.Expression, com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable> getCondition();
+  public final com.cobblemon.mod.common.api.molang.ExpressionLike getScript();
+  public final java.util.List<com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable> getVariables();
+  private final void runScript(net.minecraft.world.entity.LivingEntity, com.cobblemon.mod.common.api.ai.BehaviourConfigurationContext);
+  public java.util.List<com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable> getVariables(net.minecraft.world.entity.LivingEntity, com.cobblemon.mod.common.api.ai.BehaviourConfigurationContext);
+  public void preconfigure(net.minecraft.world.entity.LivingEntity, com.cobblemon.mod.common.api.ai.BehaviourConfigurationContext);
+  public void configure(net.minecraft.world.entity.LivingEntity, com.cobblemon.mod.common.api.ai.BehaviourConfigurationContext);
+  public boolean checkCondition(com.cobblemon.mod.common.api.ai.BehaviourConfigurationContext, com.mojang.datafixers.util.Either<com.bedrockk.molang.Expression, com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable>);
+}

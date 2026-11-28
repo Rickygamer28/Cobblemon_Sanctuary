@@ -1,0 +1,20 @@
+public final class com.cobblemon.mod.common.api.storage.pc.UnlockablePCWallpaper {
+  public transient net.minecraft.resources.ResourceLocation id;
+  private boolean enabled;
+  private java.lang.String displayName;
+  private net.minecraft.resources.ResourceLocation texture;
+  private final transient com.cobblemon.mod.common.api.molang.ObjectValue<com.cobblemon.mod.common.api.storage.pc.UnlockablePCWallpaper> struct;
+  public com.cobblemon.mod.common.api.storage.pc.UnlockablePCWallpaper();
+  public final net.minecraft.resources.ResourceLocation getId();
+  public final void setId(net.minecraft.resources.ResourceLocation);
+  public final boolean getEnabled();
+  public final void setEnabled(boolean);
+  public final java.lang.String getDisplayName();
+  public final void setDisplayName(java.lang.String);
+  public final net.minecraft.resources.ResourceLocation getTexture();
+  public final void setTexture(net.minecraft.resources.ResourceLocation);
+  public final com.cobblemon.mod.common.api.molang.ObjectValue<com.cobblemon.mod.common.api.storage.pc.UnlockablePCWallpaper> getStruct();
+  private static final java.lang.Object struct$lambda$0$0(com.cobblemon.mod.common.api.storage.pc.UnlockablePCWallpaper, com.bedrockk.molang.runtime.MoParams);
+  private static final java.lang.Object struct$lambda$0$1(com.cobblemon.mod.common.api.storage.pc.UnlockablePCWallpaper, com.bedrockk.molang.runtime.MoParams);
+  private static final java.lang.Object struct$lambda$0$2(com.cobblemon.mod.common.api.storage.pc.UnlockablePCWallpaper, com.bedrockk.molang.runtime.MoParams);
+}

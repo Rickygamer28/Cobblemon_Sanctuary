@@ -1,0 +1,15 @@
+public final class com.cobblemon.mod.common.entity.sensor.NPCBattlingSensor$Companion {
+  private com.cobblemon.mod.common.entity.sensor.NPCBattlingSensor$Companion();
+  public final java.util.Set<net.minecraft.world.entity.ai.memory.MemoryModuleType<java.lang.Boolean>> getOUTPUT_MEMORY_MODULES();
+  public com.cobblemon.mod.common.entity.sensor.NPCBattlingSensor$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.entity.sensor.NPCBattlingSensor extends net.minecraft.world.entity.ai.sensing.Sensor<com.cobblemon.mod.common.entity.npc.NPCEntity> {
+  public static final com.cobblemon.mod.common.entity.sensor.NPCBattlingSensor$Companion Companion;
+  private static final java.util.Set<net.minecraft.world.entity.ai.memory.MemoryModuleType<java.lang.Boolean>> OUTPUT_MEMORY_MODULES;
+  public com.cobblemon.mod.common.entity.sensor.NPCBattlingSensor();
+  public java.util.Set<net.minecraft.world.entity.ai.memory.MemoryModuleType<java.lang.Boolean>> requires();
+  protected void doTick(net.minecraft.server.level.ServerLevel, com.cobblemon.mod.common.entity.npc.NPCEntity);
+  public void doTick(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity);
+  public static final java.util.Set access$getOUTPUT_MEMORY_MODULES$cp();
+  static {};
+}

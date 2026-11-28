@@ -1,0 +1,33 @@
+public final class com.cobblemon.mod.common.block.TypeGemCoreBlock$Companion$EntriesMappings {
+  public static final kotlin.enums.EnumEntries<net.minecraft.core.Direction> entries$0;
+  static {};
+}
+public final class com.cobblemon.mod.common.block.TypeGemCoreBlock$Companion {
+  private com.cobblemon.mod.common.block.TypeGemCoreBlock$Companion();
+  public final java.util.Map<net.minecraft.resources.ResourceLocation, net.minecraft.world.level.block.Block> getBLOCK_TO_CLUSTER();
+  public final java.util.List<kotlin.Pair<net.minecraft.world.level.block.state.BlockState, net.minecraft.core.BlockPos>> getConnectedGemBlocks(net.minecraft.world.level.BlockGetter, net.minecraft.core.BlockPos);
+  public final void addClustersToBlock(net.minecraft.world.level.block.state.BlockState, net.minecraft.core.BlockPos, net.minecraft.world.level.LevelAccessor, net.minecraft.util.RandomSource);
+  private final com.cobblemon.mod.common.block.TypeGemClusterBlock$GrowthType decideClusterGrowthType(net.minecraft.world.level.LevelAccessor, net.minecraft.core.BlockPos, net.minecraft.util.RandomSource);
+  static com.cobblemon.mod.common.block.TypeGemClusterBlock$GrowthType decideClusterGrowthType$default(com.cobblemon.mod.common.block.TypeGemCoreBlock$Companion, net.minecraft.world.level.LevelAccessor, net.minecraft.core.BlockPos, net.minecraft.util.RandomSource, int, java.lang.Object);
+  public com.cobblemon.mod.common.block.TypeGemCoreBlock$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.block.TypeGemCoreBlock$EntriesMappings {
+  public static final kotlin.enums.EnumEntries<net.minecraft.core.Direction> entries$0;
+  static {};
+}
+public final class com.cobblemon.mod.common.block.TypeGemCoreBlock extends net.minecraft.world.level.block.Block {
+  public static final com.cobblemon.mod.common.block.TypeGemCoreBlock$Companion Companion;
+  private static final kotlin.Lazy<java.util.Map<net.minecraft.resources.ResourceLocation, net.minecraft.world.level.block.Block>> BLOCK_TO_CLUSTER$delegate;
+  public com.cobblemon.mod.common.block.TypeGemCoreBlock(net.minecraft.world.level.block.state.BlockBehaviour$Properties);
+  private final java.util.List<kotlin.Pair<net.minecraft.world.level.block.state.BlockState, net.minecraft.core.BlockPos>> getConnectedClusters(net.minecraft.world.level.LevelAccessor, net.minecraft.core.BlockPos);
+  protected void randomTick(net.minecraft.world.level.block.state.BlockState, net.minecraft.server.level.ServerLevel, net.minecraft.core.BlockPos, net.minecraft.util.RandomSource);
+  public final void expand(net.minecraft.world.level.LevelAccessor, net.minecraft.core.BlockPos, net.minecraft.util.RandomSource, boolean);
+  public static void expand$default(com.cobblemon.mod.common.block.TypeGemCoreBlock, net.minecraft.world.level.LevelAccessor, net.minecraft.core.BlockPos, net.minecraft.util.RandomSource, boolean, int, java.lang.Object);
+  private final void growClusters(net.minecraft.core.BlockPos, net.minecraft.world.level.LevelAccessor, net.minecraft.util.RandomSource, boolean);
+  private final void addInitialClusters(net.minecraft.core.BlockPos, net.minecraft.server.level.ServerLevel, com.cobblemon.mod.common.block.TypeGemClusterBlock);
+  protected boolean isRandomlyTicking(net.minecraft.world.level.block.state.BlockState);
+  private final void attachDecorativeClusters(net.minecraft.world.level.LevelAccessor, net.minecraft.core.BlockPos, net.minecraft.util.RandomSource);
+  private static final java.util.Map BLOCK_TO_CLUSTER_delegate$lambda$0();
+  public static final kotlin.Lazy access$getBLOCK_TO_CLUSTER$delegate$cp();
+  static {};
+}

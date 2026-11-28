@@ -1,0 +1,27 @@
+public final class com.cobblemon.mod.common.pokemon.evolution.variants.DummyEvolution implements com.cobblemon.mod.common.api.pokemon.evolution.Evolution {
+  private final java.lang.String id;
+  private final com.cobblemon.mod.common.api.pokemon.PokemonProperties result;
+  private final com.cobblemon.mod.common.api.pokemon.PokemonProperties shedder;
+  private boolean optional;
+  private boolean consumeHeldItem;
+  private final java.util.Set<com.cobblemon.mod.common.api.pokemon.requirement.Requirement> requirements;
+  private final java.util.Set<com.cobblemon.mod.common.api.moves.MoveTemplate> learnableMoves;
+  private final com.cobblemon.mod.common.api.drop.DropTable drops;
+  public com.cobblemon.mod.common.pokemon.evolution.variants.DummyEvolution();
+  public java.lang.String getId();
+  public com.cobblemon.mod.common.api.pokemon.PokemonProperties getResult();
+  public com.cobblemon.mod.common.api.pokemon.PokemonProperties getShedder();
+  public boolean getOptional();
+  public void setOptional(boolean);
+  public boolean getConsumeHeldItem();
+  public void setConsumeHeldItem(boolean);
+  public java.util.Set<com.cobblemon.mod.common.api.pokemon.requirement.Requirement> getRequirements();
+  public java.util.Set<com.cobblemon.mod.common.api.moves.MoveTemplate> getLearnableMoves();
+  public com.cobblemon.mod.common.api.drop.DropTable getDrops();
+  public boolean test(com.cobblemon.mod.common.pokemon.Pokemon);
+  public boolean evolve(com.cobblemon.mod.common.pokemon.Pokemon);
+  public boolean shed(com.cobblemon.mod.common.pokemon.Pokemon);
+  public void forceEvolve(com.cobblemon.mod.common.pokemon.Pokemon);
+  public void evolutionMethod(com.cobblemon.mod.common.pokemon.Pokemon);
+  public void applyTo(com.cobblemon.mod.common.pokemon.Pokemon);
+}

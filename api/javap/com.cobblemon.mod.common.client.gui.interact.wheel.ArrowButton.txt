@@ -1,0 +1,17 @@
+public final class com.cobblemon.mod.common.client.gui.interact.wheel.ArrowButton$Companion {
+  private com.cobblemon.mod.common.client.gui.interact.wheel.ArrowButton$Companion();
+  public com.cobblemon.mod.common.client.gui.interact.wheel.ArrowButton$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.client.gui.interact.wheel.ArrowButton extends net.minecraft.client.gui.components.Button implements com.cobblemon.mod.common.client.gui.CobblemonRenderable {
+  public static final com.cobblemon.mod.common.client.gui.interact.wheel.ArrowButton$Companion Companion;
+  private final boolean isRight;
+  private static final net.minecraft.resources.ResourceLocation ARROW_LEFT_RESOURCE;
+  private static final net.minecraft.resources.ResourceLocation ARROW_RIGHT_RESOURCE;
+  private static final int WIDTH;
+  private static final int HEIGHT;
+  public com.cobblemon.mod.common.client.gui.interact.wheel.ArrowButton(int, int, boolean, net.minecraft.client.gui.components.Button$OnPress);
+  public final boolean isRight();
+  public void playDownSound(net.minecraft.client.sounds.SoundManager);
+  protected void renderWidget(net.minecraft.client.gui.GuiGraphics, int, int, float);
+  static {};
+}

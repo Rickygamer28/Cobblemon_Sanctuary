@@ -1,0 +1,55 @@
+final class com.cobblemon.mod.common.api.storage.player.PlayerInstancedDataStoreTypes$GENERAL$1 extends kotlin.jvm.internal.FunctionReferenceImpl implements kotlin.jvm.functions.Function1<net.minecraft.network.RegistryFriendlyByteBuf, com.cobblemon.mod.common.net.messages.client.SetClientPlayerDataPacket> {
+  com.cobblemon.mod.common.api.storage.player.PlayerInstancedDataStoreTypes$GENERAL$1(java.lang.Object);
+  public final com.cobblemon.mod.common.net.messages.client.SetClientPlayerDataPacket invoke(net.minecraft.network.RegistryFriendlyByteBuf);
+  public java.lang.Object invoke(java.lang.Object);
+}
+final class com.cobblemon.mod.common.api.storage.player.PlayerInstancedDataStoreTypes$GENERAL$2 extends kotlin.jvm.internal.FunctionReferenceImpl implements kotlin.jvm.functions.Function1<com.cobblemon.mod.common.api.storage.player.client.ClientInstancedPlayerData, kotlin.Unit> {
+  com.cobblemon.mod.common.api.storage.player.PlayerInstancedDataStoreTypes$GENERAL$2(java.lang.Object);
+  public final void invoke(com.cobblemon.mod.common.api.storage.player.client.ClientInstancedPlayerData);
+  public java.lang.Object invoke(java.lang.Object);
+}
+final class com.cobblemon.mod.common.api.storage.player.PlayerInstancedDataStoreTypes$POKEDEX$1 extends kotlin.jvm.internal.FunctionReferenceImpl implements kotlin.jvm.functions.Function1<net.minecraft.network.RegistryFriendlyByteBuf, com.cobblemon.mod.common.net.messages.client.SetClientPlayerDataPacket> {
+  com.cobblemon.mod.common.api.storage.player.PlayerInstancedDataStoreTypes$POKEDEX$1(java.lang.Object);
+  public final com.cobblemon.mod.common.net.messages.client.SetClientPlayerDataPacket invoke(net.minecraft.network.RegistryFriendlyByteBuf);
+  public java.lang.Object invoke(java.lang.Object);
+}
+final class com.cobblemon.mod.common.api.storage.player.PlayerInstancedDataStoreTypes$POKEDEX$2 extends kotlin.jvm.internal.FunctionReferenceImpl implements kotlin.jvm.functions.Function1<com.cobblemon.mod.common.api.storage.player.client.ClientInstancedPlayerData, kotlin.Unit> {
+  com.cobblemon.mod.common.api.storage.player.PlayerInstancedDataStoreTypes$POKEDEX$2(java.lang.Object);
+  public final void invoke(com.cobblemon.mod.common.api.storage.player.client.ClientInstancedPlayerData);
+  public java.lang.Object invoke(java.lang.Object);
+}
+final class com.cobblemon.mod.common.api.storage.player.PlayerInstancedDataStoreTypes$POKEDEX$3 extends kotlin.jvm.internal.FunctionReferenceImpl implements kotlin.jvm.functions.Function1<com.cobblemon.mod.common.api.storage.player.client.ClientInstancedPlayerData, kotlin.Unit> {
+  com.cobblemon.mod.common.api.storage.player.PlayerInstancedDataStoreTypes$POKEDEX$3(java.lang.Object);
+  public final void invoke(com.cobblemon.mod.common.api.storage.player.client.ClientInstancedPlayerData);
+  public java.lang.Object invoke(java.lang.Object);
+}
+final class com.cobblemon.mod.common.api.storage.player.PlayerInstancedDataStoreTypes$TM_MOVES$1 extends kotlin.jvm.internal.FunctionReferenceImpl implements kotlin.jvm.functions.Function1<net.minecraft.network.RegistryFriendlyByteBuf, com.cobblemon.mod.common.net.messages.client.SetClientPlayerDataPacket> {
+  com.cobblemon.mod.common.api.storage.player.PlayerInstancedDataStoreTypes$TM_MOVES$1(java.lang.Object);
+  public final com.cobblemon.mod.common.net.messages.client.SetClientPlayerDataPacket invoke(net.minecraft.network.RegistryFriendlyByteBuf);
+  public java.lang.Object invoke(java.lang.Object);
+}
+final class com.cobblemon.mod.common.api.storage.player.PlayerInstancedDataStoreTypes$TM_MOVES$2 extends kotlin.jvm.internal.FunctionReferenceImpl implements kotlin.jvm.functions.Function1<com.cobblemon.mod.common.api.storage.player.client.ClientInstancedPlayerData, kotlin.Unit> {
+  com.cobblemon.mod.common.api.storage.player.PlayerInstancedDataStoreTypes$TM_MOVES$2(java.lang.Object);
+  public final void invoke(com.cobblemon.mod.common.api.storage.player.client.ClientInstancedPlayerData);
+  public java.lang.Object invoke(java.lang.Object);
+}
+final class com.cobblemon.mod.common.api.storage.player.PlayerInstancedDataStoreTypes$TM_MOVES$3 extends kotlin.jvm.internal.FunctionReferenceImpl implements kotlin.jvm.functions.Function1<com.cobblemon.mod.common.api.storage.player.client.ClientInstancedPlayerData, kotlin.Unit> {
+  com.cobblemon.mod.common.api.storage.player.PlayerInstancedDataStoreTypes$TM_MOVES$3(java.lang.Object);
+  public final void invoke(com.cobblemon.mod.common.api.storage.player.client.ClientInstancedPlayerData);
+  public java.lang.Object invoke(java.lang.Object);
+}
+public final class com.cobblemon.mod.common.api.storage.player.PlayerInstancedDataStoreTypes {
+  public static final com.cobblemon.mod.common.api.storage.player.PlayerInstancedDataStoreTypes INSTANCE;
+  private static final java.util.Map<net.minecraft.resources.ResourceLocation, com.cobblemon.mod.common.api.storage.player.PlayerInstancedDataStoreType> types;
+  private static final com.cobblemon.mod.common.api.storage.player.PlayerInstancedDataStoreType GENERAL;
+  private static final com.cobblemon.mod.common.api.storage.player.PlayerInstancedDataStoreType POKEDEX;
+  private static final com.cobblemon.mod.common.api.storage.player.PlayerInstancedDataStoreType TM_MOVES;
+  private com.cobblemon.mod.common.api.storage.player.PlayerInstancedDataStoreTypes();
+  public final java.util.Map<net.minecraft.resources.ResourceLocation, com.cobblemon.mod.common.api.storage.player.PlayerInstancedDataStoreType> getTypes();
+  public final com.cobblemon.mod.common.api.storage.player.PlayerInstancedDataStoreType getGENERAL();
+  public final com.cobblemon.mod.common.api.storage.player.PlayerInstancedDataStoreType getPOKEDEX();
+  public final com.cobblemon.mod.common.api.storage.player.PlayerInstancedDataStoreType getTM_MOVES();
+  public final com.cobblemon.mod.common.api.storage.player.PlayerInstancedDataStoreType register(com.cobblemon.mod.common.api.storage.player.PlayerInstancedDataStoreType);
+  public final com.cobblemon.mod.common.api.storage.player.PlayerInstancedDataStoreType getTypeById(net.minecraft.resources.ResourceLocation);
+  static {};
+}

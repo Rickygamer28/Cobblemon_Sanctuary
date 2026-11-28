@@ -1,0 +1,16 @@
+public final class com.cobblemon.mod.common.api.pokemon.experience.ExperienceSource$DefaultImpls {
+  public static boolean isBattle(com.cobblemon.mod.common.api.pokemon.experience.ExperienceSource);
+  public static boolean isInteraction(com.cobblemon.mod.common.api.pokemon.experience.ExperienceSource);
+  public static boolean isCommand(com.cobblemon.mod.common.api.pokemon.experience.ExperienceSource);
+  public static boolean isSidemod(com.cobblemon.mod.common.api.pokemon.experience.ExperienceSource);
+}
+public interface com.cobblemon.mod.common.api.pokemon.experience.ExperienceSource {
+  public default boolean isBattle();
+  public default boolean isInteraction();
+  public default boolean isCommand();
+  public default boolean isSidemod();
+  public static boolean access$isBattle$jd(com.cobblemon.mod.common.api.pokemon.experience.ExperienceSource);
+  public static boolean access$isInteraction$jd(com.cobblemon.mod.common.api.pokemon.experience.ExperienceSource);
+  public static boolean access$isCommand$jd(com.cobblemon.mod.common.api.pokemon.experience.ExperienceSource);
+  public static boolean access$isSidemod$jd(com.cobblemon.mod.common.api.pokemon.experience.ExperienceSource);
+}

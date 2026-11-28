@@ -1,0 +1,23 @@
+public final class com.cobblemon.mod.common.client.render.models.blockbench.animation.WaveAnimation extends com.cobblemon.mod.common.client.render.models.blockbench.animation.PoseAnimation {
+  private final kotlin.jvm.functions.Function1<java.lang.Float, java.lang.Float> waveFunction;
+  private final float oscillationsScalar;
+  private final net.minecraft.client.model.geom.ModelPart head;
+  private final float headLength;
+  private final boolean moveHead;
+  private final int rotationAxis;
+  private final int motionAxis;
+  private final boolean basedOnLimbSwing;
+  private final com.cobblemon.mod.common.client.render.models.blockbench.animation.WaveSegment[] segments;
+  public com.cobblemon.mod.common.client.render.models.blockbench.animation.WaveAnimation(kotlin.jvm.functions.Function1<? super java.lang.Float, java.lang.Float>, float, net.minecraft.client.model.geom.ModelPart, float, boolean, int, int, boolean, com.cobblemon.mod.common.client.render.models.blockbench.animation.WaveSegment[]);
+  public com.cobblemon.mod.common.client.render.models.blockbench.animation.WaveAnimation(kotlin.jvm.functions.Function1, float, net.minecraft.client.model.geom.ModelPart, float, boolean, int, int, boolean, com.cobblemon.mod.common.client.render.models.blockbench.animation.WaveSegment[], int, kotlin.jvm.internal.DefaultConstructorMarker);
+  public final kotlin.jvm.functions.Function1<java.lang.Float, java.lang.Float> getWaveFunction();
+  public final float getOscillationsScalar();
+  public final net.minecraft.client.model.geom.ModelPart getHead();
+  public final float getHeadLength();
+  public final boolean getMoveHead();
+  public final int getRotationAxis();
+  public final int getMotionAxis();
+  public final boolean getBasedOnLimbSwing();
+  public final com.cobblemon.mod.common.client.render.models.blockbench.animation.WaveSegment[] getSegments();
+  protected void setupAnim(com.cobblemon.mod.common.client.render.models.blockbench.repository.RenderContext, com.cobblemon.mod.common.client.render.models.blockbench.PosableModel, com.cobblemon.mod.common.client.render.models.blockbench.PosableState, float, float, float, float, float, float);
+}

@@ -1,0 +1,3 @@
+public final class com.cobblemon.mod.common.util.BrainExtensionsKt {
+  public static final <T, E extends net.minecraft.world.entity.LivingEntity> java.util.Optional<T> getMemorySafely(net.minecraft.world.entity.ai.Brain<E>, net.minecraft.world.entity.ai.memory.MemoryModuleType<T>);
+}

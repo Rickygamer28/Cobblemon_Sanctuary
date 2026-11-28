@@ -1,0 +1,31 @@
+public final class com.cobblemon.mod.common.CobblemonMechanics implements com.cobblemon.mod.common.api.data.DataRegistry {
+  public static final com.cobblemon.mod.common.CobblemonMechanics INSTANCE;
+  private static final net.minecraft.resources.ResourceLocation id;
+  private static final net.minecraft.server.packs.PackType type;
+  private static final com.cobblemon.mod.common.api.reactive.SimpleObservable<com.cobblemon.mod.common.CobblemonMechanics> observable;
+  private static final com.google.gson.Gson gson;
+  private static com.cobblemon.mod.common.mechanics.RemediesMechanic remedies;
+  private static com.cobblemon.mod.common.mechanics.BerriesMechanic berries;
+  private static com.cobblemon.mod.common.mechanics.PotionsMechanic potions;
+  private static com.cobblemon.mod.common.mechanics.AprijuicesMechanic aprijuices;
+  private static com.cobblemon.mod.common.mechanics.SlowpokeTailsMechanic slowpokeTails;
+  private com.cobblemon.mod.common.CobblemonMechanics();
+  public net.minecraft.resources.ResourceLocation getId();
+  public net.minecraft.server.packs.PackType getType();
+  public com.cobblemon.mod.common.api.reactive.SimpleObservable<com.cobblemon.mod.common.CobblemonMechanics> getObservable();
+  public final com.google.gson.Gson getGson();
+  public final com.cobblemon.mod.common.mechanics.RemediesMechanic getRemedies();
+  public final void setRemedies(com.cobblemon.mod.common.mechanics.RemediesMechanic);
+  public final com.cobblemon.mod.common.mechanics.BerriesMechanic getBerries();
+  public final void setBerries(com.cobblemon.mod.common.mechanics.BerriesMechanic);
+  public final com.cobblemon.mod.common.mechanics.PotionsMechanic getPotions();
+  public final void setPotions(com.cobblemon.mod.common.mechanics.PotionsMechanic);
+  public final com.cobblemon.mod.common.mechanics.AprijuicesMechanic getAprijuices();
+  public final void setAprijuices(com.cobblemon.mod.common.mechanics.AprijuicesMechanic);
+  public final com.cobblemon.mod.common.mechanics.SlowpokeTailsMechanic getSlowpokeTails();
+  public final void setSlowpokeTails(com.cobblemon.mod.common.mechanics.SlowpokeTailsMechanic);
+  public void sync(net.minecraft.server.level.ServerPlayer);
+  public void reload(net.minecraft.server.packs.resources.ResourceManager);
+  private final <T> T loadMechanic(net.minecraft.server.packs.resources.ResourceManager, java.lang.String, java.lang.Class<T>);
+  static {};
+}

@@ -1,0 +1,29 @@
+public final class com.cobblemon.mod.common.api.events.pokemon.HyperTrainedIvEvent$Post implements com.cobblemon.mod.common.api.events.pokemon.HyperTrainedIvEvent {
+  private final com.cobblemon.mod.common.pokemon.Pokemon pokemon;
+  private final com.cobblemon.mod.common.api.pokemon.stats.Stat stat;
+  private final int value;
+  private final java.util.Map<java.lang.String, com.bedrockk.molang.runtime.value.MoValue> context;
+  public com.cobblemon.mod.common.api.events.pokemon.HyperTrainedIvEvent$Post(com.cobblemon.mod.common.pokemon.Pokemon, com.cobblemon.mod.common.api.pokemon.stats.Stat, int);
+  public com.cobblemon.mod.common.pokemon.Pokemon getPokemon();
+  public com.cobblemon.mod.common.api.pokemon.stats.Stat getStat();
+  public final int getValue();
+  public final java.util.Map<java.lang.String, com.bedrockk.molang.runtime.value.MoValue> getContext();
+}
+public final class com.cobblemon.mod.common.api.events.pokemon.HyperTrainedIvEvent$Pre extends com.cobblemon.mod.common.api.events.Cancelable implements com.cobblemon.mod.common.api.events.pokemon.HyperTrainedIvEvent {
+  private final com.cobblemon.mod.common.pokemon.Pokemon pokemon;
+  private final com.cobblemon.mod.common.api.pokemon.stats.Stat stat;
+  private int value;
+  private final java.util.Map<java.lang.String, com.bedrockk.molang.runtime.value.MoValue> context;
+  private final java.util.Map<java.lang.String, kotlin.jvm.functions.Function1<com.bedrockk.molang.runtime.MoParams, com.bedrockk.molang.runtime.value.MoValue>> functions;
+  public com.cobblemon.mod.common.api.events.pokemon.HyperTrainedIvEvent$Pre(com.cobblemon.mod.common.pokemon.Pokemon, com.cobblemon.mod.common.api.pokemon.stats.Stat, int);
+  public com.cobblemon.mod.common.pokemon.Pokemon getPokemon();
+  public com.cobblemon.mod.common.api.pokemon.stats.Stat getStat();
+  public final int getValue();
+  public final void setValue(int);
+  public final java.util.Map<java.lang.String, com.bedrockk.molang.runtime.value.MoValue> getContext();
+  public final java.util.Map<java.lang.String, kotlin.jvm.functions.Function1<com.bedrockk.molang.runtime.MoParams, com.bedrockk.molang.runtime.value.MoValue>> getFunctions();
+}
+public interface com.cobblemon.mod.common.api.events.pokemon.HyperTrainedIvEvent {
+  public abstract com.cobblemon.mod.common.api.pokemon.stats.Stat getStat();
+  public abstract com.cobblemon.mod.common.pokemon.Pokemon getPokemon();
+}

@@ -1,0 +1,16 @@
+public final class com.cobblemon.mod.common.api.events.pokemon.PokemonAspectsChangedEvent {
+  private final java.util.UUID ownerId;
+  private final com.cobblemon.mod.common.pokemon.Pokemon pokemon;
+  private final java.util.Map<java.lang.String, com.bedrockk.molang.runtime.value.MoValue> context;
+  public com.cobblemon.mod.common.api.events.pokemon.PokemonAspectsChangedEvent(java.util.UUID, com.cobblemon.mod.common.pokemon.Pokemon);
+  public final java.util.UUID getOwnerId();
+  public final com.cobblemon.mod.common.pokemon.Pokemon getPokemon();
+  public final java.util.Map<java.lang.String, com.bedrockk.molang.runtime.value.MoValue> getContext();
+  public final java.util.UUID component1();
+  public final com.cobblemon.mod.common.pokemon.Pokemon component2();
+  public final com.cobblemon.mod.common.api.events.pokemon.PokemonAspectsChangedEvent copy(java.util.UUID, com.cobblemon.mod.common.pokemon.Pokemon);
+  public static com.cobblemon.mod.common.api.events.pokemon.PokemonAspectsChangedEvent copy$default(com.cobblemon.mod.common.api.events.pokemon.PokemonAspectsChangedEvent, java.util.UUID, com.cobblemon.mod.common.pokemon.Pokemon, int, java.lang.Object);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+}

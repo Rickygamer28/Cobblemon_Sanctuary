@@ -1,0 +1,14 @@
+public final class com.cobblemon.mod.common.client.gui.interact.wheel.InteractTypePokemon extends java.lang.Enum<com.cobblemon.mod.common.client.gui.interact.wheel.InteractTypePokemon> {
+  public static final com.cobblemon.mod.common.client.gui.interact.wheel.InteractTypePokemon SHOULDER;
+  public static final com.cobblemon.mod.common.client.gui.interact.wheel.InteractTypePokemon HELD_ITEM;
+  public static final com.cobblemon.mod.common.client.gui.interact.wheel.InteractTypePokemon COSMETIC_ITEM;
+  public static final com.cobblemon.mod.common.client.gui.interact.wheel.InteractTypePokemon RIDE;
+  private static final com.cobblemon.mod.common.client.gui.interact.wheel.InteractTypePokemon[] $VALUES;
+  private static final kotlin.enums.EnumEntries $ENTRIES;
+  private com.cobblemon.mod.common.client.gui.interact.wheel.InteractTypePokemon();
+  public static com.cobblemon.mod.common.client.gui.interact.wheel.InteractTypePokemon[] values();
+  public static com.cobblemon.mod.common.client.gui.interact.wheel.InteractTypePokemon valueOf(java.lang.String);
+  public static kotlin.enums.EnumEntries<com.cobblemon.mod.common.client.gui.interact.wheel.InteractTypePokemon> getEntries();
+  private static final com.cobblemon.mod.common.client.gui.interact.wheel.InteractTypePokemon[] $values();
+  static {};
+}

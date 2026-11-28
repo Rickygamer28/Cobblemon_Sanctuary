@@ -1,0 +1,16 @@
+public final class com.cobblemon.mod.common.api.drop.DropTable {
+  private final java.util.List<com.cobblemon.mod.common.api.drop.DropEntry> entries;
+  private final kotlin.ranges.IntRange amount;
+  public com.cobblemon.mod.common.api.drop.DropTable();
+  public final java.util.List<com.cobblemon.mod.common.api.drop.DropEntry> getEntries();
+  public final kotlin.ranges.IntRange getAmount();
+  public final java.util.List<com.cobblemon.mod.common.api.drop.DropEntry> getDrops(kotlin.ranges.IntRange, com.cobblemon.mod.common.pokemon.Pokemon);
+  public static java.util.List getDrops$default(com.cobblemon.mod.common.api.drop.DropTable, kotlin.ranges.IntRange, com.cobblemon.mod.common.pokemon.Pokemon, int, java.lang.Object);
+  public final void drop(net.minecraft.world.entity.LivingEntity, net.minecraft.server.level.ServerLevel, net.minecraft.world.phys.Vec3, net.minecraft.server.level.ServerPlayer, kotlin.ranges.IntRange, com.cobblemon.mod.common.pokemon.Pokemon);
+  public static void drop$default(com.cobblemon.mod.common.api.drop.DropTable, net.minecraft.world.entity.LivingEntity, net.minecraft.server.level.ServerLevel, net.minecraft.world.phys.Vec3, net.minecraft.server.level.ServerPlayer, kotlin.ranges.IntRange, com.cobblemon.mod.common.pokemon.Pokemon, int, java.lang.Object);
+  public final void postLootDroppedEvent(java.util.List<com.cobblemon.mod.common.api.drop.DropEntry>, net.minecraft.world.entity.LivingEntity, net.minecraft.server.level.ServerLevel, net.minecraft.world.phys.Vec3, net.minecraft.server.level.ServerPlayer);
+  public final void encode(net.minecraft.network.RegistryFriendlyByteBuf);
+  public final void decode(net.minecraft.network.RegistryFriendlyByteBuf);
+  private static final boolean getDrops$lambda$2(com.cobblemon.mod.common.api.drop.DropEntry, java.util.List, int, com.cobblemon.mod.common.api.drop.DropEntry);
+  private static final boolean getDrops$lambda$3(kotlin.jvm.functions.Function1, java.lang.Object);
+}

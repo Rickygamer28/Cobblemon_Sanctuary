@@ -1,0 +1,24 @@
+public final class com.cobblemon.mod.common.client.render.models.blockbench.animation.SingleBoneLookAnimation extends com.cobblemon.mod.common.client.render.models.blockbench.animation.PoseAnimation {
+  private final com.cobblemon.mod.common.client.render.models.blockbench.pose.Bone bone;
+  private final float pitchMultiplier;
+  private final float yawMultiplier;
+  private final float maxPitch;
+  private final float minPitch;
+  private final float maxYaw;
+  private final float minYaw;
+  private java.util.Set<java.lang.String> labels;
+  public com.cobblemon.mod.common.client.render.models.blockbench.animation.SingleBoneLookAnimation(com.cobblemon.mod.common.client.render.models.blockbench.pose.Bone, float, float, float, float, float, float);
+  public com.cobblemon.mod.common.client.render.models.blockbench.animation.SingleBoneLookAnimation(com.cobblemon.mod.common.client.render.models.blockbench.pose.Bone, float, float, float, float, float, float, int, kotlin.jvm.internal.DefaultConstructorMarker);
+  public final com.cobblemon.mod.common.client.render.models.blockbench.pose.Bone getBone();
+  public final float getPitchMultiplier();
+  public final float getYawMultiplier();
+  public final float getMaxPitch();
+  public final float getMinPitch();
+  public final float getMaxYaw();
+  public final float getMinYaw();
+  public com.cobblemon.mod.common.client.render.models.blockbench.animation.SingleBoneLookAnimation(com.cobblemon.mod.common.client.render.models.blockbench.frame.HeadedFrame, boolean, boolean, boolean, boolean, java.lang.Float, java.lang.Float, java.lang.Float, java.lang.Float, java.lang.Float, java.lang.Float);
+  public com.cobblemon.mod.common.client.render.models.blockbench.animation.SingleBoneLookAnimation(com.cobblemon.mod.common.client.render.models.blockbench.frame.HeadedFrame, boolean, boolean, boolean, boolean, java.lang.Float, java.lang.Float, java.lang.Float, java.lang.Float, java.lang.Float, java.lang.Float, int, kotlin.jvm.internal.DefaultConstructorMarker);
+  public java.util.Set<java.lang.String> getLabels();
+  public void setLabels(java.util.Set<java.lang.String>);
+  protected void setupAnim(com.cobblemon.mod.common.client.render.models.blockbench.repository.RenderContext, com.cobblemon.mod.common.client.render.models.blockbench.PosableModel, com.cobblemon.mod.common.client.render.models.blockbench.PosableState, float, float, float, float, float, float);
+}

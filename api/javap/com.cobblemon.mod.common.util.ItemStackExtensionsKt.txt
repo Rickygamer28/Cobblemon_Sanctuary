@@ -1,0 +1,6 @@
+public final class com.cobblemon.mod.common.util.ItemStackExtensionsKt {
+  public static final com.google.gson.JsonElement saveToJson(net.minecraft.world.item.ItemStack);
+  public static final boolean isHeld(net.minecraft.world.item.ItemStack, net.minecraft.server.level.ServerPlayer);
+  public static final boolean isOf(net.minecraft.world.item.ItemStack, net.minecraft.tags.TagKey<net.minecraft.world.item.Item>);
+  private static final java.lang.IllegalStateException saveToJson$lambda$0(java.lang.String);
+}

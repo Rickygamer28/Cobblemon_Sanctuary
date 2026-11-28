@@ -1,0 +1,13 @@
+public final class com.cobblemon.mod.common.api.scheduling.ServerTaskTracker extends com.cobblemon.mod.common.api.scheduling.SchedulingTracker implements com.cobblemon.mod.common.api.scheduling.Schedulable {
+  public static final com.cobblemon.mod.common.api.scheduling.ServerTaskTracker INSTANCE;
+  private static final com.cobblemon.mod.common.api.scheduling.ServerTaskTracker schedulingTracker;
+  private com.cobblemon.mod.common.api.scheduling.ServerTaskTracker();
+  public com.cobblemon.mod.common.api.scheduling.ServerTaskTracker getSchedulingTracker();
+  public com.cobblemon.mod.common.api.scheduling.ScheduledTask momentarily(kotlin.jvm.functions.Function0<kotlin.Unit>);
+  public com.cobblemon.mod.common.api.scheduling.ScheduledTask after(float, kotlin.jvm.functions.Function0<kotlin.Unit>);
+  public com.cobblemon.mod.common.api.scheduling.ScheduledTask lerp(float, kotlin.jvm.functions.Function1<? super java.lang.Float, kotlin.Unit>);
+  public java.util.concurrent.CompletableFuture<kotlin.Unit> delayedFuture(float);
+  public com.cobblemon.mod.common.api.scheduling.ScheduledTask$Builder taskBuilder();
+  public com.cobblemon.mod.common.api.scheduling.SchedulingTracker getSchedulingTracker();
+  static {};
+}

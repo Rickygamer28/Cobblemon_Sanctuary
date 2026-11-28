@@ -1,0 +1,32 @@
+final class com.cobblemon.mod.common.api.entity.pokemon.EntityEffect$Companion$2 extends kotlin.jvm.internal.AdaptedFunctionReference implements kotlin.jvm.functions.Function0<com.cobblemon.mod.common.entity.pokemon.effects.IllusionEffect> {
+  public static final com.cobblemon.mod.common.api.entity.pokemon.EntityEffect$Companion$2 INSTANCE;
+  com.cobblemon.mod.common.api.entity.pokemon.EntityEffect$Companion$2();
+  public final com.cobblemon.mod.common.entity.pokemon.effects.IllusionEffect invoke();
+  public java.lang.Object invoke();
+  static {};
+}
+final class com.cobblemon.mod.common.api.entity.pokemon.EntityEffect$Companion$4 extends kotlin.jvm.internal.AdaptedFunctionReference implements kotlin.jvm.functions.Function0<com.cobblemon.mod.common.entity.pokemon.effects.TransformEffect> {
+  public static final com.cobblemon.mod.common.api.entity.pokemon.EntityEffect$Companion$4 INSTANCE;
+  com.cobblemon.mod.common.api.entity.pokemon.EntityEffect$Companion$4();
+  public final com.cobblemon.mod.common.entity.pokemon.effects.TransformEffect invoke();
+  public java.lang.Object invoke();
+  static {};
+}
+public final class com.cobblemon.mod.common.api.entity.pokemon.EntityEffect$Companion {
+  static final com.cobblemon.mod.common.api.entity.pokemon.EntityEffect$Companion $$INSTANCE;
+  private static final java.util.Map<java.lang.String, kotlin.reflect.KClass<? extends com.cobblemon.mod.common.api.entity.pokemon.EntityEffect>> effects;
+  private static final java.util.Map<java.lang.String, kotlin.jvm.functions.Function0<com.cobblemon.mod.common.api.entity.pokemon.EntityEffect>> defaults;
+  private com.cobblemon.mod.common.api.entity.pokemon.EntityEffect$Companion();
+  public final <T extends com.cobblemon.mod.common.api.entity.pokemon.EntityEffect> void register(java.lang.String, kotlin.reflect.KClass<T>, kotlin.jvm.functions.Function0<? extends T>);
+  public final com.cobblemon.mod.common.api.entity.pokemon.EntityEffect createDefault(java.lang.String);
+  public final com.cobblemon.mod.common.api.entity.pokemon.EntityEffect loadFromNbt(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);
+  static {};
+}
+public interface com.cobblemon.mod.common.api.entity.pokemon.EntityEffect {
+  public static final com.cobblemon.mod.common.api.entity.pokemon.EntityEffect$Companion Companion;
+  public abstract java.util.concurrent.CompletableFuture<com.cobblemon.mod.common.entity.pokemon.PokemonEntity> start(com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+  public abstract java.util.concurrent.CompletableFuture<com.cobblemon.mod.common.entity.pokemon.PokemonEntity> end(com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+  public abstract net.minecraft.nbt.CompoundTag saveToNbt(net.minecraft.core.HolderLookup$Provider);
+  public abstract void loadFromNBT(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);
+  static {};
+}

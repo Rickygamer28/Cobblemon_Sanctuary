@@ -1,0 +1,10 @@
+public final class com.cobblemon.mod.common.entity.ai.MoveToAttackTargetTask {
+  public static final com.cobblemon.mod.common.entity.ai.MoveToAttackTargetTask INSTANCE;
+  private com.cobblemon.mod.common.entity.ai.MoveToAttackTargetTask();
+  public final net.minecraft.world.entity.ai.behavior.OneShot<net.minecraft.world.entity.LivingEntity> create(com.bedrockk.molang.Expression, com.bedrockk.molang.Expression);
+  public static net.minecraft.world.entity.ai.behavior.OneShot create$default(com.cobblemon.mod.common.entity.ai.MoveToAttackTargetTask, com.bedrockk.molang.Expression, com.bedrockk.molang.Expression, int, java.lang.Object);
+  private static final com.mojang.datafixers.kinds.App create$lambda$0(com.bedrockk.molang.Expression, com.bedrockk.molang.Expression, net.minecraft.world.entity.ai.behavior.declarative.BehaviorBuilder$Instance);
+  private static final net.minecraft.world.entity.ai.behavior.declarative.Trigger create$lambda$0$0(com.bedrockk.molang.Expression, com.bedrockk.molang.Expression, net.minecraft.world.entity.ai.behavior.declarative.BehaviorBuilder$Instance, net.minecraft.world.entity.ai.behavior.declarative.MemoryAccessor, net.minecraft.world.entity.ai.behavior.declarative.MemoryAccessor);
+  private static final boolean create$lambda$0$0$0(com.bedrockk.molang.Expression, com.bedrockk.molang.Expression, net.minecraft.world.entity.ai.behavior.declarative.BehaviorBuilder$Instance, net.minecraft.world.entity.ai.behavior.declarative.MemoryAccessor, net.minecraft.world.entity.ai.behavior.declarative.MemoryAccessor, net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity, long);
+  static {};
+}

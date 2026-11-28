@@ -1,0 +1,31 @@
+public final class com.cobblemon.mod.common.client.render.models.blockbench.pose.Pose {
+  private java.lang.String poseName;
+  private final java.util.Set<com.cobblemon.mod.common.entity.PoseType> poseTypes;
+  private final kotlin.jvm.functions.Function1<com.cobblemon.mod.common.client.render.models.blockbench.PosableState, java.lang.Boolean> condition;
+  private final kotlin.jvm.functions.Function1<com.cobblemon.mod.common.client.render.models.blockbench.PosableState, kotlin.Unit> onTransitionedInto;
+  private final int transformTicks;
+  private final java.lang.Integer transformToTicks;
+  private final java.util.Map<java.lang.String, com.cobblemon.mod.common.api.molang.ExpressionLike> namedAnimations;
+  private final com.cobblemon.mod.common.client.render.models.blockbench.animation.PoseAnimation[] animations;
+  private final com.cobblemon.mod.common.client.render.models.blockbench.pose.ModelPartTransformation[] transformedParts;
+  private final com.cobblemon.mod.common.client.render.models.blockbench.quirk.ModelQuirk<?>[] quirks;
+  private final java.util.Map<java.lang.String, kotlin.jvm.functions.Function2<com.cobblemon.mod.common.client.render.models.blockbench.pose.Pose, com.cobblemon.mod.common.client.render.models.blockbench.pose.Pose, com.cobblemon.mod.common.client.render.models.blockbench.animation.ActiveAnimation>> transitions;
+  public com.cobblemon.mod.common.client.render.models.blockbench.pose.Pose(java.lang.String, java.util.Set<? extends com.cobblemon.mod.common.entity.PoseType>, kotlin.jvm.functions.Function1<? super com.cobblemon.mod.common.client.render.models.blockbench.PosableState, java.lang.Boolean>, kotlin.jvm.functions.Function1<? super com.cobblemon.mod.common.client.render.models.blockbench.PosableState, kotlin.Unit>, int, java.lang.Integer, java.util.Map<java.lang.String, com.cobblemon.mod.common.api.molang.ExpressionLike>, com.cobblemon.mod.common.client.render.models.blockbench.animation.PoseAnimation[], com.cobblemon.mod.common.client.render.models.blockbench.pose.ModelPartTransformation[], com.cobblemon.mod.common.client.render.models.blockbench.quirk.ModelQuirk<?>[]);
+  public com.cobblemon.mod.common.client.render.models.blockbench.pose.Pose(java.lang.String, java.util.Set, kotlin.jvm.functions.Function1, kotlin.jvm.functions.Function1, int, java.lang.Integer, java.util.Map, com.cobblemon.mod.common.client.render.models.blockbench.animation.PoseAnimation[], com.cobblemon.mod.common.client.render.models.blockbench.pose.ModelPartTransformation[], com.cobblemon.mod.common.client.render.models.blockbench.quirk.ModelQuirk[], int, kotlin.jvm.internal.DefaultConstructorMarker);
+  public final java.lang.String getPoseName();
+  public final void setPoseName(java.lang.String);
+  public final java.util.Set<com.cobblemon.mod.common.entity.PoseType> getPoseTypes();
+  public final kotlin.jvm.functions.Function1<com.cobblemon.mod.common.client.render.models.blockbench.PosableState, java.lang.Boolean> getCondition();
+  public final kotlin.jvm.functions.Function1<com.cobblemon.mod.common.client.render.models.blockbench.PosableState, kotlin.Unit> getOnTransitionedInto();
+  public final int getTransformTicks();
+  public final java.lang.Integer getTransformToTicks();
+  public final java.util.Map<java.lang.String, com.cobblemon.mod.common.api.molang.ExpressionLike> getNamedAnimations();
+  public final com.cobblemon.mod.common.client.render.models.blockbench.animation.PoseAnimation[] getAnimations();
+  public final com.cobblemon.mod.common.client.render.models.blockbench.pose.ModelPartTransformation[] getTransformedParts();
+  public final com.cobblemon.mod.common.client.render.models.blockbench.quirk.ModelQuirk<?>[] getQuirks();
+  public final boolean isSuitable(com.cobblemon.mod.common.client.render.models.blockbench.PosableState);
+  public final java.util.Map<java.lang.String, kotlin.jvm.functions.Function2<com.cobblemon.mod.common.client.render.models.blockbench.pose.Pose, com.cobblemon.mod.common.client.render.models.blockbench.pose.Pose, com.cobblemon.mod.common.client.render.models.blockbench.animation.ActiveAnimation>> getTransitions();
+  public final void apply(com.cobblemon.mod.common.client.render.models.blockbench.repository.RenderContext, com.cobblemon.mod.common.client.render.models.blockbench.PosableModel, com.cobblemon.mod.common.client.render.models.blockbench.PosableState, float, float, float, float, float);
+  private static final kotlin.Unit _init_$lambda$0(com.cobblemon.mod.common.client.render.models.blockbench.PosableState);
+  private static final boolean apply$lambda$0(com.cobblemon.mod.common.client.render.models.blockbench.PosableState, com.cobblemon.mod.common.client.render.models.blockbench.animation.PoseAnimation);
+}

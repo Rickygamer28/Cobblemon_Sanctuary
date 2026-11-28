@@ -1,0 +1,17 @@
+public class com.cobblemon.mod.common.api.storage.party.PlayerPartyStore extends com.cobblemon.mod.common.api.storage.party.PartyStore {
+  private final java.util.UUID playerUUID;
+  private int secondsSinceFriendshipUpdate;
+  public com.cobblemon.mod.common.api.storage.party.PlayerPartyStore(java.util.UUID, java.util.UUID);
+  public com.cobblemon.mod.common.api.storage.party.PlayerPartyStore(java.util.UUID, java.util.UUID, int, kotlin.jvm.internal.DefaultConstructorMarker);
+  public final java.util.UUID getPlayerUUID();
+  public com.cobblemon.mod.common.api.storage.party.PlayerPartyStore(java.util.UUID);
+  public void initialize();
+  public com.cobblemon.mod.common.api.storage.pc.PCStore getOverflowPC(net.minecraft.core.RegistryAccess);
+  public boolean add(com.cobblemon.mod.common.pokemon.Pokemon);
+  public final void onSecondPassed(net.minecraft.server.level.ServerPlayer);
+  private final boolean validateShoulder(net.minecraft.server.level.ServerPlayer, boolean);
+  public void swap(com.cobblemon.mod.common.api.storage.party.PartyPosition, com.cobblemon.mod.common.api.storage.party.PartyPosition);
+  public void set(com.cobblemon.mod.common.api.storage.party.PartyPosition, com.cobblemon.mod.common.pokemon.Pokemon);
+  public void swap(com.cobblemon.mod.common.api.storage.StorePosition, com.cobblemon.mod.common.api.storage.StorePosition);
+  public void set(com.cobblemon.mod.common.api.storage.StorePosition, com.cobblemon.mod.common.pokemon.Pokemon);
+}

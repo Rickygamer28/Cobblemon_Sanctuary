@@ -1,0 +1,40 @@
+public final class com.cobblemon.mod.common.entity.pokemon.ai.PokemonMoveControl$Companion {
+  private com.cobblemon.mod.common.entity.pokemon.ai.PokemonMoveControl$Companion();
+  public com.cobblemon.mod.common.entity.pokemon.ai.PokemonMoveControl$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.entity.pokemon.ai.PokemonMoveControl extends net.minecraft.world.entity.ai.control.MoveControl {
+  public static final com.cobblemon.mod.common.entity.pokemon.ai.PokemonMoveControl$Companion Companion;
+  private final com.cobblemon.mod.common.entity.pokemon.PokemonEntity pokemonEntity;
+  private final com.bedrockk.molang.runtime.MoLangRuntime runtime;
+  private double waterLevel;
+  private boolean banking;
+  private int bankDurationTicks;
+  private float bankForwardBlocksPerTick;
+  private float bankUpwardsBlocksPerTick;
+  private float bankRightDegreesPerTick;
+  public static final double VERY_CLOSE;
+  public com.cobblemon.mod.common.entity.pokemon.ai.PokemonMoveControl(com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+  public final com.cobblemon.mod.common.entity.pokemon.PokemonEntity getPokemonEntity();
+  public final com.bedrockk.molang.runtime.MoLangRuntime getRuntime();
+  public final boolean getBanking();
+  public final void setBanking(boolean);
+  public final int getBankDurationTicks();
+  public final void setBankDurationTicks(int);
+  public final float getBankForwardBlocksPerTick();
+  public final void setBankForwardBlocksPerTick(float);
+  public final float getBankUpwardsBlocksPerTick();
+  public final void setBankUpwardsBlocksPerTick(float);
+  public final float getBankRightDegreesPerTick();
+  public final void setBankRightDegreesPerTick(float);
+  public final void startBanking(float, float, float, int);
+  public static void startBanking$default(com.cobblemon.mod.common.entity.pokemon.ai.PokemonMoveControl, float, float, float, int, int, java.lang.Object);
+  public final void stopBanking();
+  public void tick();
+  private final double getStableBattleFloatHeight();
+  private final boolean checkInWater();
+  private final boolean isUnderwater();
+  private final boolean isWalkable(float, float);
+  public final void stop();
+  private static final double tick$lambda$0(double);
+  static {};
+}

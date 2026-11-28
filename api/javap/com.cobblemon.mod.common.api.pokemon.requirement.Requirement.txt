@@ -1,0 +1,22 @@
+public final class com.cobblemon.mod.common.api.pokemon.requirement.Requirement$Companion {
+  static final com.cobblemon.mod.common.api.pokemon.requirement.Requirement$Companion $$INSTANCE;
+  private static final java.util.WeakHashMap<com.cobblemon.mod.common.api.pokemon.requirement.Requirement, net.minecraft.resources.ResourceLocation> pokedexIconOverrides;
+  private static final java.util.WeakHashMap<com.cobblemon.mod.common.api.pokemon.requirement.Requirement, java.lang.String> pokedexTooltipOverrides;
+  private com.cobblemon.mod.common.api.pokemon.requirement.Requirement$Companion();
+  public final java.util.WeakHashMap<com.cobblemon.mod.common.api.pokemon.requirement.Requirement, net.minecraft.resources.ResourceLocation> getPokedexIconOverrides();
+  public final java.util.WeakHashMap<com.cobblemon.mod.common.api.pokemon.requirement.Requirement, java.lang.String> getPokedexTooltipOverrides();
+  static {};
+}
+public final class com.cobblemon.mod.common.api.pokemon.requirement.Requirement$DefaultImpls {
+  public static net.minecraft.resources.ResourceLocation getPokedexIcon(com.cobblemon.mod.common.api.pokemon.requirement.Requirement);
+  public static java.lang.String getPokedexTooltip(com.cobblemon.mod.common.api.pokemon.requirement.Requirement);
+}
+public interface com.cobblemon.mod.common.api.pokemon.requirement.Requirement {
+  public static final com.cobblemon.mod.common.api.pokemon.requirement.Requirement$Companion Companion;
+  public abstract boolean check(com.cobblemon.mod.common.pokemon.Pokemon);
+  public default net.minecraft.resources.ResourceLocation getPokedexIcon();
+  public default java.lang.String getPokedexTooltip();
+  public static net.minecraft.resources.ResourceLocation access$getPokedexIcon$jd(com.cobblemon.mod.common.api.pokemon.requirement.Requirement);
+  public static java.lang.String access$getPokedexTooltip$jd(com.cobblemon.mod.common.api.pokemon.requirement.Requirement);
+  static {};
+}

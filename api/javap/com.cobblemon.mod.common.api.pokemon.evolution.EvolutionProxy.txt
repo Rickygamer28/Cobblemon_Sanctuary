@@ -1,0 +1,6 @@
+public interface com.cobblemon.mod.common.api.pokemon.evolution.EvolutionProxy<C extends com.cobblemon.mod.common.api.pokemon.evolution.EvolutionLike, S extends com.cobblemon.mod.common.api.pokemon.evolution.EvolutionLike, CI extends com.cobblemon.mod.common.api.pokemon.evolution.PreProcessor, SI extends com.cobblemon.mod.common.api.pokemon.evolution.PreProcessor> {
+  public abstract boolean isClient();
+  public abstract com.cobblemon.mod.common.api.pokemon.evolution.EvolutionController<? extends com.cobblemon.mod.common.api.pokemon.evolution.EvolutionLike, ?> current();
+  public abstract com.cobblemon.mod.common.api.pokemon.evolution.EvolutionController<C, CI> client();
+  public abstract com.cobblemon.mod.common.api.pokemon.evolution.EvolutionController<S, SI> server();
+}

@@ -1,0 +1,15 @@
+public final class com.cobblemon.mod.common.CobblemonActivities {
+  public static final com.cobblemon.mod.common.CobblemonActivities INSTANCE;
+  public static final java.util.List<net.minecraft.world.entity.schedule.Activity> activities;
+  public static final net.minecraft.world.entity.schedule.Activity BATTLING;
+  public static final net.minecraft.world.entity.schedule.Activity ACTION_EFFECT;
+  public static final net.minecraft.world.entity.schedule.Activity NPC_CHATTING;
+  public static final net.minecraft.world.entity.schedule.Activity POKEMON_SLEEPING_ACTIVITY;
+  public static final net.minecraft.world.entity.schedule.Activity POKEMON_GROW_CROP;
+  public static final net.minecraft.world.entity.schedule.Activity POKEMON_SLEEP_ON_TRAINER_BED;
+  public static final net.minecraft.world.entity.schedule.Activity POKEMON_HERD;
+  public static final net.minecraft.world.entity.schedule.Activity POKEMON_POLLINATION;
+  private com.cobblemon.mod.common.CobblemonActivities();
+  public static final net.minecraft.world.entity.schedule.Activity register(net.minecraft.world.entity.schedule.Activity);
+  static {};
+}

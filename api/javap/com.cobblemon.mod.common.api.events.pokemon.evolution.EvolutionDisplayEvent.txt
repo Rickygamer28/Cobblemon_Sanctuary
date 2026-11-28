@@ -1,0 +1,18 @@
+public final class com.cobblemon.mod.common.api.events.pokemon.evolution.EvolutionDisplayEvent implements com.cobblemon.mod.common.api.events.pokemon.evolution.EvolutionEvent {
+  private final com.cobblemon.mod.common.pokemon.Pokemon pokemon;
+  private com.cobblemon.mod.common.api.pokemon.evolution.EvolutionDisplay display;
+  private final com.cobblemon.mod.common.api.pokemon.evolution.Evolution evolution;
+  public com.cobblemon.mod.common.api.events.pokemon.evolution.EvolutionDisplayEvent(com.cobblemon.mod.common.pokemon.Pokemon, com.cobblemon.mod.common.api.pokemon.evolution.EvolutionDisplay, com.cobblemon.mod.common.api.pokemon.evolution.Evolution);
+  public com.cobblemon.mod.common.pokemon.Pokemon getPokemon();
+  public final com.cobblemon.mod.common.api.pokemon.evolution.EvolutionDisplay getDisplay();
+  public final void setDisplay(com.cobblemon.mod.common.api.pokemon.evolution.EvolutionDisplay);
+  public com.cobblemon.mod.common.api.pokemon.evolution.Evolution getEvolution();
+  public final com.cobblemon.mod.common.pokemon.Pokemon component1();
+  public final com.cobblemon.mod.common.api.pokemon.evolution.EvolutionDisplay component2();
+  public final com.cobblemon.mod.common.api.pokemon.evolution.Evolution component3();
+  public final com.cobblemon.mod.common.api.events.pokemon.evolution.EvolutionDisplayEvent copy(com.cobblemon.mod.common.pokemon.Pokemon, com.cobblemon.mod.common.api.pokemon.evolution.EvolutionDisplay, com.cobblemon.mod.common.api.pokemon.evolution.Evolution);
+  public static com.cobblemon.mod.common.api.events.pokemon.evolution.EvolutionDisplayEvent copy$default(com.cobblemon.mod.common.api.events.pokemon.evolution.EvolutionDisplayEvent, com.cobblemon.mod.common.pokemon.Pokemon, com.cobblemon.mod.common.api.pokemon.evolution.EvolutionDisplay, com.cobblemon.mod.common.api.pokemon.evolution.Evolution, int, java.lang.Object);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+}

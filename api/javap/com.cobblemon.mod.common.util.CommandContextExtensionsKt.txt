@@ -1,0 +1,8 @@
+public final class com.cobblemon.mod.common.util.CommandContextExtensionsKt {
+  public static final net.minecraft.server.level.ServerPlayer player(com.mojang.brigadier.context.CommandContext<net.minecraft.commands.CommandSourceStack>, java.lang.String);
+  public static net.minecraft.server.level.ServerPlayer player$default(com.mojang.brigadier.context.CommandContext, java.lang.String, int, java.lang.Object);
+  public static final java.lang.String string(com.mojang.brigadier.context.CommandContext<net.minecraft.commands.CommandSourceStack>, java.lang.String);
+  public static final java.util.UUID uuid(com.mojang.brigadier.context.CommandContext<net.minecraft.commands.CommandSourceStack>, java.lang.String);
+  public static final net.minecraft.resources.ResourceLocation resourceLocation(com.mojang.brigadier.context.CommandContext<net.minecraft.commands.CommandSourceStack>, java.lang.String);
+  public static final net.minecraft.world.entity.Entity entity(com.mojang.brigadier.context.CommandContext<net.minecraft.commands.CommandSourceStack>, java.lang.String);
+}

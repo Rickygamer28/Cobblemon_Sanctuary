@@ -1,0 +1,1 @@
+{"configurations":[{"activity":"core","tasksByPriority":{"0":["look_in_direction"]},"type":"add_tasks_to_activity"}],"description":"cobblemon.behaviour.looks_in_one_direction.desc","name":"cobblemon.behaviour.looks_in_one_direction.name"}

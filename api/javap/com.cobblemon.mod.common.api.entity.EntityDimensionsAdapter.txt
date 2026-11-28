@@ -1,0 +1,14 @@
+public final class com.cobblemon.mod.common.api.entity.EntityDimensionsAdapter implements com.google.gson.JsonSerializer<net.minecraft.world.entity.EntityDimensions>, com.google.gson.JsonDeserializer<net.minecraft.world.entity.EntityDimensions> {
+  public static final com.cobblemon.mod.common.api.entity.EntityDimensionsAdapter INSTANCE;
+  public static final java.lang.String WIDTH;
+  public static final java.lang.String HEIGHT;
+  private static final java.util.Map<java.lang.String, kotlin.jvm.functions.Function0<net.minecraft.world.entity.EntityDimensions>> templates;
+  private com.cobblemon.mod.common.api.entity.EntityDimensionsAdapter();
+  public final java.util.Map<java.lang.String, kotlin.jvm.functions.Function0<net.minecraft.world.entity.EntityDimensions>> getTemplates();
+  public com.google.gson.JsonElement serialize(net.minecraft.world.entity.EntityDimensions, java.lang.reflect.Type, com.google.gson.JsonSerializationContext);
+  public net.minecraft.world.entity.EntityDimensions deserialize(com.google.gson.JsonElement, java.lang.reflect.Type, com.google.gson.JsonDeserializationContext);
+  private static final net.minecraft.world.entity.EntityDimensions templates$lambda$0();
+  public com.google.gson.JsonElement serialize(java.lang.Object, java.lang.reflect.Type, com.google.gson.JsonSerializationContext);
+  public java.lang.Object deserialize(com.google.gson.JsonElement, java.lang.reflect.Type, com.google.gson.JsonDeserializationContext);
+  static {};
+}

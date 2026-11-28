@@ -1,0 +1,32 @@
+public abstract class com.cobblemon.mod.common.api.storage.PokemonStore<T extends com.cobblemon.mod.common.api.storage.StorePosition> implements java.lang.Iterable<com.cobblemon.mod.common.pokemon.Pokemon>, kotlin.jvm.internal.markers.KMappedMarker {
+  private final java.util.HashMap<java.util.UUID, com.cobblemon.mod.common.pokemon.Pokemon> pokemonByUuid;
+  public com.cobblemon.mod.common.api.storage.PokemonStore();
+  public abstract java.util.UUID getUuid();
+  public abstract com.cobblemon.mod.common.pokemon.Pokemon get(T);
+  public abstract T getFirstAvailablePosition();
+  public abstract java.lang.Iterable<net.minecraft.server.level.ServerPlayer> getObservingPlayers();
+  public abstract void sendTo(net.minecraft.server.level.ServerPlayer);
+  public abstract void onPokemonChanged(com.cobblemon.mod.common.pokemon.Pokemon);
+  public abstract void initialize();
+  protected abstract void setAtPosition(T, com.cobblemon.mod.common.pokemon.Pokemon);
+  public abstract boolean isValidPosition(T);
+  public void sendPacketToObservers(com.cobblemon.mod.common.api.net.NetworkPacket<?>);
+  public boolean add(com.cobblemon.mod.common.pokemon.Pokemon);
+  public void set(T, com.cobblemon.mod.common.pokemon.Pokemon);
+  public void swap(T, T);
+  public final void move(com.cobblemon.mod.common.pokemon.Pokemon, T);
+  public boolean remove(T);
+  public boolean remove(com.cobblemon.mod.common.pokemon.Pokemon);
+  public final com.cobblemon.mod.common.pokemon.Pokemon get(java.util.UUID);
+  protected final void rebuildPokemonByUuid();
+  public void handleInvalidSpeciesNBT(net.minecraft.nbt.CompoundTag);
+  public abstract net.minecraft.nbt.CompoundTag saveToNBT(net.minecraft.nbt.CompoundTag, net.minecraft.core.RegistryAccess);
+  public abstract com.cobblemon.mod.common.api.storage.PokemonStore<T> loadFromNBT(net.minecraft.nbt.CompoundTag, net.minecraft.core.RegistryAccess);
+  public void handleInvalidSpeciesJSON(com.google.gson.JsonObject);
+  public abstract com.google.gson.JsonObject saveToJSON(com.google.gson.JsonObject, net.minecraft.core.RegistryAccess);
+  public abstract com.cobblemon.mod.common.api.storage.PokemonStore<T> loadFromJSON(com.google.gson.JsonObject, net.minecraft.core.RegistryAccess);
+  public abstract void savePositionToNBT(T, net.minecraft.nbt.CompoundTag);
+  public abstract com.cobblemon.mod.common.api.storage.StoreCoordinates<T> loadPositionFromNBT(net.minecraft.nbt.CompoundTag);
+  public abstract com.cobblemon.mod.common.api.reactive.Observable<kotlin.Unit> getAnyChangeObservable();
+  public java.util.Iterator<com.cobblemon.mod.common.pokemon.Pokemon> iterator();
+}

@@ -1,0 +1,5 @@
+public final class com.cobblemon.mod.common.api.storage.pc.link.PermissiblePcLink extends com.cobblemon.mod.common.api.storage.pc.link.PCLink {
+  private final com.cobblemon.mod.common.api.permission.Permission permission;
+  public com.cobblemon.mod.common.api.storage.pc.link.PermissiblePcLink(com.cobblemon.mod.common.api.storage.pc.PCStore, net.minecraft.server.level.ServerPlayer, com.cobblemon.mod.common.api.permission.Permission);
+  public boolean isPermitted(net.minecraft.server.level.ServerPlayer);
+}

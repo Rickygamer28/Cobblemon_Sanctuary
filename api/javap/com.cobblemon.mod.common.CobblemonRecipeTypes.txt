@@ -1,0 +1,14 @@
+public final class com.cobblemon.mod.common.CobblemonRecipeTypes extends com.cobblemon.mod.common.platform.PlatformRegistry<net.minecraft.core.Registry<net.minecraft.world.item.crafting.RecipeType<?>>, net.minecraft.resources.ResourceKey<net.minecraft.core.Registry<net.minecraft.world.item.crafting.RecipeType<?>>>, net.minecraft.world.item.crafting.RecipeType<?>> {
+  public static final com.cobblemon.mod.common.CobblemonRecipeTypes INSTANCE;
+  private static final net.minecraft.world.item.crafting.RecipeType<com.cobblemon.mod.common.item.crafting.CookingPotRecipe> COOKING_POT_COOKING;
+  private static final net.minecraft.world.item.crafting.RecipeType<com.cobblemon.mod.common.item.crafting.CookingPotShapelessRecipe> COOKING_POT_SHAPELESS;
+  private static final net.minecraft.world.item.crafting.RecipeType<com.cobblemon.mod.common.item.crafting.brewingstand.BrewingStandRecipe> BREWING_STAND;
+  private com.cobblemon.mod.common.CobblemonRecipeTypes();
+  public final net.minecraft.world.item.crafting.RecipeType<com.cobblemon.mod.common.item.crafting.CookingPotRecipe> getCOOKING_POT_COOKING();
+  public final net.minecraft.world.item.crafting.RecipeType<com.cobblemon.mod.common.item.crafting.CookingPotShapelessRecipe> getCOOKING_POT_SHAPELESS();
+  public final net.minecraft.world.item.crafting.RecipeType<com.cobblemon.mod.common.item.crafting.brewingstand.BrewingStandRecipe> getBREWING_STAND();
+  public net.minecraft.core.Registry<net.minecraft.world.item.crafting.RecipeType<?>> getRegistry();
+  public net.minecraft.resources.ResourceKey<net.minecraft.core.Registry<net.minecraft.world.item.crafting.RecipeType<?>>> getResourceKey();
+  public final <T extends net.minecraft.world.item.crafting.Recipe<?>> net.minecraft.world.item.crafting.RecipeType<T> register(java.lang.String);
+  static {};
+}

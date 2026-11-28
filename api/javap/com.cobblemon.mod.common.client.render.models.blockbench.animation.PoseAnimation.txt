@@ -1,0 +1,16 @@
+public abstract class com.cobblemon.mod.common.client.render.models.blockbench.animation.PoseAnimation {
+  private java.util.Set<java.lang.String> labels;
+  private kotlin.jvm.functions.Function1<? super com.cobblemon.mod.common.client.render.models.blockbench.PosableState, java.lang.Boolean> condition;
+  public com.cobblemon.mod.common.client.render.models.blockbench.animation.PoseAnimation();
+  public java.util.Set<java.lang.String> getLabels();
+  public void setLabels(java.util.Set<java.lang.String>);
+  public kotlin.jvm.functions.Function1<com.cobblemon.mod.common.client.render.models.blockbench.PosableState, java.lang.Boolean> getCondition();
+  public void setCondition(kotlin.jvm.functions.Function1<? super com.cobblemon.mod.common.client.render.models.blockbench.PosableState, java.lang.Boolean>);
+  public com.cobblemon.mod.common.client.render.models.blockbench.animation.PoseAnimation withCondition(kotlin.jvm.functions.Function1<? super com.cobblemon.mod.common.client.render.models.blockbench.PosableState, java.lang.Boolean>);
+  public com.cobblemon.mod.common.client.render.models.blockbench.animation.PoseAnimation withCondition(com.cobblemon.mod.common.api.molang.ExpressionLike);
+  protected abstract void setupAnim(com.cobblemon.mod.common.client.render.models.blockbench.repository.RenderContext, com.cobblemon.mod.common.client.render.models.blockbench.PosableModel, com.cobblemon.mod.common.client.render.models.blockbench.PosableState, float, float, float, float, float, float);
+  public final void apply(com.cobblemon.mod.common.client.render.models.blockbench.repository.RenderContext, com.cobblemon.mod.common.client.render.models.blockbench.PosableModel, com.cobblemon.mod.common.client.render.models.blockbench.PosableState, float, float, float, float, float, float);
+  public void applyEffects(net.minecraft.world.entity.Entity, com.cobblemon.mod.common.client.render.models.blockbench.PosableState, float, float);
+  private static final boolean condition$lambda$0(com.cobblemon.mod.common.client.render.models.blockbench.PosableState);
+  private static final boolean withCondition$lambda$0(com.cobblemon.mod.common.api.molang.ExpressionLike, com.cobblemon.mod.common.client.render.models.blockbench.PosableState);
+}

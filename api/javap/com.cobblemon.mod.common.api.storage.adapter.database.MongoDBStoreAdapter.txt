@@ -1,0 +1,16 @@
+public class com.cobblemon.mod.common.api.storage.adapter.database.MongoDBStoreAdapter extends com.cobblemon.mod.common.api.storage.adapter.CobblemonAdapterParent<com.google.gson.JsonObject> implements com.cobblemon.mod.common.api.storage.adapter.flatfile.FileStoreAdapter<com.google.gson.JsonObject> {
+  private final com.mongodb.client.MongoClient mongoClient;
+  private final java.lang.String databaseName;
+  private final com.google.gson.Gson gson;
+  public com.cobblemon.mod.common.api.storage.adapter.database.MongoDBStoreAdapter(com.mongodb.client.MongoClient, java.lang.String);
+  protected final com.mongodb.client.MongoClient getMongoClient();
+  protected final java.lang.String getDatabaseName();
+  protected final com.google.gson.Gson getGson();
+  public <E extends com.cobblemon.mod.common.api.storage.StorePosition, T extends com.cobblemon.mod.common.api.storage.PokemonStore<E>> com.google.gson.JsonObject serialize(T, net.minecraft.core.RegistryAccess);
+  public void save(java.lang.Class<? extends com.cobblemon.mod.common.api.storage.PokemonStore<?>>, java.util.UUID, com.google.gson.JsonObject);
+  public <E extends com.cobblemon.mod.common.api.storage.StorePosition, T extends com.cobblemon.mod.common.api.storage.PokemonStore<E>> T provide(java.lang.Class<T>, java.util.UUID, net.minecraft.core.RegistryAccess);
+  protected com.google.gson.Gson createGson();
+  protected com.mongodb.client.MongoCollection<org.bson.Document> getCollection(java.lang.Class<? extends com.cobblemon.mod.common.api.storage.PokemonStore<?>>);
+  public java.lang.Object serialize(com.cobblemon.mod.common.api.storage.PokemonStore, net.minecraft.core.RegistryAccess);
+  public void save(java.lang.Class, java.util.UUID, java.lang.Object);
+}

@@ -1,0 +1,51 @@
+public final class com.cobblemon.mod.common.api.pokemon.aspect.ParticleData$MinecraftParticle$WhenMappings {
+  public static final int[] $EnumSwitchMapping$0;
+  static {};
+}
+public final class com.cobblemon.mod.common.api.pokemon.aspect.ParticleData$MinecraftParticle extends com.cobblemon.mod.common.api.pokemon.aspect.ParticleData {
+  private final net.minecraft.core.particles.ParticleOptions particle;
+  private final double chance;
+  private final int amount;
+  public com.cobblemon.mod.common.api.pokemon.aspect.ParticleData$MinecraftParticle(net.minecraft.core.particles.ParticleOptions, double, int);
+  public final net.minecraft.core.particles.ParticleOptions getParticle();
+  public final double getChance();
+  public final int getAmount();
+  public final int amount();
+  public final net.minecraft.core.particles.ParticleOptions component1();
+  public final double component2();
+  public final int component3();
+  public final com.cobblemon.mod.common.api.pokemon.aspect.ParticleData$MinecraftParticle copy(net.minecraft.core.particles.ParticleOptions, double, int);
+  public static com.cobblemon.mod.common.api.pokemon.aspect.ParticleData$MinecraftParticle copy$default(com.cobblemon.mod.common.api.pokemon.aspect.ParticleData$MinecraftParticle, net.minecraft.core.particles.ParticleOptions, double, int, int, java.lang.Object);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+}
+public final class com.cobblemon.mod.common.api.pokemon.aspect.ParticleData$SnowstormParticle$WhenMappings {
+  public static final int[] $EnumSwitchMapping$0;
+  static {};
+}
+public final class com.cobblemon.mod.common.api.pokemon.aspect.ParticleData$SnowstormParticle extends com.cobblemon.mod.common.api.pokemon.aspect.ParticleData {
+  private final net.minecraft.resources.ResourceLocation particle;
+  private final double chance;
+  private final int amount;
+  private final kotlin.jvm.functions.Function1<java.util.Map<java.lang.String, com.cobblemon.mod.common.client.render.MatrixWrapper>, java.util.List<java.lang.String>> locatorResolver;
+  public com.cobblemon.mod.common.api.pokemon.aspect.ParticleData$SnowstormParticle(net.minecraft.resources.ResourceLocation, double, int, kotlin.jvm.functions.Function1<? super java.util.Map<java.lang.String, com.cobblemon.mod.common.client.render.MatrixWrapper>, ? extends java.util.List<java.lang.String>>);
+  public final net.minecraft.resources.ResourceLocation getParticle();
+  public final double getChance();
+  public final int getAmount();
+  public final kotlin.jvm.functions.Function1<java.util.Map<java.lang.String, com.cobblemon.mod.common.client.render.MatrixWrapper>, java.util.List<java.lang.String>> getLocatorResolver();
+  public final int amount();
+  public final net.minecraft.resources.ResourceLocation component1();
+  public final double component2();
+  public final int component3();
+  public final kotlin.jvm.functions.Function1<java.util.Map<java.lang.String, com.cobblemon.mod.common.client.render.MatrixWrapper>, java.util.List<java.lang.String>> component4();
+  public final com.cobblemon.mod.common.api.pokemon.aspect.ParticleData$SnowstormParticle copy(net.minecraft.resources.ResourceLocation, double, int, kotlin.jvm.functions.Function1<? super java.util.Map<java.lang.String, com.cobblemon.mod.common.client.render.MatrixWrapper>, ? extends java.util.List<java.lang.String>>);
+  public static com.cobblemon.mod.common.api.pokemon.aspect.ParticleData$SnowstormParticle copy$default(com.cobblemon.mod.common.api.pokemon.aspect.ParticleData$SnowstormParticle, net.minecraft.resources.ResourceLocation, double, int, kotlin.jvm.functions.Function1, int, java.lang.Object);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+}
+public abstract class com.cobblemon.mod.common.api.pokemon.aspect.ParticleData {
+  private com.cobblemon.mod.common.api.pokemon.aspect.ParticleData();
+  public com.cobblemon.mod.common.api.pokemon.aspect.ParticleData(kotlin.jvm.internal.DefaultConstructorMarker);
+}

@@ -1,0 +1,22 @@
+public final class com.cobblemon.mod.common.CobblemonRecipeCategories extends java.lang.Enum<com.cobblemon.mod.common.CobblemonRecipeCategories> {
+  public static final com.cobblemon.mod.common.CobblemonRecipeCategories$Companion Companion;
+  private java.lang.String id;
+  private static final java.util.Map<net.minecraft.client.RecipeBookCategories, java.util.List<net.minecraft.client.RecipeBookCategories>> customAggregateCategories;
+  public static final com.cobblemon.mod.common.CobblemonRecipeCategories COOKING_POT_SEARCH;
+  public static final com.cobblemon.mod.common.CobblemonRecipeCategories COOKING_POT_FOODS;
+  public static final com.cobblemon.mod.common.CobblemonRecipeCategories COOKING_POT_MEDICINES;
+  public static final com.cobblemon.mod.common.CobblemonRecipeCategories COOKING_POT_COMPLEX_DISHES;
+  public static final com.cobblemon.mod.common.CobblemonRecipeCategories COOKING_POT_MISC;
+  private static final com.cobblemon.mod.common.CobblemonRecipeCategories[] $VALUES;
+  private static final kotlin.enums.EnumEntries $ENTRIES;
+  public final java.lang.String getId();
+  public final void setId(java.lang.String);
+  private com.cobblemon.mod.common.CobblemonRecipeCategories(java.lang.String);
+  public final net.minecraft.client.RecipeBookCategories toVanillaCategory();
+  public static com.cobblemon.mod.common.CobblemonRecipeCategories[] values();
+  public static com.cobblemon.mod.common.CobblemonRecipeCategories valueOf(java.lang.String);
+  public static kotlin.enums.EnumEntries<com.cobblemon.mod.common.CobblemonRecipeCategories> getEntries();
+  private static final com.cobblemon.mod.common.CobblemonRecipeCategories[] $values();
+  public static final java.util.Map access$getCustomAggregateCategories$cp();
+  static {};
+}

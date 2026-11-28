@@ -1,0 +1,41 @@
+public final class com.cobblemon.mod.common.entity.ai.FollowWalkTargetTask$Companion {
+  private com.cobblemon.mod.common.entity.ai.FollowWalkTargetTask$Companion();
+  private final boolean isTargetSpectator(net.minecraft.world.entity.ai.memory.WalkTarget);
+  public static final boolean access$isTargetSpectator(com.cobblemon.mod.common.entity.ai.FollowWalkTargetTask$Companion, net.minecraft.world.entity.ai.memory.WalkTarget);
+  public com.cobblemon.mod.common.entity.ai.FollowWalkTargetTask$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+final class com.cobblemon.mod.common.entity.ai.FollowWalkTargetTask$canStillUse$isTargetSpectator$1 extends kotlin.jvm.internal.FunctionReferenceImpl implements kotlin.jvm.functions.Function1<net.minecraft.world.entity.ai.memory.WalkTarget, java.lang.Boolean> {
+  com.cobblemon.mod.common.entity.ai.FollowWalkTargetTask$canStillUse$isTargetSpectator$1(java.lang.Object);
+  public final java.lang.Boolean invoke(net.minecraft.world.entity.ai.memory.WalkTarget);
+  public java.lang.Object invoke(java.lang.Object);
+}
+public final class com.cobblemon.mod.common.entity.ai.FollowWalkTargetTask extends net.minecraft.world.entity.ai.behavior.Behavior<net.minecraft.world.entity.PathfinderMob> {
+  public static final com.cobblemon.mod.common.entity.ai.FollowWalkTargetTask$Companion Companion;
+  private int pathUpdateCountdownTicks;
+  private net.minecraft.world.level.pathfinder.Path path;
+  private net.minecraft.core.BlockPos lookTargetPos;
+  private float speed;
+  public com.cobblemon.mod.common.entity.ai.FollowWalkTargetTask(int, int);
+  public com.cobblemon.mod.common.entity.ai.FollowWalkTargetTask(int, int, int, kotlin.jvm.internal.DefaultConstructorMarker);
+  protected boolean checkExtraStartConditions(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.PathfinderMob);
+  public final void resetPathUpdateCountdownTicks(net.minecraft.world.entity.PathfinderMob);
+  protected boolean canStillUse(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.PathfinderMob, long);
+  protected void stop(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.PathfinderMob, long);
+  protected void start(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.PathfinderMob, long);
+  protected void tick(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.PathfinderMob, long);
+  private final void withNodeFilter(net.minecraft.world.entity.PathfinderMob, java.util.function.Predicate<net.minecraft.world.level.pathfinder.PathType>, kotlin.jvm.functions.Function0<kotlin.Unit>);
+  private final boolean hasFinishedPath(net.minecraft.world.entity.PathfinderMob, net.minecraft.world.entity.ai.memory.WalkTarget, long);
+  private final net.minecraft.world.level.pathfinder.Path generatePath(net.minecraft.world.entity.PathfinderMob, net.minecraft.world.entity.ai.memory.WalkTarget, net.minecraft.core.BlockPos);
+  private final boolean hasReached(net.minecraft.world.entity.PathfinderMob, net.minecraft.world.entity.ai.memory.WalkTarget);
+  private static final java.lang.Boolean canStillUse$lambda$0(kotlin.jvm.functions.Function1, java.lang.Object);
+  private static final boolean withNodeFilter$lambda$0(net.minecraft.world.level.pathfinder.PathType);
+  private static final boolean generatePath$lambda$0(kotlin.jvm.functions.Function1, net.minecraft.world.level.pathfinder.PathType);
+  private static final kotlin.Unit generatePath$lambda$1(net.minecraft.world.entity.PathfinderMob, net.minecraft.world.entity.ai.memory.WalkTarget, kotlin.jvm.internal.Ref$ObjectRef);
+  public com.cobblemon.mod.common.entity.ai.FollowWalkTargetTask();
+  public boolean checkExtraStartConditions(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity);
+  public boolean canStillUse(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity, long);
+  public void stop(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity, long);
+  public void start(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity, long);
+  public void tick(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity, long);
+  static {};
+}

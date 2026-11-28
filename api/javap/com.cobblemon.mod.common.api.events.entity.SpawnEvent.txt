@@ -1,0 +1,9 @@
+public final class com.cobblemon.mod.common.api.events.entity.SpawnEvent<T extends net.minecraft.world.entity.Entity> extends com.cobblemon.mod.common.api.events.Cancelable {
+  private final T entity;
+  private final com.cobblemon.mod.common.api.spawning.position.SpawnablePosition spawnablePosition;
+  public com.cobblemon.mod.common.api.events.entity.SpawnEvent(T, com.cobblemon.mod.common.api.spawning.position.SpawnablePosition);
+  public final T getEntity();
+  public final com.cobblemon.mod.common.api.spawning.position.SpawnablePosition getSpawnablePosition();
+  public final com.cobblemon.mod.common.api.spawning.SpawnCause getCause();
+  public final com.cobblemon.mod.common.api.spawning.spawner.Spawner getSpawner();
+}

@@ -1,0 +1,18 @@
+public final class com.cobblemon.mod.common.pokemon.OriginalTrainerType extends java.lang.Enum<com.cobblemon.mod.common.pokemon.OriginalTrainerType> implements net.minecraft.util.StringRepresentable {
+  public static final com.cobblemon.mod.common.pokemon.OriginalTrainerType$Companion Companion;
+  private static final com.mojang.serialization.Codec<com.cobblemon.mod.common.pokemon.OriginalTrainerType> CODEC;
+  public static final com.cobblemon.mod.common.pokemon.OriginalTrainerType NONE;
+  public static final com.cobblemon.mod.common.pokemon.OriginalTrainerType PLAYER;
+  public static final com.cobblemon.mod.common.pokemon.OriginalTrainerType NPC;
+  private static final com.cobblemon.mod.common.pokemon.OriginalTrainerType[] $VALUES;
+  private static final kotlin.enums.EnumEntries $ENTRIES;
+  private com.cobblemon.mod.common.pokemon.OriginalTrainerType();
+  public java.lang.String getSerializedName();
+  public static com.cobblemon.mod.common.pokemon.OriginalTrainerType[] values();
+  public static com.cobblemon.mod.common.pokemon.OriginalTrainerType valueOf(java.lang.String);
+  public static kotlin.enums.EnumEntries<com.cobblemon.mod.common.pokemon.OriginalTrainerType> getEntries();
+  private static final com.cobblemon.mod.common.pokemon.OriginalTrainerType[] $values();
+  public static final com.mojang.serialization.Codec<com.cobblemon.mod.common.pokemon.OriginalTrainerType> getCODEC();
+  public static final com.mojang.serialization.Codec access$getCODEC$cp();
+  static {};
+}

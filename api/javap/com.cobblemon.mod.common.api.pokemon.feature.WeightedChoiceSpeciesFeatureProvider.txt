@@ -1,0 +1,35 @@
+public final class com.cobblemon.mod.common.api.pokemon.feature.WeightedChoiceSpeciesFeatureProvider extends com.cobblemon.mod.common.api.pokemon.feature.AbstractChoiceSpeciesFeatureProvider<java.util.Map<java.lang.String, ? extends java.lang.Integer>> {
+  private boolean needsKey;
+  private boolean visible;
+  public com.cobblemon.mod.common.api.pokemon.feature.WeightedChoiceSpeciesFeatureProvider();
+  public boolean getNeedsKey();
+  public void setNeedsKey(boolean);
+  public boolean getVisible();
+  public void setVisible(boolean);
+  public java.util.List<java.lang.String> examples();
+  public void saveToBuffer(net.minecraft.network.RegistryFriendlyByteBuf, boolean);
+  public void loadFromBuffer(net.minecraft.network.RegistryFriendlyByteBuf);
+  public com.cobblemon.mod.common.api.pokemon.feature.StringSpeciesFeature fromString(java.lang.String);
+  public com.cobblemon.mod.common.api.pokemon.feature.StringSpeciesFeature invoke(com.cobblemon.mod.common.pokemon.Pokemon);
+  public java.util.Map<java.lang.String, java.lang.Integer> getAllAspects();
+  private static final kotlin.Unit saveToBuffer$lambda$0(net.minecraft.network.RegistryFriendlyByteBuf, net.minecraft.network.FriendlyByteBuf, java.lang.String);
+  private static final void saveToBuffer$lambda$1(kotlin.jvm.functions.Function2, java.lang.Object, java.lang.String);
+  private static final kotlin.Unit saveToBuffer$lambda$2(net.minecraft.network.RegistryFriendlyByteBuf, net.minecraft.network.FriendlyByteBuf, java.lang.String);
+  private static final void saveToBuffer$lambda$3(kotlin.jvm.functions.Function2, java.lang.Object, java.lang.String);
+  private static final kotlin.Unit saveToBuffer$lambda$4(net.minecraft.network.RegistryFriendlyByteBuf, net.minecraft.network.FriendlyByteBuf, java.lang.String);
+  private static final void saveToBuffer$lambda$5(kotlin.jvm.functions.Function2, java.lang.Object, java.lang.String);
+  private static final kotlin.Unit saveToBuffer$lambda$6(net.minecraft.network.RegistryFriendlyByteBuf, net.minecraft.network.FriendlyByteBuf, java.lang.Integer);
+  private static final void saveToBuffer$lambda$7(kotlin.jvm.functions.Function2, java.lang.Object, java.lang.Integer);
+  private static final java.lang.String loadFromBuffer$lambda$0(net.minecraft.network.RegistryFriendlyByteBuf, net.minecraft.network.FriendlyByteBuf);
+  private static final java.lang.String loadFromBuffer$lambda$1(kotlin.jvm.functions.Function1, java.lang.Object);
+  private static final java.lang.String loadFromBuffer$lambda$2(net.minecraft.network.RegistryFriendlyByteBuf, net.minecraft.network.FriendlyByteBuf);
+  private static final java.lang.String loadFromBuffer$lambda$3(kotlin.jvm.functions.Function1, java.lang.Object);
+  private static final java.lang.String loadFromBuffer$lambda$4(net.minecraft.network.RegistryFriendlyByteBuf, net.minecraft.network.FriendlyByteBuf);
+  private static final java.lang.String loadFromBuffer$lambda$5(kotlin.jvm.functions.Function1, java.lang.Object);
+  private static final java.lang.Integer loadFromBuffer$lambda$6(net.minecraft.network.RegistryFriendlyByteBuf, net.minecraft.network.FriendlyByteBuf);
+  private static final java.lang.Integer loadFromBuffer$lambda$7(kotlin.jvm.functions.Function1, java.lang.Object);
+  public java.util.Collection examples();
+  public com.cobblemon.mod.common.api.properties.CustomPokemonProperty fromString(java.lang.String);
+  public com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeature invoke(com.cobblemon.mod.common.pokemon.Pokemon);
+  public java.lang.Object getAllAspects();
+}

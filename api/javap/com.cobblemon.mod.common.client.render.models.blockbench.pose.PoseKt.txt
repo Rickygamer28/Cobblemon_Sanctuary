@@ -1,0 +1,2 @@
+public final class com.cobblemon.mod.common.client.render.models.blockbench.pose.PoseKt {
+}

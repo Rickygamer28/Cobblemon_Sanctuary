@@ -1,0 +1,12 @@
+public final class com.cobblemon.mod.common.api.storage.factory.PokemonStoreFactory$DefaultImpls {
+  public static com.cobblemon.mod.common.api.storage.pc.PCStore getPCForPlayer(com.cobblemon.mod.common.api.storage.factory.PokemonStoreFactory, net.minecraft.server.level.ServerPlayer, com.cobblemon.mod.common.block.entity.PCBlockEntity);
+}
+public interface com.cobblemon.mod.common.api.storage.factory.PokemonStoreFactory {
+  public abstract com.cobblemon.mod.common.api.storage.party.PlayerPartyStore getPlayerParty(java.util.UUID, net.minecraft.core.RegistryAccess);
+  public abstract com.cobblemon.mod.common.api.storage.pc.PCStore getPC(java.util.UUID, net.minecraft.core.RegistryAccess);
+  public default com.cobblemon.mod.common.api.storage.pc.PCStore getPCForPlayer(net.minecraft.server.level.ServerPlayer, com.cobblemon.mod.common.block.entity.PCBlockEntity);
+  public abstract <E extends com.cobblemon.mod.common.api.storage.StorePosition, T extends com.cobblemon.mod.common.api.storage.PokemonStore<E>> T getCustomStore(java.lang.Class<T>, java.util.UUID, net.minecraft.core.RegistryAccess);
+  public abstract void shutdown(net.minecraft.core.RegistryAccess);
+  public abstract void onPlayerDisconnect(net.minecraft.server.level.ServerPlayer);
+  public static com.cobblemon.mod.common.api.storage.pc.PCStore access$getPCForPlayer$jd(com.cobblemon.mod.common.api.storage.factory.PokemonStoreFactory, net.minecraft.server.level.ServerPlayer, com.cobblemon.mod.common.block.entity.PCBlockEntity);
+}

@@ -1,0 +1,30 @@
+public final class com.cobblemon.mod.common.net.messages.client.effect.SaccharineLogBlockParticlesPacket$Companion {
+  private com.cobblemon.mod.common.net.messages.client.effect.SaccharineLogBlockParticlesPacket$Companion();
+  public final net.minecraft.resources.ResourceLocation getID();
+  public final com.cobblemon.mod.common.net.messages.client.effect.SaccharineLogBlockParticlesPacket decode(net.minecraft.network.RegistryFriendlyByteBuf);
+  private static final net.minecraft.core.BlockPos decode$lambda$0(net.minecraft.network.RegistryFriendlyByteBuf, net.minecraft.network.FriendlyByteBuf);
+  private static final net.minecraft.core.BlockPos decode$lambda$1(kotlin.jvm.functions.Function1, java.lang.Object);
+  public com.cobblemon.mod.common.net.messages.client.effect.SaccharineLogBlockParticlesPacket$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.net.messages.client.effect.SaccharineLogBlockParticlesPacket implements com.cobblemon.mod.common.api.net.NetworkPacket<com.cobblemon.mod.common.net.messages.client.effect.SaccharineLogBlockParticlesPacket> {
+  public static final com.cobblemon.mod.common.net.messages.client.effect.SaccharineLogBlockParticlesPacket$Companion Companion;
+  private final net.minecraft.core.BlockPos blockPos;
+  private final net.minecraft.core.BlockPos entityPos;
+  private final net.minecraft.resources.ResourceLocation id;
+  private static final net.minecraft.resources.ResourceLocation ID;
+  public com.cobblemon.mod.common.net.messages.client.effect.SaccharineLogBlockParticlesPacket(net.minecraft.core.BlockPos, net.minecraft.core.BlockPos);
+  public final net.minecraft.core.BlockPos getBlockPos();
+  public final net.minecraft.core.BlockPos getEntityPos();
+  public net.minecraft.resources.ResourceLocation getId();
+  public void encode(net.minecraft.network.RegistryFriendlyByteBuf);
+  public void sendToPlayer(net.minecraft.server.level.ServerPlayer);
+  public void sendToPlayers(java.lang.Iterable<? extends net.minecraft.server.level.ServerPlayer>);
+  public void sendToAllPlayers();
+  public void sendToServer();
+  public void sendToPlayersAround(double, double, double, double, net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level>, kotlin.jvm.functions.Function1<? super net.minecraft.server.level.ServerPlayer, java.lang.Boolean>);
+  public net.minecraft.network.protocol.common.custom.CustomPacketPayload$Type<com.cobblemon.mod.common.net.messages.client.effect.SaccharineLogBlockParticlesPacket> type();
+  private static final kotlin.Unit encode$lambda$0(net.minecraft.network.RegistryFriendlyByteBuf, net.minecraft.network.FriendlyByteBuf, net.minecraft.core.BlockPos);
+  private static final void encode$lambda$1(kotlin.jvm.functions.Function2, java.lang.Object, net.minecraft.core.BlockPos);
+  public static final net.minecraft.resources.ResourceLocation access$getID$cp();
+  static {};
+}

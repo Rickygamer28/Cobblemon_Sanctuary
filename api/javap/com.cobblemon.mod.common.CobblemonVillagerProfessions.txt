@@ -1,0 +1,14 @@
+public final class com.cobblemon.mod.common.CobblemonVillagerProfessions extends com.cobblemon.mod.common.platform.PlatformRegistry<net.minecraft.core.Registry<net.minecraft.world.entity.npc.VillagerProfession>, net.minecraft.resources.ResourceKey<net.minecraft.core.Registry<net.minecraft.world.entity.npc.VillagerProfession>>, net.minecraft.world.entity.npc.VillagerProfession> {
+  public static final com.cobblemon.mod.common.CobblemonVillagerProfessions INSTANCE;
+  private static final net.minecraft.core.Registry<net.minecraft.world.entity.npc.VillagerProfession> registry;
+  private static final net.minecraft.resources.ResourceKey<net.minecraft.core.Registry<net.minecraft.world.entity.npc.VillagerProfession>> resourceKey;
+  public static final net.minecraft.world.entity.npc.VillagerProfession NURSE;
+  private com.cobblemon.mod.common.CobblemonVillagerProfessions();
+  public net.minecraft.core.Registry<net.minecraft.world.entity.npc.VillagerProfession> getRegistry();
+  public net.minecraft.resources.ResourceKey<net.minecraft.core.Registry<net.minecraft.world.entity.npc.VillagerProfession>> getResourceKey();
+  public final kotlin.Pair<java.lang.String, java.lang.String[]> getNameTagOverride(net.minecraft.world.entity.npc.VillagerProfession);
+  private final net.minecraft.world.entity.npc.VillagerProfession profession(net.minecraft.resources.ResourceKey<net.minecraft.world.entity.ai.village.poi.PoiType>, net.minecraft.sounds.SoundEvent);
+  private static final boolean profession$lambda$0(net.minecraft.resources.ResourceKey, net.minecraft.core.Holder);
+  private static final boolean profession$lambda$1(net.minecraft.resources.ResourceKey, net.minecraft.core.Holder);
+  static {};
+}

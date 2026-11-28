@@ -1,0 +1,17 @@
+public final class com.cobblemon.mod.common.api.pokemon.effect.ShoulderEffectRegistry {
+  public static final com.cobblemon.mod.common.api.pokemon.effect.ShoulderEffectRegistry INSTANCE;
+  private static final java.util.Map<java.lang.String, java.lang.Class<? extends com.cobblemon.mod.common.api.pokemon.effect.ShoulderEffect>> effects;
+  private static final java.lang.Class<? extends com.cobblemon.mod.common.api.pokemon.effect.ShoulderEffect> POTION_EFFECT;
+  private com.cobblemon.mod.common.api.pokemon.effect.ShoulderEffectRegistry();
+  public final java.lang.Class<? extends com.cobblemon.mod.common.api.pokemon.effect.ShoulderEffect> getPOTION_EFFECT();
+  public final void register$common();
+  public static final java.lang.Class<? extends com.cobblemon.mod.common.api.pokemon.effect.ShoulderEffect> register(java.lang.String, java.lang.Class<? extends com.cobblemon.mod.common.api.pokemon.effect.ShoulderEffect>);
+  public static final java.lang.Class<? extends com.cobblemon.mod.common.api.pokemon.effect.ShoulderEffect> unregister(java.lang.String);
+  public static final java.lang.String getName(java.lang.Class<? extends com.cobblemon.mod.common.api.pokemon.effect.ShoulderEffect>);
+  public static final java.lang.Class<? extends com.cobblemon.mod.common.api.pokemon.effect.ShoulderEffect> get(java.lang.String);
+  public final void onEffectEnd(net.minecraft.server.level.ServerPlayer);
+  private final void refreshEffects(net.minecraft.server.level.ServerPlayer);
+  private static final kotlin.Unit register$lambda$0(com.cobblemon.mod.common.platform.events.ServerPlayerEvent$Login);
+  private static final kotlin.Unit onEffectEnd$lambda$0(net.minecraft.server.level.ServerPlayer);
+  static {};
+}

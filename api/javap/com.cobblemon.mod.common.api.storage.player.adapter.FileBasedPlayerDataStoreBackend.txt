@@ -1,0 +1,33 @@
+public final class com.cobblemon.mod.common.api.storage.player.adapter.FileBasedPlayerDataStoreBackend$Companion {
+  private com.cobblemon.mod.common.api.storage.player.adapter.FileBasedPlayerDataStoreBackend$Companion();
+  public com.cobblemon.mod.common.api.storage.player.adapter.FileBasedPlayerDataStoreBackend$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public abstract class com.cobblemon.mod.common.api.storage.player.adapter.FileBasedPlayerDataStoreBackend<T extends com.cobblemon.mod.common.api.storage.player.InstancedPlayerData> extends com.cobblemon.mod.common.api.storage.player.adapter.PlayerDataStoreBackend<T> {
+  public static final com.cobblemon.mod.common.api.storage.player.adapter.FileBasedPlayerDataStoreBackend$Companion Companion;
+  private final java.lang.String subfolder;
+  private final com.cobblemon.mod.common.api.storage.player.PlayerInstancedDataStoreType type;
+  private final java.lang.String fileExt;
+  public java.nio.file.Path savePath;
+  private final boolean useNestedStructure;
+  public static final java.lang.String OLD_FILE_EXTENSION;
+  public static final java.lang.String TEMPORARY_FILE_EXTENSION;
+  public com.cobblemon.mod.common.api.storage.player.adapter.FileBasedPlayerDataStoreBackend(java.lang.String, com.cobblemon.mod.common.api.storage.player.PlayerInstancedDataStoreType, java.lang.String);
+  public final java.lang.String getSubfolder();
+  public final com.cobblemon.mod.common.api.storage.player.PlayerInstancedDataStoreType getType();
+  public final java.lang.String getFileExt();
+  public abstract kotlin.jvm.functions.Function1<java.util.UUID, T> getDefaultData();
+  public final java.nio.file.Path getSavePath();
+  public final void setSavePath(java.nio.file.Path);
+  public final boolean getUseNestedStructure();
+  public void setup(net.minecraft.server.MinecraftServer);
+  protected final void postSaveFileMoving(java.util.UUID);
+  protected final T loadWithFallback(java.util.UUID, kotlin.jvm.functions.Function1<? super java.io.File, ? extends T>);
+  public final java.lang.String getSubFile(java.util.UUID, java.lang.String);
+  public static java.lang.String getSubFile$default(com.cobblemon.mod.common.api.storage.player.adapter.FileBasedPlayerDataStoreBackend, java.util.UUID, java.lang.String, int, java.lang.Object);
+  public final java.io.File filePath(java.util.UUID, java.lang.String);
+  public static java.io.File filePath$default(com.cobblemon.mod.common.api.storage.player.adapter.FileBasedPlayerDataStoreBackend, java.util.UUID, java.lang.String, int, java.lang.Object);
+  public final java.lang.String getSubFile(java.util.UUID);
+  public final java.io.File filePath(java.util.UUID);
+  private static final com.cobblemon.mod.common.api.storage.player.InstancedPlayerData loadWithFallback$lambda$0(java.io.File, java.io.File, kotlin.jvm.functions.Function1, com.cobblemon.mod.common.api.storage.player.adapter.FileBasedPlayerDataStoreBackend, java.util.UUID);
+  static {};
+}

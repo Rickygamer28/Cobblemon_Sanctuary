@@ -1,0 +1,11 @@
+public final class com.cobblemon.mod.common.api.storage.pc.link.ProximityPCLink extends com.cobblemon.mod.common.api.storage.pc.link.PCLink {
+  private final double maxDistance;
+  private final net.minecraft.world.level.Level world;
+  private final net.minecraft.core.BlockPos pos;
+  public com.cobblemon.mod.common.api.storage.pc.link.ProximityPCLink(com.cobblemon.mod.common.api.storage.pc.PCStore, java.util.UUID, com.cobblemon.mod.common.block.entity.PCBlockEntity, double);
+  public com.cobblemon.mod.common.api.storage.pc.link.ProximityPCLink(com.cobblemon.mod.common.api.storage.pc.PCStore, java.util.UUID, com.cobblemon.mod.common.block.entity.PCBlockEntity, double, int, kotlin.jvm.internal.DefaultConstructorMarker);
+  public final double getMaxDistance();
+  public final net.minecraft.world.level.Level getWorld();
+  public final net.minecraft.core.BlockPos getPos();
+  public boolean isPermitted(net.minecraft.server.level.ServerPlayer);
+}

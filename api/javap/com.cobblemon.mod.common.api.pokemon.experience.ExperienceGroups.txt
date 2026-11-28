@@ -1,0 +1,11 @@
+public final class com.cobblemon.mod.common.api.pokemon.experience.ExperienceGroups implements java.lang.Iterable<com.cobblemon.mod.common.api.pokemon.experience.ExperienceGroup>, kotlin.jvm.internal.markers.KMappedMarker {
+  public static final com.cobblemon.mod.common.api.pokemon.experience.ExperienceGroups INSTANCE;
+  private static final java.util.List<com.cobblemon.mod.common.api.pokemon.experience.ExperienceGroup> groups;
+  private com.cobblemon.mod.common.api.pokemon.experience.ExperienceGroups();
+  public java.util.Iterator<com.cobblemon.mod.common.api.pokemon.experience.ExperienceGroup> iterator();
+  public final com.cobblemon.mod.common.api.pokemon.experience.ExperienceGroup findByName(java.lang.String);
+  public final com.cobblemon.mod.common.api.pokemon.experience.ExperienceGroup register(com.cobblemon.mod.common.api.pokemon.experience.ExperienceGroup);
+  public final boolean unregister(com.cobblemon.mod.common.api.pokemon.experience.ExperienceGroup);
+  public final void registerDefaults();
+  static {};
+}

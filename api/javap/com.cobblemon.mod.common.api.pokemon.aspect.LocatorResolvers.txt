@@ -1,0 +1,11 @@
+public final class com.cobblemon.mod.common.api.pokemon.aspect.LocatorResolvers {
+  public static final com.cobblemon.mod.common.api.pokemon.aspect.LocatorResolvers INSTANCE;
+  private com.cobblemon.mod.common.api.pokemon.aspect.LocatorResolvers();
+  public final kotlin.jvm.functions.Function1<java.util.Map<java.lang.String, com.cobblemon.mod.common.client.render.MatrixWrapper>, java.util.List<java.lang.String>> containing(java.lang.String);
+  public final kotlin.jvm.functions.Function1<java.util.Map<java.lang.String, com.cobblemon.mod.common.client.render.MatrixWrapper>, java.util.List<java.lang.String>> exact(java.lang.String...);
+  public final kotlin.jvm.functions.Function1<java.util.Map<java.lang.String, com.cobblemon.mod.common.client.render.MatrixWrapper>, java.util.List<java.lang.String>> firstMatch(java.lang.String...);
+  private static final java.util.List containing$lambda$0(java.lang.String, java.util.Map);
+  private static final java.util.List exact$lambda$0(java.lang.String[], java.util.Map);
+  private static final java.util.List firstMatch$lambda$0(java.lang.String[], java.util.Map);
+  static {};
+}

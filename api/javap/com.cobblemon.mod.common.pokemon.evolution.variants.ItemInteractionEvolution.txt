@@ -1,0 +1,58 @@
+public final class com.cobblemon.mod.common.pokemon.evolution.variants.ItemInteractionEvolution$Companion {
+  private com.cobblemon.mod.common.pokemon.evolution.variants.ItemInteractionEvolution$Companion();
+  public com.cobblemon.mod.common.pokemon.evolution.variants.ItemInteractionEvolution$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.pokemon.evolution.variants.ItemInteractionEvolution$ItemInteractionContext {
+  private final net.minecraft.world.item.ItemStack stack;
+  private final net.minecraft.world.level.Level world;
+  public com.cobblemon.mod.common.pokemon.evolution.variants.ItemInteractionEvolution$ItemInteractionContext(net.minecraft.world.item.ItemStack, net.minecraft.world.level.Level);
+  public final net.minecraft.world.item.ItemStack getStack();
+  public final net.minecraft.world.level.Level getWorld();
+  public final net.minecraft.world.item.ItemStack component1();
+  public final net.minecraft.world.level.Level component2();
+  public final com.cobblemon.mod.common.pokemon.evolution.variants.ItemInteractionEvolution$ItemInteractionContext copy(net.minecraft.world.item.ItemStack, net.minecraft.world.level.Level);
+  public static com.cobblemon.mod.common.pokemon.evolution.variants.ItemInteractionEvolution$ItemInteractionContext copy$default(com.cobblemon.mod.common.pokemon.evolution.variants.ItemInteractionEvolution$ItemInteractionContext, net.minecraft.world.item.ItemStack, net.minecraft.world.level.Level, int, java.lang.Object);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+}
+public class com.cobblemon.mod.common.pokemon.evolution.variants.ItemInteractionEvolution implements com.cobblemon.mod.common.api.pokemon.evolution.ContextEvolution<com.cobblemon.mod.common.pokemon.evolution.variants.ItemInteractionEvolution$ItemInteractionContext, net.minecraft.advancements.critereon.ItemPredicate> {
+  public static final com.cobblemon.mod.common.pokemon.evolution.variants.ItemInteractionEvolution$Companion Companion;
+  private final java.lang.String id;
+  private final com.cobblemon.mod.common.api.pokemon.PokemonProperties result;
+  private final com.cobblemon.mod.common.api.pokemon.PokemonProperties shedder;
+  private final net.minecraft.advancements.critereon.ItemPredicate requiredContext;
+  private boolean optional;
+  private boolean consumeHeldItem;
+  private final java.util.Set<com.cobblemon.mod.common.api.pokemon.requirement.Requirement> requirements;
+  private final java.util.Set<com.cobblemon.mod.common.api.moves.MoveTemplate> learnableMoves;
+  private final com.cobblemon.mod.common.api.drop.DropTable drops;
+  public static final java.lang.String ADAPTER_VARIANT;
+  public com.cobblemon.mod.common.pokemon.evolution.variants.ItemInteractionEvolution(java.lang.String, com.cobblemon.mod.common.api.pokemon.PokemonProperties, com.cobblemon.mod.common.api.pokemon.PokemonProperties, net.minecraft.advancements.critereon.ItemPredicate, boolean, boolean, java.util.Set<com.cobblemon.mod.common.api.pokemon.requirement.Requirement>, java.util.Set<com.cobblemon.mod.common.api.moves.MoveTemplate>, com.cobblemon.mod.common.api.drop.DropTable);
+  public java.lang.String getId();
+  public com.cobblemon.mod.common.api.pokemon.PokemonProperties getResult();
+  public com.cobblemon.mod.common.api.pokemon.PokemonProperties getShedder();
+  public net.minecraft.advancements.critereon.ItemPredicate getRequiredContext();
+  public boolean getOptional();
+  public void setOptional(boolean);
+  public boolean getConsumeHeldItem();
+  public void setConsumeHeldItem(boolean);
+  public java.util.Set<com.cobblemon.mod.common.api.pokemon.requirement.Requirement> getRequirements();
+  public java.util.Set<com.cobblemon.mod.common.api.moves.MoveTemplate> getLearnableMoves();
+  public com.cobblemon.mod.common.api.drop.DropTable getDrops();
+  public com.cobblemon.mod.common.pokemon.evolution.variants.ItemInteractionEvolution();
+  public boolean testContext(com.cobblemon.mod.common.pokemon.Pokemon, com.cobblemon.mod.common.pokemon.evolution.variants.ItemInteractionEvolution$ItemInteractionContext);
+  public boolean equals(java.lang.Object);
+  public int hashCode();
+  public boolean attemptEvolution(com.cobblemon.mod.common.pokemon.Pokemon, com.cobblemon.mod.common.pokemon.evolution.variants.ItemInteractionEvolution$ItemInteractionContext);
+  public boolean test(com.cobblemon.mod.common.pokemon.Pokemon);
+  public boolean evolve(com.cobblemon.mod.common.pokemon.Pokemon);
+  public boolean shed(com.cobblemon.mod.common.pokemon.Pokemon);
+  public void forceEvolve(com.cobblemon.mod.common.pokemon.Pokemon);
+  public void evolutionMethod(com.cobblemon.mod.common.pokemon.Pokemon);
+  public void applyTo(com.cobblemon.mod.common.pokemon.Pokemon);
+  public java.lang.Object getRequiredContext();
+  public boolean testContext(com.cobblemon.mod.common.pokemon.Pokemon, java.lang.Object);
+  public boolean attemptEvolution(com.cobblemon.mod.common.pokemon.Pokemon, java.lang.Object);
+  static {};
+}

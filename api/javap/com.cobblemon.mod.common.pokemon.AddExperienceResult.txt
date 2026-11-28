@@ -1,0 +1,20 @@
+public final class com.cobblemon.mod.common.pokemon.AddExperienceResult {
+  private final int oldLevel;
+  private final int newLevel;
+  private final java.util.Set<com.cobblemon.mod.common.api.moves.MoveTemplate> newMoves;
+  private final int experienceAdded;
+  public com.cobblemon.mod.common.pokemon.AddExperienceResult(int, int, java.util.Set<? extends com.cobblemon.mod.common.api.moves.MoveTemplate>, int);
+  public final int getOldLevel();
+  public final int getNewLevel();
+  public final java.util.Set<com.cobblemon.mod.common.api.moves.MoveTemplate> getNewMoves();
+  public final int getExperienceAdded();
+  public final int component1();
+  public final int component2();
+  public final java.util.Set<com.cobblemon.mod.common.api.moves.MoveTemplate> component3();
+  public final int component4();
+  public final com.cobblemon.mod.common.pokemon.AddExperienceResult copy(int, int, java.util.Set<? extends com.cobblemon.mod.common.api.moves.MoveTemplate>, int);
+  public static com.cobblemon.mod.common.pokemon.AddExperienceResult copy$default(com.cobblemon.mod.common.pokemon.AddExperienceResult, int, int, java.util.Set, int, int, java.lang.Object);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+}

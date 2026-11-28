@@ -1,0 +1,111 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+> Configure project :fabric
+Fabric Loom: 1.11.8
+
+duplicate input class net/fabricmc/fabric/mixin/tag/package-info, from /home/runner/.gradle/caches/modules-2/files-2.1/net.fabricmc.fabric-api/fabric-convention-tags-v2/2.12.0+c3656daa19/cae8ee9fc130df2be8d3aaefe04da974112a3510/fabric-convention-tags-v2-2.12.0+c3656daa19.jar and /home/runner/.gradle/caches/modules-2/files-2.1/net.fabricmc.fabric-api/fabric-tag-api-v1/1.3.0+1eb36c0719/b2c96fc9cdc805207ae3eee28d2950b41b4dc7ee/fabric-tag-api-v1-1.3.0+1eb36c0719.jar
+
+> Configure project :neoforge
+Creating Minecraft artifacts without recompilation.
+
+> Task :fabric:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :neoforge:checkKotlinGradlePluginConfigurationErrors SKIPPED
+
+> Task :neoforge:createMinecraftArtifacts
+Loaded 131 artifacts from /home/runner/work/Cobblemon_Sanctuary/Cobblemon_Sanctuary/neoforge/build/tmp/createMinecraftArtifacts/nfrt_artifact_manifest.properties
+[1m*** Started working on [4mdownloadJson[23;0m[23;0m
+ [1m[92m✓[23;0m Completed [4mdownloadJson[23;0m in 0.06s
+[1m*** Started working on [4mdownloadServer[23;0m[23;0m
+[1m*** Started working on [4mdownloadClient[23;0m[23;0m
+[1m*** Started working on [4mdownloadClientMappings[23;0m[23;0m
+ [1m[92m✓[23;0m Completed [4mdownloadClientMappings[23;0m in 0.00s
+ [1m[92m✓[23;0m Completed [4mdownloadClient[23;0m in 0.07s
+ [1m[92m✓[23;0m Completed [4mdownloadServer[23;0m in 0.07s
+[1m*** Started working on [4mstripClient[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mstripClient[23;0m in 0.00s
+[1m*** Started working on [4mmergeMappings[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mmergeMappings[23;0m in 0.00s
+[1m*** Started working on [4mextractServer[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mextractServer[23;0m in 0.00s
+[1m*** Started working on [4mstripServer[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mstripServer[23;0m in 0.00s
+[1m*** Started working on [4mmerge[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mmerge[23;0m in 0.00s
+[1m*** Started working on [4mrename[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mrename[23;0m in 0.00s
+[1m*** Started working on [4mbinaryPatch[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mbinaryPatch[23;0m in 0.00s
+[1m*** Started working on [4mcopyUnpatchedClasses[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mcopyUnpatchedClasses[23;0m in 0.00s
+[1m*** Started working on [4mapplyDevTransforms[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mapplyDevTransforms[23;0m in 0.00s
+[1m*** Started working on [4mbinaryWithNeoForge[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mbinaryWithNeoForge[23;0m in 0.00s
+Total runtime: 1.76s
+
+
+> Task :neoforge:generateModMetadata
+> Task :neoforge:processResources
+> Task :neoforge:jarJar NO-SOURCE
+> Task :neoforge:processTestResources NO-SOURCE
+> Task :fabric:processResources
+
+> Task :fabric:processIncludeJars
+(N5qzq0XV) is not valid semver for dependency maven.modrinth:forge-config-api-port:N5qzq0XV
+
+> Task :fabric:remapSourcesJar SKIPPED
+> Task :fabric:processTestResources NO-SOURCE
+> Task :fabric:validateAccessWidener NO-SOURCE
+> Task :fabric:compileKotlin
+> Task :neoforge:compileKotlin
+w: file:///home/runner/work/Cobblemon_Sanctuary/Cobblemon_Sanctuary/common/src/main/kotlin/com/rickygamer28/sanctuary/SelfTest.kt:439:23 'val isSolid: Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Cobblemon_Sanctuary/Cobblemon_Sanctuary/common/src/main/kotlin/com/rickygamer28/sanctuary/SelfTest.kt:439:37 'val isSolid: Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Cobblemon_Sanctuary/Cobblemon_Sanctuary/common/src/main/kotlin/com/rickygamer28/sanctuary/block/DecorationBlocks.kt:156:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/Cobblemon_Sanctuary/Cobblemon_Sanctuary/common/src/main/kotlin/com/rickygamer28/sanctuary/life/Activities.kt:157:83 'val isSolid: Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Cobblemon_Sanctuary/Cobblemon_Sanctuary/common/src/main/kotlin/com/rickygamer28/sanctuary/registry/ModContent.kt:89:147 Java type mismatch: inferred type is 'Nothing?', but 'Type<*>' was expected.
+w: file:///home/runner/work/Cobblemon_Sanctuary/Cobblemon_Sanctuary/common/src/main/kotlin/com/rickygamer28/sanctuary/registry/ModContent.kt:92:111 Java type mismatch: inferred type is 'Nothing?', but 'Type<*>' was expected.
+w: file:///home/runner/work/Cobblemon_Sanctuary/Cobblemon_Sanctuary/common/src/main/kotlin/com/rickygamer28/sanctuary/world/BiomeDresser.kt:1280:42 'val isSolid: Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Cobblemon_Sanctuary/Cobblemon_Sanctuary/common/src/main/kotlin/com/rickygamer28/sanctuary/world/BiomeDresser.kt:1367:57 'val isSolid: Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Cobblemon_Sanctuary/Cobblemon_Sanctuary/common/src/main/kotlin/com/rickygamer28/sanctuary/world/GuardianRise.kt:132:67 'val isSolid: Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Cobblemon_Sanctuary/Cobblemon_Sanctuary/common/src/main/kotlin/com/rickygamer28/sanctuary/world/TownBuildings.kt:234:97 'fun rotate(p0: Rotation!): BlockState!' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Cobblemon_Sanctuary/Cobblemon_Sanctuary/common/src/main/kotlin/com/rickygamer28/sanctuary/world/TownBuildings.kt:257:63 'val isSolid: Boolean' is deprecated. Deprecated in Java.
+
+> Task :fabric:compileKotlin
+w: file:///home/runner/work/Cobblemon_Sanctuary/Cobblemon_Sanctuary/common/src/main/kotlin/com/rickygamer28/sanctuary/SelfTest.kt:439:23 'val isSolid: Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Cobblemon_Sanctuary/Cobblemon_Sanctuary/common/src/main/kotlin/com/rickygamer28/sanctuary/SelfTest.kt:439:37 'val isSolid: Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Cobblemon_Sanctuary/Cobblemon_Sanctuary/common/src/main/kotlin/com/rickygamer28/sanctuary/data/SanctuaryData.kt:64:107 Java type mismatch: inferred type is 'Nothing?', but 'DataFixTypes' was expected.
+w: file:///home/runner/work/Cobblemon_Sanctuary/Cobblemon_Sanctuary/common/src/main/kotlin/com/rickygamer28/sanctuary/life/Activities.kt:157:83 'val isSolid: Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Cobblemon_Sanctuary/Cobblemon_Sanctuary/common/src/main/kotlin/com/rickygamer28/sanctuary/registry/ModContent.kt:89:147 Java type mismatch: inferred type is 'Nothing?', but 'Type<*>' was expected.
+w: file:///home/runner/work/Cobblemon_Sanctuary/Cobblemon_Sanctuary/common/src/main/kotlin/com/rickygamer28/sanctuary/registry/ModContent.kt:92:111 Java type mismatch: inferred type is 'Nothing?', but 'Type<*>' was expected.
+w: file:///home/runner/work/Cobblemon_Sanctuary/Cobblemon_Sanctuary/common/src/main/kotlin/com/rickygamer28/sanctuary/world/BiomeDresser.kt:1280:42 'val isSolid: Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Cobblemon_Sanctuary/Cobblemon_Sanctuary/common/src/main/kotlin/com/rickygamer28/sanctuary/world/BiomeDresser.kt:1367:57 'val isSolid: Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Cobblemon_Sanctuary/Cobblemon_Sanctuary/common/src/main/kotlin/com/rickygamer28/sanctuary/world/GuardianRise.kt:132:67 'val isSolid: Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Cobblemon_Sanctuary/Cobblemon_Sanctuary/common/src/main/kotlin/com/rickygamer28/sanctuary/world/TownBuildings.kt:257:63 'val isSolid: Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Cobblemon_Sanctuary/Cobblemon_Sanctuary/fabric/src/main/kotlin/com/rickygamer28/sanctuary/fabric/SanctuaryFabric.kt:55:71 'static fun <A : Any!> builder(): AttachmentRegistry.Builder<A!>!' is deprecated. Deprecated in Java.
+
+> Task :neoforge:compileJava
+> Task :neoforge:classes
+> Task :neoforge:jar
+> Task :neoforge:assemble
+> Task :neoforge:compileTestKotlin NO-SOURCE
+> Task :neoforge:compileTestJava NO-SOURCE
+> Task :neoforge:testClasses UP-TO-DATE
+> Task :neoforge:test NO-SOURCE
+> Task :neoforge:check UP-TO-DATE
+> Task :neoforge:build
+> Task :fabric:compileJava
+> Task :fabric:classes
+> Task :fabric:jar
+> Task :fabric:compileTestKotlin NO-SOURCE
+> Task :fabric:compileTestJava NO-SOURCE
+> Task :fabric:testClasses UP-TO-DATE
+> Task :fabric:test NO-SOURCE
+> Task :fabric:check UP-TO-DATE
+> Task :fabric:remapJar
+> Task :fabric:assemble
+> Task :fabric:build
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/build-1795889511710.json
+
+BUILD SUCCESSFUL in 1m 23s
+12 actionable tasks: 12 executed

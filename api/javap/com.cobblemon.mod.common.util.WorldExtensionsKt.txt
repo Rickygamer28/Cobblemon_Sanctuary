@@ -1,0 +1,33 @@
+public final class com.cobblemon.mod.common.util.WorldExtensionsKt {
+  public static final void playSoundServer(net.minecraft.world.level.Level, net.minecraft.world.phys.Vec3, net.minecraft.sounds.SoundEvent, net.minecraft.sounds.SoundSource, float, float);
+  public static void playSoundServer$default(net.minecraft.world.level.Level, net.minecraft.world.phys.Vec3, net.minecraft.sounds.SoundEvent, net.minecraft.sounds.SoundSource, float, float, int, java.lang.Object);
+  public static final <T extends net.minecraft.core.particles.ParticleOptions> int sendParticlesServer(net.minecraft.world.level.Level, T, net.minecraft.world.phys.Vec3, int, net.minecraft.world.phys.Vec3, double);
+  public static final net.minecraft.core.BlockPos squeezeWithinBounds(net.minecraft.world.level.Level, net.minecraft.core.BlockPos);
+  public static final boolean isBoxLoaded(net.minecraft.server.level.ServerLevel, net.minecraft.world.phys.AABB);
+  public static final kotlin.Triple<kotlin.ranges.IntRange, kotlin.ranges.IntRange, kotlin.ranges.IntRange> getRanges(net.minecraft.world.phys.AABB);
+  public static final void doForAllBlocksIn(net.minecraft.world.level.BlockGetter, net.minecraft.world.phys.AABB, kotlin.jvm.functions.Function2<? super net.minecraft.world.level.block.state.BlockState, ? super net.minecraft.core.BlockPos, kotlin.Unit>);
+  public static final <T extends net.minecraft.world.level.block.entity.BlockEntity> java.util.List<kotlin.Pair<net.minecraft.core.BlockPos, T>> getNearbyBlockEntities(net.minecraft.world.level.BlockGetter, net.minecraft.world.phys.AABB, net.minecraft.world.level.block.entity.BlockEntityType<T>);
+  public static final java.lang.Iterable<net.minecraft.world.level.block.state.BlockState> getBlockStates(net.minecraft.world.level.BlockGetter, net.minecraft.world.phys.AABB);
+  public static final java.lang.Iterable<kotlin.Pair<net.minecraft.world.level.block.state.BlockState, net.minecraft.core.BlockPos>> getBlockStatesWithPos(net.minecraft.world.level.BlockGetter, net.minecraft.world.phys.AABB);
+  public static final java.lang.Iterable<net.minecraft.core.BlockPos> getBlockPositions(net.minecraft.world.level.BlockGetter, net.minecraft.world.phys.AABB);
+  public static final kotlin.Pair<java.lang.Boolean, java.lang.Boolean> getWaterAndLavaIn(net.minecraft.world.level.BlockGetter, net.minecraft.world.phys.AABB);
+  public static final boolean canFit(net.minecraft.world.entity.Entity, net.minecraft.core.BlockPos);
+  public static final boolean canFit(net.minecraft.world.entity.Entity, net.minecraft.world.phys.Vec3);
+  public static final boolean canEntityStayAt(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, int, int, com.cobblemon.mod.common.util.PositionType);
+  public static boolean canEntityStayAt$default(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, int, int, com.cobblemon.mod.common.util.PositionType, int, java.lang.Object);
+  public static final net.minecraft.core.Registry<net.minecraft.world.item.Item> getItemRegistry(net.minecraft.world.level.Level);
+  public static final net.minecraft.core.Registry<net.minecraft.world.level.biome.Biome> getBiomeRegistry(net.minecraft.world.level.Level);
+  public static final net.minecraft.core.Registry<net.minecraft.world.level.Level> getWorldRegistry(net.minecraft.world.level.Level);
+  public static final net.minecraft.core.Registry<net.minecraft.world.item.enchantment.Enchantment> getEnchantmentRegistry(net.minecraft.world.level.Level);
+  public static final net.minecraft.core.Registry<net.minecraft.world.entity.schedule.Activity> getActivityRegistry(net.minecraft.world.level.Level);
+  public static final net.minecraft.core.Registry<net.minecraft.world.level.block.Block> getBlockRegistry(net.minecraft.world.level.Level);
+  public static final net.minecraft.core.Registry<net.minecraft.world.entity.EntityType<?>> getEntityTypeRegistry(net.minecraft.world.level.Level);
+  public static final net.minecraft.core.Registry<net.minecraft.world.level.material.Fluid> getFluidRegistry(net.minecraft.world.level.Level);
+  public static final com.cobblemon.mod.common.util.TraceResult traceDownwards(net.minecraft.world.phys.Vec3, net.minecraft.world.level.Level, float, float);
+  public static com.cobblemon.mod.common.util.TraceResult traceDownwards$default(net.minecraft.world.phys.Vec3, net.minecraft.world.level.Level, float, float, int, java.lang.Object);
+  private static final kotlin.Unit getNearbyBlockEntities$lambda$0(java.util.List, net.minecraft.core.BlockPos$MutableBlockPos, net.minecraft.world.level.block.entity.BlockEntity);
+  private static final void getNearbyBlockEntities$lambda$1(kotlin.jvm.functions.Function1, java.lang.Object);
+  private static final kotlin.Unit getBlockStates$lambda$0(java.util.List, net.minecraft.world.level.block.state.BlockState, net.minecraft.core.BlockPos);
+  private static final kotlin.Unit getBlockStatesWithPos$lambda$0(java.util.List, net.minecraft.world.level.block.state.BlockState, net.minecraft.core.BlockPos);
+  private static final kotlin.Unit getWaterAndLavaIn$lambda$0(kotlin.jvm.internal.Ref$BooleanRef, kotlin.jvm.internal.Ref$BooleanRef, net.minecraft.world.level.block.state.BlockState, net.minecraft.core.BlockPos);
+}

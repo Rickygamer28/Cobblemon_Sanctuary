@@ -1,0 +1,13 @@
+public final class com.cobblemon.mod.common.api.storage.player.PlayerDataExtensionRegistry {
+  public static final com.cobblemon.mod.common.api.storage.player.PlayerDataExtensionRegistry INSTANCE;
+  private static final java.util.Map<java.lang.String, java.lang.Class<? extends com.cobblemon.mod.common.api.storage.player.PlayerDataExtension>> allExtensions;
+  private com.cobblemon.mod.common.api.storage.player.PlayerDataExtensionRegistry();
+  public final boolean register(java.lang.String, java.lang.Class<? extends com.cobblemon.mod.common.api.storage.player.PlayerDataExtension>, boolean);
+  public static boolean register$default(com.cobblemon.mod.common.api.storage.player.PlayerDataExtensionRegistry, java.lang.String, java.lang.Class, boolean, int, java.lang.Object);
+  public final java.lang.Class<? extends com.cobblemon.mod.common.api.storage.player.PlayerDataExtension> get(java.lang.String);
+  public final java.lang.Class<? extends com.cobblemon.mod.common.api.storage.player.PlayerDataExtension> getOrException(java.lang.String);
+  public final int count();
+  public final java.lang.Class<? extends com.cobblemon.mod.common.api.storage.player.PlayerDataExtension> remove(java.lang.String);
+  public final boolean contains(java.lang.String);
+  static {};
+}

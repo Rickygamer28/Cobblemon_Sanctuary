@@ -1,0 +1,16 @@
+public final class com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgress$Companion {
+  static final com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgress$Companion $$INSTANCE;
+  private com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgress$Companion();
+  public final com.mojang.serialization.Codec<com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgress<?>> codec();
+  static {};
+}
+public interface com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgress<T> extends com.cobblemon.mod.common.api.data.Identifiable {
+  public static final com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgress$Companion Companion;
+  public abstract T currentProgress();
+  public abstract void updateProgress(T);
+  public abstract void reset();
+  public abstract boolean shouldKeep(com.cobblemon.mod.common.pokemon.Pokemon);
+  public abstract com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgressType<?> type();
+  public static com.mojang.serialization.Codec<com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgress<?>> codec();
+  static {};
+}

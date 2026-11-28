@@ -1,0 +1,4 @@
+public interface com.cobblemon.mod.common.api.storage.adapter.flatfile.FileStoreAdapter<S> extends com.cobblemon.mod.common.api.storage.adapter.CobblemonAdapter<S> {
+  public abstract <E extends com.cobblemon.mod.common.api.storage.StorePosition, T extends com.cobblemon.mod.common.api.storage.PokemonStore<E>> S serialize(T, net.minecraft.core.RegistryAccess);
+  public abstract void save(java.lang.Class<? extends com.cobblemon.mod.common.api.storage.PokemonStore<?>>, java.util.UUID, S);
+}

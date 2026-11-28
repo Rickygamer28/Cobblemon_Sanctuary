@@ -1,0 +1,7 @@
+public interface com.cobblemon.mod.common.api.pokemon.feature.SynchronizedSpeciesFeatureProvider<T extends com.cobblemon.mod.common.api.pokemon.feature.SynchronizedSpeciesFeature> extends com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeatureProvider<T>, com.cobblemon.mod.common.api.serialization.BufferSerializer {
+  public abstract boolean getVisible();
+  public abstract void setVisible(boolean);
+  public abstract T invoke(net.minecraft.network.RegistryFriendlyByteBuf, java.lang.String);
+  public abstract T get(com.cobblemon.mod.common.pokemon.Pokemon);
+  public abstract com.cobblemon.mod.common.client.gui.summary.featurerenderers.SummarySpeciesFeatureRenderer<T> getRenderer(com.cobblemon.mod.common.pokemon.Pokemon);
+}

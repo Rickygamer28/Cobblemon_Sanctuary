@@ -1,0 +1,14 @@
+public final class com.cobblemon.mod.common.api.ai.CobblemonBlockPosTracker$Companion {
+  private com.cobblemon.mod.common.api.ai.CobblemonBlockPosTracker$Companion();
+  public com.cobblemon.mod.common.api.ai.CobblemonBlockPosTracker$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.api.ai.CobblemonBlockPosTracker extends net.minecraft.world.entity.ai.behavior.BlockPosTracker {
+  public static final com.cobblemon.mod.common.api.ai.CobblemonBlockPosTracker$Companion Companion;
+  private final java.util.Set<java.lang.String> flags;
+  public static final java.lang.String BATTLE_LOOK_BYPASS_FLAG;
+  public com.cobblemon.mod.common.api.ai.CobblemonBlockPosTracker(net.minecraft.world.phys.Vec3, java.util.Set<java.lang.String>);
+  public com.cobblemon.mod.common.api.ai.CobblemonBlockPosTracker(net.minecraft.world.phys.Vec3, java.util.Set, int, kotlin.jvm.internal.DefaultConstructorMarker);
+  public final java.util.Set<java.lang.String> getFlags();
+  public final boolean isBattleLookBypass();
+  static {};
+}

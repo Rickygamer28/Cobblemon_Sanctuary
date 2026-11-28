@@ -1,0 +1,2 @@
+public interface com.cobblemon.mod.common.api.pokemon.stats.StatTypeAdapter extends com.google.gson.JsonDeserializer<com.cobblemon.mod.common.api.pokemon.stats.Stat>, com.google.gson.JsonSerializer<com.cobblemon.mod.common.api.pokemon.stats.Stat> {
+}

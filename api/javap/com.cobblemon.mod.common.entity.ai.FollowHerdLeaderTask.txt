@@ -1,0 +1,32 @@
+final class com.cobblemon.mod.common.entity.ai.FollowHerdLeaderTask$checkExtraStartConditions$1 extends kotlin.jvm.internal.FunctionReferenceImpl implements kotlin.jvm.functions.Function1<java.lang.String, java.util.UUID> {
+  public static final com.cobblemon.mod.common.entity.ai.FollowHerdLeaderTask$checkExtraStartConditions$1 INSTANCE;
+  com.cobblemon.mod.common.entity.ai.FollowHerdLeaderTask$checkExtraStartConditions$1();
+  public final java.util.UUID invoke(java.lang.String);
+  public java.lang.Object invoke(java.lang.Object);
+  static {};
+}
+public final class com.cobblemon.mod.common.entity.ai.FollowHerdLeaderTask extends net.minecraft.world.entity.ai.behavior.Behavior<com.cobblemon.mod.common.entity.pokemon.PokemonEntity> {
+  private com.cobblemon.mod.common.entity.pokemon.PokemonEntity leader;
+  private float tooFar;
+  private float closeEnough;
+  private final float chance;
+  public com.cobblemon.mod.common.entity.ai.FollowHerdLeaderTask();
+  public final com.cobblemon.mod.common.entity.pokemon.PokemonEntity getLeader();
+  public final void setLeader(com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+  public final float getTooFar();
+  public final void setTooFar(float);
+  public final float getCloseEnough();
+  public final void setCloseEnough(float);
+  public final float getChance();
+  protected boolean checkExtraStartConditions(net.minecraft.server.level.ServerLevel, com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+  protected boolean canStillUse(net.minecraft.server.level.ServerLevel, com.cobblemon.mod.common.entity.pokemon.PokemonEntity, long);
+  protected void tick(net.minecraft.server.level.ServerLevel, com.cobblemon.mod.common.entity.pokemon.PokemonEntity, long);
+  public final net.minecraft.world.phys.Vec3 getRandomOffset(com.cobblemon.mod.common.entity.pokemon.PokemonEntity, net.minecraft.server.level.ServerLevel);
+  public final void applySleep(com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+  public final void removeSleep(com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+  private static final java.util.UUID checkExtraStartConditions$lambda$0(kotlin.jvm.functions.Function1, java.lang.Object);
+  private static final boolean tick$lambda$0(net.minecraft.world.level.pathfinder.PathType);
+  public boolean checkExtraStartConditions(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity);
+  public boolean canStillUse(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity, long);
+  public void tick(net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity, long);
+}

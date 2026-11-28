@@ -1,0 +1,33 @@
+public final class com.cobblemon.mod.common.pokemon.ai.RestBehaviour {
+  private final boolean canSleep;
+  private final com.cobblemon.mod.common.api.spawning.TimeRange times;
+  private final java.util.List<com.cobblemon.mod.common.api.conditional.RegistryLikeCondition<net.minecraft.world.level.block.Block>> blocks;
+  private final java.util.List<com.cobblemon.mod.common.api.conditional.RegistryLikeCondition<net.minecraft.world.level.biome.Biome>> biomes;
+  private final java.util.List<com.cobblemon.mod.common.api.conditional.RegistryLikeCondition<net.minecraft.world.level.material.Fluid>> fluids;
+  private final kotlin.ranges.IntRange light;
+  private final com.cobblemon.mod.common.api.ai.SleepDepth depth;
+  private final java.lang.Boolean canSeeSky;
+  private final kotlin.ranges.IntRange skyLight;
+  private final float drowsyChance;
+  private final float rouseChance;
+  private final boolean willSleepOnBed;
+  private final transient com.cobblemon.mod.common.api.molang.ObjectValue<com.cobblemon.mod.common.pokemon.ai.RestBehaviour> struct;
+  public com.cobblemon.mod.common.pokemon.ai.RestBehaviour();
+  public final boolean getCanSleep();
+  public final com.cobblemon.mod.common.api.spawning.TimeRange getTimes();
+  public final java.util.List<com.cobblemon.mod.common.api.conditional.RegistryLikeCondition<net.minecraft.world.level.block.Block>> getBlocks();
+  public final java.util.List<com.cobblemon.mod.common.api.conditional.RegistryLikeCondition<net.minecraft.world.level.biome.Biome>> getBiomes();
+  public final java.util.List<com.cobblemon.mod.common.api.conditional.RegistryLikeCondition<net.minecraft.world.level.material.Fluid>> getFluids();
+  public final kotlin.ranges.IntRange getLight();
+  public final com.cobblemon.mod.common.api.ai.SleepDepth getDepth();
+  public final java.lang.Boolean getCanSeeSky();
+  public final kotlin.ranges.IntRange getSkyLight();
+  public final float getDrowsyChance();
+  public final float getRouseChance();
+  public final boolean getWillSleepOnBed();
+  public final com.cobblemon.mod.common.api.molang.ObjectValue<com.cobblemon.mod.common.pokemon.ai.RestBehaviour> getStruct();
+  private static final java.lang.Object struct$lambda$0$0(com.cobblemon.mod.common.pokemon.ai.RestBehaviour, com.bedrockk.molang.runtime.MoParams);
+  private static final java.lang.Object struct$lambda$0$1(com.cobblemon.mod.common.pokemon.ai.RestBehaviour, com.bedrockk.molang.runtime.MoParams);
+  private static final java.lang.Object struct$lambda$0$2(com.cobblemon.mod.common.pokemon.ai.RestBehaviour, com.bedrockk.molang.runtime.MoParams);
+  private static final java.lang.Object struct$lambda$0$3(com.cobblemon.mod.common.pokemon.ai.RestBehaviour, com.bedrockk.molang.runtime.MoParams);
+}

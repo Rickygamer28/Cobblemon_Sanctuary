@@ -1,0 +1,26 @@
+public final class com.cobblemon.mod.common.api.events.pokemon.FriendshipUpdatedEvent {
+  private final com.cobblemon.mod.common.pokemon.Pokemon pokemon;
+  private final int newFriendshipInitial;
+  private final boolean earned;
+  private int newFriendship;
+  private final java.util.Map<java.lang.String, com.bedrockk.molang.runtime.value.MoValue> context;
+  private final java.util.Map<java.lang.String, kotlin.jvm.functions.Function1<com.bedrockk.molang.runtime.MoParams, com.bedrockk.molang.runtime.value.MoValue>> functions;
+  public com.cobblemon.mod.common.api.events.pokemon.FriendshipUpdatedEvent(com.cobblemon.mod.common.pokemon.Pokemon, int, boolean);
+  public com.cobblemon.mod.common.api.events.pokemon.FriendshipUpdatedEvent(com.cobblemon.mod.common.pokemon.Pokemon, int, boolean, int, kotlin.jvm.internal.DefaultConstructorMarker);
+  public final com.cobblemon.mod.common.pokemon.Pokemon getPokemon();
+  public final int getNewFriendshipInitial();
+  public final boolean getEarned();
+  public final int getNewFriendship();
+  public final void setNewFriendship(int);
+  public final java.util.Map<java.lang.String, com.bedrockk.molang.runtime.value.MoValue> getContext();
+  public final java.util.Map<java.lang.String, kotlin.jvm.functions.Function1<com.bedrockk.molang.runtime.MoParams, com.bedrockk.molang.runtime.value.MoValue>> getFunctions();
+  public final com.cobblemon.mod.common.pokemon.Pokemon component1();
+  public final int component2();
+  public final boolean component3();
+  public final com.cobblemon.mod.common.api.events.pokemon.FriendshipUpdatedEvent copy(com.cobblemon.mod.common.pokemon.Pokemon, int, boolean);
+  public static com.cobblemon.mod.common.api.events.pokemon.FriendshipUpdatedEvent copy$default(com.cobblemon.mod.common.api.events.pokemon.FriendshipUpdatedEvent, com.cobblemon.mod.common.pokemon.Pokemon, int, boolean, int, java.lang.Object);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+  private static final com.bedrockk.molang.runtime.value.DoubleValue functions$lambda$0(com.cobblemon.mod.common.api.events.pokemon.FriendshipUpdatedEvent, com.bedrockk.molang.runtime.MoParams);
+}

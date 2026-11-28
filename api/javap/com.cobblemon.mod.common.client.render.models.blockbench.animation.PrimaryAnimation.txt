@@ -1,0 +1,30 @@
+public final class com.cobblemon.mod.common.client.render.models.blockbench.animation.PrimaryAnimation implements com.cobblemon.mod.common.client.render.models.blockbench.animation.ActiveAnimation {
+  private final com.cobblemon.mod.common.client.render.models.blockbench.animation.ActiveAnimation animation;
+  private kotlin.jvm.functions.Function1<? super java.lang.Float, java.lang.Float> curve;
+  private final java.util.Set<java.lang.String> excludedLabels;
+  private boolean isTransition;
+  private float started;
+  private final float duration;
+  private java.util.function.Consumer<kotlin.Unit> afterAction;
+  private final boolean enduresPrimaryAnimations;
+  public com.cobblemon.mod.common.client.render.models.blockbench.animation.PrimaryAnimation(com.cobblemon.mod.common.client.render.models.blockbench.animation.ActiveAnimation, kotlin.jvm.functions.Function1<? super java.lang.Float, java.lang.Float>, java.util.Set<java.lang.String>, boolean);
+  public com.cobblemon.mod.common.client.render.models.blockbench.animation.PrimaryAnimation(com.cobblemon.mod.common.client.render.models.blockbench.animation.ActiveAnimation, kotlin.jvm.functions.Function1, java.util.Set, boolean, int, kotlin.jvm.internal.DefaultConstructorMarker);
+  public final com.cobblemon.mod.common.client.render.models.blockbench.animation.ActiveAnimation getAnimation();
+  public final kotlin.jvm.functions.Function1<java.lang.Float, java.lang.Float> getCurve();
+  public final void setCurve(kotlin.jvm.functions.Function1<? super java.lang.Float, java.lang.Float>);
+  public final java.util.Set<java.lang.String> getExcludedLabels();
+  public boolean isTransition();
+  public void setTransition(boolean);
+  public final float getStarted();
+  public final void setStarted(float);
+  public float getDuration();
+  public final java.util.function.Consumer<kotlin.Unit> getAfterAction();
+  public final void setAfterAction(java.util.function.Consumer<kotlin.Unit>);
+  public boolean getEnduresPrimaryAnimations();
+  public void start(com.cobblemon.mod.common.client.render.models.blockbench.PosableState);
+  public boolean run(com.cobblemon.mod.common.client.render.models.blockbench.repository.RenderContext, com.cobblemon.mod.common.client.render.models.blockbench.PosableModel, com.cobblemon.mod.common.client.render.models.blockbench.PosableState, float, float, float, float, float, float);
+  public final boolean prevents(com.cobblemon.mod.common.client.render.models.blockbench.animation.PoseAnimation);
+  public void applyEffects(net.minecraft.world.entity.Entity, com.cobblemon.mod.common.client.render.models.blockbench.PosableState, float, float);
+  private static final float _init_$lambda$0(float);
+  private static final void afterAction$lambda$0(kotlin.Unit);
+}

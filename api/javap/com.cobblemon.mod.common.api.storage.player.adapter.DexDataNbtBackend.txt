@@ -1,0 +1,7 @@
+public final class com.cobblemon.mod.common.api.storage.player.adapter.DexDataNbtBackend extends com.cobblemon.mod.common.api.storage.player.adapter.NbtBackedPlayerData<com.cobblemon.mod.common.api.pokedex.PokedexManager> {
+  private final com.mojang.serialization.Codec<com.cobblemon.mod.common.api.pokedex.PokedexManager> codec;
+  private final kotlin.jvm.functions.Function1<java.util.UUID, com.cobblemon.mod.common.api.pokedex.PokedexManager> defaultData;
+  public com.cobblemon.mod.common.api.storage.player.adapter.DexDataNbtBackend();
+  public com.mojang.serialization.Codec<com.cobblemon.mod.common.api.pokedex.PokedexManager> getCodec();
+  public kotlin.jvm.functions.Function1<java.util.UUID, com.cobblemon.mod.common.api.pokedex.PokedexManager> getDefaultData();
+}

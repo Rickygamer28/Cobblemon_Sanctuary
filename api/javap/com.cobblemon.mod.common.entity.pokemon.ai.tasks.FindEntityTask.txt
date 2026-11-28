@@ -1,0 +1,16 @@
+public final class com.cobblemon.mod.common.entity.pokemon.ai.tasks.FindEntityTask {
+  public static final com.cobblemon.mod.common.entity.pokemon.ai.tasks.FindEntityTask INSTANCE;
+  private com.cobblemon.mod.common.entity.pokemon.ai.tasks.FindEntityTask();
+  public final <T extends net.minecraft.world.entity.LivingEntity> net.minecraft.world.entity.ai.behavior.BehaviorControl<net.minecraft.world.entity.LivingEntity> create(net.minecraft.world.entity.EntityType<? extends T>, int, net.minecraft.world.entity.ai.memory.MemoryModuleType<T>, float, int);
+  public final <E extends net.minecraft.world.entity.LivingEntity, T extends net.minecraft.world.entity.LivingEntity> net.minecraft.world.entity.ai.behavior.BehaviorControl<E> create(net.minecraft.world.entity.EntityType<? extends T>, int, java.util.function.Predicate<E>, java.util.function.Predicate<T>, net.minecraft.world.entity.ai.memory.MemoryModuleType<T>, float, int);
+  private static final boolean create$lambda$0(net.minecraft.world.entity.LivingEntity);
+  private static final boolean create$lambda$1(net.minecraft.world.entity.LivingEntity);
+  private static final boolean create$lambda$2(net.minecraft.world.entity.EntityType, java.util.function.Predicate, net.minecraft.world.entity.LivingEntity);
+  private static final com.mojang.datafixers.kinds.App create$lambda$3(net.minecraft.world.entity.ai.memory.MemoryModuleType, java.util.function.Predicate, java.util.function.Predicate, int, float, int, net.minecraft.world.entity.ai.behavior.declarative.BehaviorBuilder$Instance);
+  private static final net.minecraft.world.entity.ai.behavior.declarative.Trigger create$lambda$3$0(net.minecraft.world.entity.ai.behavior.declarative.BehaviorBuilder$Instance, java.util.function.Predicate, java.util.function.Predicate, int, float, int, net.minecraft.world.entity.ai.behavior.declarative.MemoryAccessor, net.minecraft.world.entity.ai.behavior.declarative.MemoryAccessor, net.minecraft.world.entity.ai.behavior.declarative.MemoryAccessor, net.minecraft.world.entity.ai.behavior.declarative.MemoryAccessor);
+  private static final boolean create$lambda$3$0$0(net.minecraft.world.entity.ai.behavior.declarative.BehaviorBuilder$Instance, net.minecraft.world.entity.ai.behavior.declarative.MemoryAccessor, java.util.function.Predicate, java.util.function.Predicate, int, net.minecraft.world.entity.ai.behavior.declarative.MemoryAccessor, net.minecraft.world.entity.ai.behavior.declarative.MemoryAccessor, net.minecraft.world.entity.ai.behavior.declarative.MemoryAccessor, float, int, net.minecraft.server.level.ServerLevel, net.minecraft.world.entity.LivingEntity, long);
+  private static final boolean create$lambda$3$0$0$0(net.minecraft.world.entity.LivingEntity, int, java.util.function.Predicate, net.minecraft.world.entity.LivingEntity);
+  private static final kotlin.Unit create$lambda$3$0$0$1(net.minecraft.world.entity.ai.behavior.declarative.MemoryAccessor, net.minecraft.world.entity.ai.behavior.declarative.MemoryAccessor, net.minecraft.world.entity.ai.behavior.declarative.MemoryAccessor, float, int, net.minecraft.world.entity.LivingEntity);
+  private static final void create$lambda$3$0$0$2(kotlin.jvm.functions.Function1, java.lang.Object);
+  static {};
+}

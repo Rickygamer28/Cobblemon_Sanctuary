@@ -1,0 +1,5 @@
+public interface com.cobblemon.mod.common.api.interaction.PlayerActionRequest {
+  public abstract java.util.UUID getRequestID();
+  public abstract java.util.UUID getSenderID();
+  public abstract int getExpiryTime();
+}

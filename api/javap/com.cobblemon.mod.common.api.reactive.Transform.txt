@@ -1,0 +1,12 @@
+public final class com.cobblemon.mod.common.api.reactive.Transform$Companion {
+  static final com.cobblemon.mod.common.api.reactive.Transform$Companion $$INSTANCE;
+  private static final com.cobblemon.mod.common.api.reactive.NoTransformThrowable noTransformNoTerminateThrowable;
+  private static final com.cobblemon.mod.common.api.reactive.NoTransformThrowable noTransformTerminateThrowable;
+  private com.cobblemon.mod.common.api.reactive.Transform$Companion();
+  public static final com.cobblemon.mod.common.api.reactive.NoTransformThrowable access$getNoTransformTerminateThrowable$p();
+  public static final com.cobblemon.mod.common.api.reactive.NoTransformThrowable access$getNoTransformNoTerminateThrowable$p();
+  static {};
+}
+public final class com.cobblemon.mod.common.api.reactive.Transform$DefaultImpls {
+  public static <I, O> java.lang.Void noTransform(com.cobblemon.mod.common.api.reactive.Transform<I, O>, boolean);
+}

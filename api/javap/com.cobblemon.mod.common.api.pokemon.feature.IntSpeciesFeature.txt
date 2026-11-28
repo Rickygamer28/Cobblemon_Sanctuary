@@ -1,0 +1,23 @@
+public final class com.cobblemon.mod.common.api.pokemon.feature.IntSpeciesFeature implements com.cobblemon.mod.common.api.pokemon.feature.SynchronizedSpeciesFeature,com.cobblemon.mod.common.api.properties.CustomPokemonProperty {
+  private java.lang.String name;
+  private int value;
+  public com.cobblemon.mod.common.api.pokemon.feature.IntSpeciesFeature(java.lang.String);
+  public java.lang.String getName();
+  public void setName(java.lang.String);
+  public final int getValue();
+  public final void setValue(int);
+  public com.cobblemon.mod.common.api.pokemon.feature.IntSpeciesFeature();
+  public com.cobblemon.mod.common.api.pokemon.feature.IntSpeciesFeature(java.lang.String, int);
+  public net.minecraft.nbt.CompoundTag saveToNBT(net.minecraft.nbt.CompoundTag);
+  public com.cobblemon.mod.common.api.pokemon.feature.SynchronizedSpeciesFeature loadFromNBT(net.minecraft.nbt.CompoundTag);
+  public com.google.gson.JsonObject saveToJSON(com.google.gson.JsonObject);
+  public com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeature loadFromJSON(com.google.gson.JsonObject);
+  public void saveToBuffer(net.minecraft.network.RegistryFriendlyByteBuf, boolean);
+  public void loadFromBuffer(net.minecraft.network.RegistryFriendlyByteBuf);
+  public java.lang.String asString();
+  public void apply(com.cobblemon.mod.common.pokemon.Pokemon);
+  public boolean matches(com.cobblemon.mod.common.pokemon.Pokemon);
+  public void apply(com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+  public boolean matches(com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+  public com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeature loadFromNBT(net.minecraft.nbt.CompoundTag);
+}

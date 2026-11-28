@@ -1,0 +1,26 @@
+public final class com.cobblemon.mod.common.api.interaction.PokemonEntityInteraction$DefaultImpls {
+  public static net.minecraft.sounds.SoundEvent getSound(com.cobblemon.mod.common.api.interaction.PokemonEntityInteraction);
+  public static boolean onInteraction(com.cobblemon.mod.common.api.interaction.PokemonEntityInteraction, net.minecraft.server.level.ServerPlayer, com.cobblemon.mod.common.entity.pokemon.PokemonEntity, net.minecraft.world.item.ItemStack);
+}
+public final class com.cobblemon.mod.common.api.interaction.PokemonEntityInteraction$Ownership extends java.lang.Enum<com.cobblemon.mod.common.api.interaction.PokemonEntityInteraction$Ownership> {
+  public static final com.cobblemon.mod.common.api.interaction.PokemonEntityInteraction$Ownership OWNER;
+  public static final com.cobblemon.mod.common.api.interaction.PokemonEntityInteraction$Ownership OWNED_ANOTHER;
+  public static final com.cobblemon.mod.common.api.interaction.PokemonEntityInteraction$Ownership WILD;
+  private static final com.cobblemon.mod.common.api.interaction.PokemonEntityInteraction$Ownership[] $VALUES;
+  private static final kotlin.enums.EnumEntries $ENTRIES;
+  private com.cobblemon.mod.common.api.interaction.PokemonEntityInteraction$Ownership();
+  public static com.cobblemon.mod.common.api.interaction.PokemonEntityInteraction$Ownership[] values();
+  public static com.cobblemon.mod.common.api.interaction.PokemonEntityInteraction$Ownership valueOf(java.lang.String);
+  public static kotlin.enums.EnumEntries<com.cobblemon.mod.common.api.interaction.PokemonEntityInteraction$Ownership> getEntries();
+  private static final com.cobblemon.mod.common.api.interaction.PokemonEntityInteraction$Ownership[] $values();
+  static {};
+}
+public interface com.cobblemon.mod.common.api.interaction.PokemonEntityInteraction extends com.cobblemon.mod.common.api.interaction.EntityInteraction<com.cobblemon.mod.common.entity.pokemon.PokemonEntity> {
+  public abstract java.util.Set<com.cobblemon.mod.common.api.interaction.PokemonEntityInteraction$Ownership> getAccepted();
+  public default net.minecraft.sounds.SoundEvent getSound();
+  public default boolean onInteraction(net.minecraft.server.level.ServerPlayer, com.cobblemon.mod.common.entity.pokemon.PokemonEntity, net.minecraft.world.item.ItemStack);
+  public abstract boolean processInteraction(net.minecraft.server.level.ServerPlayer, com.cobblemon.mod.common.entity.pokemon.PokemonEntity, net.minecraft.world.item.ItemStack);
+  public default boolean onInteraction(net.minecraft.server.level.ServerPlayer, net.minecraft.world.entity.Entity, net.minecraft.world.item.ItemStack);
+  public static net.minecraft.sounds.SoundEvent access$getSound$jd(com.cobblemon.mod.common.api.interaction.PokemonEntityInteraction);
+  public static boolean access$onInteraction$jd(com.cobblemon.mod.common.api.interaction.PokemonEntityInteraction, net.minecraft.server.level.ServerPlayer, com.cobblemon.mod.common.entity.pokemon.PokemonEntity, net.minecraft.world.item.ItemStack);
+}

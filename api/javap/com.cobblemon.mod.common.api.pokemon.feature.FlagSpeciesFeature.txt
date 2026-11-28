@@ -1,0 +1,20 @@
+public class com.cobblemon.mod.common.api.pokemon.feature.FlagSpeciesFeature implements com.cobblemon.mod.common.api.pokemon.feature.SynchronizedSpeciesFeature,com.cobblemon.mod.common.api.properties.CustomPokemonProperty {
+  private final java.lang.String name;
+  private boolean enabled;
+  public com.cobblemon.mod.common.api.pokemon.feature.FlagSpeciesFeature(java.lang.String);
+  public java.lang.String getName();
+  public com.cobblemon.mod.common.api.pokemon.feature.FlagSpeciesFeature(java.lang.String, boolean);
+  public final boolean getEnabled();
+  public final void setEnabled(boolean);
+  public net.minecraft.nbt.CompoundTag saveToNBT(net.minecraft.nbt.CompoundTag);
+  public com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeature loadFromNBT(net.minecraft.nbt.CompoundTag);
+  public com.google.gson.JsonObject saveToJSON(com.google.gson.JsonObject);
+  public com.cobblemon.mod.common.api.pokemon.feature.SpeciesFeature loadFromJSON(com.google.gson.JsonObject);
+  public void saveToBuffer(net.minecraft.network.RegistryFriendlyByteBuf, boolean);
+  public void loadFromBuffer(net.minecraft.network.RegistryFriendlyByteBuf);
+  public java.lang.String asString();
+  public void apply(com.cobblemon.mod.common.pokemon.Pokemon);
+  public boolean matches(com.cobblemon.mod.common.pokemon.Pokemon);
+  public void apply(com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+  public boolean matches(com.cobblemon.mod.common.entity.pokemon.PokemonEntity);
+}

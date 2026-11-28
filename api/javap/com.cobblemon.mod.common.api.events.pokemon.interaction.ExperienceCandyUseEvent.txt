@@ -1,0 +1,32 @@
+public final class com.cobblemon.mod.common.api.events.pokemon.interaction.ExperienceCandyUseEvent$Post implements com.cobblemon.mod.common.api.events.pokemon.interaction.ExperienceCandyUseEvent {
+  private final net.minecraft.server.level.ServerPlayer player;
+  private final com.cobblemon.mod.common.pokemon.Pokemon pokemon;
+  private final com.cobblemon.mod.common.item.interactive.CandyItem item;
+  private final com.cobblemon.mod.common.pokemon.AddExperienceResult experienceResult;
+  public com.cobblemon.mod.common.api.events.pokemon.interaction.ExperienceCandyUseEvent$Post(net.minecraft.server.level.ServerPlayer, com.cobblemon.mod.common.pokemon.Pokemon, com.cobblemon.mod.common.item.interactive.CandyItem, com.cobblemon.mod.common.pokemon.AddExperienceResult);
+  public net.minecraft.server.level.ServerPlayer getPlayer();
+  public com.cobblemon.mod.common.pokemon.Pokemon getPokemon();
+  public com.cobblemon.mod.common.item.interactive.CandyItem getItem();
+  public final com.cobblemon.mod.common.pokemon.AddExperienceResult getExperienceResult();
+  public final boolean wasExperienceGiven();
+  public final boolean wasCandyConsumed();
+}
+public final class com.cobblemon.mod.common.api.events.pokemon.interaction.ExperienceCandyUseEvent$Pre extends com.cobblemon.mod.common.api.events.Cancelable implements com.cobblemon.mod.common.api.events.pokemon.interaction.ExperienceCandyUseEvent {
+  private final net.minecraft.server.level.ServerPlayer player;
+  private final com.cobblemon.mod.common.pokemon.Pokemon pokemon;
+  private final com.cobblemon.mod.common.item.interactive.CandyItem item;
+  private final int baseExperienceYield;
+  private int experienceYield;
+  public com.cobblemon.mod.common.api.events.pokemon.interaction.ExperienceCandyUseEvent$Pre(net.minecraft.server.level.ServerPlayer, com.cobblemon.mod.common.pokemon.Pokemon, com.cobblemon.mod.common.item.interactive.CandyItem, int, int);
+  public net.minecraft.server.level.ServerPlayer getPlayer();
+  public com.cobblemon.mod.common.pokemon.Pokemon getPokemon();
+  public com.cobblemon.mod.common.item.interactive.CandyItem getItem();
+  public final int getBaseExperienceYield();
+  public final int getExperienceYield();
+  public final void setExperienceYield(int);
+}
+public interface com.cobblemon.mod.common.api.events.pokemon.interaction.ExperienceCandyUseEvent {
+  public abstract net.minecraft.server.level.ServerPlayer getPlayer();
+  public abstract com.cobblemon.mod.common.pokemon.Pokemon getPokemon();
+  public abstract com.cobblemon.mod.common.item.interactive.CandyItem getItem();
+}

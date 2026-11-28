@@ -1,0 +1,4 @@
+public interface com.cobblemon.mod.common.api.pokemon.effect.ShoulderEffect {
+  public abstract void applyEffect(com.cobblemon.mod.common.pokemon.Pokemon, net.minecraft.server.level.ServerPlayer, boolean);
+  public abstract void removeEffect(com.cobblemon.mod.common.pokemon.Pokemon, net.minecraft.server.level.ServerPlayer, boolean);
+}

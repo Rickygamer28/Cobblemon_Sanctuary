@@ -1,0 +1,7 @@
+public final class com.cobblemon.mod.common.api.pokemon.effect.adapter.ShoulderEffectAdapter implements com.google.gson.JsonDeserializer<com.cobblemon.mod.common.api.pokemon.effect.ShoulderEffect> {
+  public static final com.cobblemon.mod.common.api.pokemon.effect.adapter.ShoulderEffectAdapter INSTANCE;
+  private com.cobblemon.mod.common.api.pokemon.effect.adapter.ShoulderEffectAdapter();
+  public com.cobblemon.mod.common.api.pokemon.effect.ShoulderEffect deserialize(com.google.gson.JsonElement, java.lang.reflect.Type, com.google.gson.JsonDeserializationContext);
+  public java.lang.Object deserialize(com.google.gson.JsonElement, java.lang.reflect.Type, com.google.gson.JsonDeserializationContext);
+  static {};
+}

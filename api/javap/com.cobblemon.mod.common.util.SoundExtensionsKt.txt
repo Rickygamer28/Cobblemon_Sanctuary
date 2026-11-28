@@ -1,0 +1,4 @@
+public final class com.cobblemon.mod.common.util.SoundExtensionsKt {
+  public static final void pauseSounds(net.minecraft.client.sounds.SoundManager, net.minecraft.resources.ResourceLocation, net.minecraft.sounds.SoundSource);
+  public static final void resumeSounds(net.minecraft.client.sounds.SoundManager, net.minecraft.resources.ResourceLocation, net.minecraft.sounds.SoundSource);
+}

@@ -1,0 +1,37 @@
+public final class com.cobblemon.mod.common.api.events.pokemon.EvGainedEvent$DefaultImpls {
+  public static com.cobblemon.mod.common.pokemon.Pokemon getPokemon(com.cobblemon.mod.common.api.events.pokemon.EvGainedEvent);
+}
+public final class com.cobblemon.mod.common.api.events.pokemon.EvGainedEvent$Post implements com.cobblemon.mod.common.api.events.pokemon.EvGainedEvent {
+  private final com.cobblemon.mod.common.api.pokemon.stats.Stat stat;
+  private final int amount;
+  private final com.cobblemon.mod.common.api.pokemon.stats.EvSource source;
+  private final java.util.Map<java.lang.String, com.bedrockk.molang.runtime.value.MoValue> context;
+  public com.cobblemon.mod.common.api.events.pokemon.EvGainedEvent$Post(com.cobblemon.mod.common.api.pokemon.stats.Stat, int, com.cobblemon.mod.common.api.pokemon.stats.EvSource);
+  public com.cobblemon.mod.common.api.pokemon.stats.Stat getStat();
+  public final int getAmount();
+  public com.cobblemon.mod.common.api.pokemon.stats.EvSource getSource();
+  public final java.util.Map<java.lang.String, com.bedrockk.molang.runtime.value.MoValue> getContext();
+  public com.cobblemon.mod.common.pokemon.Pokemon getPokemon();
+}
+public final class com.cobblemon.mod.common.api.events.pokemon.EvGainedEvent$Pre extends com.cobblemon.mod.common.api.events.Cancelable implements com.cobblemon.mod.common.api.events.pokemon.EvGainedEvent {
+  private final com.cobblemon.mod.common.api.pokemon.stats.Stat stat;
+  private int amount;
+  private final com.cobblemon.mod.common.api.pokemon.stats.EvSource source;
+  private final java.util.Map<java.lang.String, com.bedrockk.molang.runtime.value.MoValue> context;
+  private final java.util.Map<java.lang.String, kotlin.jvm.functions.Function1<com.bedrockk.molang.runtime.MoParams, com.bedrockk.molang.runtime.value.MoValue>> functions;
+  public com.cobblemon.mod.common.api.events.pokemon.EvGainedEvent$Pre(com.cobblemon.mod.common.api.pokemon.stats.Stat, int, com.cobblemon.mod.common.api.pokemon.stats.EvSource);
+  public com.cobblemon.mod.common.api.pokemon.stats.Stat getStat();
+  public final int getAmount();
+  public final void setAmount(int);
+  public com.cobblemon.mod.common.api.pokemon.stats.EvSource getSource();
+  public final java.util.Map<java.lang.String, com.bedrockk.molang.runtime.value.MoValue> getContext();
+  public final java.util.Map<java.lang.String, kotlin.jvm.functions.Function1<com.bedrockk.molang.runtime.MoParams, com.bedrockk.molang.runtime.value.MoValue>> getFunctions();
+  public com.cobblemon.mod.common.pokemon.Pokemon getPokemon();
+  private static final com.bedrockk.molang.runtime.value.DoubleValue functions$lambda$0(com.cobblemon.mod.common.api.events.pokemon.EvGainedEvent$Pre, com.bedrockk.molang.runtime.MoParams);
+}
+public interface com.cobblemon.mod.common.api.events.pokemon.EvGainedEvent {
+  public abstract com.cobblemon.mod.common.api.pokemon.stats.Stat getStat();
+  public default com.cobblemon.mod.common.pokemon.Pokemon getPokemon();
+  public abstract com.cobblemon.mod.common.api.pokemon.stats.EvSource getSource();
+  public static com.cobblemon.mod.common.pokemon.Pokemon access$getPokemon$jd(com.cobblemon.mod.common.api.events.pokemon.EvGainedEvent);
+}

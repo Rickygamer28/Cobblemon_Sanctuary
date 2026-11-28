@@ -1,0 +1,16 @@
+public final class com.cobblemon.mod.common.pokemon.PokemonSizeCategory extends java.lang.Enum<com.cobblemon.mod.common.pokemon.PokemonSizeCategory> {
+  public static final com.cobblemon.mod.common.pokemon.PokemonSizeCategory$Companion Companion;
+  public static final com.cobblemon.mod.common.pokemon.PokemonSizeCategory XS;
+  public static final com.cobblemon.mod.common.pokemon.PokemonSizeCategory S;
+  public static final com.cobblemon.mod.common.pokemon.PokemonSizeCategory M;
+  public static final com.cobblemon.mod.common.pokemon.PokemonSizeCategory L;
+  public static final com.cobblemon.mod.common.pokemon.PokemonSizeCategory XL;
+  private static final com.cobblemon.mod.common.pokemon.PokemonSizeCategory[] $VALUES;
+  private static final kotlin.enums.EnumEntries $ENTRIES;
+  private com.cobblemon.mod.common.pokemon.PokemonSizeCategory();
+  public static com.cobblemon.mod.common.pokemon.PokemonSizeCategory[] values();
+  public static com.cobblemon.mod.common.pokemon.PokemonSizeCategory valueOf(java.lang.String);
+  public static kotlin.enums.EnumEntries<com.cobblemon.mod.common.pokemon.PokemonSizeCategory> getEntries();
+  private static final com.cobblemon.mod.common.pokemon.PokemonSizeCategory[] $values();
+  static {};
+}

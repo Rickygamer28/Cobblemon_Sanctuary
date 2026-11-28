@@ -1,0 +1,31 @@
+public final class com.cobblemon.mod.common.api.storage.molang.NbtMoLangDataStoreFactory implements com.cobblemon.mod.common.api.storage.molang.MoLangDataStoreFactory {
+  public static final com.cobblemon.mod.common.api.storage.molang.NbtMoLangDataStoreFactory INSTANCE;
+  public static final java.lang.String DEFAULT_PATH;
+  public static final java.lang.String DEFAULT_FOLDER_STRUCTURE;
+  public static java.nio.file.Path savePath;
+  private static final java.util.Map<java.util.UUID, com.bedrockk.molang.runtime.struct.VariableStruct> cache;
+  private static final java.util.List<java.util.UUID> dirty;
+  private static int ticker;
+  private static int saveTicks;
+  private com.cobblemon.mod.common.api.storage.molang.NbtMoLangDataStoreFactory();
+  public final java.nio.file.Path getSavePath();
+  public final void setSavePath(java.nio.file.Path);
+  public final java.util.Map<java.util.UUID, com.bedrockk.molang.runtime.struct.VariableStruct> getCache();
+  public final java.util.List<java.util.UUID> getDirty();
+  public final int getTicker();
+  public final void setTicker(int);
+  public final int getSaveTicks();
+  public final void setSaveTicks(int);
+  public final void saveAll();
+  public void markDirty(java.util.UUID);
+  public com.bedrockk.molang.runtime.struct.VariableStruct load(java.util.UUID, java.lang.String);
+  public final void save(java.util.UUID, java.lang.String);
+  public static void save$default(com.cobblemon.mod.common.api.storage.molang.NbtMoLangDataStoreFactory, java.util.UUID, java.lang.String, int, java.lang.Object);
+  private final java.nio.file.Path file(java.util.UUID, java.lang.String);
+  static java.nio.file.Path file$default(com.cobblemon.mod.common.api.storage.molang.NbtMoLangDataStoreFactory, java.util.UUID, java.lang.String, int, java.lang.Object);
+  private static final kotlin.Unit _init_$lambda$0(com.cobblemon.mod.common.platform.events.ServerEvent$Started);
+  private static final kotlin.Unit _init_$lambda$1(com.cobblemon.mod.common.platform.events.ServerPlayerEvent$Logout);
+  private static final kotlin.Unit _init_$lambda$2(com.cobblemon.mod.common.platform.events.ServerEvent$Stopping);
+  private static final kotlin.Unit _init_$lambda$3(com.cobblemon.mod.common.platform.events.ServerTickEvent$Post);
+  static {};
+}

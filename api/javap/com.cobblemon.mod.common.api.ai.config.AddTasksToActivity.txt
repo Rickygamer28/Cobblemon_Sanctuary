@@ -1,0 +1,15 @@
+public final class com.cobblemon.mod.common.api.ai.config.AddTasksToActivity implements com.cobblemon.mod.common.api.ai.config.BehaviourConfig {
+  private final net.minecraft.world.entity.schedule.Activity activity;
+  private final java.util.List<net.minecraft.world.entity.schedule.Activity> activities;
+  private final com.mojang.datafixers.util.Either<com.bedrockk.molang.Expression, com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable> condition;
+  private final java.util.Map<java.lang.Integer, java.util.List<com.cobblemon.mod.common.api.ai.config.task.TaskConfig>> tasksByPriority;
+  public com.cobblemon.mod.common.api.ai.config.AddTasksToActivity();
+  public final net.minecraft.world.entity.schedule.Activity getActivity();
+  public final java.util.List<net.minecraft.world.entity.schedule.Activity> getActivities();
+  public final com.mojang.datafixers.util.Either<com.bedrockk.molang.Expression, com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable> getCondition();
+  public final java.util.Map<java.lang.Integer, java.util.List<com.cobblemon.mod.common.api.ai.config.task.TaskConfig>> getTasksByPriority();
+  public java.util.List<com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable> getVariables(net.minecraft.world.entity.LivingEntity, com.cobblemon.mod.common.api.ai.BehaviourConfigurationContext);
+  public void configure(net.minecraft.world.entity.LivingEntity, com.cobblemon.mod.common.api.ai.BehaviourConfigurationContext);
+  public boolean checkCondition(com.cobblemon.mod.common.api.ai.BehaviourConfigurationContext, com.mojang.datafixers.util.Either<com.bedrockk.molang.Expression, com.cobblemon.mod.common.api.npc.configuration.MoLangConfigVariable>);
+  public void preconfigure(net.minecraft.world.entity.LivingEntity, com.cobblemon.mod.common.api.ai.BehaviourConfigurationContext);
+}

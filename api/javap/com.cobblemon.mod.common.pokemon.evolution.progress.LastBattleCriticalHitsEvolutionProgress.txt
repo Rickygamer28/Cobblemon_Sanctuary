@@ -1,0 +1,42 @@
+public final class com.cobblemon.mod.common.pokemon.evolution.progress.LastBattleCriticalHitsEvolutionProgress$Companion {
+  private com.cobblemon.mod.common.pokemon.evolution.progress.LastBattleCriticalHitsEvolutionProgress$Companion();
+  public final net.minecraft.resources.ResourceLocation getID();
+  public final com.mojang.serialization.MapCodec<com.cobblemon.mod.common.pokemon.evolution.progress.LastBattleCriticalHitsEvolutionProgress> getCODEC();
+  public static void getCODEC$annotations();
+  public final boolean supports(com.cobblemon.mod.common.pokemon.Pokemon);
+  public com.cobblemon.mod.common.pokemon.evolution.progress.LastBattleCriticalHitsEvolutionProgress$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.pokemon.evolution.progress.LastBattleCriticalHitsEvolutionProgress$Progress {
+  private final int amount;
+  public com.cobblemon.mod.common.pokemon.evolution.progress.LastBattleCriticalHitsEvolutionProgress$Progress(int);
+  public final int getAmount();
+  public final int component1();
+  public final com.cobblemon.mod.common.pokemon.evolution.progress.LastBattleCriticalHitsEvolutionProgress$Progress copy(int);
+  public static com.cobblemon.mod.common.pokemon.evolution.progress.LastBattleCriticalHitsEvolutionProgress$Progress copy$default(com.cobblemon.mod.common.pokemon.evolution.progress.LastBattleCriticalHitsEvolutionProgress$Progress, int, int, java.lang.Object);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+}
+public final class com.cobblemon.mod.common.pokemon.evolution.progress.LastBattleCriticalHitsEvolutionProgress implements com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgress<com.cobblemon.mod.common.pokemon.evolution.progress.LastBattleCriticalHitsEvolutionProgress$Progress> {
+  public static final com.cobblemon.mod.common.pokemon.evolution.progress.LastBattleCriticalHitsEvolutionProgress$Companion Companion;
+  private com.cobblemon.mod.common.pokemon.evolution.progress.LastBattleCriticalHitsEvolutionProgress$Progress progress;
+  private static final net.minecraft.resources.ResourceLocation ID;
+  private static final java.lang.String AMOUNT;
+  private static final com.mojang.serialization.MapCodec<com.cobblemon.mod.common.pokemon.evolution.progress.LastBattleCriticalHitsEvolutionProgress> CODEC;
+  public com.cobblemon.mod.common.pokemon.evolution.progress.LastBattleCriticalHitsEvolutionProgress();
+  public net.minecraft.resources.ResourceLocation id();
+  public com.cobblemon.mod.common.pokemon.evolution.progress.LastBattleCriticalHitsEvolutionProgress$Progress currentProgress();
+  public void updateProgress(com.cobblemon.mod.common.pokemon.evolution.progress.LastBattleCriticalHitsEvolutionProgress$Progress);
+  public void reset();
+  public boolean shouldKeep(com.cobblemon.mod.common.pokemon.Pokemon);
+  public com.cobblemon.mod.common.api.pokemon.evolution.progress.EvolutionProgressType<?> type();
+  private static final com.mojang.datafixers.kinds.App CODEC$lambda$0(com.mojang.serialization.codecs.RecordCodecBuilder$Instance);
+  private static final java.lang.Integer CODEC$lambda$0$0(com.cobblemon.mod.common.pokemon.evolution.progress.LastBattleCriticalHitsEvolutionProgress);
+  private static final com.cobblemon.mod.common.pokemon.evolution.progress.LastBattleCriticalHitsEvolutionProgress CODEC$lambda$0$1(java.lang.Integer);
+  public static final com.mojang.serialization.MapCodec<com.cobblemon.mod.common.pokemon.evolution.progress.LastBattleCriticalHitsEvolutionProgress> getCODEC();
+  public java.lang.Object currentProgress();
+  public void updateProgress(java.lang.Object);
+  public static final net.minecraft.resources.ResourceLocation access$getID$cp();
+  public static final com.mojang.serialization.MapCodec access$getCODEC$cp();
+  static {};
+}

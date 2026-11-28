@@ -1,0 +1,30 @@
+public final class com.cobblemon.mod.common.net.messages.client.effect.RunPosableMoLangPacket$Companion {
+  private com.cobblemon.mod.common.net.messages.client.effect.RunPosableMoLangPacket$Companion();
+  public final net.minecraft.resources.ResourceLocation getID();
+  public final com.cobblemon.mod.common.net.messages.client.effect.RunPosableMoLangPacket decode(net.minecraft.network.RegistryFriendlyByteBuf);
+  private static final java.lang.String decode$lambda$0(net.minecraft.network.FriendlyByteBuf);
+  private static final java.lang.String decode$lambda$1(kotlin.jvm.functions.Function1, java.lang.Object);
+  public com.cobblemon.mod.common.net.messages.client.effect.RunPosableMoLangPacket$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.net.messages.client.effect.RunPosableMoLangPacket implements com.cobblemon.mod.common.api.net.NetworkPacket<com.cobblemon.mod.common.net.messages.client.effect.RunPosableMoLangPacket> {
+  public static final com.cobblemon.mod.common.net.messages.client.effect.RunPosableMoLangPacket$Companion Companion;
+  private final int entityId;
+  private final java.util.Set<java.lang.String> expressions;
+  private final net.minecraft.resources.ResourceLocation id;
+  private static final net.minecraft.resources.ResourceLocation ID;
+  public com.cobblemon.mod.common.net.messages.client.effect.RunPosableMoLangPacket(int, java.util.Set<java.lang.String>);
+  public final int getEntityId();
+  public final java.util.Set<java.lang.String> getExpressions();
+  public net.minecraft.resources.ResourceLocation getId();
+  public void encode(net.minecraft.network.RegistryFriendlyByteBuf);
+  public void sendToPlayer(net.minecraft.server.level.ServerPlayer);
+  public void sendToPlayers(java.lang.Iterable<? extends net.minecraft.server.level.ServerPlayer>);
+  public void sendToAllPlayers();
+  public void sendToServer();
+  public void sendToPlayersAround(double, double, double, double, net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level>, kotlin.jvm.functions.Function1<? super net.minecraft.server.level.ServerPlayer, java.lang.Boolean>);
+  public net.minecraft.network.protocol.common.custom.CustomPacketPayload$Type<com.cobblemon.mod.common.net.messages.client.effect.RunPosableMoLangPacket> type();
+  private static final kotlin.Unit encode$lambda$0(net.minecraft.network.FriendlyByteBuf, java.lang.String);
+  private static final void encode$lambda$1(kotlin.jvm.functions.Function2, java.lang.Object, java.lang.String);
+  public static final net.minecraft.resources.ResourceLocation access$getID$cp();
+  static {};
+}

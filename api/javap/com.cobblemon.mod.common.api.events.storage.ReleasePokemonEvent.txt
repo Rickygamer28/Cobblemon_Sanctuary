@@ -1,0 +1,32 @@
+public final class com.cobblemon.mod.common.api.events.storage.ReleasePokemonEvent$DefaultImpls {
+  public static java.util.Map<java.lang.String, com.bedrockk.molang.runtime.value.MoValue> getContext(com.cobblemon.mod.common.api.events.storage.ReleasePokemonEvent);
+}
+public final class com.cobblemon.mod.common.api.events.storage.ReleasePokemonEvent$Post implements com.cobblemon.mod.common.api.events.storage.ReleasePokemonEvent {
+  private final net.minecraft.server.level.ServerPlayer player;
+  private final com.cobblemon.mod.common.pokemon.Pokemon pokemon;
+  private final com.cobblemon.mod.common.api.storage.PokemonStore<?> storage;
+  public com.cobblemon.mod.common.api.events.storage.ReleasePokemonEvent$Post(net.minecraft.server.level.ServerPlayer, com.cobblemon.mod.common.pokemon.Pokemon, com.cobblemon.mod.common.api.storage.PokemonStore<?>);
+  public net.minecraft.server.level.ServerPlayer getPlayer();
+  public com.cobblemon.mod.common.pokemon.Pokemon getPokemon();
+  public com.cobblemon.mod.common.api.storage.PokemonStore<?> getStorage();
+  public java.util.Map<java.lang.String, com.bedrockk.molang.runtime.value.MoValue> getContext();
+}
+public final class com.cobblemon.mod.common.api.events.storage.ReleasePokemonEvent$Pre extends com.cobblemon.mod.common.api.events.Cancelable implements com.cobblemon.mod.common.api.events.storage.ReleasePokemonEvent {
+  private final net.minecraft.server.level.ServerPlayer player;
+  private final com.cobblemon.mod.common.pokemon.Pokemon pokemon;
+  private final com.cobblemon.mod.common.api.storage.PokemonStore<?> storage;
+  private final java.util.Map<java.lang.String, kotlin.jvm.functions.Function1<com.bedrockk.molang.runtime.MoParams, com.bedrockk.molang.runtime.value.MoValue>> functions;
+  public com.cobblemon.mod.common.api.events.storage.ReleasePokemonEvent$Pre(net.minecraft.server.level.ServerPlayer, com.cobblemon.mod.common.pokemon.Pokemon, com.cobblemon.mod.common.api.storage.PokemonStore<?>);
+  public net.minecraft.server.level.ServerPlayer getPlayer();
+  public com.cobblemon.mod.common.pokemon.Pokemon getPokemon();
+  public com.cobblemon.mod.common.api.storage.PokemonStore<?> getStorage();
+  public final java.util.Map<java.lang.String, kotlin.jvm.functions.Function1<com.bedrockk.molang.runtime.MoParams, com.bedrockk.molang.runtime.value.MoValue>> getFunctions();
+  public java.util.Map<java.lang.String, com.bedrockk.molang.runtime.value.MoValue> getContext();
+}
+public interface com.cobblemon.mod.common.api.events.storage.ReleasePokemonEvent {
+  public abstract net.minecraft.server.level.ServerPlayer getPlayer();
+  public abstract com.cobblemon.mod.common.pokemon.Pokemon getPokemon();
+  public abstract com.cobblemon.mod.common.api.storage.PokemonStore<?> getStorage();
+  public default java.util.Map<java.lang.String, com.bedrockk.molang.runtime.value.MoValue> getContext();
+  public static java.util.Map access$getContext$jd(com.cobblemon.mod.common.api.events.storage.ReleasePokemonEvent);
+}

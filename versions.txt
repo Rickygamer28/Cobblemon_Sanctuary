@@ -1,0 +1,15 @@
+neoforge=21.1.268
+moddev=2.0.149
+cobblemon_modrinth_id=xsVHrAsY
+cobblemon_version=1.8.4NF
+loom=1.11.8 fabric_api=0.116.18+1.21.1 fabric_kotlin=1.13.7+kotlin.2.2.21 fabric_loader=0.20.1 installer=1.1.2
+cobblemon_fabric=PdOzYHKU fcap=N5qzq0XV (v21.1.6-1.21.1-Fabric)
+recent cobblemon neoforge versions:
+  1.8.4NF  xsVHrAsY
+  1.8.3NF  Gt09DDui
+  1.8.2  9IXh9584
+  1.8.1  7otgw3aH
+  1.8.0  2oL01rSF
+  1.7.3  S1TrAn8c
+  1.7.2  1f6yhGfC
+  1.7.1  Uz1QF4Md

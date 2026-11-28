@@ -1,0 +1,29 @@
+final class com.cobblemon.mod.common.api.types.tera.TeraType$Companion$BY_IDENTIFIER_CODEC$1 extends kotlin.jvm.internal.FunctionReferenceImpl implements kotlin.jvm.functions.Function1<net.minecraft.resources.ResourceLocation, com.cobblemon.mod.common.api.types.tera.TeraType> {
+  com.cobblemon.mod.common.api.types.tera.TeraType$Companion$BY_IDENTIFIER_CODEC$1(java.lang.Object);
+  public final com.cobblemon.mod.common.api.types.tera.TeraType invoke(net.minecraft.resources.ResourceLocation);
+  public java.lang.Object invoke(java.lang.Object);
+}
+final class com.cobblemon.mod.common.api.types.tera.TeraType$Companion$BY_IDENTIFIER_CODEC$2 extends kotlin.jvm.internal.PropertyReference1Impl {
+  public static final com.cobblemon.mod.common.api.types.tera.TeraType$Companion$BY_IDENTIFIER_CODEC$2 INSTANCE;
+  com.cobblemon.mod.common.api.types.tera.TeraType$Companion$BY_IDENTIFIER_CODEC$2();
+  public java.lang.Object get(java.lang.Object);
+  static {};
+}
+public final class com.cobblemon.mod.common.api.types.tera.TeraType$Companion {
+  static final com.cobblemon.mod.common.api.types.tera.TeraType$Companion $$INSTANCE;
+  private static final com.mojang.serialization.Codec<com.cobblemon.mod.common.api.types.tera.TeraType> BY_IDENTIFIER_CODEC;
+  private com.cobblemon.mod.common.api.types.tera.TeraType$Companion();
+  public final com.mojang.serialization.Codec<com.cobblemon.mod.common.api.types.tera.TeraType> getBY_IDENTIFIER_CODEC();
+  public static void getBY_IDENTIFIER_CODEC$annotations();
+  private static final java.lang.String BY_IDENTIFIER_CODEC$lambda$0(net.minecraft.resources.ResourceLocation);
+  static {};
+}
+public interface com.cobblemon.mod.common.api.types.tera.TeraType extends com.cobblemon.mod.common.api.data.ShowdownIdentifiable {
+  public static final com.cobblemon.mod.common.api.types.tera.TeraType$Companion Companion;
+  public abstract net.minecraft.resources.ResourceLocation getId();
+  public abstract java.lang.String getName();
+  public abstract boolean getLegalAsStatic();
+  public abstract net.minecraft.network.chat.Component getDisplayName();
+  public static com.mojang.serialization.Codec<com.cobblemon.mod.common.api.types.tera.TeraType> getBY_IDENTIFIER_CODEC();
+  static {};
+}

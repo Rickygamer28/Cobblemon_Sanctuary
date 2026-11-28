@@ -1,0 +1,12 @@
+public final class com.cobblemon.mod.common.CobblemonMobEffects extends com.cobblemon.mod.common.platform.PlatformRegistry<net.minecraft.core.Registry<net.minecraft.world.effect.MobEffect>, net.minecraft.resources.ResourceKey<net.minecraft.core.Registry<net.minecraft.world.effect.MobEffect>>, net.minecraft.world.effect.MobEffect> {
+  public static final com.cobblemon.mod.common.CobblemonMobEffects INSTANCE;
+  private static final net.minecraft.core.Registry<net.minecraft.world.effect.MobEffect> registry;
+  private static final net.minecraft.resources.ResourceKey<net.minecraft.core.Registry<net.minecraft.world.effect.MobEffect>> resourceKey;
+  public static final com.cobblemon.mod.common.api.cooking.effects.CleanseNegativeEffect CLEANSE_NEGATIVE;
+  public static final com.cobblemon.mod.common.api.cooking.effects.MentalRestorationEffect MENTAL_RESTORATION;
+  public static final com.cobblemon.mod.common.api.cooking.effects.CleanseAllEffect CLEANSE_ALL;
+  private com.cobblemon.mod.common.CobblemonMobEffects();
+  public net.minecraft.core.Registry<net.minecraft.world.effect.MobEffect> getRegistry();
+  public net.minecraft.resources.ResourceKey<net.minecraft.core.Registry<net.minecraft.world.effect.MobEffect>> getResourceKey();
+  static {};
+}

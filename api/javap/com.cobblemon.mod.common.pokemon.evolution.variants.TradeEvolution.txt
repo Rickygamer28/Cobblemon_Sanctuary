@@ -1,0 +1,44 @@
+public final class com.cobblemon.mod.common.pokemon.evolution.variants.TradeEvolution$Companion {
+  private com.cobblemon.mod.common.pokemon.evolution.variants.TradeEvolution$Companion();
+  public com.cobblemon.mod.common.pokemon.evolution.variants.TradeEvolution$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public class com.cobblemon.mod.common.pokemon.evolution.variants.TradeEvolution implements com.cobblemon.mod.common.api.pokemon.evolution.ContextEvolution<com.cobblemon.mod.common.pokemon.Pokemon, com.cobblemon.mod.common.api.pokemon.PokemonProperties> {
+  public static final com.cobblemon.mod.common.pokemon.evolution.variants.TradeEvolution$Companion Companion;
+  private final java.lang.String id;
+  private final com.cobblemon.mod.common.api.pokemon.PokemonProperties result;
+  private final com.cobblemon.mod.common.api.pokemon.PokemonProperties shedder;
+  private final com.cobblemon.mod.common.api.pokemon.PokemonProperties requiredContext;
+  private boolean optional;
+  private boolean consumeHeldItem;
+  private final java.util.Set<com.cobblemon.mod.common.api.pokemon.requirement.Requirement> requirements;
+  private final java.util.Set<com.cobblemon.mod.common.api.moves.MoveTemplate> learnableMoves;
+  private final com.cobblemon.mod.common.api.drop.DropTable drops;
+  public static final java.lang.String ADAPTER_VARIANT;
+  public com.cobblemon.mod.common.pokemon.evolution.variants.TradeEvolution(java.lang.String, com.cobblemon.mod.common.api.pokemon.PokemonProperties, com.cobblemon.mod.common.api.pokemon.PokemonProperties, com.cobblemon.mod.common.api.pokemon.PokemonProperties, boolean, boolean, java.util.Set<com.cobblemon.mod.common.api.pokemon.requirement.Requirement>, java.util.Set<com.cobblemon.mod.common.api.moves.MoveTemplate>, com.cobblemon.mod.common.api.drop.DropTable);
+  public java.lang.String getId();
+  public com.cobblemon.mod.common.api.pokemon.PokemonProperties getResult();
+  public com.cobblemon.mod.common.api.pokemon.PokemonProperties getShedder();
+  public com.cobblemon.mod.common.api.pokemon.PokemonProperties getRequiredContext();
+  public boolean getOptional();
+  public void setOptional(boolean);
+  public boolean getConsumeHeldItem();
+  public void setConsumeHeldItem(boolean);
+  public java.util.Set<com.cobblemon.mod.common.api.pokemon.requirement.Requirement> getRequirements();
+  public java.util.Set<com.cobblemon.mod.common.api.moves.MoveTemplate> getLearnableMoves();
+  public com.cobblemon.mod.common.api.drop.DropTable getDrops();
+  public com.cobblemon.mod.common.pokemon.evolution.variants.TradeEvolution();
+  public boolean testContext(com.cobblemon.mod.common.pokemon.Pokemon, com.cobblemon.mod.common.pokemon.Pokemon);
+  public boolean equals(java.lang.Object);
+  public int hashCode();
+  public boolean attemptEvolution(com.cobblemon.mod.common.pokemon.Pokemon, com.cobblemon.mod.common.pokemon.Pokemon);
+  public boolean test(com.cobblemon.mod.common.pokemon.Pokemon);
+  public boolean evolve(com.cobblemon.mod.common.pokemon.Pokemon);
+  public boolean shed(com.cobblemon.mod.common.pokemon.Pokemon);
+  public void forceEvolve(com.cobblemon.mod.common.pokemon.Pokemon);
+  public void evolutionMethod(com.cobblemon.mod.common.pokemon.Pokemon);
+  public void applyTo(com.cobblemon.mod.common.pokemon.Pokemon);
+  public java.lang.Object getRequiredContext();
+  public boolean testContext(com.cobblemon.mod.common.pokemon.Pokemon, java.lang.Object);
+  public boolean attemptEvolution(com.cobblemon.mod.common.pokemon.Pokemon, java.lang.Object);
+  static {};
+}

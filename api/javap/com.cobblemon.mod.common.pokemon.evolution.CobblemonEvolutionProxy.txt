@@ -1,0 +1,11 @@
+public final class com.cobblemon.mod.common.pokemon.evolution.CobblemonEvolutionProxy implements com.cobblemon.mod.common.api.pokemon.evolution.EvolutionProxy<com.cobblemon.mod.common.api.pokemon.evolution.EvolutionDisplay, com.cobblemon.mod.common.api.pokemon.evolution.Evolution, com.cobblemon.mod.common.pokemon.evolution.controller.ClientEvolutionController$Intermediate, com.cobblemon.mod.common.pokemon.evolution.controller.ServerEvolutionController$Intermediate> {
+  private final com.cobblemon.mod.common.pokemon.Pokemon pokemon;
+  private com.cobblemon.mod.common.pokemon.evolution.controller.ClientEvolutionController clientController;
+  private com.cobblemon.mod.common.pokemon.evolution.controller.ServerEvolutionController serverController;
+  public com.cobblemon.mod.common.pokemon.evolution.CobblemonEvolutionProxy(com.cobblemon.mod.common.pokemon.Pokemon);
+  public boolean isClient();
+  public com.cobblemon.mod.common.api.pokemon.evolution.EvolutionController<? extends com.cobblemon.mod.common.api.pokemon.evolution.EvolutionLike, ?> current();
+  public com.cobblemon.mod.common.api.pokemon.evolution.EvolutionController<com.cobblemon.mod.common.api.pokemon.evolution.EvolutionDisplay, com.cobblemon.mod.common.pokemon.evolution.controller.ClientEvolutionController$Intermediate> client();
+  public com.cobblemon.mod.common.api.pokemon.evolution.EvolutionController<com.cobblemon.mod.common.api.pokemon.evolution.Evolution, com.cobblemon.mod.common.pokemon.evolution.controller.ServerEvolutionController$Intermediate> server();
+  public final void overrideController$common(com.cobblemon.mod.common.api.pokemon.evolution.EvolutionController<? extends com.cobblemon.mod.common.api.pokemon.evolution.EvolutionLike, ? extends com.cobblemon.mod.common.api.pokemon.evolution.PreProcessor>);
+}

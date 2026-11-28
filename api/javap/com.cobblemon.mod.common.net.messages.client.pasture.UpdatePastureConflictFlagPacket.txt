@@ -1,0 +1,33 @@
+public final class com.cobblemon.mod.common.net.messages.client.pasture.UpdatePastureConflictFlagPacket$Companion {
+  private com.cobblemon.mod.common.net.messages.client.pasture.UpdatePastureConflictFlagPacket$Companion();
+  public final net.minecraft.resources.ResourceLocation getID();
+  public final com.cobblemon.mod.common.net.messages.client.pasture.UpdatePastureConflictFlagPacket decode(net.minecraft.network.RegistryFriendlyByteBuf);
+  public com.cobblemon.mod.common.net.messages.client.pasture.UpdatePastureConflictFlagPacket$Companion(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.cobblemon.mod.common.net.messages.client.pasture.UpdatePastureConflictFlagPacket implements com.cobblemon.mod.common.api.net.NetworkPacket<com.cobblemon.mod.common.net.messages.client.pasture.UpdatePastureConflictFlagPacket> {
+  public static final com.cobblemon.mod.common.net.messages.client.pasture.UpdatePastureConflictFlagPacket$Companion Companion;
+  private final java.util.UUID pokemonId;
+  private final boolean enabled;
+  private final net.minecraft.resources.ResourceLocation id;
+  private static final net.minecraft.resources.ResourceLocation ID;
+  public com.cobblemon.mod.common.net.messages.client.pasture.UpdatePastureConflictFlagPacket(java.util.UUID, boolean);
+  public final java.util.UUID getPokemonId();
+  public final boolean getEnabled();
+  public net.minecraft.resources.ResourceLocation getId();
+  public void encode(net.minecraft.network.RegistryFriendlyByteBuf);
+  public final java.util.UUID component1();
+  public final boolean component2();
+  public final com.cobblemon.mod.common.net.messages.client.pasture.UpdatePastureConflictFlagPacket copy(java.util.UUID, boolean);
+  public static com.cobblemon.mod.common.net.messages.client.pasture.UpdatePastureConflictFlagPacket copy$default(com.cobblemon.mod.common.net.messages.client.pasture.UpdatePastureConflictFlagPacket, java.util.UUID, boolean, int, java.lang.Object);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+  public void sendToPlayer(net.minecraft.server.level.ServerPlayer);
+  public void sendToPlayers(java.lang.Iterable<? extends net.minecraft.server.level.ServerPlayer>);
+  public void sendToAllPlayers();
+  public void sendToServer();
+  public void sendToPlayersAround(double, double, double, double, net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level>, kotlin.jvm.functions.Function1<? super net.minecraft.server.level.ServerPlayer, java.lang.Boolean>);
+  public net.minecraft.network.protocol.common.custom.CustomPacketPayload$Type<com.cobblemon.mod.common.net.messages.client.pasture.UpdatePastureConflictFlagPacket> type();
+  public static final net.minecraft.resources.ResourceLocation access$getID$cp();
+  static {};
+}

@@ -1,0 +1,3 @@
+public final class com.cobblemon.mod.common.api.storage.factory.DatabaseBackedPokemonStoreFactory {
+  public com.cobblemon.mod.common.api.storage.factory.DatabaseBackedPokemonStoreFactory();
+}
