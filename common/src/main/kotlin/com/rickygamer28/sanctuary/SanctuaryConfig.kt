@@ -64,6 +64,10 @@ object SanctuaryConfig {
         .comment("Stop wild Pokémon from spawning inside sanctuaries, so only residents live there.")
         .define("blockWildSpawns", true)
 
+    val blockTrainerSpawns: ModConfigSpec.BooleanValue = builder
+        .comment("Stop NPC trainers from other mods (like Radical Cobblemon Trainers) from spawning inside sanctuaries.")
+        .define("blockTrainerSpawns", true)
+
     val fillRivers: ModConfigSpec.BooleanValue = builder
         .comment("Fill rivers and ponds so biomes continue across them.")
         .define("fillRivers", true)

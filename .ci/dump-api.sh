@@ -83,7 +83,12 @@ if [ -f .ci/compat-mods.txt ]; then
   while IFS= read -r slug; do
     [ -z "$slug" ] && continue
     case "$slug" in \#*) continue;; esac
-    URL=$(curl -fsSL "https://api.modrinth.com/v2/project/$slug/version?loaders=%5B%22neoforge%22%5D&game_versions=%5B%221.21.1%22%5D" | jq -r '.[0].files[0].url')
+    # a line is a search: the first mod found is used
+    Q=$(printf '%s' "$slug" | jq -sRr @uri)
+    PID=$(curl -fsSL "https://api.modrinth.com/v2/search?query=$Q&facets=%5B%5B%22project_type%3Amod%22%5D%5D" | jq -r '.hits[0].project_id')
+    echo "$slug -> $PID ($(curl -fsSL "https://api.modrinth.com/v2/project/$PID" | jq -r '.slug + " / " + .title'))" >> "$OUT/compat.log"
+    URL=$(curl -fsSL "https://api.modrinth.com/v2/project/$PID/version?game_versions=%5B%221.21.1%22%5D" | jq -r '([.[] | select(.loaders | index("neoforge"))] + .)[0].files[0].url')
+    slug=$(printf '%s' "$slug" | tr ' ' '-' | tr 'A-Z' 'a-z')
     [ -z "$URL" ] || [ "$URL" = "null" ] && { echo "$slug: no build" >> "$OUT/compat.log"; continue; }
     D=$(mktemp -d); curl -fsSL -o "$D/mod.jar" "$URL"
     mkdir -p "$D/classes" "$OUT/compat/$slug"

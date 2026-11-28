@@ -102,8 +102,8 @@ object CobblemonSanctuary {
      * the sanctuary respawns them. Also keeps wild Pokémon out of the sanctuaries.
      */
     fun allowJoin(entity: Entity, level: Level): Boolean {
-        if (entity !is PokemonEntity) return true
         if (level !is ServerLevel) return true
+        if (entity !is PokemonEntity) return !(isOutsideTrainer(entity) && SanctuaryDimension.isSanctuary(level) && SanctuaryConfig.blockTrainerSpawns.get())
         val tethering = entity.tethering
         if (tethering == null) {
             return !(SanctuaryDimension.isSanctuary(level) && SanctuaryConfig.blockWildSpawns.get() &&
@@ -115,6 +115,14 @@ object CobblemonSanctuary {
         // in a sanctuary nobody can build a pasture: a plain tethering here is a resident saved with the world
         if (entity.pokemon.tetheringId == tethering.tetheringId) entity.pokemon.tetheringId = null
         return false
+    }
+
+    /** Mods whose NPC trainers wander in on their own (their entities are kept out when the setting is on). */
+    private val TRAINER_MODS = setOf("rctmod")
+
+    private fun isOutsideTrainer(entity: Entity): Boolean {
+        val id = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(entity.type)
+        return id.namespace in TRAINER_MODS
     }
 
     /** A player breaking a block: crystal nodes are mined, the valley is kept, and Cores have their own rules. False stops it. */

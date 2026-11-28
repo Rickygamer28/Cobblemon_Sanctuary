@@ -38,6 +38,7 @@ object Settings {
         Setting("Basket", "Room for each item", C.basketItemCap, 8.0, 1024.0, 8.0),
         Setting("World", "Habitat atmosphere", C.atmosphere),
         Setting("World", "No wild Pokémon spawning", C.blockWildSpawns),
+        Setting("World", "No NPC trainers spawning", C.blockTrainerSpawns),
         Setting("World", "Play-fights give XP", C.playFightXp),
     ) }
 

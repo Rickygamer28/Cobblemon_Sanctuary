@@ -101,7 +101,8 @@ open class PokemonBedBlock(properties: Properties, val size: Int) :
             for (off in cells(size, state.getValue(FACING))) {
                 if (off.x == 0 && off.z == 0) continue
                 val p = pos.offset(off)
-                if (BedPartBlock.masterOf(level, p) == pos) level.setBlock(p, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), UPDATE_ALL)
+                // the main block is already gone here: each part is matched by where it points, not by asking for it
+                if (BedPartBlock.pointsTo(level.getBlockState(p), p) == pos) level.setBlock(p, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), UPDATE_ALL)
             }
         }
         super.onRemove(state, level, pos, newState, movedByPiston)
@@ -143,6 +144,15 @@ class BedPartBlock(properties: Properties) : Block(properties) {
 
     override fun getShape(state: BlockState, level: BlockGetter, pos: BlockPos, context: CollisionContext): VoxelShape = SHAPE
 
+    // a part whose bed is gone (left by older versions) clears itself away
+    override fun isRandomlyTicking(state: BlockState) = true
+    override fun randomTick(state: BlockState, level: ServerLevel, pos: BlockPos, random: net.minecraft.util.RandomSource) {
+        if (masterOf(level, pos) == null) level.setBlock(pos, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), UPDATE_ALL)
+    }
+    // and right away when something next to it changes
+    override fun updateShape(state: BlockState, dir: Direction, neighbor: BlockState, level: net.minecraft.world.level.LevelAccessor, pos: BlockPos, neighborPos: BlockPos): BlockState =
+        if (pointsTo(state, pos) == neighborPos && neighbor.block !is PokemonBedBlock) net.minecraft.world.level.block.Blocks.AIR.defaultBlockState() else state
+
     override fun getCloneItemStack(level: net.minecraft.world.level.LevelReader, pos: BlockPos, state: BlockState): ItemStack =
         masterOf(level, pos)?.let { level.getBlockState(it).block.asItem().defaultInstance } ?: ItemStack.EMPTY
 
@@ -164,6 +174,10 @@ class BedPartBlock(properties: Properties) : Block(properties) {
         val DX: IntegerProperty = IntegerProperty.create("dx", 0, 4)
         val DZ: IntegerProperty = IntegerProperty.create("dz", 0, 4)
         private val SHAPE: VoxelShape = box(0.0, 0.0, 0.0, 16.0, 5.0, 16.0)
+
+        /** Where a part says its bed's main block is (null if it isn't a part). */
+        fun pointsTo(st: BlockState, pos: BlockPos): BlockPos? =
+            if (st.block !is BedPartBlock) null else BlockPos(pos.x - 2 + st.getValue(DX), pos.y, pos.z - 2 + st.getValue(DZ))
 
         /** The main block of the bed this part belongs to, if it's still there. */
         fun masterOf(level: BlockGetter, pos: BlockPos): BlockPos? {
