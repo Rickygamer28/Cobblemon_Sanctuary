@@ -31,9 +31,16 @@ internal object ExpeditionsBridge {
     private class Homecoming(val trip: AwayTrip, val outcome: String?, val until: Long)
     private val homecomings = HashMap<UUID, HashMap<UUID, Homecoming>>()
 
-    private fun name(id: ResourceLocation): String =
-        ExpeditionRegistry.getExpedition(id)?.display?.name?.takeIf { it.isNotBlank() }
-            ?: id.path.split('_', '-').joinToString(" ") { w -> w.replaceFirstChar { it.uppercase() } }
+    /**
+     * The expedition's name. Expeditions usually keeps it as a translation key, which only the player's game can
+     * translate: then the name is made from its id ("forest_forage" → "Forest Forage").
+     */
+    private fun name(id: ResourceLocation): String {
+        val raw = ExpeditionRegistry.getExpedition(id)?.display?.name
+        if (raw != null && raw.isNotBlank() && ' ' in raw) return raw
+        val base = raw?.takeIf { it.isNotBlank() }?.substringAfterLast('.') ?: id.path
+        return base.split('_', '-').joinToString(" ") { w -> w.replaceFirstChar { it.uppercase() } }
+    }
 
     private fun pokeName(s: Sanctuary, rt: SanctuaryRuntime, id: UUID): String =
         (rt.live[id]?.pokemon ?: Residents.findRoster(rt, id)?.pokemon ?: rt.away.firstOrNull { it.pokemon.uuid == id }?.pokemon)

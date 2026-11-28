@@ -11,6 +11,14 @@ internal object ExpeditionsClientBridge {
     /** The expedition selected on the board, as last seen. */
     @Volatile private var selected: SyncStatePayload.AvailableExpeditionInfo? = null
 
+    /** The expedition's name: Expeditions keeps it as a translation key ("expedition.cobblemon_expeditions.forest_forage"). */
+    private fun nameOf(exp: SyncStatePayload.AvailableExpeditionInfo): String {
+        val raw = exp.name
+        val shown = Component.translatable(raw).string
+        if (shown != raw || ' ' in raw) return shown
+        return raw.substringAfterLast('.').split('_', '-').joinToString(" ") { w -> w.replaceFirstChar { it.uppercase() } }
+    }
+
     private fun suits(home: String, exp: SyncStatePayload.AvailableExpeditionInfo) = exp.preferredTypes.any { it.equals(home, ignoreCase = true) }
 
     fun bonus(poke: Any, exp: Any): Double {
@@ -40,8 +48,8 @@ internal object ExpeditionsClientBridge {
         val text = when {
             // no expedition picked (or no bonus on this server): just where it lives
             exp == null || pct <= 0 -> Component.literal("⌂ Lives in the $name").withColor(0x7CC8F0)
-            suits(home, exp) -> Component.literal("⌂ Home ground bonus: +$pct% on ${exp.name}").withColor(0x55FF55)
-            else -> Component.literal("⌂ No home bonus on ${exp.name}").withColor(0xFF7070)
+            suits(home, exp) -> Component.literal("⌂ Home ground bonus: +$pct% on ${nameOf(exp)}").withColor(0x55FF55)
+            else -> Component.literal("⌂ No home bonus on ${nameOf(exp)}").withColor(0xFF7070)
                 .append(Component.literal(" (lives in the $name)").withColor(0x9AA4B0))
         }
         // just under the Power line (or at the end if it isn't found)
